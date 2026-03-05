@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREYONG 크레용 — Brand Filmmaker</title>
+<meta name="description" content="크레용 — 이야기로 브랜드의 진심을 전하는 필름메이커. Director · Creator · Mentor">
+<link rel="canonical" href="https://creyong.net/">
+<meta property="og:title" content="CREYONG 크레용 — Brand Filmmaker">
+<meta property="og:description" content="보는 순간, 마음이 움직인다. 크레용 — 필름 디렉터 · 크리에이터 · 멘토">
+<meta property="og:url" content="https://creyong.net/">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Noto Sans KR","Apple SD Gothic Neo",-apple-system,sans-serif;color:#111;overflow-x:hidden;background:#fff}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(255,255,255,0.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.06);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;transition:background .3s,box-shadow .3s}
+.nav.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.nav-logo{font-size:15px;font-weight:900;letter-spacing:5px;color:#111;text-decoration:none}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:12px;font-weight:500;color:#777;text-decoration:none;letter-spacing:.5px;transition:color .2s;white-space:nowrap}
+.nav-links a:hover{color:#111}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.hamburger span{display:block;width:22px;height:2px;background:#111;transition:.3s}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .85s cubic-bezier(.22,1,.36,1),transform .85s cubic-bezier(.22,1,.36,1)}
+.reveal.from-left{transform:translateX(-48px)}
+.reveal.from-right{transform:translateX(48px)}
+.reveal.scale-up{transform:scale(.95)}
+.reveal.visible{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+/* HERO */
+@keyframes floatChar{0%,100%{transform:translateY(0px)}50%{transform:translateY(-18px)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.hero{min-height:100vh;background:#fff;display:flex;align-items:center;padding:80px 64px 64px;position:relative;overflow:hidden}
+.hero-bg-word{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(160px,22vw,340px);font-weight:900;color:rgba(0,0,0,.03);letter-spacing:-12px;white-space:nowrap;pointer-events:none;user-select:none;line-height:1}
+.hero-accent-line{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(to bottom,#f97316,#059669)}
+.hero-content{position:relative;z-index:2;max-width:580px}
+.hero-eyebrow{font-size:11px;letter-spacing:6px;color:#f97316;font-weight:700;margin-bottom:28px;display:block;text-transform:uppercase}
+.hero-kr{font-size:clamp(90px,14vw,160px);font-weight:900;color:#111;line-height:.88;letter-spacing:-5px;display:block}
+.hero-en{font-size:clamp(16px,2.5vw,26px);font-weight:400;color:#bbb;letter-spacing:12px;margin-top:16px;display:block;font-family:"Playfair Display",Georgia,serif;font-style:italic}
+.hero-divider{width:40px;height:3px;background:#f97316;margin:28px 0;border-radius:2px}
+.hero-tagline{font-size:16px;line-height:2;color:#555;word-break:keep-all;max-width:400px}
+.hero-tags{margin-top:28px;display:flex;gap:10px;flex-wrap:wrap}
+.hero-tag{font-size:10px;letter-spacing:2px;font-weight:700;text-transform:uppercase;color:#fff;background:#111;padding:6px 14px;border-radius:2px}
+.hero-tag.orange{background:#f97316}
+.hero-scroll{margin-top:40px;display:flex;align-items:center;gap:12px;color:#bbb;font-size:10px;letter-spacing:4px}
+.hero-scroll::after{content:"";display:block;width:40px;height:1px;background:#ddd}
+.hero-3d{position:absolute;right:-20px;bottom:0;z-index:1;height:72%;width:auto;max-height:72vh;object-fit:contain;object-position:bottom right;mix-blend-mode:multiply;animation:floatChar 6s ease-in-out infinite}
+
+/* ABOUT */
+.about{background:#0d0d0d;padding:120px 64px;overflow:hidden}
+.about-inner{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-label{font-size:10px;letter-spacing:5px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:28px}
+.about-text{font-size:clamp(20px,2.8vw,30px);color:#fff;line-height:1.75;font-weight:400;word-break:keep-all}
+.about-text em{color:#34d399;font-style:normal;font-weight:700}
+.about-sub{margin-top:28px;font-size:14px;color:#555;line-height:1.9;word-break:keep-all}
+.photo-frame{aspect-ratio:3/4;border-radius:4px;overflow:hidden;position:relative}
+.photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 50%);pointer-events:none}
+
+/* WHO */
+.who{background:#f97316;padding:100px 64px}
+.who-inner{max-width:1100px;margin:0 auto}
+.who-heading{font-size:clamp(40px,7.5vw,96px);font-weight:900;color:#fff;letter-spacing:-3px;margin-bottom:56px;line-height:1}
+.who-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.who-card{background:#fff;border-radius:14px;padding:44px 32px;text-decoration:none;display:block;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s}
+.who-card:hover{transform:translateY(-12px);box-shadow:0 28px 60px rgba(0,0,0,.2)}
+.who-card-icon{font-size:38px;margin-bottom:18px;display:block}
+.who-card-title{font-size:20px;font-weight:900;color:#111;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.who-card-desc{font-size:14px;color:#666;line-height:1.75;word-break:keep-all}
+.who-card-link{display:inline-flex;align-items:center;gap:6px;margin-top:22px;font-size:11px;font-weight:700;letter-spacing:2px;color:#f97316;text-transform:uppercase}
+.who-card:hover .who-card-link::after{transform:translateX(4px)}
+.who-card-link::after{content:"→";transition:transform .2s}
+
+/* SEC-HERO */
+.sec-hero{background:#efefef;padding:130px 64px;position:relative;overflow:hidden}
+.sec-hero-bg{position:absolute;bottom:-30px;right:-20px;font-size:clamp(120px,20vw,280px);font-weight:900;color:rgba(0,0,0,.04);line-height:1;letter-spacing:-8px;pointer-events:none;user-select:none;white-space:nowrap}
+.sec-hero-content{position:relative;z-index:1;max-width:900px}
+.sec-hero-eye{font-size:10px;letter-spacing:5px;color:#aaa;font-weight:600;text-transform:uppercase;margin-bottom:16px;display:block}
+.sec-hero-title{font-size:clamp(56px,10vw,120px);font-weight:900;color:#111;letter-spacing:-4px;line-height:.95}
+.sec-hero-script{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:clamp(28px,5vw,68px);color:#c0c0c0;margin-top:14px;font-weight:400}
+
+/* WORK (side-by-side) */
+.work{padding:80px 64px}
+.work-blue{background:linear-gradient(135deg,#064e3b 0%,#047857 100%)}
+.work-orange{background:linear-gradient(135deg,#b83c0a 0%,#f97316 100%)}
+.work-dark{background:#111}
+.work-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.work-eye{font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.45);font-weight:600;text-transform:uppercase;margin-bottom:14px;display:block}
+.work-title{font-size:clamp(28px,4.5vw,52px);font-weight:900;color:#fff;line-height:1.15;letter-spacing:-1.5px;word-break:keep-all}
+.work-desc{font-size:16px;color:rgba(255,255,255,.82);line-height:1.9;margin-top:18px;word-break:keep-all}
+.work-awards{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.work-award{font-size:15px;color:rgba(255,255,255,.85);display:flex;align-items:flex-start;gap:10px}
+.work-award::before{content:"🏆";font-size:14px;flex-shrink:0;margin-top:1px}
+.work-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.work-tag{font-size:10px;letter-spacing:1.5px;padding:5px 14px;border:1px solid rgba(255,255,255,.25);border-radius:20px;color:rgba(255,255,255,.65);font-weight:600;text-transform:uppercase}
+.work-book{display:flex;align-items:center;gap:14px;margin-top:14px;background:rgba(0,0,0,.2);border-radius:10px;padding:16px 18px}
+.work-book-icon{font-size:28px;flex-shrink:0}
+.work-book-txt{font-size:13px;line-height:1.6;color:rgba(255,255,255,.78)}
+.work-book-title{font-size:15px;font-weight:800;color:#fff;display:block;margin-bottom:3px}
+
+/* LAUREL */
+.laurel-row{display:flex;gap:16px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.laurel-img{height:80px;width:auto;object-fit:contain;filter:brightness(0) invert(1);opacity:.85}
+
+/* SHORTS row */
+.shorts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+
+/* PHOTO STRIP */
+.dir-strip{display:grid;grid-template-columns:repeat(6,1fr);max-height:300px;overflow:hidden;gap:3px}
+.dir-strip img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+.dir-strip img:hover{transform:scale(1.04)}
+
+/* CREATOR */
+.creator-work{background:linear-gradient(135deg,#b83c0a 0%,#f97316 100%);padding:80px 64px}
+.creator-work-inner{max-width:1100px;margin:0 auto}
+.creator-work-label{font-size:10px;letter-spacing:5px;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;margin-bottom:12px}
+.creator-work-title{font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;margin-bottom:6px}
+.creator-work-desc{font-size:14px;color:rgba(255,255,255,.72);margin-bottom:40px}
+.creator-embeds{display:grid;grid-template-columns:3fr 2fr 2fr;gap:12px}
+.embed-ch{aspect-ratio:1/1;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-decoration:none;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s;position:relative;overflow:hidden}
+.embed-ch:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.embed-ch-yt{background:linear-gradient(145deg,#ff0000 0%,#cc0000 100%)}
+.embed-ch-ig{background:linear-gradient(145deg,#833ab4 0%,#fd1d1d 50%,#fcb045 100%)}
+.embed-ch svg{width:40px;height:40px;fill:#fff;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+.embed-ch-label{font-size:13px;font-weight:700;color:#fff;letter-spacing:1px}
+.embed-ch-sub{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.5px}
+
+/* MENTOR */
+.mentor{background:#0a0a0a;padding:120px 64px;position:relative;overflow:hidden}
+.mentor-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(249,115,22,.1) 0%,transparent 70%);pointer-events:none}
+.mentor-inner{max-width:920px;margin:0 auto;text-align:center;position:relative;z-index:1}
+.mentor-label{font-size:10px;letter-spacing:5px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:22px}
+.mentor-sub{font-size:12px;color:#f97316;letter-spacing:3px;margin-bottom:12px;display:block}
+.mentor-title{font-size:clamp(36px,6.5vw,78px);font-weight:900;color:#fff;letter-spacing:-3px;line-height:1.05;margin-bottom:20px}
+.mentor-desc{font-size:16px;color:#666;line-height:1.88;word-break:keep-all;max-width:560px;margin:0 auto 52px}
+.mentor-cta{display:inline-block;padding:20px 56px;background:#f97316;color:#fff;font-size:16px;font-weight:800;text-decoration:none;border-radius:4px;letter-spacing:.5px;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.mentor-cta:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(249,115,22,.4)}
+.mentor-course{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:64px;text-align:left}
+.mentor-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:28px;transition:border-color .3s,background .3s}
+.mentor-card:hover{border-color:rgba(249,115,22,.3);background:rgba(249,115,22,.06)}
+.mentor-card-icon{font-size:24px;margin-bottom:12px;display:block}
+.mentor-card-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px}
+.mentor-card-desc{font-size:13px;color:#555;line-height:1.7;word-break:keep-all}
+.mentor-bg-txt{position:absolute;font-size:clamp(32px,6vw,96px);font-weight:900;color:rgba(255,255,255,.022);letter-spacing:8px;text-transform:uppercase;white-space:nowrap;bottom:24px;left:50%;transform:translateX(-50%);pointer-events:none;user-select:none;z-index:0}
+
+/* STUDIO */
+.studio{background:#0e0e14;padding:100px 64px}
+.studio-inner{max-width:1200px;margin:0 auto}
+.studio-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
+.studio-bg-txt{font-size:clamp(80px,14vw,180px);font-weight:900;color:rgba(255,255,255,.05);letter-spacing:-6px;line-height:1}
+.studio-info-right{text-align:right}
+.studio-name{font-size:30px;font-weight:900;color:#fff;margin-bottom:8px}
+.studio-meta{font-size:13px;color:rgba(255,255,255,.5);line-height:1.9}
+.studio-tags{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:flex-end}
+.studio-tag{font-size:11px;letter-spacing:1px;padding:6px 16px;border:1px solid rgba(255,255,255,.2);border-radius:20px;color:rgba(255,255,255,.6)}
+
+/* 슬라이더 */
+.slider-wrap{position:relative;margin-bottom:48px}
+.slider{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+.slider::-webkit-scrollbar{display:none}
+.slide{flex:0 0 calc(50% - 5px);scroll-snap-align:start;border-radius:8px;overflow:hidden;aspect-ratio:4/3}
+.slide img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.slide:hover img{transform:scale(1.04)}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;transition:background .2s;z-index:2;display:flex;align-items:center;justify-content:center}
+.slider-btn:hover{background:rgba(255,255,255,.25)}
+.slider-btn.prev{left:-22px}
+.slider-btn.next{right:-22px}
+
+/* 스튜디오 비디오 슬라이더 */
+.vid-slider-title{font-size:12px;letter-spacing:4px;color:rgba(255,255,255,.35);margin-bottom:16px;text-transform:uppercase;font-weight:600}
+.vid-slider{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.vid-slider::-webkit-scrollbar{display:none}
+.vid-slide{flex:0 0 calc(33.333% - 8px);scroll-snap-align:start;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:#111}
+.vid-slide iframe{width:100%;height:100%;border:none;display:block}
+
+/* BOOKING CTA */
+.booking-cta{margin-top:52px}
+.booking-price-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.booking-price-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:28px 24px;text-align:center;transition:border-color .3s}
+.booking-price-card.highlight{background:rgba(249,115,22,.12);border-color:rgba(249,115,22,.4)}
+.bp-badge{font-size:9px;font-weight:800;letter-spacing:3px;color:#f97316;text-transform:uppercase;margin-bottom:10px}
+.bp-label{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:10px;font-weight:500}
+.bp-price{font-size:clamp(22px,3vw,32px);font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
+.bp-price span{font-size:14px;font-weight:400;color:rgba(255,255,255,.45);margin-left:3px}
+.bp-note{font-size:11px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.5}
+.booking-btn{display:block;width:100%;max-width:400px;margin:0 auto;padding:18px 40px;background:#f97316;color:#fff;font-size:17px;font-weight:800;border:none;border-radius:6px;cursor:pointer;letter-spacing:.5px;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.booking-btn:hover{transform:translateY(-4px);box-shadow:0 16px 44px rgba(249,115,22,.5)}
+
+/* BOOKING MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex}
+.modal{background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:18px;width:100%;max-width:540px;padding:44px 40px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:18px;right:20px;background:none;border:none;color:#666;font-size:22px;cursor:pointer;line-height:1;padding:4px 8px}
+.modal-close:hover{color:#fff}
+.modal-title{font-size:24px;font-weight:900;color:#fff;margin-bottom:6px}
+.modal-sub{font-size:13px;color:#555;margin-bottom:28px}
+.form-row{margin-bottom:18px}
+.form-label{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;display:block;margin-bottom:8px}
+.form-input,.form-select,.form-textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:13px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#f97316}
+.form-select option{background:#222;color:#fff}
+.form-textarea{height:100px;resize:none}
+.form-submit{width:100%;padding:16px;background:#f97316;color:#fff;font-size:16px;font-weight:800;border:none;border-radius:8px;cursor:pointer;margin-top:10px;transition:background .2s}
+.form-submit:hover{background:#ea6d10}
+.form-note{font-size:11px;color:#444;text-align:center;margin-top:14px}
+
+/* CONTACT */
+.contact{background:#181818;padding:110px 64px}
+.contact-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.contact-eyebrow{font-size:10px;letter-spacing:5px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:28px}
+.contact-name{font-size:clamp(40px,6vw,60px);font-weight:900;color:#fff;letter-spacing:-2px}
+.contact-name-en{font-size:13px;color:#444;letter-spacing:4px;margin-top:6px;margin-bottom:44px}
+.contact-items{display:flex;flex-direction:column;gap:20px}
+.contact-item{display:flex;align-items:flex-start;gap:16px}
+.c-icon{width:42px;height:42px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:2px}
+.c-label{font-size:10px;color:#444;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.c-val{font-size:14px;color:#bbb}
+.c-val a{color:#bbb;text-decoration:none}
+.c-val a:hover{color:#fff}
+
+footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1a1a1a}
+.f-logo{font-size:13px;font-weight:900;letter-spacing:5px;color:#2a2a2a}
+.f-copy{font-size:11px;color:#333}
+
+@media(max-width:900px){
+  .nav{padding:0 24px}
+  .nav-links{display:none}
+  .nav-links.open{display:flex;flex-direction:column;gap:16px;position:absolute;top:60px;left:0;right:0;background:rgba(255,255,255,.98);padding:20px 24px 28px;border-bottom:1px solid #eee}
+  .nav-links.open a{font-size:14px;color:#333}
+  .hamburger{display:flex}
+  .hero{padding:80px 24px 200px}
+  .hero-3d{height:45%;max-height:45vh;right:0}
+  .about{padding:64px 24px}
+  .about-inner,.work-inner,.contact-inner{grid-template-columns:1fr;gap:40px}
+  .who{padding:64px 24px}
+  .who-cards{grid-template-columns:1fr}
+  .sec-hero{padding:80px 24px}
+  .work{padding:60px 24px}
+  .shorts-row{grid-template-columns:1fr 1fr}
+  .dir-strip{grid-template-columns:repeat(3,1fr)}
+  .dir-strip img:nth-child(n+4){display:none}
+  .creator-work{padding:60px 24px}
+  .creator-embeds{grid-template-columns:1fr}
+  .mentor{padding:64px 24px}
+  .mentor-course{grid-template-columns:1fr}
+  .studio{padding:64px 24px}
+  .studio-header{flex-direction:column;align-items:flex-start;gap:20px}
+  .studio-info-right{text-align:left}
+  .studio-tags{justify-content:flex-start}
+  .slide{flex:0 0 85%}
+  .vid-slide{flex:0 0 80%}
+  .contact-visual{display:none}
+  footer{padding:24px;flex-direction:column;gap:10px;text-align:center}
+  .booking-price-row{grid-template-columns:1fr}
+  .modal{padding:32px 22px}
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">CREYONG</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">About Creyong</a></li>
+    <li><a href="#director">Director</a></li>
+    <li><a href="#creator">Creator</a></li>
+    <li><a href="#mentor">Mentor</a></li>
+    <li><a href="#studio">Rental Studio</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="메뉴"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="heroSection">
+  <div class="hero-accent-line"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow reveal">Brand Filmmaker</span>
+    <span class="hero-kr reveal d1">크레용</span>
+    <span class="hero-en reveal d2">CREYONG</span>
+    <div class="hero-divider reveal d2"></div>
+    <p class="hero-tagline reveal d3">보는 순간, 마음이 움직인다.</p>
+    <div class="hero-tags reveal d4">
+      <span class="hero-tag orange">Director</span>
+      <span class="hero-tag">Creator</span>
+      <span class="hero-tag">Mentor</span>
+    </div>
+    <div class="hero-scroll reveal d5">SCROLL</div>
+  </div>
+  <img class="hero-3d" id="hero3d" src="imgs/img3d.png" alt="크레용 3D">
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div>
+      <p class="about-label reveal">About Creyong</p>
+      <p class="about-text reveal d1">크레용은 이야기로<br><em>브랜드의 진심</em>을 전하고,<br>사람의 마음을 움직이는 필름메이커입니다.</p>
+      <p class="about-sub reveal d2">자극적인 세상 속에서 감동과 희망의 영상으로<br>선한 영향력을 만들어갑니다.</p>
+    </div>
+    <div class="photo-frame" style="aspect-ratio:3/4"><img src="imgs/profile.jpg" alt="크레용 프로필" style="object-position:center center"></div>
+  </div>
+</section>
+
+<!-- WHO IS CREYONG -->
+<section class="who">
+  <div class="who-inner">
+    <h2 class="who-heading reveal">WHO IS<br>CREYONG</h2>
+    <div class="who-cards">
+      <a href="#director" class="who-card reveal d1">
+        <span class="who-card-icon">🎬</span>
+        <div class="who-card-title">DIRECTOR</div>
+        <p class="who-card-desc">공기관 웹드라마부터 브랜드 숏폼까지.<br>국내외 영화제 수상 경력의 필름 디렉터</p>
+        <span class="who-card-link">View Works</span>
+      </a>
+      <a href="#creator" class="who-card reveal d2">
+        <span class="who-card-icon">📱</span>
+        <div class="who-card-title">CREATOR</div>
+        <p class="who-card-desc">유튜브 채널 크레용팜 운영.<br>선한 영향력을 전하는 크리에이터</p>
+        <span class="who-card-link">View Channel</span>
+      </a>
+      <a href="#mentor" class="who-card reveal d3">
+        <span class="who-card-icon">🎓</span>
+        <div class="who-card-title">MENTOR</div>
+        <p class="who-card-desc">다빈치 리졸브 하루 끝장 수업.<br>현업 필름메이커가 직접 진행하는 밀착 강의</p>
+        <span class="who-card-link">View Class</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- DIRECTOR HERO -->
+<section class="sec-hero" id="director">
+  <div class="sec-hero-bg" aria-hidden="true">Director</div>
+  <div class="sec-hero-content">
+    <span class="sec-hero-eye reveal">Creyong · Film Works</span>
+    <h2 class="sec-hero-title reveal d1">Director</h2>
+    <p class="sec-hero-script reveal d2">Creyong production</p>
+  </div>
+</section>
+
+<!-- DIRECTOR WORK 1 — 안녕하세요 스타벅스입니다 -->
+<div class="work work-orange">
+  <div class="work-inner">
+    <div class="reveal from-left">
+      <a href="https://www.youtube.com/watch?v=xlNgGn210Zw" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/xlNgGn210Zw/hqdefault.jpg" alt="안녕하세요 스타벅스입니다" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <div class="work-book">
+        <span class="work-book-icon">📖</span>
+        <div class="work-book-txt"><span class="work-book-title">트렌드코리아 2024</span>올해의 콘텐츠 트렌드 사례로 선정</div>
+      </div>
+    </div>
+    <div class="reveal from-right d2">
+      <span class="work-eye">숏폼 웹드라마 · Brand Film</span>
+      <h3 class="work-title">안녕하세요<br>스타벅스입니다</h3>
+      <p class="work-desc">브랜드 스토리텔링의 새로운 가능성을 보여준 숏폼 웹드라마. 기업 브랜드와 감동적인 서사를 결합해 트렌드코리아 2024에 소개된 화제작입니다.</p>
+      <div class="work-tags"><span class="work-tag">Brand Film</span><span class="work-tag">숏폼</span><span class="work-tag">트렌드코리아</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 2 — 춘자의 전성시대 -->
+<div class="work work-blue">
+  <div class="work-inner">
+    <div class="reveal from-left">
+      <span class="work-eye">공기관 웹드라마 · 2023–2025</span>
+      <h3 class="work-title">춘자의 전성시대</h3>
+      <p class="work-desc">노인과 젊은 층의 조화, 보이스피싱 사회문제를 소재로 한 공기관 웹드라마.<br>일상 속 진짜 이야기를 감동으로 담아낸 작품으로<br>다수의 국내외 영화제에서 수상의 영예를 안았습니다.</p>
+      <div class="work-tags"><span class="work-tag">Web Drama</span><span class="work-tag">공기관</span><span class="work-tag">영화제 수상</span></div>
+      <div class="laurel-row" style="margin-top:24px">
+        <img src="imgs/laurel1.png" alt="여수국제웹드라마영화제" class="laurel-img">
+        <img src="imgs/laurel2.png" alt="Melbourne Web Fest" class="laurel-img">
+        <img src="imgs/laurel3.png" alt="Vienna Film Awards" class="laurel-img">
+      </div>
+    </div>
+    <div class="reveal from-right d2">
+      <a href="https://www.youtube.com/watch?v=azYovbTA0jw" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/azYovbTA0jw/hqdefault.jpg" alt="춘자의 전성시대" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <div class="work-awards" style="margin-top:18px">
+        <div class="work-award">여수국제웹드라마영화제 심사위원 특별상</div>
+        <div class="work-award">Melbourne Web Fest 공식 초청</div>
+        <div class="work-award">비엔나 국제영화상 Honorable Mention</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 3 — 스타벅스 네버랜드 -->
+<div class="work work-orange">
+  <div class="work-inner">
+    <div class="reveal from-left"><a href="https://www.youtube.com/watch?v=Lnk85DRD854" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/Lnk85DRD854/hqdefault.jpg" alt="스타벅스 네버랜드" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a></div>
+    <div class="reveal from-right d2">
+      <span class="work-eye">드라마타이즈 브랜드 필름</span>
+      <h3 class="work-title">스타벅스<br>네버랜드</h3>
+      <p class="work-desc">어떻게 하면 세상에 없던 새로운 콘텐츠를 만들 수 있을까.<br>25주년 기념 영상 의뢰를 받았을 때, 크레용프로덕션이 가장 먼저 던진 질문이었습니다.<br>어린이들을 주인공으로 세워 순수한 시선으로 브랜드의 이야기를 다시 바라본 작품.</p>
+      <div class="work-tags"><span class="work-tag">Brand Film</span><span class="work-tag">드라마타이즈</span><span class="work-tag">Starbucks 25th</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 4 — LG휘센 모두의 바람으로 -->
+<div class="work work-blue">
+  <div class="work-inner">
+    <div class="reveal from-left">
+      <span class="work-eye">브랜드 필름 · Brand Film</span>
+      <h3 class="work-title">LG휘센<br>모두의 바람으로</h3>
+      <p class="work-desc">LG전자 휘센과 함께한 브랜드 필름.<br>바람이라는 키워드를 중심으로 사람들의 소망과 일상을 따뜻하게 담아낸 감성 브랜드 영상입니다.</p>
+      <div class="work-tags"><span class="work-tag">Brand Film</span><span class="work-tag">LG전자</span><span class="work-tag">휘센</span></div>
+    </div>
+    <div class="reveal from-right d2"><a href="https://www.youtube.com/watch?v=HAV76UvQ-5w" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/HAV76UvQ-5w/hqdefault.jpg" alt="LG휘센 모두의 바람으로" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a></div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 5 — 평창동계올림픽 -->
+<div class="work work-orange">
+  <div class="work-inner">
+    <div class="reveal from-left"><div style="aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden">
+  <iframe src="https://player.vimeo.com/video/239821618?badge=0&autopause=0" title="평창동계올림픽 성화봉송 TVCF"
+    allow="autoplay;fullscreen;picture-in-picture" allowfullscreen
+    style="width:100%;height:100%;border:none;display:block"></iframe>
+</div></div>
+    <div class="reveal from-right d2">
+      <span class="work-eye">스팟 광고 · TVCF · 2017</span>
+      <h3 class="work-title">평창동계올림픽<br>성화봉송</h3>
+      <p class="work-desc">2014년, 크레용프로덕션은 '세상을 움직이는 이야기를 만들자'는 비전을 품고 출발했습니다. 첫 목표는 2018년 평창동계올림픽과 함께하는 것이었습니다.<br>시간이 흘러 성화봉송 TVCF 제작을 맡으며, 기획 단계부터 올림픽조직위원회와 협력해 전국을 누비며 촬영했습니다.<br>완성된 영상은 업계에서 레퍼런스로 회자될 만큼 높은 완성도로 평가받았습니다.</p>
+      <div class="work-tags"><span class="work-tag">TVCF</span><span class="work-tag">스팟 광고</span><span class="work-tag">올림픽</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 6 — 헤이지니 은행원 체험 -->
+<div class="work work-blue">
+  <div class="work-inner">
+    <div class="reveal from-left">
+      <span class="work-eye">웹 예능 · 교육 콘텐츠</span>
+      <h3 class="work-title">헤이지니<br>은행원 체험</h3>
+      <p class="work-desc">크레용프로덕션은 농협은행의 외환 업무라는 주제를 교육적 메시지와 예능적 재미가 공존하는 포맷으로 완성했습니다.<br>어린이의 시선으로 자연스럽게 정보를 전달하는 흐름을 설계했으며, 높은 바이럴 효과와 브랜드 인지도 상승을 이끌어냈습니다.</p>
+      <div class="work-tags"><span class="work-tag">웹 예능</span><span class="work-tag">교육 콘텐츠</span><span class="work-tag">NH농협은행</span></div>
+    </div>
+    <div class="reveal from-right d2"><a href="https://www.youtube.com/watch?v=pEA_rUePq4U" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/pEA_rUePq4U/hqdefault.jpg" alt="헤이지니 은행원 체험" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a></div>
+  </div>
+</div>
+
+<!-- DIRECTOR WORK 7 — 스타벅스 세로 광고 (Shorts) -->
+<div class="work work-dark">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="reveal" style="margin-bottom:36px">
+      <span class="work-eye" style="color:rgba(255,255,255,.4)">브랜드 릴스 · Shorts</span>
+      <h3 class="work-title">스타벅스 세로 광고</h3>
+      <p class="work-desc" style="max-width:600px">트렌드가 빠르게 바뀌는 SNS 시대, 크레용프로덕션은 스타벅스만의 품격을 유지하면서도 대중과 호흡하는 숏폼 콘텐츠를 선보였습니다. 스타벅스의 매장·파트너·리워드 프로그램 등 일상의 순간들을 유쾌하고 세련된 시선으로 담아냈습니다.</p>
+    </div>
+    <div class="shorts-row reveal d2">
+      <a href="https://www.youtube.com/watch?v=4gO34JoYwiU" target="_blank" rel="noopener" style="aspect-ratio:9/16;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/4gO34JoYwiU/hqdefault.jpg" alt="스타벅스 세로광고 1" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=pTEcatiXRNM" target="_blank" rel="noopener" style="aspect-ratio:9/16;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/pTEcatiXRNM/hqdefault.jpg" alt="스타벅스 세로광고 2" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=Y7j3UJtfEIY" target="_blank" rel="noopener" style="aspect-ratio:9/16;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/Y7j3UJtfEIY/hqdefault.jpg" alt="스타벅스 세로광고 3" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=k6wwYn82I1Q" target="_blank" rel="noopener" style="aspect-ratio:9/16;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/k6wwYn82I1Q/hqdefault.jpg" alt="스타벅스 세로광고 4" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTOR PHOTO STRIP -->
+<div class="dir-strip">
+  <img src="imgs/profile6.jpg" alt="크레용 촬영현장">
+  <img src="imgs/profile7.jpg" alt="크레용 촬영현장">
+  <img src="imgs/profile8.jpg" alt="크레용 촬영현장">
+  <img src="imgs/profile3.jpg" alt="크레용 촬영현장">
+  <img src="imgs/profile4.jpg" alt="크레용 촬영현장">
+  <img src="imgs/profile5.jpg" alt="크레용 촬영현장">
+</div>
+
+<!-- CREATOR HERO -->
+<section class="sec-hero" id="creator">
+  <div class="sec-hero-bg" aria-hidden="true">Creator</div>
+  <div class="sec-hero-content">
+    <span class="sec-hero-eye reveal">Creyong · Original Contents</span>
+    <h2 class="sec-hero-title reveal d1">Creator</h2>
+    <p class="sec-hero-script reveal d2">Creyongfarm</p>
+  </div>
+</section>
+
+<!-- CREATOR WORK -->
+<section class="creator-work">
+  <div class="creator-work-inner">
+    <p class="creator-work-label reveal">Original Contents</p>
+    <h3 class="creator-work-title reveal d1">크레용팜</h3>
+    <p class="creator-work-desc reveal d2">1인 프로덕션으로 시작해 카메라·편집·조명 노하우를 콘텐츠로 담아온 오리지널 채널.<br>감동과 희망의 이야기로 선한 영향력을 전합니다.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px" class="reveal d2">
+      <a href="https://www.youtube.com/@creyongfarm" target="_blank" rel="noopener" class="embed-ch embed-ch-yt" style="aspect-ratio:unset;flex-direction:row;justify-content:flex-start;padding:14px 18px;gap:12px;border-radius:10px">
+        <svg viewBox="0 0 24 24" style="width:26px;height:26px;flex-shrink:0"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1C4.5 20.4 12 20.4 12 20.4s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+        <div><span class="embed-ch-label" style="font-size:13px">YouTube</span><br><span class="embed-ch-sub">@creyongfarm</span><br><span id="yt-sub-count" style="font-size:11px;color:#ff4444;font-weight:700;letter-spacing:.3px">15K 구독자</span></div>
+      </a>
+      <a href="https://www.instagram.com/creyongfarm" target="_blank" rel="noopener" class="embed-ch embed-ch-ig" style="aspect-ratio:unset;flex-direction:row;justify-content:flex-start;padding:14px 18px;gap:12px;border-radius:10px">
+        <svg viewBox="0 0 24 24" style="width:26px;height:26px;flex-shrink:0"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.2 4.8 1.7 5 5 .1 1.3.1 1.6.1 4.8s0 3.6-.1 4.9c-.2 3.3-1.7 4.8-5 5-1.3.1-1.6.1-4.9.1s-3.6 0-4.9-.1c-3.3-.2-4.8-1.7-5-5-.1-1.3-.1-1.6-.1-4.9s0-3.6.1-4.9C2.4 3.9 3.9 2.4 7.1 2.3c1.3-.1 1.6-.1 4.9-.1zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4A6.2 6.2 0 0 0 12 5.8zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.8 1.4 1.4 0 0 0 0-2.8z"/></svg>
+        <div><span class="embed-ch-label" style="font-size:13px">Instagram</span><br><span class="embed-ch-sub">@creyongfarm</span><br><span id="ig-sub-count" style="font-size:11px;color:#e1306c;font-weight:700;letter-spacing:.3px">2.7K 팔로워</span></div>
+      </a>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" class="reveal d3">
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:6px;font-weight:600;text-transform:uppercase">카메라 리뷰</div>
+        <a href="https://www.youtube.com/watch?v=dBa99cZcBrM" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/dBa99cZcBrM/hqdefault.jpg" alt="카메라 리뷰" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:6px;font-weight:600;text-transform:uppercase">전문가 토크쇼</div>
+        <a href="https://www.youtube.com/watch?v=XmU9naaiDVI" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/XmU9naaiDVI/hqdefault.jpg" alt="전문가 토크쇼" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:6px;font-weight:600;text-transform:uppercase">편집 튜토리얼</div>
+        <a href="https://www.youtube.com/watch?v=A7V2b8QbOAQ" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/A7V2b8QbOAQ/hqdefault.jpg" alt="편집 튜토리얼" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      </div>
+      <div>
+        <div style="font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.4);margin-bottom:6px;font-weight:600;text-transform:uppercase">촬영 조명 꿀팁</div>
+        <a href="https://www.youtube.com/watch?v=8A2lp2cto7E" target="_blank" rel="noopener" style="aspect-ratio:16/9;background:#111;border-radius:8px;overflow:hidden;position:relative;display:block;text-decoration:none;">
+  <img src="https://img.youtube.com/vi/8A2lp2cto7E/hqdefault.jpg" alt="촬영 조명 꿀팁" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.22)">
+    <div style="width:68px;height:48px;background:rgba(220,0,0,.92);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.45)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENTOR HERO -->
+<section class="sec-hero" id="mentor">
+  <div class="sec-hero-bg" aria-hidden="true">Mentor</div>
+  <div class="sec-hero-content">
+    <span class="sec-hero-eye reveal">Creyong · Film School</span>
+    <h2 class="sec-hero-title reveal d1">Mentor</h2>
+    <p class="sec-hero-script reveal d2">Creyong Film School</p>
+  </div>
+</section>
+
+<!-- MENTOR CLASS -->
+<section class="mentor" id="mentor-class">
+  <div class="mentor-glow"></div>
+  <div class="mentor-bg-txt">CREYONG FILM SCHOOL</div>
+  <div class="mentor-inner">
+    <p class="mentor-label reveal">Creyong Film School</p>
+    <span class="mentor-sub reveal d1">DaVinci Resolve</span>
+    <h2 class="mentor-title reveal d2">다빈치 리졸브<br>하루 끝장 수업</h2>
+    <p class="mentor-desc reveal d3">현업 필름메이커 크레용이 직접 진행하는 단 하루의 집중 수업.<br>촬영부터 편집·색보정까지, 단 5명 소수 정예로 밀착 지도합니다.</p>
+    <a href="https://creyong.net/class" target="_blank" rel="noopener" class="mentor-cta reveal d4">수업 자세히 보기 →</a>
+    <div class="mentor-course">
+      <div class="mentor-card reveal d2"><span class="mentor-card-icon">🎬</span><div class="mentor-card-title">조명 · 촬영 현장 실습</div><p class="mentor-card-desc">실제 촬영 현장처럼 구성된 환경에서 직접 조명을 세팅하고 촬영하는 실습</p></div>
+      <div class="mentor-card reveal d3"><span class="mentor-card-icon">🖥️</span><div class="mentor-card-title">AI 워크스테이션 제공</div><p class="mentor-card-desc">필름메이커 전용 고사양 AI 워크스테이션으로 다빈치 리졸브 풀 실습</p></div>
+      <div class="mentor-card reveal d4"><span class="mentor-card-icon">💬</span><div class="mentor-card-title">수료 후 1:1 피드백 무제한</div><p class="mentor-card-desc">수업 이후에도 작업물에 대한 1:1 피드백을 무제한으로 제공</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- RENTAL STUDIO -->
+<section class="studio" id="studio">
+  <div class="studio-inner">
+    <div class="studio-header">
+      <div class="studio-bg-txt reveal">STUDIO</div>
+      <div class="studio-info-right reveal from-right">
+        <div class="studio-name">예운옥</div>
+        <p class="studio-meta">경기도 고양시 일산동구<br>200평대 전원주택 스튜디오</p>
+        <div class="studio-tags">
+          <span class="studio-tag">홍대 35분</span>
+          <span class="studio-tag">고양시내 15분</span>
+          <span class="studio-tag">주차 5대 가능</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 사진 슬라이더 -->
+    <div class="slider-wrap reveal">
+      <button class="slider-btn prev" onclick="this.nextElementSibling.scrollBy({left:-600,behavior:'smooth'})">‹</button>
+      <div class="slider" id="photoSlider">
+        <div class="slide"><img src="imgs/studio1.jpg" alt="예운옥 1"></div>
+        <div class="slide"><img src="imgs/studio2.jpg" alt="예운옥 2"></div>
+        <div class="slide"><img src="imgs/studio3.jpg" alt="예운옥 3"></div>
+        <div class="slide"><img src="imgs/studio4.jpg" alt="예운옥 4"></div>
+        <div class="slide"><img src="imgs/studio5.jpg" alt="예운옥 5"></div>
+        <div class="slide"><img src="imgs/studio6.jpg" alt="예운옥 6"></div>
+        <div class="slide"><img src="imgs/studio7.jpg" alt="예운옥 7"></div>
+        <div class="slide"><img src="imgs/studio8.jpg" alt="예운옥 8"></div>
+        <div class="slide"><img src="imgs/studio9.jpg" alt="예운옥 9"></div>
+        <div class="slide"><img src="imgs/studio10.jpg" alt="예운옥 10"></div>
+        <div class="slide"><img src="imgs/studio11.jpg" alt="예운옥 11"></div>
+      </div>
+      <button class="slider-btn next" onclick="this.previousElementSibling.scrollBy({left:600,behavior:'smooth'})">›</button>
+    </div>
+
+    <!-- 예약 CTA -->
+    <div class="booking-cta reveal d1">
+      <div class="booking-price-row">
+        <div class="booking-price-card">
+          <div class="bp-label">기본 대관</div>
+          <div class="bp-price">₩80,000<span>/hr</span></div>
+          <div class="bp-note">4인 기준 · 최소 5시간<br>추가 1인당 +5,000원</div>
+        </div>
+        <div class="booking-price-card highlight">
+          <div class="bp-badge">PACKAGE</div>
+          <div class="bp-label">YouTube 예능 패키지</div>
+          <div class="bp-price">₩150,000<span>/hr</span></div>
+          <div class="bp-note">25인 기준 · 최소 5시간<br>추가 1인당 +5,000원</div>
+        </div>
+        <div class="booking-price-card">
+          <div class="bp-label">광고·드라마·영화</div>
+          <div class="bp-price">협의</div>
+          <div class="bp-note">대규모 촬영 별도 문의</div>
+        </div>
+      </div>
+      <button class="booking-btn" onclick="openBooking()">예약 문의하기 →</button>
+    </div>
+
+    <!-- 스튜디오 촬영 영상 -->
+    <p class="vid-slider-title reveal" style="margin-top:52px">예운옥에서 촬영된 영상들</p>
+    <div class="vid-slider reveal d1">
+      <a href="https://www.youtube.com/watch?v=12mMS6GInJE" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/12mMS6GInJE/hqdefault.jpg" alt="예운옥 촬영 1" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=6mRBfwXUKBY" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/6mRBfwXUKBY/hqdefault.jpg" alt="예운옥 촬영 2" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=joE1D1DAL6Q" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/joE1D1DAL6Q/hqdefault.jpg" alt="예운옥 촬영 3" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=Y55WS2z718E" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/Y55WS2z718E/hqdefault.jpg" alt="예운옥 촬영 4" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=O1eN4MrG8vk" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/O1eN4MrG8vk/hqdefault.jpg" alt="예운옥 촬영 5" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=OgVbzwk_siQ" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/OgVbzwk_siQ/hqdefault.jpg" alt="예운옥 촬영 6" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+      <a href="https://www.youtube.com/watch?v=WksVamWvivM" class="vid-slide" target="_blank" rel="noopener" style="position:relative;display:block;flex-shrink:0;text-decoration:none">
+  <img src="https://img.youtube.com/vi/WksVamWvivM/hqdefault.jpg" alt="예운옥 촬영 7" style="width:100%;height:100%;object-fit:cover;display:block">
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.3)">
+    <div style="width:44px;height:32px;background:rgba(220,0,0,.9);border-radius:8px;display:flex;align-items:center;justify-content:center">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="6,3 20,12 6,21"/></svg>
+    </div>
+  </div>
+</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <div class="photo-frame" style="aspect-ratio:3/4"><img src="imgs/profile.jpg" alt="크레용" style="object-position:65% center"></div>
+    <div class="contact-content">
+      <p class="contact-eyebrow reveal">Get In Touch</p>
+      <h2 class="contact-name reveal d1">크레용</h2>
+      <p class="contact-name-en reveal d1">CREYONG</p>
+      <div class="contact-items">
+        <div class="contact-item reveal d2"><div class="c-icon">📞</div><div><div class="c-label">Phone</div><div class="c-val"><a id="phoneLink" href="#">불러오는 중…</a></div></div></div>
+        <div class="contact-item reveal d2"><div class="c-icon">✉️</div><div><div class="c-label">Email</div><div class="c-val"><a id="mailLink" href="#">불러오는 중…</a></div></div></div>
+        <div class="contact-item reveal d3"><div class="c-icon">▶️</div><div><div class="c-label">YouTube</div><div class="c-val"><a href="https://www.youtube.com/@creyongfarm" target="_blank" rel="noopener">youtube.com/@creyongfarm</a></div></div></div>
+        <div class="contact-item reveal d4"><div class="c-icon">📸</div><div><div class="c-label">Instagram</div><div class="c-val"><a href="https://www.instagram.com/creyongfarm" target="_blank" rel="noopener">@creyongfarm</a></div></div></div>
+        <div class="contact-item reveal d4"><div class="c-icon" style="background:#FEE500;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">💬</div><div><div class="c-label">KakaoTalk</div><div class="c-val"><a href="https://open.kakao.com/o/samILOji" target="_blank" rel="noopener" id="kakaoLink">스튜디오 예운옥 오픈채팅</a></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">CREYONG</div>
+  <div class="f-copy">© 2025 Creyong. Brand Filmmaker.</div>
+</footer>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBooking()">✕</button>
+    <h3 class="modal-title">예운옥 예약 문의</h3>
+    <p class="modal-sub">아래 내용을 작성하시면 카카오톡 오픈채팅으로 연결됩니다</p>
+    <div class="form-row">
+      <label class="form-label">패키지 선택</label>
+      <select class="form-select" id="bk-pkg">
+        <option value="기본 대관 (4인 기준 시간당 8만원)">기본 대관 — 시간당 8만원 (4인 기준)</option>
+        <option value="YouTube 예능 패키지 (25인 기준 시간당 15만원, 최소 5시간)">YouTube 예능 패키지 — 시간당 15만원 (최소 5시간)</option>
+        <option value="광고·드라마·영화 대규모 촬영 (가격 협의)">광고·드라마·영화 — 가격 협의</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">희망 날짜</label>
+      <input type="date" class="form-input" id="bk-date">
+    </div>
+    <div class="form-row">
+      <label class="form-label">희망 시간 및 인원</label>
+      <input type="text" class="form-input" id="bk-time" placeholder="예: 오전 10시~오후 6시, 8인">
+    </div>
+    <div class="form-row">
+      <label class="form-label">연락처 (이름 / 연락처)</label>
+      <input type="text" class="form-input" id="bk-contact" placeholder="홍길동 / 010-0000-0000">
+    </div>
+    <div class="form-row">
+      <label class="form-label">추가 문의사항</label>
+      <textarea class="form-textarea" id="bk-msg" placeholder="촬영 내용, 특이사항 등을 자유롭게 작성해 주세요"></textarea>
+    </div>
+    <button class="form-submit" onclick="submitBooking()" style="background:#FEE500;color:#3C1E1E;font-weight:900">💬 카카오톡 오픈채팅으로 문의하기 →</button>
+    <p class="form-note">카카오톡 오픈채팅으로 연결됩니다 · 문의 내용이 자동으로 복사됩니다</p>
+  </div>
+</div>
+
+<script>
+// 햄버거
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+// NAV 스크롤
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
+
+// Scroll Reveal (Intersection Observer)
+const ro = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+// 히어로 패럴랙스
+const hero3d = document.getElementById('hero3d');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if(y < window.innerHeight * 1.3) {
+    hero3d.style.transform = `translateY(${-y * 0.15}px)`;
+    hero3d.style.opacity = Math.max(0, 1 - y/(window.innerHeight * 0.65));
+  }
+}, {passive:true});
+
+// 섹션 BG 텍스트 패럴랙스
+document.querySelectorAll('.sec-hero-bg, .studio-bg-txt').forEach(el => {
+  const parent = el.parentElement;
+  window.addEventListener('scroll', () => {
+    const rect = parent.getBoundingClientRect();
+    if(rect.top < window.innerHeight && rect.bottom > 0) {
+      el.style.transform = `translateY(${(rect.top / window.innerHeight) * -50}px)`;
+    }
+  }, {passive:true});
+});
+
+// YouTube 구독자 수 실시간
+(function() {
+  const API_KEY = 'AIzaSyD_PLACEHOLDER_REPLACE_ME';
+  const HANDLE  = 'creyongfarm';
+  if(API_KEY.includes('PLACEHOLDER')) return;
+  fetch('https://www.googleapis.com/youtube/v3/channels?part=statistics&forHandle=' + HANDLE + '&key=' + API_KEY)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if(!data.items || !data.items[0]) return;
+      var n = parseInt(data.items[0].statistics.subscriberCount);
+      var s;
+      if(n >= 10000)      s = (n/10000).toFixed(1).replace(/\.0$/,'') + '만';
+      else if(n >= 1000)  s = (n/1000).toFixed(1).replace(/\.0$/,'') + 'K';
+      else                s = n.toLocaleString();
+      s += ' 구독자';
+      var el = document.getElementById('yt-sub-count');
+      if(el) el.textContent = s;
+    }).catch(function(){});
+})();
+
+// 이메일 스팸봇 방지 — JS로 조립
+(function() {
+  const u = ['c','r','e','y','o','n','g','f','a','r','m'].join('');
+  const d = ['g','m','a','i','l','.','c','o','m'].join('');
+  const addr = u + '@' + d;
+  const link = document.getElementById('mailLink');
+  if(link) { link.href = 'mailto:' + addr; link.textContent = addr; }
+})();
+
+// 전화번호 스팸봇 방지 — JS로 조립
+(function() {
+  const p = ['010','7499','4557'].join(' ');
+  const link = document.getElementById('phoneLink');
+  if(link) { link.href = 'tel:' + p.replace(/ /g,''); link.textContent = p; }
+})();
+
+// 예약 모달
+function openBooking() {
+  document.getElementById('bookingModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeBooking() {
+  document.getElementById('bookingModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+  if(e.target === this) closeBooking();
+});
+function submitBooking() {
+  const kakaoUrl = 'https://open.kakao.com/o/samILOji';
+  const pkg     = document.getElementById('bk-pkg').value;
+  const date    = document.getElementById('bk-date').value;
+  const time    = document.getElementById('bk-time').value;
+  const contact = document.getElementById('bk-contact').value;
+  const msg     = document.getElementById('bk-msg').value;
+  // 문의 내용을 클립보드에 복사 후 카카오톡으로 이동
+  const text = '[예운옥 예약 문의]\n패키지: ' + pkg + '\n날짜: ' + date + '\n시간/인원: ' + time + '\n연락처: ' + contact + (msg ? '\n\n문의사항: ' + msg : '');
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      alert('문의 내용이 복사되었습니다!\n카카오톡 오픈채팅에 붙여넣기(Ctrl+V) 해주세요.');
+    }).catch(function() {});
+  }
+  window.open(kakaoUrl, '_blank');
+}
+</script>
+</body>
+</html>
