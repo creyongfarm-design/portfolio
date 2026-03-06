@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CREYONG C.LAB v20260303o</title>
+<title>CREYONG C.LAB v20260303p</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -899,10 +899,10 @@
           <span>🤖 AI 기획안 초안 생성</span>
         </button>
         <div class="no-api-key-warn" id="no-api-key-warn">
-          ⚠️ Gemini API 키가 없습니다. 오른쪽 상단 <strong>🔑 API</strong> 버튼에서 Gemini API 키를 입력해주세요.
+          ⚠️ API 키가 없습니다. 오른쪽 상단 <strong>🔑 API</strong> 버튼에서 Claude 또는 Gemini API 키를 입력해주세요.
         </div>
         <div class="briefing-hint" id="briefing-hint">
-          미팅 브리핑 정보를 바탕으로 Gemini가 2개의 컨셉 (레퍼런스·핵심 컨셉·제작 규모) 전체를 자동으로 채워드립니다.
+          미팅 브리핑 정보를 바탕으로 AI가 2개의 컨셉 (레퍼런스·핵심 컨셉·제작 규모) 전체를 자동으로 채워드립니다.
         </div>
       </div>
     </div>
@@ -5039,10 +5039,11 @@ function buildBriefingPrompt(brief, proposalTitle, client) {
 
 async function generateWithClaude() {
   const geminiKey = localStorage.getItem('creyong-gemini-key');
+  const claudeKey = localStorage.getItem('creyong-api-key');
   const warnEl = document.getElementById('no-api-key-warn');
   const hintEl = document.getElementById('briefing-hint');
 
-  if (!geminiKey) {
+  if (!geminiKey && !claudeKey) {
     warnEl.style.display = 'block';
     return;
   }
@@ -5060,10 +5061,14 @@ async function generateWithClaude() {
     return;
   }
 
+  // 사용할 API 결정 (Gemini 우선, 없으면 Claude)
+  const useGemini = !!geminiKey;
+  const apiName = useGemini ? 'Gemini' : 'Claude';
+
   // 로딩 상태
   const btn = document.getElementById('ai-gen-btn');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Gemini가 기획안을 작성 중입니다...';
+  btn.innerHTML = `<span class="spinner"></span> ${apiName}가 기획안을 작성 중입니다...`;
   hintEl.textContent = '보통 10~20초 정도 소요됩니다. 잠시만 기다려주세요.';
 
   // ① ListModels API로 이 API 키에서 실제 사용 가능한 텍스트 모델 조회
@@ -5106,50 +5111,75 @@ async function generateWithClaude() {
     ];
   }
 
-  hintEl.textContent = `${TEXT_MODELS.length}개 모델 확인됨. 기획안 작성 중...`;
-
   let rawText = '';
   let lastErr = null;
 
   try {
-  for (const model of TEXT_MODELS) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: buildBriefingPrompt(brief, proposalTitle, client) }],
-            }],
-            generationConfig: { temperature: 0.8, maxOutputTokens: 4096 },
-          }),
+  // ── Claude API 경로 ──────────────────────────────────
+  if (!useGemini) {
+    hintEl.textContent = 'Claude가 기획안을 작성 중입니다...';
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 4096,
+        messages: [{ role: 'user', content: buildBriefingPrompt(brief, proposalTitle, client) }],
+      }),
+    });
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    rawText = data.content?.[0]?.text || '';
+
+  // ── Gemini API 경로 ──────────────────────────────────
+  } else {
+    hintEl.textContent = `${TEXT_MODELS.length}개 모델 확인됨. 기획안 작성 중...`;
+    for (const model of TEXT_MODELS) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: buildBriefingPrompt(brief, proposalTitle, client) }],
+              }],
+              generationConfig: { temperature: 0.8, maxOutputTokens: 4096 },
+            }),
+          }
+        );
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const msg = errData.error?.message || `HTTP ${response.status}`;
+          if (response.status === 404 || msg.includes('not found') || msg.includes('not supported') || msg.includes('no longer available') || msg.includes('deprecated')) {
+            lastErr = new Error(msg);
+            continue;
+          }
+          throw new Error(msg);
         }
-      );
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        const msg = errData.error?.message || `HTTP ${response.status}`;
-        // 모델 없음/지원 안 함 오류면 다음 모델 시도
-        if (response.status === 404 || msg.includes('not found') || msg.includes('not supported') || msg.includes('no longer available') || msg.includes('deprecated')) {
-          lastErr = new Error(msg);
-          continue;
+        const data = await response.json();
+        rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        lastErr = null;
+        break;
+      } catch (e) {
+        lastErr = e;
+        const eMsg = e.message || '';
+        if (!eMsg.includes('not found') && !eMsg.includes('not supported') && !eMsg.includes('no longer available') && !eMsg.includes('deprecated')) {
+          throw e;
         }
-        throw new Error(msg);
-      }
-      const data = await response.json();
-      rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      lastErr = null;
-      break; // 성공!
-    } catch (e) {
-      lastErr = e;
-      const eMsg = e.message || '';
-      if (!eMsg.includes('not found') && !eMsg.includes('not supported') && !eMsg.includes('no longer available') && !eMsg.includes('deprecated')) {
-        throw e; // 모델 문제가 아닌 오류는 즉시 throw
       }
     }
+    if (lastErr) throw lastErr;
   }
-  if (lastErr) throw lastErr;
 
     // JSON 파싱
     let parsed;
