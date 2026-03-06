@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; connect-src https://api.anthropic.com; img-src * blob: data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; connect-src https://white-meadow-22dc.creyongfarm.workers.dev; img-src * blob: data:;">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>예운옥 포스팅 포털</title>
 <style>
@@ -1054,7 +1054,7 @@ async function generatePost() {
       : '로케이션뱅크 카페용 글을 작성하세요:\n- 제목: 간결한 제목 1개\n- 본문: 500~700자, 실용적인 정보 위주, 연락처 포함\n- 형식: 제목:\n[제목]\n\n본문:\n[본문]');
 
   try {
-    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+    var resp = await fetch('https://white-meadow-22dc.creyongfarm.workers.dev/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': key,
@@ -1266,7 +1266,7 @@ async function testApi() {
 
   for (var i = 0; i < models.length; i++) {
     try {
-      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      var resp = await fetch('https://white-meadow-22dc.creyongfarm.workers.dev/v1/messages', {
         method: 'POST',
         headers: {
           'x-api-key': key,
