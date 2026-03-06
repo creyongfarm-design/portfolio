@@ -284,16 +284,124 @@
   .add-concept-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(2,136,209,0.08); border: 1px dashed rgba(2,136,209,0.4); border-radius: 10px; padding: 14px 20px; color: #38bdf8; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
   .add-concept-btn:hover { background: rgba(2,136,209,0.15); }
 
+  /* ══════════════════════════════════════
+     📱 TABLET (iPad)
+  ══════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    header { padding: 0 20px; }
+    .nav-tabs { padding: 0 20px; }
+    main { padding: 20px; }
+  }
+
+  /* ══════════════════════════════════════
+     📱 MOBILE (768px 이하 — 일반 모바일)
+  ══════════════════════════════════════ */
   @media (max-width: 768px) {
-    .overview-grid { grid-template-columns: repeat(2, 1fr); }
-    .quick-actions { grid-template-columns: repeat(2, 1fr); }
+    /* 헤더 */
+    header { padding: 0 16px; height: 56px; }
+    .header-logo .logo-text { font-size: 14px; }
+    .header-logo .logo-sub { display: none; }
+    .stat-pill { padding: 4px 8px; font-size: 10px; gap: 4px; }
+    .api-settings-btn { padding: 4px 9px; font-size: 10px; }
+
+    /* 네비게이션 탭 — 가로 스크롤 */
+    .nav-tabs {
+      padding: 0 8px;
+      top: 56px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { padding: 12px 14px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+
+    /* 메인 콘텐츠 */
+    main { padding: 14px; }
+
+    /* 그리드 */
+    .overview-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .tool-grid { grid-template-columns: 1fr; }
-    main { padding: 16px; }
+    .form-row-3col, .form-row-2col { grid-template-columns: 1fr; }
+
+    /* 프로젝트 목록 */
     .project-row { grid-template-columns: 1fr auto; }
     .project-date, .progress-bar-wrap { display: none; }
-    .form-row-3col, .form-row-2col { grid-template-columns: 1fr; }
-    .editor-toolbar { flex-wrap: wrap; }
+
+    /* 편집기 */
+    .editor-toolbar { flex-wrap: wrap; gap: 4px; }
     .editor-title-input { font-size: 16px; }
+
+    /* stat 카드 */
+    .stat-card { padding: 16px 12px; }
+    .stat-number { font-size: 32px; }
+
+    /* 빠른 시작 카드 */
+    .quick-btn { padding: 14px 12px; }
+
+    /* 브리핑 패널 */
+    .briefing-grid { grid-template-columns: 1fr !important; }
+    .briefing-full { grid-column: 1 !important; }
+
+    /* 모달 */
+    .modal-content { width: 95vw; max-height: 88vh; margin: 6vh auto 0; padding: 20px 16px; }
+
+    /* 콘셉트 블록 */
+    .concept-block { padding: 16px; }
+    .concept-grid { grid-template-columns: 1fr !important; }
+  }
+
+  /* ══════════════════════════════════════
+     📱 IPHONE (480px 이하)
+  ══════════════════════════════════════ */
+  @media (max-width: 480px) {
+    /* 헤더 단순화 */
+    header { padding: 0 12px; height: 52px; }
+    .header-stats { gap: 4px; }
+    /* stat-pill 2개만 보이게 (진행중, 제안 숨김) */
+    .stat-pill:nth-child(2) { display: none; }
+    .api-settings-btn { padding: 4px 8px; font-size: 10px; }
+    #save-indicator { display: none; }
+    #access-modal-btn { display: none; }
+
+    /* 네비게이션 더 작게 */
+    .nav-tabs { top: 52px; padding: 0 4px; }
+    .nav-tab { padding: 10px 12px; font-size: 11px; }
+
+    /* 메인 */
+    main { padding: 10px; }
+
+    /* overview 그리드 */
+    .overview-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat-card { padding: 14px 10px; border-radius: 12px; }
+    .stat-number { font-size: 28px; }
+    .stat-label { font-size: 11px; }
+
+    /* 빠른 시작 2열 유지 */
+    .quick-actions { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .quick-btn { padding: 12px 10px; border-radius: 12px; gap: 10px; }
+    .quick-icon { width: 36px; height: 36px; font-size: 18px; }
+    .quick-title { font-size: 13px; }
+    .quick-desc { font-size: 10px; }
+
+    /* 버튼 터치 영역 확보 */
+    button, .nav-tab, .quick-btn { min-height: 44px; }
+
+    /* 폼 */
+    .form-input, .form-select, .form-textarea { font-size: 16px; } /* iOS zoom 방지 */
+    .form-label { font-size: 11px; }
+
+    /* 모달 풀스크린에 가깝게 */
+    .modal-content { width: 100vw; max-height: 92vh; margin: 4vh 0 0; border-radius: 20px 20px 0 0; padding: 20px 14px; }
+
+    /* AI 생성 버튼 */
+    .ai-generate-btn { font-size: 14px; padding: 14px; }
+
+    /* 기획안 컨셉 */
+    .concept-block-header { flex-wrap: wrap; gap: 8px; }
   }
 
   /* ── CONTI TABLE ── */
