@@ -359,11 +359,16 @@
   ══════════════════════════════════════ */
   @media (max-width: 480px) {
     /* 헤더 단순화 */
-    header { padding: 0 12px; height: 52px; }
-    .header-stats { gap: 4px; }
-    /* stat-pill 2개만 보이게 (진행중, 제안 숨김) */
+    header { padding: 0 12px; height: 52px; flex-wrap: nowrap; }
+    .logo { gap: 8px; min-width: 0; flex-shrink: 1; overflow: hidden; }
+    .logo-icon { width: 34px; height: 34px; font-size: 12px; flex-shrink: 0; }
+    .logo-main { font-size: 16px; letter-spacing: 1px; white-space: nowrap; }
+    .logo-sub { display: none; }
+    .header-stats { gap: 5px; flex-shrink: 0; }
+    /* stat-pill 하나 숨기기 (제안) */
     .stat-pill:nth-child(2) { display: none; }
-    .api-settings-btn { padding: 4px 8px; font-size: 10px; }
+    .stat-pill { padding: 4px 8px; font-size: 10px; }
+    .api-settings-btn { padding: 5px 10px; font-size: 11px; font-weight: 700; }
     #save-indicator { display: none; }
     #access-modal-btn { display: none; }
 
@@ -402,6 +407,20 @@
 
     /* 기획안 컨셉 */
     .concept-block-header { flex-wrap: wrap; gap: 8px; }
+
+    /* Gmail & 캘린더 허브 — 모바일 1열 */
+    #overview-hub-section .section-header { flex-wrap: wrap; gap: 6px; }
+    #overview-hub-section > div > div[style*="grid-template-columns:1fr 1fr"],
+    #overview-hub-section > div > div[style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+    .gmail-shortcut-link { padding: 10px 12px; font-size: 12px; }
+
+    /* 각종 텍스트 줄바꿈 방지 */
+    .section-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60vw; }
+
+    /* Gmail & 캘린더 허브 1열로 */
+    .hub-grid { grid-template-columns: 1fr !important; }
   }
 
   /* ── CONTI TABLE ── */
@@ -698,7 +717,7 @@
       <div class="section-line"></div>
       <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0" onclick="setupCalendar()">⚙️ 캘린더 설정</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="hub-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
       <!-- Gmail 바로가기 -->
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
