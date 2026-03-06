@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; connect-src https://api.anthropic.com; img-src * blob: data:;">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예운옥 포스팅 포털</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #0a0a18;
+  --card: #131325;
+  --card2: #0f0f22;
+  --border: #252545;
+  --pink: #e91e8c;
+  --pink2: #ff4db8;
+  --purple: #7c3aed;
+  --purple2: #a855f7;
+  --teal: #0d9488;
+  --text: #e8e8f0;
+  --muted: #7070a0;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+}
+
+body {
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── 헤더 ── */
+.header {
+  background: linear-gradient(135deg, #1a0a2e 0%, #0d1a3a 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo { display:flex; align-items:center; gap:14px; }
+.logo-icon {
+  font-size:32px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.logo h1 { font-size:18px; font-weight:800; letter-spacing:-0.5px; }
+.logo p { font-size:11px; color:var(--muted); margin-top:2px; }
+
+/* ── 탭 ── */
+.tabs {
+  display: flex;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  overflow-x: auto;
+  gap: 2px;
+  position: sticky;
+  top: 69px;
+  z-index: 90;
+}
+.tabs::-webkit-scrollbar { height:2px; }
+.tabs::-webkit-scrollbar-thumb { background: var(--pink); }
+.tab-btn {
+  padding: 14px 18px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  font-family: inherit;
+  z-index: 91;
+  position: relative;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--pink);
+  border-bottom-color: var(--pink);
+  background: linear-gradient(to bottom, transparent, rgba(233,30,140,0.06));
+}
+
+/* ── 패널 ── */
+.panel { display:none; padding: 24px 28px; max-width: 920px; margin: 0 auto; }
+.panel.active { display:block; }
+
+/* ── 카드 ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, rgba(233,30,140,0.06) 0%, transparent 100%);
+}
+.card-body { padding: 18px; }
+
+/* ── 버튼 ── */
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-pink { background: linear-gradient(135deg, var(--pink), #c2185b); color: #fff; }
+.btn-pink:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(233,30,140,0.4); }
+.btn-gray { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.btn-gray:hover { border-color: var(--pink); color: var(--pink); }
+.btn-green { background: var(--green); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-purple { background: linear-gradient(135deg, var(--purple), var(--purple2)); color: #fff; }
+
+/* ── 인풋 ── */
+input, textarea, select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(233,30,140,0.1); }
+textarea { resize: vertical; min-height: 80px; }
+label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block; }
+
+/* ── 사진 그리드 ── */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.photo-item {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  aspect-ratio: 4/3;
+  background: var(--card2);
+}
+.photo-item:hover { transform: scale(1.02); }
+.photo-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo-item.selected { border-color: var(--pink); box-shadow: 0 0 0 3px rgba(233,30,140,0.3); }
+.photo-check {
+  position: absolute; top:5px; right:5px;
+  width:22px; height:22px;
+  background: var(--pink); color:#fff;
+  border-radius: 50%; font-size:12px;
+  display:none; align-items:center; justify-content:center;
+}
+.photo-item.selected .photo-check { display:flex; }
+.photo-del {
+  position:absolute; top:5px; left:5px;
+  background:rgba(0,0,0,0.7); color:#fff;
+  border:none; border-radius:50%; width:22px; height:22px;
+  cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center;
+  z-index:2;
+}
+.photo-del:hover { background: var(--red); }
+.photo-cat {
+  position:absolute; bottom:0; left:0; right:0;
+  background:rgba(0,0,0,0.75);
+  font-size:11px; padding:4px 6px;
+  cursor:pointer; text-align:center;
+  transition: background 0.2s;
+  z-index:2;
+}
+.photo-cat:hover { background: var(--pink); }
+
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 36px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: linear-gradient(135deg, rgba(233,30,140,0.02), rgba(124,58,237,0.02));
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color: var(--pink);
+  background: linear-gradient(135deg, rgba(233,30,140,0.08), rgba(124,58,237,0.06));
+}
+.upload-zone p { color: var(--muted); font-size:14px; margin-top:8px; }
+
+/* ── 카테고리 선택 강조 ── */
+.cat-selector {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.cat-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 2px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.cat-btn.active {
+  border-color: var(--pink);
+  color: var(--pink);
+  background: rgba(233,30,140,0.1);
+}
+
+/* ── 생성된 글 ── */
+.gen-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-size:13px;
+  line-height:1.8;
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+/* ── 토스트 ── */
+.toast {
+  position: fixed; bottom:28px; right:28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size:13px;
+  font-weight: 600;
+  z-index: 9999;
+  transform: translateY(120px);
+  opacity:0;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 320px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.toast.show { transform: translateY(0); opacity:1; }
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+.toast.info { border-color: var(--purple); }
+
+/* ── 빈 상태 ── */
+.empty { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+.empty-icon { font-size:40px; margin-bottom:12px; }
+
+/* ── 히스토리 카드 ── */
+.hist-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.hist-card:hover { border-color: var(--purple); }
+.hist-title { font-weight:700; font-size:14px; margin-bottom:8px; }
+.hist-preview {
+  font-size:12px; color:var(--muted);
+  max-height:60px; overflow:hidden;
+  line-height:1.6; margin-bottom:12px;
+}
+.hist-btns { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ── 대시보드 ── */
+.dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+.dash-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+
+.stat-card {
+  border-radius: 16px;
+  padding: 22px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  opacity: 0.12;
+}
+.stat-pink { background: linear-gradient(135deg, #2d0a1e, #1a0a2e); border-color: rgba(233,30,140,0.3); }
+.stat-pink::before { background: linear-gradient(135deg, #e91e8c, #c2185b); opacity: 0.15; }
+.stat-purple { background: linear-gradient(135deg, #1a0a2e, #0f0a2a); border-color: rgba(124,58,237,0.3); }
+.stat-purple::before { background: linear-gradient(135deg, #7c3aed, #a855f7); opacity: 0.15; }
+.stat-green { background: linear-gradient(135deg, #0a1e0a, #0a1a14); border-color: rgba(34,197,94,0.3); }
+.stat-green::before { background: linear-gradient(135deg, #22c55e, #16a34a); opacity: 0.15; }
+.stat-teal { background: linear-gradient(135deg, #0a1e1a, #081814); border-color: rgba(13,148,136,0.3); }
+.stat-teal::before { background: linear-gradient(135deg, #0d9488, #0f766e); opacity: 0.15; }
+
+.stat-num { font-size: 40px; font-weight: 900; line-height: 1; margin-bottom: 6px; position: relative; }
+.stat-pink .stat-num { color: var(--pink2); }
+.stat-purple .stat-num { color: var(--purple2); }
+.stat-green .stat-num { color: var(--green); }
+.stat-teal .stat-num { color: #2dd4bf; }
+.stat-lbl { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; position: relative; }
+.stat-icon { font-size: 28px; margin-bottom: 8px; position: relative; }
+
+.cat-bar-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.cat-bar-title { font-size:13px; font-weight:700; margin-bottom:14px; }
+.cat-bar-row { margin-bottom:10px; }
+.cat-bar-label { display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+.cat-bar-label span:last-child { color:var(--muted); }
+.cat-bar-track { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.cat-bar-fill { height:100%; border-radius:4px; transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.bar-pink { background: linear-gradient(90deg, var(--pink), var(--pink2)); }
+.bar-green { background: linear-gradient(90deg, #16a34a, var(--green)); }
+.bar-yellow { background: linear-gradient(90deg, #ca8a04, var(--yellow)); }
+.bar-teal { background: linear-gradient(90deg, #0f766e, #2dd4bf); }
+
+.guide-card {
+  background: linear-gradient(135deg, #0d1a2e, #1a0a2e);
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 14px;
+}
+.guide-card h3 { font-size:13px; font-weight:700; margin-bottom:12px; color:var(--purple2); }
+.step-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+.step-num {
+  width:26px; height:26px;
+  background: linear-gradient(135deg, var(--purple), var(--purple2));
+  border-radius:50%; font-size:12px; font-weight:800; color:#fff;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.step-text { font-size:13px; line-height:1.6; }
+.step-text b { color:var(--text); }
+.step-text span { color:var(--muted); font-size:12px; }
+
+.quick-btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+
+/* 플렉스 유틸 */
+.flex { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.mt8 { margin-top:8px; }
+.mt12 { margin-top:12px; }
+.mt16 { margin-top:16px; }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">🎬</div>
+    <div>
+      <h1>예운옥 포스팅 포털</h1>
+      <p>촬영대관 홍보 자동화 v5.1</p>
+    </div>
+  </div>
+  <div>
+    <span id="api-status" style="font-size:12px; color:var(--muted); font-weight:600">● Claude AI 미연결</span>
+  </div>
+</div>
+
+<!-- 탭 -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('dashboard', this)">📊 대시보드</button>
+  <button class="tab-btn" onclick="showTab('photos', this)">📸 사진 관리</button>
+  <button class="tab-btn" onclick="showTab('generate', this)">✍️ 포스팅 생성</button>
+  <button class="tab-btn" onclick="showTab('copy', this)">📋 글 복사하기</button>
+  <button class="tab-btn" onclick="showTab('settings', this)">⚙️ 설정</button>
+</div>
+
+<!-- ═══ 대시보드 ═══ -->
+<div id="tab-dashboard" class="panel active">
+
+  <!-- 통계 카드 4개 -->
+  <div class="dash-grid-4">
+    <div class="stat-card stat-pink">
+      <div class="stat-icon">📸</div>
+      <div class="stat-num" id="stat-photos">0</div>
+      <div class="stat-lbl">전체 사진</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-icon">🌿</div>
+      <div class="stat-num" id="stat-outdoor">0</div>
+      <div class="stat-lbl">야외 사진</div>
+    </div>
+    <div class="stat-card stat-purple">
+      <div class="stat-icon">📝</div>
+      <div class="stat-num" id="stat-posts">0</div>
+      <div class="stat-lbl">생성한 글</div>
+    </div>
+    <div class="stat-card stat-teal">
+      <div class="stat-icon">🤖</div>
+      <div class="stat-num" id="stat-ai">AI</div>
+      <div class="stat-lbl">Claude 상태</div>
+    </div>
+  </div>
+
+  <!-- 카테고리 현황 -->
+  <div class="cat-bar-card">
+    <div class="cat-bar-title">📂 사진 카테고리 현황</div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🛋 거실</span><span id="cnt-livingroom">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-pink" id="bar-livingroom" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🍳 키친</span><span id="cnt-kitchen">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-yellow" id="bar-kitchen" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>📚 서재</span><span id="cnt-study">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-teal" id="bar-study" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🏠 2층거실</span><span id="cnt-livingroom2">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-pink" id="bar-livingroom2" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🛏 침실</span><span id="cnt-bedroom">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-teal" id="bar-bedroom" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🚿 화장실</span><span id="cnt-bathroom">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-green" id="bar-bathroom" style="width:0%"></div></div>
+    </div>
+    <div class="cat-bar-row">
+      <div class="cat-bar-label"><span>🌿 야외</span><span id="cnt-outdoor">0장</span></div>
+      <div class="cat-bar-track"><div class="cat-bar-fill bar-green" id="bar-outdoor" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- 사용 가이드 -->
+  <div class="guide-card">
+    <h3>🚀 사용 방법</h3>
+    <div class="step-row">
+      <div class="step-num">1</div>
+      <div class="step-text"><b>⚙️ 설정</b>에서 Claude API 키 입력 후 저장<br><span>API 키는 console.anthropic.com에서 발급</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">2</div>
+      <div class="step-text"><b>📸 사진 관리</b>에서 예운옥 사진 업로드<br><span>카테고리 선택 후 업로드 → 여러 장 동시 가능</span></div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">3</div>
+      <div class="step-text"><b>✍️ 포스팅 생성</b>에서 AI 글 자동 생성</div>
+    </div>
+    <div class="step-row">
+      <div class="step-num">4</div>
+      <div class="step-text"><b>📋 글 복사하기</b>에서 복사 → 네이버 블로그/카페에 붙여넣기</div>
+    </div>
+  </div>
+
+  <!-- 빠른 이동 -->
+  <div class="quick-btns">
+    <a href="https://blog.naver.com/ckddyd33" target="_blank">
+      <button class="btn btn-gray">📝 네이버 블로그</button>
+    </a>
+    <a href="https://cafe.naver.com/locationbank" target="_blank">
+      <button class="btn btn-gray">☕ 로케이션뱅크</button>
+    </a>
+    <button class="btn btn-pink" onclick="showTab('generate', document.querySelectorAll('.tab-btn')[2])">✍️ 글 생성 시작</button>
+  </div>
+</div>
+
+<!-- ═══ 사진 관리 ═══ -->
+<div id="tab-photos" class="panel">
+  <div class="card">
+    <div class="card-head">📸 사진 업로드</div>
+    <div class="card-body">
+
+      <!-- 카테고리 선택 (버튼형) -->
+      <div style="margin-bottom:14px">
+        <label style="margin-bottom:8px; font-size:13px; color:var(--text); font-weight:600">📂 업로드할 카테고리 선택:</label>
+        <div class="cat-selector">
+          <button class="cat-btn active" id="catbtn-livingroom" onclick="selectUploadCat('livingroom', this)">🛋 거실</button>
+          <button class="cat-btn" id="catbtn-kitchen" onclick="selectUploadCat('kitchen', this)">🍳 키친</button>
+          <button class="cat-btn" id="catbtn-study" onclick="selectUploadCat('study', this)">📚 서재</button>
+          <button class="cat-btn" id="catbtn-livingroom2" onclick="selectUploadCat('livingroom2', this)">🏠 2층 거실</button>
+          <button class="cat-btn" id="catbtn-bedroom" onclick="selectUploadCat('bedroom', this)">🛏 침실</button>
+          <button class="cat-btn" id="catbtn-bathroom" onclick="selectUploadCat('bathroom', this)">🚿 화장실</button>
+          <button class="cat-btn" id="catbtn-outdoor" onclick="selectUploadCat('outdoor', this)">🌿 야외</button>
+        </div>
+        <div id="selected-cat-display" style="font-size:12px; color:var(--pink); font-weight:700; margin-bottom:6px">
+          ✅ 선택된 카테고리: 🛋 거실
+        </div>
+      </div>
+
+      <div class="upload-zone" id="drop-zone"
+        onclick="document.getElementById('file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event)">
+        <div style="font-size:40px">📷</div>
+        <p style="font-size:15px; font-weight:600; color:var(--text); margin-top:8px">클릭하거나 사진을 드래그해서 업로드</p>
+        <p style="font-size:12px; margin-top:6px">JPG, PNG 여러 장 동시 선택 가능</p>
+      </div>
+      <input type="file" id="file-input" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <span>사진 목록 <span id="photo-count" style="color:var(--pink)">(0장)</span></span>
+      <div style="margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; align-items:center">
+        <span style="font-size:11px; color:var(--muted)">선택 사진 →</span>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('livingroom')">🛋거실</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('kitchen')">🍳키친</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('study')">📚서재</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('livingroom2')">🏠2층거실</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('bedroom')">🛏침실</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('bathroom')">🚿화장실</button>
+        <button class="btn btn-gray btn-sm" onclick="bulkCat('outdoor')">🌿야외</button>
+        <button class="btn btn-gray btn-sm" onclick="deleteSelected()" style="color:var(--red)">🗑 삭제</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="flex" style="margin-bottom:12px; gap:6px">
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('all')" id="f-all">전체</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('livingroom')" id="f-livingroom">🛋 거실</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('kitchen')" id="f-kitchen">🍳 키친</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('study')" id="f-study">📚 서재</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('livingroom2')" id="f-livingroom2">🏠 2층거실</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('bedroom')" id="f-bedroom">🛏 침실</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('bathroom')" id="f-bathroom">🚿 화장실</button>
+        <button class="btn btn-gray btn-sm" onclick="filterPhotos('outdoor')" id="f-outdoor">🌿 야외</button>
+      </div>
+      <div class="photo-grid" id="photo-grid">
+        <div class="empty"><div class="empty-icon">📷</div>사진을 업로드하세요</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 포스팅 생성 ═══ -->
+<div id="tab-generate" class="panel">
+  <div class="card">
+    <div class="card-head">✍️ AI 글 생성</div>
+    <div class="card-body">
+      <div class="flex" style="margin-bottom:16px; gap:12px">
+        <div style="flex:1">
+          <label>글 유형</label>
+          <select id="post-type">
+            <option value="blog">📝 네이버 블로그 (SEO 최적화, 1500~2000자)</option>
+            <option value="cafe">☕ 로케이션뱅크 카페 (500~700자)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label>포커스</label>
+          <select id="post-focus">
+            <option value="general">전체 소개</option>
+            <option value="indoor">실내 촬영</option>
+            <option value="outdoor">야외·정원 촬영</option>
+            <option value="season">계절 특집</option>
+          </select>
+        </div>
+      </div>
+      <label>추가 요청사항 (선택)</label>
+      <textarea id="extra-req" placeholder="예: 걸그룹 화보 촬영 위주로, 주방 강조해서..." rows="3"></textarea>
+      <div class="flex mt16">
+        <button class="btn btn-pink" onclick="generatePost()">🤖 AI 글 생성하기</button>
+        <span id="gen-status" style="font-size:12px; color:var(--muted); font-weight:600"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="gen-result-card" style="display:none">
+    <div class="card-head">
+      <span>✅ 생성 결과</span>
+      <div style="margin-left:auto; display:flex; gap:6px">
+        <button class="btn btn-gray btn-sm" onclick="copyText('gen-title')">📋 제목 복사</button>
+        <button class="btn btn-gray btn-sm" onclick="copyText('gen-body')">📄 본문 복사</button>
+        <button class="btn btn-pink btn-sm" onclick="saveToHistory()">💾 저장</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div style="margin-bottom:14px">
+        <label>제목</label>
+        <div id="gen-title" class="gen-box" style="max-height:60px; font-weight:700; font-size:14px"></div>
+      </div>
+      <div>
+        <label>본문</label>
+        <div id="gen-body" class="gen-box"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 글 복사하기 ═══ -->
+<div id="tab-copy" class="panel">
+  <div class="flex" style="margin-bottom:16px">
+    <a href="https://blog.naver.com/ckddyd33" target="_blank">
+      <button class="btn btn-gray">📝 네이버 블로그 열기</button>
+    </a>
+    <a href="https://cafe.naver.com/locationbank" target="_blank">
+      <button class="btn btn-gray">☕ 로케이션뱅크 열기</button>
+    </a>
+    <button class="btn btn-gray" onclick="clearHistory()" style="margin-left:auto; color:var(--red)">🗑 전체 삭제</button>
+  </div>
+  <div id="hist-list">
+    <div class="empty"><div class="empty-icon">📋</div>포스팅 생성 탭에서 글을 만들고 저장하면 여기 나와요</div>
+  </div>
+</div>
+
+<!-- ═══ 설정 ═══ -->
+<div id="tab-settings" class="panel">
+  <!-- Chrome 안내 배너 -->
+  <div id="server-notice" style="background:linear-gradient(135deg,#0a1a0a,#0f2a0f);border:1px solid #22c55e;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
+    <div style="font-size:24px">🚀</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700;color:#86efac;margin-bottom:4px">서버시작.command 를 더블클릭하면 API가 바로 연결됩니다</div>
+      <div style="font-size:12px;color:#6b7280">HTML 파일과 같은 폴더에 있는 <b style="color:#86efac">서버시작.command</b>를 더블클릭 → 브라우저가 자동으로 열립니다</div>
+    </div>
+    <div id="server-status-dot" style="width:10px;height:10px;border-radius:50%;background:#ef4444;flex-shrink:0" title="서버 미연결"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🤖 Claude API 설정</div>
+    <div class="card-body">
+      <label>API 키 (sk-ant-... 로 시작) <span id="api-saved-badge" style="display:none; background:var(--green); color:#fff; font-size:10px; padding:2px 8px; border-radius:10px; font-weight:700; margin-left:6px">💾 저장됨</span></label>
+      <div class="flex mt8">
+        <input type="password" id="api-key-input" placeholder="sk-ant-api03-...">
+        <button class="btn btn-gray" onclick="toggleKeyVisibility()" style="flex-shrink:0">👁</button>
+      </div>
+      <div class="flex mt12">
+        <button class="btn btn-pink" onclick="saveApiKey()">💾 저장</button>
+        <button class="btn btn-gray" onclick="testApi()">🔗 연결 테스트</button>
+        <span id="api-test-result" style="font-size:12px; color:var(--muted); font-weight:600"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">🏠 스튜디오 정보 (AI 글 생성 시 참고)</div>
+    <div class="card-body">
+      <label>스튜디오 이름</label>
+      <input type="text" id="s-name" value="예운옥">
+      <label class="mt12">위치</label>
+      <input type="text" id="s-location" value="경기도 고양시 일산동구 (설문IC 인근)">
+      <label class="mt12">연락처 / SNS</label>
+      <input type="text" id="s-contact" value="010-7499-4557 / 인스타 @studio.ooohouse">
+      <label class="mt12">특징 (AI 참고용)</label>
+      <textarea id="s-features" rows="4">200평+ 부지, 실내 60평 통공간, 기둥없는 층고7m 거실(20평+), 거실 폭9.4m 길이7m 높이6m, 넓은 주방5×5m, 야외 캠핑데크, 모래놀이터, 돌담정원, 핑크인테리어, 오늘의집 홈스타일링 소개, 건축탐구집 소개. 서울에서 가까운 일산 단독주택 촬영스튜디오. 걸그룹화보, 드라마, 예능, CF, 시즐, 인터뷰, 차량촬영 가능.</textarea>
+      <label class="mt12">해시태그</label>
+      <input type="text" id="s-tags" value="#예운옥 #촬영스튜디오 #단독스튜디오 #일산스튜디오 #로케이션 #촬영대관 #스튜디오대관">
+      <button class="btn btn-pink mt16" onclick="saveStudioInfo()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────
+//  상태
+// ─────────────────────────────────────
+var db = null;
+var currentFilter = 'all';
+var selectedIds = new Set();
+var currentPost = null;
+var history = [];
+var uploadCat = 'livingroom';   // ← 별도 변수로 관리
+
+var SETTINGS_KEY = 'yewunok_v5_settings';
+var API_KEY_STORE = 'yewunok_v5_apikey';
+var settings = {
+  apiKey: '',
+  name: '예운옥',
+  location: '경기도 고양시 일산동구 (설문IC 인근)',
+  contact: '010-7499-4557 / 인스타 @studio.ooohouse',
+  features: '200평+ 부지, 실내 60평 통공간, 기둥없는 층고7m 거실(20평+), 거실 폭9.4m 길이7m 높이6m, 넓은 주방5×5m, 야외 캠핑데크, 모래놀이터, 돌담정원, 핑크인테리어, 오늘의집 홈스타일링 소개, 건축탐구집 소개.',
+  tags: '#예운옥 #촬영스튜디오 #단독스튜디오 #일산스튜디오 #로케이션 #촬영대관 #스튜디오대관'
+};
+
+// ─────────────────────────────────────
+//  초기화
+// ─────────────────────────────────────
+async function init() {
+  loadSettings();
+  await openDB();
+  await updateStats();
+  renderPhotos();
+  renderHistory();
+  populateSettings();
+}
+
+function loadSettings() {
+  // localStorage 시도
+  try {
+    var s = localStorage.getItem(SETTINGS_KEY);
+    if (s) Object.assign(settings, JSON.parse(s));
+  } catch(e) {}
+  // sessionStorage fallback (localStorage 실패 시)
+  try {
+    if (!settings.apiKey) {
+      var ss = sessionStorage.getItem(SETTINGS_KEY);
+      if (ss) Object.assign(settings, JSON.parse(ss));
+    }
+  } catch(e) {}
+  // API 키 별도 복구 (localStorage)
+  try {
+    if (!settings.apiKey) {
+      var k = localStorage.getItem(API_KEY_STORE);
+      if (k) settings.apiKey = k;
+    }
+  } catch(e) {}
+  // API 키 별도 복구 (sessionStorage)
+  try {
+    if (!settings.apiKey) {
+      var k2 = sessionStorage.getItem(API_KEY_STORE);
+      if (k2) settings.apiKey = k2;
+    }
+  } catch(e) {}
+  try {
+    history = JSON.parse(localStorage.getItem(SETTINGS_KEY + '_hist') || '[]');
+  } catch(e) { history = []; }
+}
+
+function saveSettingsData() {
+  var data = JSON.stringify(settings);
+  // localStorage 저장 (기본)
+  try { localStorage.setItem(SETTINGS_KEY, data); } catch(e) {}
+  // sessionStorage 백업 (Safari localhost 대응)
+  try { sessionStorage.setItem(SETTINGS_KEY, data); } catch(e) {}
+  // API 키 별도 저장
+  if (settings.apiKey) {
+    try { localStorage.setItem(API_KEY_STORE, settings.apiKey); } catch(e) {}
+    try { sessionStorage.setItem(API_KEY_STORE, settings.apiKey); } catch(e) {}
+  }
+}
+
+// ─────────────────────────────────────
+//  탭 전환 (버튼 참조를 직접 받음)
+// ─────────────────────────────────────
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'photos') renderPhotos();
+  if (name === 'copy') renderHistory();
+  if (name === 'dashboard') updateStats();
+  if (name === 'settings') populateSettings();
+}
+
+// ─────────────────────────────────────
+//  업로드 카테고리 선택
+// ─────────────────────────────────────
+var catNames = {livingroom:'🛋 거실', kitchen:'🍳 키친', study:'📚 서재', livingroom2:'🏠 2층 거실', bedroom:'🛏 침실', bathroom:'🚿 화장실', outdoor:'🌿 야외'};
+var catShort = {livingroom:'거실', kitchen:'키친', study:'서재', livingroom2:'2층거실', bedroom:'침실', bathroom:'화장실', outdoor:'야외'};
+
+function selectUploadCat(cat, btn) {
+  uploadCat = cat;
+  // 버튼 상태 갱신
+  document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  // 표시 갱신
+  var disp = document.getElementById('selected-cat-display');
+  if (disp) disp.textContent = '✅ 선택된 카테고리: ' + (catNames[cat] || cat);
+}
+
+// ─────────────────────────────────────
+//  IndexedDB
+// ─────────────────────────────────────
+function openDB() {
+  return new Promise(function(res, rej) {
+    var req = indexedDB.open('yewunok_v5', 1);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('photos')) {
+        d.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = function(e) { db = e.target.result; res(); };
+    req.onerror = function(e) { toast('DB 오류', 'error'); rej(e); };
+  });
+}
+
+function dbAdd(item) {
+  return new Promise(function(res, rej) {
+    var tx = db.transaction('photos', 'readwrite');
+    var req = tx.objectStore('photos').add(item);
+    req.onsuccess = function() { res(req.result); };
+    req.onerror = function() { rej(req.error); };
+  });
+}
+
+function dbGetAll() {
+  return new Promise(function(res, rej) {
+    var tx = db.transaction('photos', 'readonly');
+    var req = tx.objectStore('photos').getAll();
+    req.onsuccess = function() { res(req.result); };
+    req.onerror = function() { rej(req.error); };
+  });
+}
+
+function dbGet(id) {
+  return new Promise(function(res, rej) {
+    var tx = db.transaction('photos', 'readonly');
+    var req = tx.objectStore('photos').get(id);
+    req.onsuccess = function() { res(req.result); };
+    req.onerror = function() { rej(req.error); };
+  });
+}
+
+function dbPut(item) {
+  return new Promise(function(res, rej) {
+    var tx = db.transaction('photos', 'readwrite');
+    var req = tx.objectStore('photos').put(item);
+    req.onsuccess = function() { res(); };
+    req.onerror = function() { rej(req.error); };
+  });
+}
+
+function dbDelete(id) {
+  return new Promise(function(res, rej) {
+    var tx = db.transaction('photos', 'readwrite');
+    var req = tx.objectStore('photos').delete(id);
+    req.onsuccess = function() { res(); };
+    req.onerror = function() { rej(req.error); };
+  });
+}
+
+// ─────────────────────────────────────
+//  사진 업로드  ← 핵심 수정: uploadCat 변수 직접 사용
+// ─────────────────────────────────────
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+}
+
+async function handleFiles(files) {
+  if (!files || !files.length) return;
+
+  // ★ uploadCat 전역 변수 직접 사용 (DOM에 의존 안 함)
+  var cat = uploadCat;
+  var catLabel = catNames[cat] || cat;
+
+  toast(files.length + '장 ' + catLabel + '로 업로드 중...', 'info');
+  var done = 0;
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+    var dataUrl = await toDataUrl(file);
+    await dbAdd({
+      name: file.name.replace(/\.[^.]+$/, ''),
+      dataUrl: dataUrl,
+      category: cat,   // ← 정확한 카테고리 저장
+      addedAt: new Date().toISOString()
+    });
+    done++;
+  }
+
+  toast(done + '장 ' + catLabel + '로 업로드 완료! ✅', 'success');
+  await updateStats();
+
+  // 업로드 후 해당 카테고리 필터로 자동 전환
+  filterPhotos(cat);
+}
+
+function toDataUrl(file) {
+  return new Promise(function(res) {
+    var r = new FileReader();
+    r.onload = function(e) { res(e.target.result); };
+    r.readAsDataURL(file);
+  });
+}
+
+// ─────────────────────────────────────
+//  사진 렌더링
+// ─────────────────────────────────────
+async function renderPhotos() {
+  var photos = await dbGetAll();
+  var count = document.getElementById('photo-count');
+  if (count) count.textContent = '(' + photos.length + '장)';
+
+  var filtered = currentFilter === 'all' ? photos : photos.filter(function(p) { return p.category === currentFilter; });
+  var grid = document.getElementById('photo-grid');
+  if (!grid) return;
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="empty"><div class="empty-icon">📷</div>' +
+      (currentFilter === 'all' ? '사진을 업로드하세요' : catNames[currentFilter] + ' 사진이 없습니다') + '</div>';
+    return;
+  }
+
+  grid.innerHTML = '';
+  filtered.forEach(function(photo) {
+    var div = document.createElement('div');
+    div.className = 'photo-item' + (selectedIds.has(photo.id) ? ' selected' : '');
+    var catLabel = catShort[photo.category] || photo.category;
+    div.innerHTML =
+      '<img src="' + photo.dataUrl + '" alt="' + photo.name + '" loading="lazy">' +
+      '<div class="photo-check">✓</div>' +
+      '<button class="photo-del" onclick="delPhoto(event,' + photo.id + ')">✕</button>' +
+      '<div class="photo-cat" onclick="cycleCat(event,' + photo.id + ')"' +
+      ' title="클릭하면 카테고리 변경">' + catLabel + '</div>';
+    div.onclick = function(e) {
+      if (e.target.classList.contains('photo-del') || e.target.classList.contains('photo-cat')) return;
+      if (selectedIds.has(photo.id)) selectedIds.delete(photo.id);
+      else selectedIds.add(photo.id);
+      div.classList.toggle('selected', selectedIds.has(photo.id));
+    };
+    grid.appendChild(div);
+  });
+}
+
+function filterPhotos(f) {
+  currentFilter = f;
+  ['all','livingroom','kitchen','study','livingroom2','bedroom','bathroom','outdoor'].forEach(function(k) {
+    var btn = document.getElementById('f-' + k);
+    if (btn) {
+      btn.style.borderColor = k === f ? 'var(--pink)' : '';
+      btn.style.color = k === f ? 'var(--pink)' : '';
+    }
+  });
+  renderPhotos();
+}
+
+async function delPhoto(e, id) {
+  e.stopPropagation();
+  await dbDelete(id);
+  selectedIds.delete(id);
+  await updateStats();
+  renderPhotos();
+}
+
+async function deleteSelected() {
+  if (!selectedIds.size) { toast('사진을 먼저 선택하세요', 'error'); return; }
+  if (!confirm(selectedIds.size + '장을 삭제할까요?')) return;
+  for (var id of selectedIds) await dbDelete(id);
+  selectedIds.clear();
+  await updateStats();
+  renderPhotos();
+  toast('삭제 완료', 'success');
+}
+
+async function cycleCat(e, id) {
+  e.stopPropagation();
+  var cats = ['livingroom','kitchen','study','livingroom2','bedroom','bathroom','outdoor'];
+  var photo = await dbGet(id);
+  if (!photo) return;
+  var next = cats[(cats.indexOf(photo.category) + 1) % cats.length];
+  photo.category = next;
+  await dbPut(photo);
+  toast('→ ' + (catNames[next] || next), 'success');
+  renderPhotos();
+}
+
+async function bulkCat(cat) {
+  if (!selectedIds.size) { toast('사진을 먼저 선택하세요', 'error'); return; }
+  for (var id of selectedIds) {
+    var p = await dbGet(id);
+    if (p) { p.category = cat; await dbPut(p); }
+  }
+  toast(selectedIds.size + '장 → ' + (catNames[cat] || cat) + ' 변경', 'success');
+  selectedIds.clear();
+  renderPhotos();
+  await updateStats();
+}
+
+// ─────────────────────────────────────
+//  글 생성
+// ─────────────────────────────────────
+async function generatePost() {
+  if (window.location.protocol === 'file:') {
+    toast('서버시작.command를 실행 후 사용해주세요', 'error');
+    showTab('settings', document.querySelector('.tab-btn:last-child'));
+    return;
+  }
+  var key = settings.apiKey;
+  if (!key) { toast('설정에서 Claude API 키를 먼저 입력하세요', 'error'); return; }
+
+  var type = document.getElementById('post-type').value;
+  var focus = document.getElementById('post-focus').value;
+  var extra = document.getElementById('extra-req').value;
+  var status = document.getElementById('gen-status');
+
+  status.textContent = '🤖 AI 글 생성 중...';
+  status.style.color = 'var(--yellow)';
+
+  var photos = await dbGetAll();
+  var catCounts = {};
+  photos.forEach(function(p) { catCounts[p.category] = (catCounts[p.category]||0) + 1; });
+  var catSummaryParts = [];
+  if (catCounts.livingroom) catSummaryParts.push('거실 ' + catCounts.livingroom + '장');
+  if (catCounts.kitchen) catSummaryParts.push('키친 ' + catCounts.kitchen + '장');
+  if (catCounts.study) catSummaryParts.push('서재 ' + catCounts.study + '장');
+  if (catCounts.livingroom2) catSummaryParts.push('2층거실 ' + catCounts.livingroom2 + '장');
+  if (catCounts.bedroom) catSummaryParts.push('침실 ' + catCounts.bedroom + '장');
+  if (catCounts.bathroom) catSummaryParts.push('화장실 ' + catCounts.bathroom + '장');
+  if (catCounts.outdoor) catSummaryParts.push('야외 ' + catCounts.outdoor + '장');
+  var photoNote = photos.length
+    ? '등록된 사진: ' + catSummaryParts.join(', ') + ' (총 ' + photos.length + '장)'
+    : '사진 미등록';
+
+  var focusMap = {
+    general: '촬영스튜디오 전체 소개',
+    indoor: '실내 통공간·거실·주방 중심',
+    outdoor: '야외 정원·캠핑데크·돌담 중심',
+    season: '현재 계절에 어울리는 촬영 포인트'
+  };
+
+  var isLong = type === 'blog';
+  var prompt = '당신은 ' + settings.name + ' 촬영스튜디오의 홍보 담당자입니다.\n\n' +
+    '스튜디오 정보:\n' +
+    '- 이름: ' + settings.name + '\n' +
+    '- 위치: ' + settings.location + '\n' +
+    '- 연락처: ' + settings.contact + '\n' +
+    '- 특징: ' + settings.features + '\n' +
+    '- 해시태그: ' + settings.tags + '\n' +
+    '- ' + photoNote + '\n\n' +
+    '포커스: ' + (focusMap[focus] || focus) + '\n' +
+    (extra ? '추가 요청: ' + extra + '\n' : '') + '\n' +
+    (isLong
+      ? '네이버 블로그용 SEO 최적화 글을 작성하세요:\n- 제목: 클릭률 높은 제목 1개 (50자 이내)\n- 본문: 1500~2000자, 자연스러운 구어체, 소제목 3~4개 포함\n- 마지막에 해시태그 포함\n- 형식: 제목:\n[제목]\n\n본문:\n[본문]'
+      : '로케이션뱅크 카페용 글을 작성하세요:\n- 제목: 간결한 제목 1개\n- 본문: 500~700자, 실용적인 정보 위주, 연락처 포함\n- 형식: 제목:\n[제목]\n\n본문:\n[본문]');
+
+  try {
+    var resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: isLong ? 3000 : 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      var errData = await resp.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || 'HTTP ' + resp.status);
+    }
+
+    var data = await resp.json();
+    var text = data.content[0].text;
+
+    var title = '', body = text;
+    var titleMatch = text.match(/제목:\s*(.+?)(?:\n|$)/);
+    var bodyMatch = text.match(/본문:\s*([\s\S]+)/);
+    if (titleMatch) title = titleMatch[1].trim();
+    if (bodyMatch) body = bodyMatch[1].trim();
+
+    document.getElementById('gen-title').textContent = title || '(제목을 찾을 수 없음)';
+    document.getElementById('gen-body').textContent = body;
+    document.getElementById('gen-result-card').style.display = 'block';
+
+    currentPost = { type: type, title: title, body: body, date: new Date().toISOString() };
+
+    status.textContent = '✅ 생성 완료!';
+    status.style.color = 'var(--green)';
+    toast('글 생성 완료! 💾 저장 버튼으로 저장하세요', 'success');
+    await updateStats();
+
+  } catch(err) {
+    status.textContent = '❌ 오류: ' + err.message;
+    status.style.color = 'var(--red)';
+    toast('오류: ' + err.message, 'error');
+  }
+}
+
+function copyText(elemId) {
+  var el = document.getElementById(elemId);
+  var text = el.textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    toast('복사됐습니다! 📋', 'success');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('복사됐습니다! 📋', 'success');
+  });
+}
+
+function saveToHistory() {
+  if (!currentPost) { toast('먼저 글을 생성하세요', 'error'); return; }
+  history.unshift(currentPost);
+  if (history.length > 30) history.pop();
+  localStorage.setItem(SETTINGS_KEY + '_hist', JSON.stringify(history));
+  toast('저장됐습니다! 글 복사하기 탭에서 확인하세요', 'success');
+  renderHistory();
+  updateStats();
+}
+
+// ─────────────────────────────────────
+//  히스토리
+// ─────────────────────────────────────
+function renderHistory() {
+  var list = document.getElementById('hist-list');
+  if (!list) return;
+  if (!history.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>포스팅 생성 탭에서 글을 만들고 저장하면 여기 나와요</div>';
+    return;
+  }
+  list.innerHTML = history.map(function(h, i) {
+    var d = new Date(h.date).toLocaleString('ko-KR');
+    var typeLabel = h.type === 'blog' ? '📝 블로그' : '☕ 카페';
+    return '<div class="hist-card">' +
+      '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">' + typeLabel + ' · ' + d + '</div>' +
+      '<div class="hist-title">' + (h.title || '제목 없음') + '</div>' +
+      '<div class="hist-preview">' + (h.body||''). substring(0,120) + '...</div>' +
+      '<div class="hist-btns">' +
+      '<button class="btn btn-gray btn-sm" onclick="copyHist(' + i + ',\'title\')">📋 제목 복사</button>' +
+      '<button class="btn btn-gray btn-sm" onclick="copyHist(' + i + ',\'body\')">📄 본문 복사</button>' +
+      '<button class="btn btn-pink btn-sm" onclick="copyHist(' + i + ',\'all\')">📎 전체 복사</button>' +
+      '<button class="btn btn-gray btn-sm" onclick="delHist(' + i + ')" style="color:var(--red)">🗑</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+function copyHist(i, part) {
+  var h = history[i];
+  var text = '';
+  if (part === 'title') text = h.title || '';
+  else if (part === 'body') text = h.body || '';
+  else text = (h.title || '') + '\n\n' + (h.body || '');
+  navigator.clipboard.writeText(text).then(function() { toast('복사됐습니다! 📋', 'success'); })
+  .catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('복사됐습니다! 📋', 'success');
+  });
+}
+
+function delHist(i) {
+  history.splice(i, 1);
+  localStorage.setItem(SETTINGS_KEY + '_hist', JSON.stringify(history));
+  renderHistory();
+  updateStats();
+  toast('삭제됐습니다', 'success');
+}
+
+function clearHistory() {
+  if (!confirm('저장된 글을 모두 삭제할까요?')) return;
+  history = [];
+  localStorage.setItem(SETTINGS_KEY + '_hist', JSON.stringify(history));
+  renderHistory();
+  updateStats();
+  toast('전체 삭제됐습니다', 'success');
+}
+
+// ─────────────────────────────────────
+//  설정
+// ─────────────────────────────────────
+function populateSettings() {
+  if (settings.apiKey) {
+    document.getElementById('api-key-input').value = settings.apiKey;
+    var badge = document.getElementById('api-saved-badge');
+    if (badge) badge.style.display = 'inline-block';
+  }
+  document.getElementById('s-name').value = settings.name;
+  document.getElementById('s-location').value = settings.location;
+  document.getElementById('s-contact').value = settings.contact;
+  document.getElementById('s-features').value = settings.features;
+  document.getElementById('s-tags').value = settings.tags;
+  updateApiStatus();
+}
+
+function saveApiKey() {
+  var key = document.getElementById('api-key-input').value.trim();
+  if (!key) { toast('API 키를 입력하세요', 'error'); return; }
+  if (!key.startsWith('sk-ant-')) { toast('API 키는 sk-ant-로 시작해야 합니다', 'error'); return; }
+  settings.apiKey = key;
+  saveSettingsData();
+  // 저장 즉시 확인
+  var verify = localStorage.getItem(API_KEY_STORE);
+  if (verify) {
+    updateApiStatus();
+    var badge = document.getElementById('api-saved-badge');
+    if (badge) { badge.style.display = 'inline-block'; }
+    toast('✅ API 키 저장 완료! 새로고침해도 유지됩니다', 'success');
+  } else {
+    toast('⚠️ 브라우저가 저장을 막고 있어요. 시크릿 모드가 아닌지 확인하세요', 'error');
+  }
+  updateApiStatus();
+}
+
+function toggleKeyVisibility() {
+  var input = document.getElementById('api-key-input');
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+
+function updateApiStatus() {
+  var el = document.getElementById('api-status');
+  var statAI = document.getElementById('stat-ai');
+  var dot = document.getElementById('server-status-dot');
+  var isLocal = (window.location.protocol === 'http:' || window.location.protocol === 'https:');
+  if (dot) dot.style.background = isLocal ? '#22c55e' : '#ef4444';
+  if (settings.apiKey) {
+    el.textContent = '● API 키 설정됨';
+    el.style.color = 'var(--green)';
+    if (statAI) { statAI.textContent = 'ON'; statAI.style.color = 'var(--green)'; }
+  } else {
+    el.textContent = '● API 키 없음';
+    el.style.color = 'var(--muted)';
+    if (statAI) { statAI.textContent = 'OFF'; statAI.style.color = 'var(--red)'; }
+  }
+}
+
+// ★ API 테스트 - 상세 에러 + CORS 진단
+async function testApi() {
+  // file:// 프로토콜 체크 - 로컬서버 없이는 CORS로 막힘
+  if (window.location.protocol === 'file:') {
+    var result = document.getElementById('api-test-result');
+    result.innerHTML = '⚠️ <b>서버시작.command</b>를 더블클릭해서 실행하세요.<br>그러면 API가 정상 연결됩니다.';
+    result.style.color = '#f59e0b';
+    toast('서버시작.command를 실행해주세요', 'error');
+    return;
+  }
+  var key = settings.apiKey || document.getElementById('api-key-input').value.trim();
+  if (!key) { toast('API 키를 먼저 입력하세요', 'error'); return; }
+  var result = document.getElementById('api-test-result');
+  result.textContent = '⏳ 테스트 중...';
+  result.style.color = 'var(--yellow)';
+
+  var models = ['claude-3-5-haiku-20241022', 'claude-haiku-4-5-20251001', 'claude-3-haiku-20240307'];
+  var lastErr = '';
+  var success = false;
+  var usedModel = '';
+  var tokens = 0;
+
+  for (var i = 0; i < models.length; i++) {
+    try {
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-allow-browser': 'true',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ model: models[i], max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
+      });
+      if (resp.ok) {
+        var data = await resp.json();
+        usedModel = models[i];
+        tokens = data.usage ? data.usage.input_tokens : 0;
+        success = true;
+        break;
+      } else {
+        var bodyText = '';
+        try { var bodyJson = await resp.json(); bodyText = bodyJson.error ? bodyJson.error.message : JSON.stringify(bodyJson); } catch(e2) {}
+        if (resp.status === 401) {
+          lastErr = '❌ 인증 실패(401): API 키가 잘못됐거나 만료됐습니다<br><small>' + bodyText + '</small>';
+          break;
+        } else if (resp.status === 400) {
+          continue; // 다음 모델 시도
+        } else if (resp.status === 529 || resp.status === 503) {
+          lastErr = '❌ 서버 과부하(' + resp.status + '): 잠시 후 다시 시도하세요';
+          break;
+        } else {
+          lastErr = '❌ HTTP ' + resp.status + (bodyText ? ': ' + bodyText : '');
+          break;
+        }
+      }
+    } catch(e) {
+      if (e.name === 'TypeError') {
+        lastErr = '❌ CORS 차단: 로컬 파일에서는 API를 직접 호출할 수 없습니다<br><small>creyong.com에 배포하면 해결됩니다</small>';
+      } else {
+        lastErr = '❌ 오류: ' + e.name + ' - ' + e.message;
+      }
+      break;
+    }
+  }
+
+  if (success) {
+    result.innerHTML = '✅ 연결 성공!<br><small style="color:#6b7280">모델: ' + usedModel + '</small>';
+    result.style.color = 'var(--green)';
+    settings.apiKey = key;
+    saveSettingsData();
+    updateApiStatus();
+    toast('Claude API 연결 성공!', 'success');
+  } else {
+    result.innerHTML = (lastErr || '❌ 연결 실패') + '<br><small style="color:#6b7280;font-size:11px">배포 후(creyong.com)에는 정상 동작합니다</small>';
+    result.style.color = 'var(--red)';
+    toast('API 연결 실패', 'error');
+  }
+}
+
+function saveStudioInfo() {
+  settings.name = document.getElementById('s-name').value;
+  settings.location = document.getElementById('s-location').value;
+  settings.contact = document.getElementById('s-contact').value;
+  settings.features = document.getElementById('s-features').value;
+  settings.tags = document.getElementById('s-tags').value;
+  saveSettingsData();
+  toast('스튜디오 정보 저장됐습니다! ✅', 'success');
+}
+
+// ─────────────────────────────────────
+//  통계 업데이트 (카테고리 바 포함)
+// ─────────────────────────────────────
+async function updateStats() {
+  var photos = await dbGetAll();
+  var total = photos.length;
+
+  // 기본 카운터
+  var p = document.getElementById('stat-photos');
+  if (p) p.textContent = total;
+  var h = document.getElementById('stat-posts');
+  if (h) h.textContent = history.length;
+
+  // 카테고리별 카운트
+  var counts = {livingroom:0, kitchen:0, study:0, livingroom2:0, bedroom:0, bathroom:0, outdoor:0};
+  photos.forEach(function(ph) {
+    if (counts[ph.category] !== undefined) counts[ph.category]++;
+    else counts.livingroom++;
+  });
+
+  // 야외 수
+  var outEl = document.getElementById('stat-outdoor');
+  if (outEl) outEl.textContent = counts.outdoor;
+
+  // 프로그레스 바
+  var max = Math.max(total, 1);
+  ['livingroom','kitchen','study','livingroom2','bedroom','bathroom','outdoor'].forEach(function(k) {
+    var cnt = counts[k];
+    var cntEl = document.getElementById('cnt-' + k);
+    var barEl = document.getElementById('bar-' + k);
+    if (cntEl) cntEl.textContent = cnt + '장';
+    if (barEl) barEl.style.width = Math.round(cnt / max * 100) + '%';
+  });
+
+  updateApiStatus();
+}
+
+// ─────────────────────────────────────
+//  토스트
+// ─────────────────────────────────────
+var toastTimer = null;
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3500);
+}
+
+// ─────────────────────────────────────
+//  Chrome으로 열기
+// ─────────────────────────────────────
+function openInBrowser() {
+  var url = window.location.href;
+  // 새 탭으로 열기 시도
+  var w = window.open(url, '_blank');
+  if (!w) {
+    // 팝업 차단됐을 경우 경로 안내
+    var path = decodeURIComponent(url.replace('file://', ''));
+    toast('파일 경로: ' + path + ' → Finder에서 우클릭 → Chrome으로 열기', 'info');
+    prompt('아래 경로를 복사해서 Chrome 주소창에 붙여넣으세요:', url);
+  }
+}
+
+// ─────────────────────────────────────
+//  시작
+// ─────────────────────────────────────
+init();
+</script>
+</body>
+</html>
