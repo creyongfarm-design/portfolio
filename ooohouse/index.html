@@ -699,40 +699,67 @@ footer strong { color:rgba(255,255,255,0.7); }
 <!-- ─── 푸터 ─── -->
 
 <!-- ─── 예약 모달 ─── -->
-<div id="reserve-modal" style="display:none; position:fixed; inset:0; z-index:300; background:rgba(20,5,10,0.85); align-items:center; justify-content:center;">
-  <div style="background:#fff; border-radius:20px; padding:36px 32px; max-width:460px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.4); position:relative;">
-    <button onclick="closeReserveModal()" style="position:absolute; top:16px; right:20px; background:none; border:none; font-size:22px; cursor:pointer; color:#999;">✕</button>
-    <div style="text-align:center; margin-bottom:24px;">
-      <div style="font-size:28px; margin-bottom:8px;">💬</div>
-      <h3 style="font-size:20px; font-weight:800; color:#1a1a1a; margin-bottom:6px;">예약 문의</h3>
-      <p style="font-size:13px; color:#888;">기본 정보를 입력하면 카카오 오픈채팅으로 연결됩니다</p>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:14px;">
-      <div>
-        <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">📅 촬영 날짜</label>
-        <input type="date" id="rv-date" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
+<div id="reserve-modal" style="display:none; position:fixed; inset:0; z-index:300; background:rgba(20,5,10,0.85); align-items:center; justify-content:center; padding:16px;">
+  <div style="background:#fff; border-radius:20px; padding:32px 28px; max-width:460px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.4); position:relative; max-height:90vh; overflow-y:auto;">
+    <button onclick="closeReserveModal()" style="position:absolute; top:14px; right:18px; background:none; border:none; font-size:22px; cursor:pointer; color:#bbb; line-height:1;">✕</button>
+
+    <!-- STEP 1: 입력폼 -->
+    <div id="rv-step1">
+      <div style="margin-bottom:20px;">
+        <div style="font-size:26px; margin-bottom:6px;">✍️</div>
+        <div style="font-size:18px; font-weight:800; color:#1a1a1a; margin-bottom:4px;">예약 문의</div>
+        <div style="font-size:13px; color:#999;">정보를 입력하고 메시지를 만들어드릴게요</div>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div style="display:flex; flex-direction:column; gap:13px;">
         <div>
-          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">👥 인원 (명)</label>
-          <input type="number" id="rv-people" min="1" max="100" placeholder="예: 5" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
+          <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">📅 촬영 날짜</label>
+          <input type="date" id="rv-date" style="width:100%; padding:11px 14px; border:1.5px solid #e8e8e8; border-radius:10px; font-size:14px; color:#333; outline:none; box-sizing:border-box;">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">👥 인원 (명)</label>
+            <input type="number" id="rv-people" min="1" max="200" placeholder="5" style="width:100%; padding:11px 14px; border:1.5px solid #e8e8e8; border-radius:10px; font-size:15px; color:#333; outline:none;">
+          </div>
+          <div>
+            <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">🚗 차량 (대)</label>
+            <input type="number" id="rv-car" min="0" max="20" placeholder="2" style="width:100%; padding:11px 14px; border:1.5px solid #e8e8e8; border-radius:10px; font-size:15px; color:#333; outline:none;">
+          </div>
         </div>
         <div>
-          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">🚗 차량 (대)</label>
-          <input type="number" id="rv-car" min="0" max="20" placeholder="예: 2" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
+          <label style="font-size:12px; font-weight:700; color:#555; display:block; margin-bottom:5px;">🎬 촬영 내용</label>
+          <input type="text" id="rv-content" placeholder="예: 뮤직비디오, 화보, 유튜브 콘텐츠" style="width:100%; padding:11px 14px; border:1.5px solid #e8e8e8; border-radius:10px; font-size:14px; color:#333; outline:none; box-sizing:border-box;">
         </div>
+        <button onclick="submitReserve()" style="padding:15px; background:#fee500; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; color:#3c1e1e; width:100%; margin-top:2px;">
+          메시지 만들기 →
+        </button>
       </div>
-      <div>
-        <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">🎬 촬영 내용</label>
-        <input type="text" id="rv-content" placeholder="예: 뮤직비디오, 화보, 유튜브 콘텐츠, 브랜드 광고 등" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
-      </div>
-      <div id="rv-copy-area" style="display:none; background:#fff9f0; border:1.5px solid #fee500; border-radius:12px; padding:14px;">
-        <p style="font-size:12px; color:#888; margin-bottom:6px;">📋 아래 내용을 카카오톡에 붙여넣으세요</p>
-        <pre id="rv-copy-text" style="font-size:13px; color:#333; white-space:pre-wrap; margin:0; font-family:inherit;"></pre>
-        <button onclick="copyMsg()" style="margin-top:10px; width:100%; padding:9px; background:#fee500; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; color:#3c1e1e;">📋 복사하기</button>
-      </div>
-      <button onclick="submitReserve()" id="rv-submit" style="padding:15px; background:#fee500; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; color:#3c1e1e; margin-top:4px;">✅ 내용 확인 후 카카오로 문의하기</button>
     </div>
+
+    <!-- STEP 2: 메시지 확인 + 버튼 2개 -->
+    <div id="rv-step2" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:26px; margin-bottom:6px;">📋</div>
+        <div style="font-size:18px; font-weight:800; color:#1a1a1a; margin-bottom:4px;">메시지 복사 후 카카오 채팅방에 붙여넣기</div>
+        <div style="font-size:13px; color:#999;">① 복사 → ② 카카오 열기 → ③ 붙여넣기(Ctrl+V)</div>
+      </div>
+      <!-- 메시지 박스 -->
+      <div style="background:#fffbea; border:2px solid #fee500; border-radius:12px; padding:16px; margin-bottom:16px;">
+        <pre id="rv-copy-text" style="font-size:14px; color:#2a2a2a; white-space:pre-wrap; margin:0; font-family:inherit; line-height:1.7;"></pre>
+      </div>
+      <!-- 버튼 2개 -->
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="rv-copy-btn" onclick="copyMsg()" style="padding:15px; background:#fee500; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; color:#3c1e1e; width:100%;">
+          📋 ① 복사하기
+        </button>
+        <button onclick="openKakao()" style="padding:15px; background:#3c1e1e; border:none; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; color:#fee500; width:100%;">
+          💬 ② 카카오 채팅방 열기
+        </button>
+        <button onclick="goBackStep1()" style="padding:10px; background:none; border:1.5px solid #e0e0e0; border-radius:10px; font-size:13px; cursor:pointer; color:#999;">
+          ← 수정하기
+        </button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -797,58 +824,72 @@ document.querySelectorAll('.space-card, .price-card, .story-grid, .gallery-item'
 
 <script>
 function openReserveModal() {
-  var m = document.getElementById('reserve-modal');
-  m.style.display = 'flex';
+  document.getElementById('reserve-modal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  // 항상 STEP1부터 시작
+  document.getElementById('rv-step1').style.display = 'block';
+  document.getElementById('rv-step2').style.display = 'none';
   document.getElementById('rv-date').value = '';
   document.getElementById('rv-people').value = '';
   document.getElementById('rv-car').value = '';
   document.getElementById('rv-content').value = '';
-  document.getElementById('rv-copy-area').style.display = 'none';
-  document.getElementById('rv-submit').style.display = 'block';
 }
 function closeReserveModal() {
   document.getElementById('reserve-modal').style.display = 'none';
   document.body.style.overflow = '';
 }
 function submitReserve() {
-  var date = document.getElementById('rv-date').value || '미정';
-  var pv = document.getElementById('rv-people').value;
-  var cv = document.getElementById('rv-car').value;
+  var date    = document.getElementById('rv-date').value || '미정';
+  var pv      = document.getElementById('rv-people').value;
+  var cv      = document.getElementById('rv-car').value;
   var content = document.getElementById('rv-content').value || '미정';
-  var people = pv ? pv + '명' : '미정';
-  var car = cv ? cv + '대' : '미정';
-  var msg = '안녕하세요! 예운옥 예약 문의드립니다 🙏\n\n📅 촬영 날짜: ' + date + '\n👥 인원: ' + people + '\n🚗 차량 대수: ' + car + '\n🎬 촬영 내용: ' + content;
+  var people  = pv ? pv + '명' : '미정';
+  var car     = cv ? cv + '대' : '미정';
 
-  // 메시지 텍스트 영역 표시
+  var msg = '안녕하세요! 예운옥 예약 문의드립니다\n\n촬영 날짜: ' + date + '\n인원: ' + people + '\n차량 대수: ' + car + '\n촬영 내용: ' + content;
+
+  // 메시지 텍스트 채우기
   document.getElementById('rv-copy-text').textContent = msg;
-  document.getElementById('rv-copy-area').style.display = 'block';
-  document.getElementById('rv-submit').style.display = 'none';
 
-  // 카카오 오픈채팅 열기
-  setTimeout(function() {
-    window.open('https://open.kakao.com/o/samILOji', '_blank');
-  }, 300);
+  // 복사 버튼 원래 상태로
+  var copyBtn = document.getElementById('rv-copy-btn');
+  copyBtn.textContent = '📋 ① 복사하기';
+  copyBtn.style.background = '#fee500';
+
+  // STEP1 → STEP2
+  document.getElementById('rv-step1').style.display = 'none';
+  document.getElementById('rv-step2').style.display = 'block';
 }
 function copyMsg() {
   var text = document.getElementById('rv-copy-text').textContent;
+  var btn  = document.getElementById('rv-copy-btn');
+  var done = function() {
+    btn.textContent = '✅ 복사됐어요! 이제 ② 카카오 버튼 누르세요';
+    btn.style.background = '#4ade80';
+    btn.style.color = '#fff';
+  };
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function() {
-      var btn = document.querySelector('[onclick="copyMsg()"]');
-      btn.textContent = '✅ 복사됐어요! 카카오톡에 붙여넣기 해주세요';
-      setTimeout(function(){ btn.textContent = '📋 다시 복사하기'; }, 2500);
+    navigator.clipboard.writeText(text).then(done).catch(function() {
+      fallbackCopy(text); done();
     });
   } else {
-    var ta = document.createElement('textarea');
-    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-    var btn = document.querySelector('[onclick="copyMsg()"]');
-    btn.textContent = '✅ 복사됐어요! 카카오톡에 붙여넣기 해주세요';
-    setTimeout(function(){ btn.textContent = '📋 다시 복사하기'; }, 2500);
+    fallbackCopy(text); done();
   }
 }
-
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta);
+}
+function openKakao() {
+  window.open('https://open.kakao.com/o/samILOji', '_blank');
+}
+function goBackStep1() {
+  document.getElementById('rv-step2').style.display = 'none';
+  document.getElementById('rv-step1').style.display = 'block';
+}
 document.getElementById('reserve-modal').addEventListener('click', function(e) {
   if (e.target === this) closeReserveModal();
 });
