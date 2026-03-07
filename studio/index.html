@@ -636,6 +636,25 @@ label { font-size: 12px; color: #7a7690; margin-bottom: 6px; display: block; fon
 
 <!-- ═══ 사진 관리 ═══ -->
 <div id="tab-photos" class="panel">
+
+  <!-- 기기 간 사진 전송 배너 -->
+  <div style="background:linear-gradient(135deg,#eff6ff,#f5f0ff);border:1.5px solid rgba(113,70,193,0.25);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(113,70,193,0.07)">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:26px">📲</span>
+        <div>
+          <div style="font-size:13px;font-weight:800;color:#4c3a8a;margin-bottom:2px">다른 컴퓨터에서 사진이 안 보이나요?</div>
+          <div style="font-size:12px;color:#7a6faa;line-height:1.5">사진은 각 컴퓨터의 브라우저에만 저장돼요. <b>📤 내보내기</b>로 파일 저장 → 카카오톡·USB·구글드라이브로 전달 → 상대방 컴퓨터에서 <b>📥 가져오기</b></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-sm" onclick="exportBackup()" style="background:var(--purple);color:#fff;font-weight:700">📤 내보내기</button>
+        <button class="btn btn-sm btn-gray" onclick="document.getElementById('import-backup-input2').click()" style="font-weight:700">📥 가져오기</button>
+        <input type="file" id="import-backup-input2" accept=".json" style="display:none" onchange="importBackup(event)">
+      </div>
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-head">📸 사진 업로드</div>
     <div class="card-body">
@@ -836,15 +855,16 @@ label { font-size: 12px; color: #7a7690; margin-bottom: 6px; display: block; fon
   <div class="card" style="margin-top:12px">
     <div class="card-head">💾 사진 백업 / 복원</div>
     <div class="card-body">
-      <div style="font-size:12px; color:var(--muted); margin-bottom:12px; line-height:1.6; padding:10px; background:rgba(99,102,241,0.1); border-radius:8px; border:1px solid rgba(99,102,241,0.3)">
-        ⚠️ <strong>중요:</strong> 사진은 브라우저에만 저장됩니다. 사진 업로드 시 자동 백업이 다운로드됩니다. 다운로드 팝업을 허용해주세요!
+      <div style="font-size:12px; color:#5a5280; margin-bottom:12px; line-height:1.7; padding:12px; background:#f0edff; border-radius:10px; border:1px solid rgba(113,70,193,0.2)">
+        💻 <strong>다른 컴퓨터(윈도우 등)에서 함께 사용할 때</strong><br>
+        이 컴퓨터에서 <b>내보내기</b> → .json 파일 저장 → 카카오톡·USB·구글드라이브로 전달 → 상대방 컴퓨터에서 <b>가져오기</b>
       </div>
       <div class="flex mt8" style="gap:8px">
-        <button class="btn btn-pink" onclick="exportBackup()" style="flex:1">📤 백업 내보내기</button>
-        <button class="btn btn-gray" onclick="document.getElementById('import-backup-input').click()" style="flex:1">📥 백업 가져오기</button>
+        <button class="btn btn-pink" onclick="exportBackup()" style="flex:1">📤 내보내기</button>
+        <button class="btn btn-gray" onclick="document.getElementById('import-backup-input').click()" style="flex:1">📥 가져오기</button>
       </div>
       <input type="file" id="import-backup-input" accept=".json" style="display:none" onchange="importBackup(event)">
-      <div style="font-size:11px; color:var(--muted); margin-top:8px">백업 파일(.json)을 컴퓨터에 저장해두면 사진이 사라져도 복원할 수 있습니다</div>
+      <div style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6">💡 .json 파일 하나에 모든 사진 포함 · 카카오톡 파일 전송으로 바로 공유 가능</div>
     </div>
   </div>
 
