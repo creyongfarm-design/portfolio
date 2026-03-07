@@ -190,6 +190,15 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
   z-index:2;
 }
 .photo-del:hover { background: var(--red); }
+.photo-dl {
+  position:absolute; top:5px; right:5px;
+  background:rgba(0,0,0,0.7); color:#fff;
+  border:none; border-radius:50%; width:22px; height:22px;
+  cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;
+  z-index:2; opacity:0; transition:opacity 0.15s;
+}
+.photo-item:hover .photo-dl { opacity:1; }
+.photo-dl:hover { background: var(--green); }
 .photo-cat {
   position:absolute; bottom:0; left:0; right:0;
   background:rgba(0,0,0,0.75);
@@ -643,6 +652,8 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
         <button class="btn btn-gray btn-sm" onclick="bulkCat('bedroom')">🛏침실 및 대기실</button>
         <button class="btn btn-gray btn-sm" onclick="bulkCat('bathroom')">🚿화장실</button>
         <button class="btn btn-gray btn-sm" onclick="bulkCat('outdoor')">🌿야외</button>
+        <button class="btn btn-gray btn-sm" onclick="downloadSelected()" style="color:#4ade80">📥 선택 다운로드</button>
+        <button class="btn btn-gray btn-sm" onclick="downloadAll()" style="color:#7dd3fc">📥 전체 다운로드</button>
         <button class="btn btn-gray btn-sm" onclick="deleteSelected()" style="color:var(--red)">🗑 삭제</button>
       </div>
     </div>
@@ -1187,10 +1198,11 @@ async function renderPhotos() {
       '<img src="' + (photo.dataUrl || '') + '" alt="' + photo.name + '" loading="lazy">' +
       '<div class="photo-check">✓</div>' +
       '<button class="photo-del" onclick="delPhoto(event,' + photo.id + ')">✕</button>' +
+      '<button class="photo-dl" onclick="downloadPhoto(event,' + photo.id + ')" title="다운로드">↓</button>' +
       '<div class="photo-cat" onclick="cycleCat(event,' + photo.id + ')"' +
       ' title="클릭하면 카테고리 변경">' + catLabel + '</div>';
     div.onclick = function(e) {
-      if (e.target.classList.contains('photo-del') || e.target.classList.contains('photo-cat')) return;
+      if (e.target.classList.contains('photo-del') || e.target.classList.contains('photo-cat') || e.target.classList.contains('photo-dl')) return;
       if (selectedIds.has(photo.id)) selectedIds.delete(photo.id);
       else selectedIds.add(photo.id);
       div.classList.toggle('selected', selectedIds.has(photo.id));
@@ -1217,6 +1229,54 @@ async function delPhoto(e, id) {
   selectedIds.delete(id);
   await updateStats();
   renderPhotos();
+}
+
+async function downloadPhoto(e, id) {
+  e.stopPropagation();
+  var photos = await dbGetAll();
+  var photo = photos.find(function(p) { return p.id === id; });
+  if (!photo || !photo.dataUrl) { toast('다운로드 실패', 'error'); return; }
+  var ext = photo.dataUrl.startsWith('data:image/png') ? 'png' : 'jpg';
+  var a = document.createElement('a');
+  a.href = photo.dataUrl;
+  a.download = (photo.name || ('예운옥_' + photo.category + '_' + id)) + '.' + ext;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+async function downloadSelected() {
+  if (!selectedIds.size) { toast('사진을 먼저 선택하세요', 'error'); return; }
+  var photos = await dbGetAll();
+  var toDownload = photos.filter(function(p) { return selectedIds.has(p.id); });
+  if (!toDownload.length) { toast('선택된 사진이 없습니다', 'error'); return; }
+  toast(toDownload.length + '장 다운로드 시작...', 'success');
+  for (var i = 0; i < toDownload.length; i++) {
+    var photo = toDownload[i];
+    if (!photo.dataUrl) continue;
+    var ext = photo.dataUrl.startsWith('data:image/png') ? 'png' : 'jpg';
+    var a = document.createElement('a');
+    a.href = photo.dataUrl;
+    a.download = (photo.name || ('예운옥_' + photo.category + '_' + photo.id)) + '.' + ext;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    // 브라우저가 여러 파일 다운로드 허용하도록 간격
+    await new Promise(function(r) { setTimeout(r, 200); });
+  }
+}
+
+async function downloadAll() {
+  var photos = await dbGetAll();
+  var filtered = currentFilter === 'all' ? photos : photos.filter(function(p) { return p.category === currentFilter; });
+  if (!filtered.length) { toast('다운로드할 사진이 없습니다', 'error'); return; }
+  toast(filtered.length + '장 전체 다운로드 시작...', 'success');
+  for (var i = 0; i < filtered.length; i++) {
+    var photo = filtered[i];
+    if (!photo.dataUrl) continue;
+    var ext = photo.dataUrl.startsWith('data:image/png') ? 'png' : 'jpg';
+    var a = document.createElement('a');
+    a.href = photo.dataUrl;
+    a.download = (photo.name || ('예운옥_' + photo.category + '_' + photo.id)) + '.' + ext;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    await new Promise(function(r) { setTimeout(r, 200); });
+  }
 }
 
 async function deleteSelected() {
