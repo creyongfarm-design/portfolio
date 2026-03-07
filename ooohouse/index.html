@@ -286,7 +286,7 @@ section { padding: 100px 20px; }
 .loc-label { font-size:11px; letter-spacing:0.15em; color:var(--pink-deep); margin-bottom:4px; }
 .loc-text { font-size:14px; color:#5a4545; line-height:1.7; }
 .location-map {
-  border-radius:20px; overflow:hidden; aspect-ratio:16/7;
+  border-radius:20px; overflow:hidden;
   box-shadow:0 8px 32px var(--shadow);
   background:var(--pink-pale); display:flex; align-items:center; justify-content:center;
   flex-direction:column; gap:12px; color:var(--pink-deep);
@@ -677,7 +677,7 @@ footer strong { color:rgba(255,255,255,0.7); }
         <div style="border-radius:16px; overflow:hidden; box-shadow:0 4px 20px var(--shadow);">
           <iframe
             src="https://maps.google.com/maps?q=%EA%B2%BD%EA%B8%B0%EB%8F%84+%EA%B3%A0%EC%96%91%EC%8B%9C+%EC%9D%BC%EC%82%B0%EB%8F%99%EA%B5%AC+%EC%9E%A5%EC%A7%84%EC%B2%9C%EA%B8%B8134%EB%B2%88%EA%B8%B8+60&z=17&output=embed&hl=ko"
-            width="100%" height="360" frameborder="0"
+            width="100%" height="480" frameborder="0"
             style="border:0; display:block;"
             allowfullscreen loading="lazy"
             referrerpolicy="no-referrer-when-downgrade">
@@ -695,47 +695,6 @@ footer strong { color:rgba(255,255,255,0.7); }
 </section>
 
 <!-- ─── 푸터 ─── -->
-
-<!-- ─── 예약 모달 ─── -->
-<div id="reserve-modal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(20,5,10,0.85);align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:24px;padding:36px 32px;max-width:460px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.4);position:relative;">
-    <button onclick="closeReserveModal()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;cursor:pointer;color:#bbb;line-height:1;">✕</button>
-    <div style="text-align:center;margin-bottom:24px;">
-      <div style="font-size:32px;margin-bottom:8px;">💬</div>
-      <h3 style="font-size:20px;font-weight:800;color:#1a1a1a;margin-bottom:6px;">예약 문의</h3>
-      <p style="font-size:13px;color:#999;line-height:1.5;">정보를 입력하면 카카오 오픈채팅으로 자동 전달됩니다</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <div>
-        <label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">촬영 날짜</label>
-        <input type="date" id="rv-date" style="width:100%;padding:12px 14px;border:1.5px solid #eee;border-radius:10px;font-size:14px;color:#333;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#f4a8c8'" onblur="this.style.borderColor='#eee'">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">인원 (명)</label>
-          <input type="number" id="rv-people" min="1" max="200" placeholder="5" style="width:100%;padding:12px 14px;border:1.5px solid #eee;border-radius:10px;font-size:15px;color:#333;outline:none;" onfocus="this.style.borderColor='#f4a8c8'" onblur="this.style.borderColor='#eee'">
-        </div>
-        <div>
-          <label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">차량 (대)</label>
-          <input type="number" id="rv-car" min="0" max="20" placeholder="2" style="width:100%;padding:12px 14px;border:1.5px solid #eee;border-radius:10px;font-size:15px;color:#333;outline:none;" onfocus="this.style.borderColor='#f4a8c8'" onblur="this.style.borderColor='#eee'">
-        </div>
-      </div>
-      <div>
-        <label style="font-size:12px;font-weight:700;color:#666;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">촬영 내용</label>
-        <input type="text" id="rv-content" placeholder="예: 뮤직비디오, 화보, 유튜브 콘텐츠" style="width:100%;padding:12px 14px;border:1.5px solid #eee;border-radius:10px;font-size:14px;color:#333;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#f4a8c8'" onblur="this.style.borderColor='#eee'">
-      </div>
-      <button id="rv-submit" onclick="submitReserve()" style="margin-top:6px;padding:17px;background:#fee500;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;color:#3c1e1e;width:100%;transition:transform .15s;">
-        카카오톡으로 문의 보내기 →
-      </button>
-      <p style="font-size:11px;color:#bbb;text-align:center;margin-top:-6px;">클릭하면 자동으로 복사되고 카카오 채팅방이 열려요</p>
-    </div>
-  </div>
-</div>
-
-<!-- 복사 완료 토스트 -->
-<div id="copy-toast" style="display:none;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:14px 24px;border-radius:40px;font-size:14px;font-weight:600;z-index:400;box-shadow:0 8px 24px rgba(0,0,0,0.3);">
-  ✅ 복사됐어요! 카카오톡에서 붙여넣기 해주세요 (Ctrl+V)
-</div>
 
 <!-- ─── 푸터 ─── -->
 
@@ -772,7 +731,7 @@ footer strong { color:rgba(255,255,255,0.7); }
         <pre id="rv-copy-text" style="font-size:13px; color:#333; white-space:pre-wrap; margin:0; font-family:inherit;"></pre>
         <button onclick="copyMsg()" style="margin-top:10px; width:100%; padding:9px; background:#fee500; border:none; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; color:#3c1e1e;">📋 복사하기</button>
       </div>
-      <button onclick="submitReserve()" id="rv-submit" style="padding:15px; background:#fee500; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; color:#3c1e1e; margin-top:4px;">카카오톡 오픈채팅으로 연결 →</button>
+      <button onclick="submitReserve()" id="rv-submit" style="padding:15px; background:#fee500; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; color:#3c1e1e; margin-top:4px;">✅ 내용 확인 후 카카오로 문의하기</button>
     </div>
   </div>
 </div>
@@ -833,47 +792,7 @@ document.querySelectorAll('.space-card, .price-card, .story-grid, .gallery-item'
 });
 </script>
 
-<script>
-// ─── 포털(creyong.net/studio) 공간사진 자동 연동 ───────────────────
-// creyong.net에서 열릴 때 포털 IndexedDB 사진을 공간 카드에 반영합니다.
-// 로컬 file:// 환경에서는 도메인이 달라 무시됩니다.
-(async function loadPortalSpacePhotos() {
-  try {
-    var db = await new Promise(function(res, rej) {
-      var req = indexedDB.open('yewunok_v5');
-      req.onsuccess = function(e) { res(e.target.result); };
-      req.onerror   = function(e) { rej(e.target.error); };
-    });
-    var photos = await new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readonly');
-      var r  = tx.objectStore('photos').getAll();
-      r.onsuccess = function() { res(r.result); };
-      r.onerror   = function() { rej(r.error); };
-    });
-    if (!photos || !photos.length) return;
-    // 카테고리별 첫 번째 사진을 공간 카드 img에 반영
-    var catMap = {
-      livingroom:  'space-img-livingroom',
-      kitchen:     'space-img-kitchen',
-      bedroom:     'space-img-bedroom',
-      outdoor:     'space-img-outdoor',
-      study:       'space-img-study',
-      livingroom2: 'space-img-livingroom2',
-      bathroom:    'space-img-bathroom'
-    };
-    var used = {};
-    photos.forEach(function(ph) {
-      var id = catMap[ph.category];
-      if (id && !used[ph.category] && ph.dataUrl) {
-        var el = document.getElementById(id);
-        if (el) { el.src = ph.dataUrl; used[ph.category] = true; }
-      }
-    });
-  } catch(e) {
-    // 로컬 환경이거나 포털 사진 없음 - 기본 이미지 유지
-  }
-})();
-</script>
+
 
 
 <script>
@@ -885,6 +804,8 @@ function openReserveModal() {
   document.getElementById('rv-people').value = '';
   document.getElementById('rv-car').value = '';
   document.getElementById('rv-content').value = '';
+  document.getElementById('rv-copy-area').style.display = 'none';
+  document.getElementById('rv-submit').style.display = 'block';
 }
 function closeReserveModal() {
   document.getElementById('reserve-modal').style.display = 'none';
@@ -897,44 +818,37 @@ function submitReserve() {
   var content = document.getElementById('rv-content').value || '미정';
   var people = pv ? pv + '명' : '미정';
   var car = cv ? cv + '대' : '미정';
-
   var msg = '안녕하세요! 예운옥 예약 문의드립니다 🙏\n\n📅 촬영 날짜: ' + date + '\n👥 인원: ' + people + '\n🚗 차량 대수: ' + car + '\n🎬 촬영 내용: ' + content;
 
-  // 클립보드 자동 복사
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(msg).then(function() {
-      showToast();
-    }).catch(function() {
-      // fallback
-      var ta = document.createElement('textarea');
-      ta.value = msg;
-      ta.style.position = 'fixed'; ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select(); document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast();
-    });
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = msg;
-    ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast();
-  }
+  // 메시지 텍스트 영역 표시
+  document.getElementById('rv-copy-text').textContent = msg;
+  document.getElementById('rv-copy-area').style.display = 'block';
+  document.getElementById('rv-submit').style.display = 'none';
 
   // 카카오 오픈채팅 열기
   setTimeout(function() {
     window.open('https://open.kakao.com/o/samILOji', '_blank');
-    closeReserveModal();
-  }, 400);
+  }, 300);
 }
-function showToast() {
-  var t = document.getElementById('copy-toast');
-  t.style.display = 'block';
-  setTimeout(function(){ t.style.display = 'none'; }, 3500);
+function copyMsg() {
+  var text = document.getElementById('rv-copy-text').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      var btn = document.querySelector('[onclick="copyMsg()"]');
+      btn.textContent = '✅ 복사됐어요! 카카오톡에 붙여넣기 해주세요';
+      setTimeout(function(){ btn.textContent = '📋 다시 복사하기'; }, 2500);
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    var btn = document.querySelector('[onclick="copyMsg()"]');
+    btn.textContent = '✅ 복사됐어요! 카카오톡에 붙여넣기 해주세요';
+    setTimeout(function(){ btn.textContent = '📋 다시 복사하기'; }, 2500);
+  }
 }
+
 document.getElementById('reserve-modal').addEventListener('click', function(e) {
   if (e.target === this) closeReserveModal();
 });
