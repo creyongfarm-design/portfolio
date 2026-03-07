@@ -59,7 +59,7 @@ nav {
 }
 .hero-bg-img {
   position:absolute; inset:0;
-  background: url('imgs/img1.jpg') center/cover no-repeat;
+  background: url('imgs/img0.jpg') center/cover no-repeat;
   opacity: 0.18;
 }
 .hero-rain {
@@ -627,8 +627,8 @@ footer strong { color:rgba(255,255,255,0.7); }
         촬영 일정, 인원, 원하는 공간을 알려주시면 빠르게 안내드립니다.
       </p>
       <div class="contact-links">
-        <button onclick="openReserveModal()" class="contact-btn contact-kakao" style="font-size:16px; font-weight:700; padding:18px 24px; border:none; cursor:pointer; width:100%;">
-          💬 예약 문의하기 (카카오 오픈채팅)
+        <button onclick="openReserveModal()" class="contact-btn contact-kakao" style="font-size:16px; font-weight:700; padding:16px 32px; border:none; cursor:pointer;">
+          💬 예약 문의하기
         </button>
         <a href="tel:010-7499-4557" class="contact-btn" target="_blank" style="background:#fff; border:2px solid var(--pink); color:var(--dark); font-weight:600;">
           📞 010-7499-4557
@@ -713,26 +713,12 @@ footer strong { color:rgba(255,255,255,0.7); }
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
         <div>
-          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">👥 인원</label>
-          <select id="rv-people" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; background:#fff; outline:none;">
-            <option value="">선택</option>
-            <option>1~2명</option>
-            <option>3~5명</option>
-            <option>6~10명</option>
-            <option>11~20명</option>
-            <option>20명 이상</option>
-          </select>
+          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">👥 인원 (명)</label>
+          <input type="number" id="rv-people" min="1" max="100" placeholder="예: 5" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
         </div>
         <div>
-          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">🚗 차량 대수</label>
-          <select id="rv-car" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; background:#fff; outline:none;">
-            <option value="">선택</option>
-            <option>1대</option>
-            <option>2대</option>
-            <option>3대</option>
-            <option>4대</option>
-            <option>5대 이상</option>
-          </select>
+          <label style="font-size:13px; font-weight:700; color:#333; display:block; margin-bottom:6px;">🚗 차량 (대)</label>
+          <input type="number" id="rv-car" min="0" max="20" placeholder="예: 2" style="width:100%; padding:11px 14px; border:1.5px solid #e0e0e0; border-radius:10px; font-size:14px; color:#333; outline:none;">
         </div>
       </div>
       <div>
@@ -860,8 +846,10 @@ function closeReserveModal() {
 }
 function submitReserve() {
   var date = document.getElementById('rv-date').value || '미정';
-  var people = document.getElementById('rv-people').value || '미정';
-  var car = document.getElementById('rv-car').value || '미정';
+  var pv = document.getElementById('rv-people').value;
+  var cv = document.getElementById('rv-car').value;
+  var people = pv ? pv+'명' : '미정';
+  var car = cv ? cv+'대' : '미정';
   var content = document.getElementById('rv-content').value || '미정';
   var msg = '안녕하세요, 예운옥 예약 문의드립니다.\n\n📅 촬영 날짜: ' + date + '\n👥 인원: ' + people + '\n🚗 차량 대수: ' + car + '\n🎬 촬영 내용: ' + content;
   document.getElementById('rv-copy-text').textContent = msg;
