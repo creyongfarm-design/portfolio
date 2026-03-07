@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예운옥 — 핑크빛 무지개구름을 닮은 전원주택 스튜디오</title>
+<meta name="description" content="예운옥 — 경기도 고양시 설문IC 인근. 필름메이커가 설계한 실내 60평 + 외부 140평 촬영 전용 전원주택 스튜디오.">
+<style>
+/* ─── 기본 리셋 ─── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', -apple-system, sans-serif;
+  background: #fff8f8;
+  color: #2d2323;
+  overflow-x: hidden;
+}
+
+/* ─── 컬러 변수 ─── */
+:root {
+  --pink:     #f4a7c3;
+  --pink-deep:#e07fa8;
+  --pink-pale:#fce8f0;
+  --cloud:    #fef0f6;
+  --white:    #ffffff;
+  --gray:     #888080;
+  --dark:     #2d2323;
+  --shadow:   rgba(230,150,180,0.18);
+}
+
+/* ─── 헤더 / 네비 ─── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display: flex; align-items:center; justify-content:space-between;
+  padding: 18px 40px;
+  background: rgba(255,248,248,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(244,167,195,0.2);
+}
+.nav-logo {
+  font-size: 18px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--dark); text-decoration:none;
+}
+.nav-logo span { color: var(--pink-deep); }
+.nav-links { display:flex; gap:28px; list-style:none; }
+.nav-links a {
+  font-size: 13px; color: var(--gray); text-decoration:none;
+  letter-spacing:0.05em; transition: color .2s;
+}
+.nav-links a:hover { color: var(--pink-deep); }
+
+/* ─── 히어로 ─── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction:column; align-items:center; justify-content:center;
+  position: relative; overflow:hidden;
+  background: linear-gradient(160deg, #fff0f5 0%, #fce8f0 40%, #f9d5e8 100%);
+  padding-top: 80px;
+}
+.hero-bg-img {
+  position:absolute; inset:0;
+  background: url('imgs/img1.jpg') center/cover no-repeat;
+  opacity: 0.18;
+}
+.hero-rain {
+  position:absolute; inset:0; pointer-events:none; overflow:hidden;
+}
+.rain-drop {
+  position:absolute; top:-20px;
+  width:2px; border-radius:2px;
+  background: linear-gradient(to bottom, transparent, rgba(244,167,195,0.6));
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(110vh); }
+}
+.hero-content { position:relative; text-align:center; padding:0 20px; }
+.hero-tag {
+  display:inline-block; margin-bottom:20px;
+  font-size:12px; letter-spacing:0.2em; color:var(--pink-deep);
+  border:1px solid var(--pink); border-radius:20px; padding:5px 18px;
+  background:rgba(255,255,255,0.7);
+}
+.hero-title {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight:700; letter-spacing:0.1em;
+  line-height:1.1; color:var(--dark);
+}
+.hero-title .accent { color:var(--pink-deep); }
+.hero-subtitle {
+  margin-top: 16px;
+  font-size: clamp(14px, 2vw, 18px);
+  color: #a07888; letter-spacing:0.08em;
+  line-height:1.7;
+}
+.hero-cta {
+  margin-top:40px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+}
+.btn-primary {
+  background:var(--pink-deep); color:#fff;
+  padding:14px 32px; border-radius:40px;
+  font-size:14px; font-weight:600; letter-spacing:0.05em;
+  text-decoration:none; transition:all .25s;
+  box-shadow: 0 4px 20px rgba(224,127,168,0.4);
+}
+.btn-primary:hover { background:#cc6a95; transform:translateY(-2px); box-shadow:0 8px 28px rgba(224,127,168,0.5); }
+.btn-outline {
+  border:1.5px solid var(--pink); color:var(--pink-deep);
+  padding:14px 32px; border-radius:40px;
+  font-size:14px; font-weight:600; letter-spacing:0.05em;
+  text-decoration:none; background:rgba(255,255,255,0.6); transition:all .25s;
+}
+.btn-outline:hover { background:var(--pink-pale); transform:translateY(-2px); }
+.hero-scroll {
+  position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  color:var(--pink); font-size:11px; letter-spacing:0.15em; animation:bounce 2s infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+/* ─── 섹션 공통 ─── */
+section { padding: 100px 20px; }
+.section-inner { max-width:1100px; margin:0 auto; }
+.section-label {
+  font-size:11px; letter-spacing:0.25em; color:var(--pink-deep);
+  margin-bottom:14px; text-transform:uppercase;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px); font-weight:700;
+  line-height:1.25; color:var(--dark); margin-bottom:20px;
+}
+.section-lead {
+  font-size:16px; color:#7a6060; line-height:1.9; max-width:600px;
+}
+
+/* ─── 스토리 ─── */
+.story {
+  background: var(--white);
+  border-top: 1px solid rgba(244,167,195,0.2);
+  border-bottom: 1px solid rgba(244,167,195,0.2);
+}
+.story-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center;
+}
+.story-img {
+  border-radius:24px; overflow:hidden;
+  box-shadow: 0 20px 60px var(--shadow);
+  aspect-ratio:4/3;
+}
+.story-img img { width:100%; height:100%; object-fit:cover; display:block; }
+.story-text .section-lead { max-width:100%; margin-top:20px; }
+.story-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:28px; }
+.chip {
+  background:var(--pink-pale); color:var(--pink-deep);
+  padding:6px 16px; border-radius:20px; font-size:12px; font-weight:600;
+  letter-spacing:0.05em;
+}
+
+/* ─── 갤러리 ─── */
+.gallery { background: var(--cloud); }
+.gallery-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:12px; margin-top:48px;
+}
+.gallery-item {
+  border-radius:16px; overflow:hidden;
+  aspect-ratio:4/3; cursor:pointer;
+  transition: transform .3s, box-shadow .3s;
+}
+.gallery-item.tall { aspect-ratio:3/4; }
+.gallery-item:hover { transform:scale(1.02); box-shadow:0 12px 40px var(--shadow); }
+.gallery-item img { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* 라이트박스 */
+.lightbox {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:rgba(20,5,10,0.9); align-items:center; justify-content:center;
+}
+.lightbox.active { display:flex; }
+.lightbox img { max-width:90vw; max-height:90vh; border-radius:12px; object-fit:contain; }
+.lightbox-close {
+  position:absolute; top:24px; right:32px; font-size:32px; color:#fff;
+  cursor:pointer; background:none; border:none; line-height:1;
+}
+
+/* ─── 공간별 소개 ─── */
+.spaces { background:#fff; }
+.spaces-grid {
+  display:grid; grid-template-columns:repeat(2, 1fr); gap:32px; margin-top:48px;
+}
+.space-card {
+  border-radius:24px; overflow:hidden;
+  box-shadow:0 4px 24px var(--shadow);
+  transition: transform .3s, box-shadow .3s;
+}
+.space-card:hover { transform:translateY(-6px); box-shadow:0 16px 48px var(--shadow); }
+.space-card-img { aspect-ratio:16/9; overflow:hidden; }
+.space-card-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
+.space-card:hover .space-card-img img { transform:scale(1.04); }
+.space-card-body { padding:24px 28px 28px; }
+.space-card-emoji { font-size:24px; margin-bottom:8px; }
+.space-card-title {
+  font-size:18px; font-weight:700; color:var(--dark); margin-bottom:8px;
+}
+.space-card-desc {
+  font-size:14px; color:#8a7070; line-height:1.8;
+}
+.space-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:14px; }
+.space-tag {
+  font-size:11px; background:var(--pink-pale); color:var(--pink-deep);
+  padding:3px 10px; border-radius:12px; font-weight:600;
+}
+
+/* ─── 요금 & 예약 ─── */
+.pricing {
+  background: linear-gradient(135deg, #fce8f0 0%, #f9d5e8 100%);
+}
+.pricing-cards {
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:24px; margin-top:48px;
+}
+.price-card {
+  background:#fff; border-radius:24px;
+  padding:32px 28px; text-align:center;
+  box-shadow:0 4px 24px var(--shadow);
+  transition:transform .3s, box-shadow .3s;
+}
+.price-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px var(--shadow); }
+.price-card.featured {
+  background:var(--pink-deep); color:#fff;
+  transform:scale(1.04);
+}
+.price-card.featured:hover { transform:scale(1.04) translateY(-4px); }
+.price-label { font-size:11px; letter-spacing:0.2em; opacity:0.6; margin-bottom:8px; }
+.price-name { font-size:20px; font-weight:700; margin-bottom:16px; }
+.price-amount { font-size:36px; font-weight:800; line-height:1; }
+.price-amount span { font-size:14px; font-weight:400; opacity:0.7; margin-left:2px; }
+.price-divider { height:1px; background:rgba(200,150,170,0.2); margin:20px 0; }
+.price-features { list-style:none; text-align:left; }
+.price-features li {
+  font-size:13px; padding:6px 0;
+  color:inherit; opacity:0.8;
+  display:flex; gap:8px; align-items:flex-start;
+}
+.price-features li::before { content:'✓'; color:var(--pink); font-weight:700; flex-shrink:0; }
+.price-card.featured .price-features li::before { color:rgba(255,255,255,0.8); }
+.price-note { font-size:12px; opacity:0.6; margin-top:12px; }
+
+/* ─── 문의 / 예약 ─── */
+.contact { background:var(--white); }
+.contact-box {
+  background: linear-gradient(135deg, var(--dark) 0%, #3d2a2a 100%);
+  border-radius:32px; padding:64px; color:#fff; text-align:center;
+  position:relative; overflow:hidden;
+}
+.contact-box::before {
+  content:''; position:absolute; top:-60px; right:-60px;
+  width:240px; height:240px; border-radius:50%;
+  background:rgba(244,167,195,0.12);
+}
+.contact-box .section-title { color:#fff; }
+.contact-box .section-lead { color:rgba(255,255,255,0.65); max-width:480px; margin:16px auto 0; }
+.contact-links {
+  display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:36px;
+}
+.contact-btn {
+  display:flex; align-items:center; gap:8px;
+  padding:14px 28px; border-radius:40px;
+  font-size:14px; font-weight:600; text-decoration:none;
+  transition:all .25s; letter-spacing:0.03em;
+}
+.contact-kakao { background:#fee500; color:#3c1e1e; }
+.contact-kakao:hover { background:#f5d800; transform:translateY(-2px); }
+.contact-insta { background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color:#fff; }
+.contact-insta:hover { opacity:0.88; transform:translateY(-2px); }
+.contact-naver { background:#03c75a; color:#fff; }
+.contact-naver:hover { background:#02b04e; transform:translateY(-2px); }
+
+/* ─── 위치 ─── */
+.location { background:var(--cloud); }
+.location-grid { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; margin-top:48px; }
+.location-info { display:flex; flex-direction:column; gap:20px; }
+.loc-item { display:flex; gap:14px; align-items:flex-start; }
+.loc-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+.loc-label { font-size:11px; letter-spacing:0.15em; color:var(--pink-deep); margin-bottom:4px; }
+.loc-text { font-size:14px; color:#5a4545; line-height:1.7; }
+.location-map {
+  border-radius:20px; overflow:hidden; aspect-ratio:4/3;
+  box-shadow:0 8px 32px var(--shadow);
+  background:var(--pink-pale); display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:12px; color:var(--pink-deep);
+}
+.location-map-placeholder { font-size:40px; }
+.location-map p { font-size:13px; }
+
+/* ─── 푸터 ─── */
+footer {
+  background:var(--dark); color:rgba(255,255,255,0.4);
+  text-align:center; padding:40px 20px; font-size:12px; letter-spacing:0.05em; line-height:2;
+}
+footer strong { color:rgba(255,255,255,0.7); }
+
+/* ─── 반응형 ─── */
+@media (max-width:768px) {
+  nav { padding:14px 20px; }
+  .nav-links { display:none; }
+  .story-grid, .location-grid { grid-template-columns:1fr; gap:40px; }
+  .gallery-grid { grid-template-columns:repeat(2,1fr); }
+  .spaces-grid { grid-template-columns:1fr; }
+  .pricing-cards { grid-template-columns:1fr; }
+  .price-card.featured { transform:scale(1); }
+  .contact-box { padding:40px 24px; }
+  section { padding:72px 20px; }
+}
+@media (max-width:480px) {
+  .gallery-grid { grid-template-columns:1fr; }
+  .hero-title { letter-spacing:0.06em; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── 네비 ─── -->
+<nav>
+  <a href="#" class="nav-logo"><span>예운옥</span> ㅇㅇㅇHOUSE</a>
+  <ul class="nav-links">
+    <li><a href="#story">스토리</a></li>
+    <li><a href="#gallery">갤러리</a></li>
+    <li><a href="#spaces">공간</a></li>
+    <li><a href="#films">레퍼런스</a></li>
+    <li><a href="#pricing">요금</a></li>
+    <li><a href="#contact">예약문의</a></li>
+  </ul>
+</nav>
+
+<!-- ─── 히어로 ─── -->
+<section class="hero" id="top">
+  <div class="hero-bg-img"></div>
+  <div class="hero-rain" id="rain"></div>
+  <div class="hero-content">
+    <div class="hero-tag">✦ 경기도 고양시 · 전원주택 촬영 대관 스튜디오 ✦</div>
+    <h1 class="hero-title">
+      예운옥<br>
+      <span class="accent" style="font-size:0.55em; letter-spacing:0.25em;">ㅇㅇㅇ HOUSE</span>
+    </h1>
+    <p class="hero-subtitle">
+      핑크빛 무지개구름을 닮은 전원주택 스튜디오<br>
+      실내 60평 · 외부 140평 · 필름메이커 설계
+    </p>
+    <div class="hero-cta">
+      <a href="#contact" class="btn-primary">예약 문의하기</a>
+      <a href="#gallery" class="btn-outline">공간 둘러보기</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>scroll</span>
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ─── 스토리 ─── -->
+<section class="story" id="story">
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-img">
+        <img src="imgs/img2.jpg" alt="예운옥 내부" loading="lazy">
+      </div>
+      <div class="story-text">
+        <div class="section-label">Our Story</div>
+        <h2 class="section-title">핑크빛 무지개구름을<br>닮은 전원주택 스튜디오</h2>
+        <p class="section-lead">
+          예운옥(霓雲)은 <strong>무지개(霓)</strong>와 <strong>구름(雲)</strong>을 품은 이름입니다. 예·운·옥 — 세 음절이 모두 ㅇ으로 시작해 <em>ㅇㅇㅇ HOUSE</em>라 부르기도 해요.<br><br>
+          <strong>필름메이커가 촬영을 위해 직접 설계한 공간</strong>입니다. 기둥 없이 트인 폭 9.4m × 깊이 7m × 높이 6.5m의 거실 통공간, 남향 미스트 창에서 쏟아지는 부드러운 자연광, 구름에서 빗방울이 떨어지듯 길이가 다른 10개의 조명 — 슈팅거리와 조명 세팅 모두 고려된 공간입니다.<br><br>
+          오늘의집 홈스타일링으로 소개된 공간으로, 계단·주방 벽에 특수 페인트 '로코코', 식당에는 수입 플라워 벽지 등 컨셉별 촬영이 한 공간에서 모두 가능합니다.
+        </p>
+        <div class="story-chips">
+          <span class="chip">🎬 필름메이커 설계</span>
+          <span class="chip">🌈 무지개구름 컨셉</span>
+          <span class="chip">🏠 실내 60평 + 외부 140평</span>
+          <span class="chip">🩷 걸그룹 단골 공간</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 공간 스펙 바 ─── -->
+<section style="background:var(--dark); padding:48px 20px;">
+  <div class="section-inner">
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; text-align:center;">
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--pink); letter-spacing:-0.02em;">60<span style="font-size:16px;">평</span></div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.1em;">실내 총면적 (1F·2F)</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--pink); letter-spacing:-0.02em;">6.5<span style="font-size:16px;">m</span></div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.1em;">거실 최고 층고</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--pink); letter-spacing:-0.02em;">140<span style="font-size:16px;">평+</span></div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.1em;">외부 프라이빗 정원</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--pink); letter-spacing:-0.02em;">1<span style="font-size:16px;">개</span></div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.5); margin-top:4px; letter-spacing:0.1em;">실내 기둥 수</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 갤러리 ─── -->
+<section class="gallery" id="gallery">
+  <div class="section-inner">
+    <div class="section-label">Gallery</div>
+    <h2 class="section-title">공간 사진</h2>
+    <div class="gallery-grid">
+      <div class="gallery-item" onclick="openLightbox('imgs/img1.jpg')">
+        <img src="imgs/img1.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img3.jpg')">
+        <img src="imgs/img3.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img4.jpg')">
+        <img src="imgs/img4.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img5.jpg')">
+        <img src="imgs/img5.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img6.jpg')">
+        <img src="imgs/img6.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img9.jpg')">
+        <img src="imgs/img9.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img10.jpg')">
+        <img src="imgs/img10.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item" onclick="openLightbox('imgs/img11.jpg')">
+        <img src="imgs/img11.jpg" alt="예운옥" loading="lazy">
+      </div>
+      <div class="gallery-item tall" onclick="openLightbox('imgs/img7.jpg')">
+        <img src="imgs/img7.jpg" alt="예운옥" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 라이트박스 -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<!-- ─── 공간별 소개 ─── -->
+<section class="spaces" id="spaces">
+  <div class="section-inner">
+    <div class="section-label">Spaces</div>
+    <h2 class="section-title">공간 소개</h2>
+    <p class="section-lead">실내 60평 + 외부 140평. 필름메이커가 직접 설계한 덕에 카메라 앵글을 위한 세심한 배려가 곳곳에 녹아있습니다.</p>
+    <div class="spaces-grid">
+      <div class="space-card">
+        <div class="space-card-img">
+          <img src="imgs/img5.jpg" alt="거실" loading="lazy">
+        </div>
+        <div class="space-card-body">
+          <div class="space-card-emoji">🛋</div>
+          <div class="space-card-title">메인 거실 (통공간)</div>
+          <div class="space-card-desc">폭 9.4m × 깊이 7m × 높이 6.5m. 기둥 없이 트인 통공간으로 충분한 슈팅거리와 조명 설치 높이를 가집니다. 라일락 벽면, 빗방울 조명 10개, 남향 미스트 창의 부드러운 자연광이 시그니처.</div>
+          <div class="space-tags">
+            <span class="space-tag">기둥 없는 오픈 공간</span>
+            <span class="space-tag">6.5m 층고</span>
+            <span class="space-tag">라일락 벽</span>
+            <span class="space-tag">빗방울 조명</span>
+          </div>
+        </div>
+      </div>
+      <div class="space-card">
+        <div class="space-card-img">
+          <img src="imgs/img8.jpg" alt="침실 및 대기실" loading="lazy">
+        </div>
+        <div class="space-card-body">
+          <div class="space-card-emoji">🛏</div>
+          <div class="space-card-title">침실 및 대기실</div>
+          <div class="space-card-desc">2층 침실 공간에 퀸 + 싱글 침대 세팅. 촬영 대기실 또는 침실 컨셉 촬영 모두 가능합니다. 유리 난간에서 1층 거실 통공간을 내려다볼 수 있어요.</div>
+          <div class="space-tags">
+            <span class="space-tag">침실 세팅</span>
+            <span class="space-tag">대기 공간</span>
+            <span class="space-tag">유리 난간 뷰</span>
+          </div>
+        </div>
+      </div>
+      <div class="space-card">
+        <div class="space-card-img">
+          <img src="imgs/img4.jpg" alt="주방" loading="lazy">
+        </div>
+        <div class="space-card-body">
+          <div class="space-card-emoji">🍳</div>
+          <div class="space-card-title">주방 (키친)</div>
+          <div class="space-card-desc">가로세로 5m가 넘는 우드톤 주방. 원목 상판, 이동형 아일랜드 식탁, 핑크 스메그 냉장고. 상부장 대신 미스트 남향창으로 조명 없이도 시즐 촬영 가능한 부드러운 빛이 들어옵니다.</div>
+          <div class="space-tags">
+            <span class="space-tag">5m+ 오픈 키친</span>
+            <span class="space-tag">원목 상판</span>
+            <span class="space-tag">핑크 냉장고</span>
+            <span class="space-tag">시즐 촬영</span>
+          </div>
+        </div>
+      </div>
+      <div class="space-card">
+        <div class="space-card-img">
+          <img src="imgs/img10.jpg" alt="외부 정원" loading="lazy">
+        </div>
+        <div class="space-card-body">
+          <div class="space-card-emoji">🌿</div>
+          <div class="space-card-title">외부 정원 &amp; 마당</div>
+          <div class="space-card-desc">140평+ 프라이빗 외부 공간. 3×4m 캠핑데크, 모래놀이터, 외부 전기 셋팅 가능. 밤나무·소나무·벚나무 숲과 돌담이 자연 배경이 됩니다. 강자갈 마당으로 차량 5대 주차 가능.</div>
+          <div class="space-tags">
+            <span class="space-tag">140평+ 외부</span>
+            <span class="space-tag">캠핑데크</span>
+            <span class="space-tag">야외 촬영</span>
+            <span class="space-tag">차량 5대 주차</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 촬영 레퍼런스 ─── -->
+<section class="films" id="films" style="padding:80px 0; background:rgba(0,0,0,0.3);">
+  <div class="section-inner">
+    <div class="section-label">Films</div>
+    <h2 class="section-title">예운옥에서 촬영된 영상들</h2>
+    <p class="section-lead" style="margin-bottom:40px;">이 공간에서 탄생한 콘텐츠들입니다.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px;">
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/12mMS6GInJE" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/6mRBfwXUKBY" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/assqrESWEHw" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/WksVamWvivM" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/Y55WS2z718E" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/OgVbzwk_siQ" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+      <div style="position:relative; padding-bottom:56.25%; border-radius:12px; overflow:hidden; background:#111;">
+        <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/Zg3a72Zhh_g" frameborder="0" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 요금 ─── -->
+<section class="pricing" id="pricing">
+  <div class="section-inner">
+    <div class="section-label">Pricing</div>
+    <h2 class="section-title">대관 요금</h2>
+    <p class="section-lead">최소 5시간 기준 · 추가 인원 1인당 +5,000원</p>
+    <div class="pricing-cards">
+      <div class="price-card">
+        <div class="price-label">BASIC</div>
+        <div class="price-name">기본 대관</div>
+        <div class="price-amount">₩80,000<span>/hr</span></div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>4인 기준</li>
+          <li>최소 5시간</li>
+          <li>전 공간 이용</li>
+          <li>추가 1인당 +5,000원</li>
+        </ul>
+        <div class="price-note">* 소규모 촬영 · 콘텐츠 제작</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-label">PACKAGE</div>
+        <div class="price-name">YouTube 예능 패키지</div>
+        <div class="price-amount">₩150,000<span>/hr</span></div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>25인 기준</li>
+          <li>최소 5시간</li>
+          <li>전 공간 이용</li>
+          <li>추가 1인당 +5,000원</li>
+        </ul>
+        <div class="price-note">* 대형 유튜브 · 예능 촬영 최적화</div>
+      </div>
+      <div class="price-card">
+        <div class="price-label">COMMERCIAL</div>
+        <div class="price-name">광고 · 드라마 · 영화</div>
+        <div class="price-amount" style="font-size:28px;">협의</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>대규모 촬영 별도 문의</li>
+          <li>장기 대관 가능</li>
+          <li>전 공간 전용 사용</li>
+          <li>프리프로덕션 미팅 가능</li>
+        </ul>
+        <div class="price-note">* 010-7499-4557로 문의</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 문의 ─── -->
+<section class="contact" id="contact">
+  <div class="section-inner">
+    <div class="contact-box">
+      <div class="section-label" style="color:var(--pink)">Contact</div>
+      <h2 class="section-title">예약 & 문의</h2>
+      <p class="section-lead">
+        촬영 일정, 인원, 원하는 공간을 알려주시면 빠르게 안내드립니다.
+      </p>
+      <div class="contact-links">
+        <a href="tel:010-7499-4557" class="contact-btn contact-kakao" target="_blank">
+          📞 전화 문의 010-7499-4557
+        </a>
+        <a href="https://www.instagram.com/studio.ooohouse" class="contact-btn contact-insta" target="_blank">
+          📸 인스타 DM @studio.ooohouse
+        </a>
+        <a href="https://blog.naver.com/creyongfarm" class="contact-btn contact-naver" target="_blank">
+          📝 네이버 블로그
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 위치 ─── -->
+<section class="location" id="location">
+  <div class="section-inner">
+    <div class="section-label">Location</div>
+    <h2 class="section-title">오시는 길</h2>
+    <div class="location-grid">
+      <div class="location-info">
+        <div class="loc-item">
+          <div class="loc-icon">📍</div>
+          <div>
+            <div class="loc-label">주소</div>
+            <div class="loc-text">경기도 고양시 일산동구 장진천길134번길 60<br><span style="font-size:0.88em; opacity:0.7;">설문IC 인근</span></div>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">🚙</div>
+          <div>
+            <div class="loc-label">오시는 길</div>
+            <div class="loc-text">설문IC 인근 · 차량 이용 추천<br><span style="font-size:0.88em; opacity:0.7;">홍대 35분 · 고양시내 15분</span></div>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">🚗</div>
+          <div>
+            <div class="loc-label">주차</div>
+            <div class="loc-text">예운옥 내부 5대 주차 가능</div>
+          </div>
+        </div>
+        <div class="loc-item">
+          <div class="loc-icon">⏰</div>
+          <div>
+            <div class="loc-label">운영 시간</div>
+            <div class="loc-text">오전 9시 — 오후 10시<br>사전 예약제 운영</div>
+          </div>
+        </div>
+      </div>
+      <div class="location-map">
+        <div class="location-map-placeholder">🗺️</div>
+        <a href="https://map.naver.com/v5/search/%EA%B3%A0%EC%96%91%EC%8B%9C%20%EC%9D%BC%EC%82%B0%EB%8F%99%EA%B5%AC%20%EC%9E%A5%EC%A7%84%EC%B2%9C%EA%B8%B8134%EB%B2%88%EA%B8%B8%2060" target="_blank" style="display:block; color:var(--pink); font-size:13px; font-weight:600; text-decoration:none; margin-top:12px;">🗺️ 네이버 지도로 보기 →</a>
+        <p style="font-size:12px; opacity:0.6; margin-top:6px;">경기도 고양시 일산동구<br>장진천길134번길 60</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── 푸터 ─── -->
+<footer>
+  <strong>예운옥 ㅇㅇㅇHOUSE</strong><br>
+  경기도 고양시 일산동구 장진천길134번길 60 · 핑크빛 무지개구름을 닮은 전원주택 스튜디오<br>
+  © 2026 CREYONG FARM. All rights reserved.<br>
+  <a href="https://creyong.net" style="color:rgba(255,255,255,0.4); text-decoration:none;">creyong.net</a>
+</footer>
+
+<!-- ─── JS ─── -->
+<script>
+// 비 애니메이션
+(function() {
+  var rain = document.getElementById('rain');
+  for (var i = 0; i < 60; i++) {
+    var drop = document.createElement('div');
+    drop.className = 'rain-drop';
+    drop.style.left = Math.random() * 100 + '%';
+    drop.style.height = (Math.random() * 60 + 40) + 'px';
+    drop.style.animationDuration = (Math.random() * 1.5 + 0.8) + 's';
+    drop.style.animationDelay = (Math.random() * 2) + 's';
+    drop.style.opacity = Math.random() * 0.5 + 0.2;
+    rain.appendChild(drop);
+  }
+})();
+
+// 라이트박스
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+
+// 스크롤 페이드인
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.space-card, .price-card, .story-grid, .gallery-item').forEach(function(el) {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = 'opacity .6s ease, transform .6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
