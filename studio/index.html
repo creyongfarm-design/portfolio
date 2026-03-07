@@ -341,6 +341,15 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
 .stat-teal .stat-num { color: #2dd4bf; }
 .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; position: relative; }
 .stat-icon { font-size: 28px; margin-bottom: 8px; position: relative; }
+.stat-schedule-card { text-align: left; }
+.stat-schedule-card .stat-icon { font-size: 20px; margin-bottom: 4px; }
+.sched-rows { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.sched-row { display: flex; align-items: center; gap: 6px; }
+.sched-icon { font-size: 14px; }
+.sched-site { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.3px; flex: 1; }
+.sched-dday { font-size: 18px; font-weight: 900; color: var(--green); line-height: 1; }
+.sched-dday.dday-today { color: #f59e0b; }
+.sched-dday.dday-soon { color: var(--pink2); }
 
 .cat-bar-card {
   background: var(--card);
@@ -449,6 +458,7 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
   .stat-num { font-size: 28px; }
   .stat-icon { font-size: 22px; margin-bottom: 6px; }
   .stat-lbl { font-size: 10px; }
+  .sched-dday { font-size: 15px; }
 
   /* 사진 그리드 */
   .photo-grid {
@@ -491,60 +501,8 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
 }
 
 </style>
-
-<style id="pw-lock-style">
-#pw-lock-overlay{position:fixed;inset:0;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:99999}
-#pw-lock-overlay.hide{opacity:0;pointer-events:none;transition:opacity .4s}
-.pw-lock-box{width:100%;max-width:340px;padding:0 24px;text-align:center}
-.pw-lock-logo{font-size:10px;letter-spacing:6px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:32px}
-.pw-lock-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:6px}
-.pw-lock-sub{font-size:13px;color:rgba(255,255,255,.38);margin-bottom:32px}
-.pw-input{width:100%;padding:15px 20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:18px;letter-spacing:6px;outline:none;text-align:center;transition:border-color .2s}
-.pw-input:focus{border-color:rgba(249,115,22,.5)}
-.pw-input::placeholder{letter-spacing:1px;font-size:13px;color:rgba(255,255,255,.22)}
-.pw-btn{width:100%;margin-top:12px;padding:15px;background:#f97316;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:background .2s}
-.pw-btn:hover{background:#ea6c0a}
-.pw-err{font-size:12px;color:#f87171;margin-top:10px;min-height:16px}
-@keyframes pw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.pw-shake{animation:pw-shake .3s ease}
-</style>
 </head>
 <body>
-<div id="pw-lock-overlay">
-  <div class="pw-lock-box">
-    <div class="pw-lock-logo">Creyong</div>
-    <div class="pw-lock-title">예운옥 포스팅 포털</div>
-    <div class="pw-lock-sub">관리자만 접근할 수 있습니다</div>
-    <input id="pw-input" class="pw-input" type="password" placeholder="비밀번호" maxlength="20" autocomplete="off">
-    <button class="pw-btn" onclick="pwCheck()">입장</button>
-    <div id="pw-err" class="pw-err"></div>
-  </div>
-</div>
-<script>
-(function(){
-  var PW='17171', KEY='studio_auth';
-  if(sessionStorage.getItem(KEY)==='1'){
-    document.getElementById('pw-lock-overlay').style.display='none';
-    return;
-  }
-  document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')pwCheck()});
-  window.pwCheck=function(){
-    var v=document.getElementById('pw-input').value;
-    if(v===PW){
-      sessionStorage.setItem(KEY,'1');
-      var el=document.getElementById('pw-lock-overlay');
-      el.classList.add('hide');
-      setTimeout(function(){el.style.display='none'},400);
-    }else{
-      document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다';
-      var inp=document.getElementById('pw-input');
-      inp.value='';inp.classList.add('pw-shake');
-      setTimeout(function(){inp.classList.remove('pw-shake')},400);
-    }
-  };
-})();
-</script>
-
 
 <!-- 헤더 -->
 <div class="header">
@@ -579,10 +537,21 @@ label { font-size: 12px; color: var(--muted); margin-bottom: 6px; display: block
       <div class="stat-num" id="stat-photos">0</div>
       <div class="stat-lbl">전체 사진</div>
     </div>
-    <div class="stat-card stat-green">
-      <div class="stat-icon">🌿</div>
-      <div class="stat-num" id="stat-outdoor">0</div>
-      <div class="stat-lbl">야외 사진</div>
+    <div class="stat-card stat-green stat-schedule-card">
+      <div class="stat-icon">📅</div>
+      <div class="sched-rows">
+        <div class="sched-row">
+          <span class="sched-icon">📝</span>
+          <span class="sched-site">블로그</span>
+          <span class="sched-dday" id="sched-blog-dday">D-?</span>
+        </div>
+        <div class="sched-row">
+          <span class="sched-icon">☕</span>
+          <span class="sched-site">카페</span>
+          <span class="sched-dday" id="sched-cafe-dday">D-?</span>
+        </div>
+      </div>
+      <div class="stat-lbl" style="margin-top:6px">다음 업로드</div>
     </div>
     <div class="stat-card stat-purple">
       <div class="stat-icon">📝</div>
@@ -1672,6 +1641,47 @@ function updateWorkerStatus() {
   }
 }
 
+// ─────────────────────────────────────
+//  업로드 스케줄 D-day 카드
+//  블로그: 매주 월요일
+//  카페: 격주 월요일 (기준: 2026-03-09 월요일부터 짝수주)
+// ─────────────────────────────────────
+function updateScheduleDday() {
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  function nextMonday(from) {
+    var d = new Date(from);
+    var day = d.getDay();
+    var diff = (day === 1) ? 0 : (day === 0 ? 1 : 8 - day);
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  var blogNext = nextMonday(today);
+  var blogDiff = Math.round((blogNext - today) / (1000 * 60 * 60 * 24));
+
+  var baseMonday = new Date(2026, 2, 9);
+  var cafeNext = nextMonday(today);
+  var weekDiff = Math.round((cafeNext - baseMonday) / (1000 * 60 * 60 * 24 * 7));
+  if (weekDiff % 2 !== 0) {
+    cafeNext.setDate(cafeNext.getDate() + 7);
+  }
+  var cafeDiff = Math.round((cafeNext - today) / (1000 * 60 * 60 * 24));
+
+  function setDday(elId, diff) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.textContent = diff === 0 ? 'D-DAY' : 'D-' + diff;
+    el.className = 'sched-dday';
+    if (diff === 0) el.classList.add('dday-today');
+    else if (diff <= 2) el.classList.add('dday-soon');
+  }
+
+  setDday('sched-blog-dday', blogDiff);
+  setDday('sched-cafe-dday', cafeDiff);
+}
+
 function updateApiStatus() {
   var el = document.getElementById('api-status');
   var statAI = document.getElementById('stat-ai');
@@ -1797,10 +1807,8 @@ async function updateStats() {
   var h = document.getElementById('stat-posts');
   if (h) h.textContent = history.length;
 
-  // 야외 사진 수
-  var outdoorCnt = photos.filter(function(ph){ return ph.category === 'outdoor'; }).length;
-  var outEl = document.getElementById('stat-outdoor');
-  if (outEl) outEl.textContent = outdoorCnt;
+  // 업로드 스케줄 D-day 계산
+  updateScheduleDday();
 
   // 포스팅 유형별 현황
   var blogCnt = history.filter(function(p){ return p.type === 'blog'; }).length;
