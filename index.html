@@ -698,7 +698,15 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
           <div class="bp-note">대규모 촬영 별도 문의</div>
         </div>
       </div>
-      <button class="booking-btn" onclick="openBooking()">예약 문의하기 →</button>
+      <div style="display:flex;gap:12px;max-width:400px;margin:0 auto">
+        <button class="booking-btn" style="margin:0;flex:1" onclick="openBooking()">예약 문의하기 →</button>
+        <a href="https://creyong.net/ooohouse" target="_blank" rel="noopener"
+           style="flex:0 0 auto;padding:18px 22px;background:transparent;border:2px solid rgba(249,115,22,.5);color:#f97316;font-size:15px;font-weight:800;border-radius:6px;cursor:pointer;letter-spacing:.3px;text-decoration:none;display:flex;align-items:center;white-space:nowrap;transition:border-color .2s,background .2s"
+           onmouseover="this.style.borderColor='#f97316';this.style.background='rgba(249,115,22,.08)'"
+           onmouseout="this.style.borderColor='rgba(249,115,22,.5)';this.style.background='transparent'">
+          스튜디오 홈페이지
+        </a>
+      </div>
     </div>
 
     <!-- 스튜디오 촬영 영상 -->
