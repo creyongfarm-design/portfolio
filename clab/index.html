@@ -127,6 +127,52 @@
   .stage-conti { background: rgba(0,203,169,0.15); color: var(--accent3); }
   .stage-done { background: rgba(34,197,94,0.15); color: var(--green); }
   .project-date { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
+
+  /* ── 프로젝트 관리 테이블 (노션 스타일) ── */
+  .pm-layout { display: flex; gap: 0; align-items: flex-start; }
+  .pm-table-wrap { flex: 1; min-width: 0; overflow: hidden; }
+  .pm-toolbar { display: flex; align-items: center; gap: 12px; padding: 20px 0 16px; }
+  .pm-table-scroll { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  .pm-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 860px; }
+  .pm-table thead { position: sticky; top: 0; z-index: 5; }
+  .pm-table th { background: var(--surface2); border-bottom: 1px solid var(--border); border-right: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; font-family: 'Space Mono',monospace; font-size: 10px; color: var(--muted); text-align: left; white-space: nowrap; font-weight: 500; }
+  .pm-table th:last-child { border-right: none; }
+  .pm-table td { border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04); padding: 0; vertical-align: middle; }
+  .pm-table td:last-child { border-right: none; }
+  .pm-table tr:last-child td { border-bottom: none; }
+  .pm-table tr { background: var(--surface); transition: background 0.15s; cursor: pointer; }
+  .pm-table tr:hover { background: rgba(0,203,169,0.04); }
+  .pm-table tr.pm-row-selected { background: rgba(0,203,169,0.08); }
+  .pm-cell { padding: 10px 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  .pm-cell-name { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; max-width: 260px; }
+  .pm-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
+  .pm-cat-유튜브롱폼 { background: rgba(249,115,22,0.2); color: #fb923c; }
+  .pm-cat-유튜브숏폼 { background: rgba(234,88,12,0.18); color: #fdba74; }
+  .pm-cat-인스타릴스 { background: rgba(139,92,246,0.2); color: #a78bfa; }
+  .pm-cat-상업영상 { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .pm-stage-프리프로덕션 { background: rgba(100,116,139,0.3); color: #94a3b8; }
+  .pm-stage-포스트프로덕션 { background: rgba(59,130,246,0.22); color: #60a5fa; }
+  .pm-stage-완료 { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .pm-date-cell { font-family: 'Space Mono',monospace; font-size: 11px; color: var(--muted); padding: 10px 12px; display: block; }
+  .pm-budget-cell { font-family: 'Space Mono',monospace; font-size: 11px; padding: 10px 12px; display: block; }
+  .pm-check { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+  .pm-check input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+  .pm-add-row { padding: 10px 14px; font-size: 12px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.04); background: var(--surface); border-radius: 0 0 8px 8px; transition: all 0.15s; }
+  .pm-add-row:hover { background: rgba(0,203,169,0.06); color: var(--accent); }
+  /* 우측 디테일 패널 */
+  .pm-panel { width: 0; overflow: hidden; transition: width 0.3s ease; flex-shrink: 0; }
+  .pm-panel.open { width: 340px; overflow-y: auto; border-left: 1px solid var(--border); padding: 20px; max-height: calc(100vh - 130px); position: sticky; top: 120px; }
+  .pm-panel-title-input { background: none; border: none; font-size: 17px; font-weight: 700; color: var(--text); font-family: 'Noto Sans KR'; outline: none; width: 100%; padding: 0; }
+  .pm-panel-label { font-family: 'Space Mono',monospace; font-size: 10px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .pm-panel-input, .pm-panel-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; font-family: 'Noto Sans KR'; outline: none; }
+  .pm-panel-input:focus, .pm-panel-select:focus { border-color: var(--accent); }
+  .pm-panel-select option { background: var(--surface2); }
+  .pm-panel-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: 'Noto Sans KR'; outline: none; resize: vertical; min-height: 120px; }
+  .pm-panel-textarea:focus { border-color: var(--accent); }
+  .pm-panel-row { margin-bottom: 14px; }
+  .pm-panel-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .pm-panel-check-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .pm-panel-divider { height: 1px; background: var(--border); margin: 16px 0; }
   .progress-bar-wrap { display: flex; align-items: center; gap: 6px; }
   .progress-bar { width: 48px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
@@ -626,60 +672,8 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" onerror="console.warn('ExcelJS 로드 실패')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" onerror="console.warn('QRCode 로드 실패')"></script>
-
-<style id="pw-lock-style">
-#pw-lock-overlay{position:fixed;inset:0;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:99999}
-#pw-lock-overlay.hide{opacity:0;pointer-events:none;transition:opacity .4s}
-.pw-lock-box{width:100%;max-width:340px;padding:0 24px;text-align:center}
-.pw-lock-logo{font-size:10px;letter-spacing:6px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:32px}
-.pw-lock-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:6px}
-.pw-lock-sub{font-size:13px;color:rgba(255,255,255,.38);margin-bottom:32px}
-.pw-input{width:100%;padding:15px 20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:18px;letter-spacing:6px;outline:none;text-align:center;transition:border-color .2s}
-.pw-input:focus{border-color:rgba(249,115,22,.5)}
-.pw-input::placeholder{letter-spacing:1px;font-size:13px;color:rgba(255,255,255,.22)}
-.pw-btn{width:100%;margin-top:12px;padding:15px;background:#f97316;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:background .2s}
-.pw-btn:hover{background:#ea6c0a}
-.pw-err{font-size:12px;color:#f87171;margin-top:10px;min-height:16px}
-@keyframes pw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.pw-shake{animation:pw-shake .3s ease}
-</style>
 </head>
 <body>
-<div id="pw-lock-overlay">
-  <div class="pw-lock-box">
-    <div class="pw-lock-logo">Creyong</div>
-    <div class="pw-lock-title">C.LAB</div>
-    <div class="pw-lock-sub">관리자만 접근할 수 있습니다</div>
-    <input id="pw-input" class="pw-input" type="password" placeholder="비밀번호" maxlength="20" autocomplete="off">
-    <button class="pw-btn" onclick="pwCheck()">입장</button>
-    <div id="pw-err" class="pw-err"></div>
-  </div>
-</div>
-<script>
-(function(){
-  var PW='17171', KEY='clab_auth';
-  if(sessionStorage.getItem(KEY)==='1'){
-    document.getElementById('pw-lock-overlay').style.display='none';
-    return;
-  }
-  document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')pwCheck()});
-  window.pwCheck=function(){
-    var v=document.getElementById('pw-input').value;
-    if(v===PW){
-      sessionStorage.setItem(KEY,'1');
-      var el=document.getElementById('pw-lock-overlay');
-      el.classList.add('hide');
-      setTimeout(function(){el.style.display='none'},400);
-    }else{
-      document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다';
-      var inp=document.getElementById('pw-input');
-      inp.value='';inp.classList.add('pw-shake');
-      setTimeout(function(){inp.classList.remove('pw-shake')},400);
-    }
-  };
-})();
-</script>
-
 
 
 <header>
@@ -807,18 +801,41 @@
 
 <!-- ═══ PROJECTS ═══ -->
 <div class="page" id="page-projects">
-  <div class="section">
-    <div class="section-header"><span class="section-title">📁 프로젝트 목록</span><div class="section-line"></div></div>
-    <button class="add-btn" onclick="openModal('new-project')">+ 새 프로젝트 추가</button>
+  <div class="section" style="padding-bottom:0">
+    <div class="pm-layout">
+      <!-- ── 테이블 영역 ── -->
+      <div class="pm-table-wrap">
+        <div class="pm-toolbar">
+          <span class="section-title">📁 프로젝트 관리</span>
+          <div class="section-line"></div>
+          <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 14px" onclick="addNewPmProject()">＋ 새 프로젝트</button>
+        </div>
+        <div class="pm-table-scroll">
+          <table class="pm-table">
+            <thead>
+              <tr>
+                <th style="min-width:200px">Aa 프로젝트명</th>
+                <th style="min-width:130px">≡ 구분</th>
+                <th style="min-width:130px">⚡ 진행률</th>
+                <th style="min-width:115px">📅 촬영예정일</th>
+                <th style="min-width:130px">≡ 촬영참석자</th>
+                <th style="min-width:110px">≡ 촬영장소</th>
+                <th style="min-width:115px">📅 업로드예정일</th>
+                <th style="min-width:60px;text-align:center">☑ 광고</th>
+                <th style="min-width:110px"># 제작비</th>
+              </tr>
+            </thead>
+            <tbody id="pm-tbody">
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">로딩 중...</td></tr>
+            </tbody>
+          </table>
+          <div class="pm-add-row" onclick="addNewPmProject()">＋ 새 페이지</div>
+        </div>
+      </div>
+      <!-- ── 디테일 패널 ── -->
+      <div class="pm-panel" id="pm-panel"></div>
+    </div>
   </div>
-  <div class="filter-bar">
-    <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">전체</div>
-    <div class="filter-chip" data-filter="proposal" onclick="setFilter('proposal',this)">🟠 초기 제안</div>
-    <div class="filter-chip" data-filter="planning" onclick="setFilter('planning',this)">🟣 기획 구체화</div>
-    <div class="filter-chip" data-filter="conti" onclick="setFilter('conti',this)">🔵 콘티 제작</div>
-    <div class="filter-chip" data-filter="done" onclick="setFilter('done',this)">✅ 완료</div>
-  </div>
-  <div id="projects-filtered-list"></div>
 </div>
 
 <!-- ═══ PIPELINE ═══ -->
@@ -1781,10 +1798,19 @@
     <div class="form-group">
       <label class="form-label">🧠 Claude API Key <span style="color:var(--muted);font-weight:400;font-size:10px">기획안 AI 자동 생성</span></label>
       <input class="form-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="font-family:'Space Mono',monospace;font-size:12px" />
-      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)">
-        <span>브라우저에만 저장 · 서버 미전송</span>
-        <a href="https://console.anthropic.com/settings/api-keys" target="_blank" style="color:var(--accent3);text-decoration:none">발급 ↗</a>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+        <div style="display:flex;gap:6px">
+          <button onclick="testClaudeApi()" id="claude-test-btn"
+            style="background:rgba(0,203,169,0.12);border:1px solid rgba(0,203,169,0.35);color:var(--accent3);border-radius:8px;padding:5px 12px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px">
+            🔌 연결 테스트
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--muted)">브라우저에만 저장</span>
+          <a href="https://console.anthropic.com/settings/api-keys" target="_blank" style="color:var(--accent3);text-decoration:none;font-size:11px">발급 ↗</a>
+        </div>
       </div>
+      <div id="claude-test-result" style="display:none;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Space Mono',monospace"></div>
     </div>
     <div id="api-key-status" style="font-size:11px;margin-bottom:8px;display:none"></div>
 
@@ -2302,24 +2328,167 @@ function setFilter(filter, el) {
   renderFilteredProjects();
 }
 
-function renderFilteredProjects() {
-  const filtered = currentFilter === 'all' ? projects : projects.filter(p => p.stage === currentFilter);
-  const container = document.getElementById('projects-filtered-list');
-  if (!container) return;
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎬</div>해당 단계 프로젝트가 없어요</div>`; return;
+function renderFilteredProjects() { renderProjectTable(); }
+
+// ════════════════════════════════════════
+//  프로젝트 관리 테이블 (노션 스타일)
+// ════════════════════════════════════════
+
+let _pmOpenId = null;
+const PM_CATEGORIES = ['유튜브 롱폼', '유튜브 숏폼', '인스타 릴스', '상업영상'];
+const PM_PROD_STAGES = ['프리프로덕션', '포스트프로덕션', '완료'];
+
+function _pmCatCls(cat) { return 'pm-cat-' + (cat || '').replace(/ /g, ''); }
+function _pmStageCls(s) { return 'pm-stage-' + (s || ''); }
+
+function renderProjectTable() {
+  const tbody = document.getElementById('pm-tbody');
+  if (!tbody) return;
+  if (!projects.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:28px;margin-bottom:10px">🎬</div>프로젝트가 없어요. 아래 버튼으로 추가해보세요!</td></tr>`;
+    return;
   }
-  if (currentFilter === 'all') {
-    let html = '';
-    [{ key:'proposal', icon:'🟠', label:'초기 제안' },{ key:'planning', icon:'🟣', label:'기획 구체화' },{ key:'conti', icon:'🔵', label:'콘티 제작' },{ key:'done', icon:'✅', label:'완료' }].forEach(sc => {
-      const list = projects.filter(p => p.stage === sc.key);
-      if (!list.length) return;
-      html += `<div class="section" style="margin-bottom:32px"><div class="section-header" style="margin-bottom:12px"><span class="section-title">${sc.icon} ${sc.label}</span><div class="section-line"></div></div><div class="project-list">${list.map(renderProjectRow).join('')}</div></div>`;
-    });
-    container.innerHTML = html || `<div class="empty-state"><div class="empty-icon">🎬</div>프로젝트가 없어요</div>`;
-  } else {
-    container.innerHTML = `<div class="project-list">${filtered.map(renderProjectRow).join('')}</div>`;
-  }
+  tbody.innerHTML = projects.map(p => `
+    <tr class="${_pmOpenId === p.id ? 'pm-row-selected' : ''}" onclick="openPmPanel(${p.id})">
+      <td><span class="pm-cell pm-cell-name">📄 ${escHtml(p.name || '제목 없음')}</span></td>
+      <td><span class="pm-cell">${p.category ? `<span class="pm-tag ${_pmCatCls(p.category)}">${escHtml(p.category)}</span>` : ''}</span></td>
+      <td><span class="pm-cell">${p.prodStage ? `<span class="pm-tag ${_pmStageCls(p.prodStage)}">${escHtml(p.prodStage)}</span>` : ''}</span></td>
+      <td><span class="pm-date-cell">${p.shootDate ? p.shootDate.replace(/-/g,'.') : ''}</span></td>
+      <td><span class="pm-cell">${escHtml(p.attendees || '')}</span></td>
+      <td><span class="pm-cell">${escHtml(p.shootLocation || '')}</span></td>
+      <td><span class="pm-date-cell">${p.uploadDate ? p.uploadDate.replace(/-/g,'.') : ''}</span></td>
+      <td><div class="pm-check"><input type="checkbox" ${p.isAd ? 'checked' : ''} onclick="event.stopPropagation();togglePmAd(${p.id},this.checked)"></div></td>
+      <td><span class="pm-budget-cell">${p.budget ? '₩' + Number(p.budget).toLocaleString() : ''}</span></td>
+    </tr>
+  `).join('');
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function addNewPmProject() {
+  const p = {
+    id: Date.now(), name: '', category: '', prodStage: '프리프로덕션',
+    shootDate: '', attendees: '', shootLocation: '', uploadDate: '',
+    isAd: false, budget: '', notes: '',
+    client: '', type: '', stage: 'proposal',
+    date: new Date().toLocaleDateString('ko-KR'), checks: {}, memo: '',
+  };
+  projects.unshift(p);
+  saveProjects();
+  renderProjectTable();
+  const el = document.getElementById('tab-count-projects');
+  if (el) el.textContent = projects.length;
+  openPmPanel(p.id);
+  // 패널 열리면 이름 입력창 자동 포커스
+  setTimeout(() => { const inp = document.getElementById('pm-f-name'); if (inp) inp.focus(); }, 100);
+}
+
+function togglePmAd(id, checked) {
+  const p = projects.find(x => x.id === id); if (!p) return;
+  p.isAd = !!checked; saveProjects();
+}
+
+function openPmPanel(id) {
+  _pmOpenId = id;
+  const p = projects.find(x => x.id === id); if (!p) return;
+  const panel = document.getElementById('pm-panel');
+  panel.classList.add('open');
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px">DETAIL</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="deletePmProject(${id})">🗑</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="closePmPanel()">✕</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:22px;margin-bottom:6px">📄</div>
+      <input class="pm-panel-title-input" id="pm-f-name" value="${escHtml(p.name || '')}" placeholder="프로젝트명을 입력하세요"
+        onblur="savePmField(${id},'name',this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()">
+    </div>
+    <div class="pm-panel-divider"></div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">☑ 광고여부</div>
+      <div class="pm-panel-check-row">
+        <input type="checkbox" id="pm-f-isAd" ${p.isAd?'checked':''} onchange="savePmField(${id},'isAd',this.checked)">
+        <label for="pm-f-isAd" style="cursor:pointer;font-size:13px">광고 / 협찬 영상</label>
+      </div>
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">≡ 구분</div>
+      <select class="pm-panel-select" onchange="savePmField(${id},'category',this.value)">
+        <option value="">선택 안함</option>
+        ${PM_CATEGORIES.map(c=>`<option value="${c}"${p.category===c?' selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">⚡ 진행률</div>
+      <select class="pm-panel-select" onchange="savePmField(${id},'prodStage',this.value)">
+        <option value="">선택 안함</option>
+        ${PM_PROD_STAGES.map(s=>`<option value="${s}"${p.prodStage===s?' selected':''}>${s}</option>`).join('')}
+      </select>
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">📅 업로드 예정일</div>
+      <input class="pm-panel-input" type="date" value="${p.uploadDate||''}" onchange="savePmField(${id},'uploadDate',this.value)">
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label"># 제작비 (₩)</div>
+      <input class="pm-panel-input" id="pm-f-budget" type="number" value="${p.budget||''}" placeholder="0"
+        onblur="savePmField(${id},'budget',this.value)">
+    </div>
+    <div class="pm-panel-divider"></div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">📅 촬영 예정일</div>
+      <input class="pm-panel-input" type="date" value="${p.shootDate||''}" onchange="savePmField(${id},'shootDate',this.value)">
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">≡ 촬영 참석자</div>
+      <input class="pm-panel-input" value="${escHtml(p.attendees||'')}" placeholder="크레용, 촬영팀..."
+        onblur="savePmField(${id},'attendees',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+    </div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">≡ 촬영장소</div>
+      <input class="pm-panel-input" value="${escHtml(p.shootLocation||'')}" placeholder="편집실, 스튜디오..."
+        onblur="savePmField(${id},'shootLocation',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+    </div>
+    <div class="pm-panel-divider"></div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label">📝 아이디어 / 시나리오 메모</div>
+      <textarea class="pm-panel-textarea" placeholder="아이디어, 레퍼런스 링크, 메모..."
+        onblur="savePmField(${id},'notes',this.value)">${escHtml(p.notes||'')}</textarea>
+    </div>
+  `;
+  renderProjectTable();
+}
+
+function closePmPanel() {
+  _pmOpenId = null;
+  const panel = document.getElementById('pm-panel');
+  panel.classList.remove('open');
+  panel.innerHTML = '';
+  renderProjectTable();
+}
+
+function savePmField(id, field, value) {
+  const p = projects.find(x => x.id === id); if (!p) return;
+  if (field === 'isAd') p.isAd = !!value;
+  else if (field === 'budget') p.budget = value === '' ? '' : Number(value);
+  else p[field] = value;
+  saveProjects();
+  renderProjectTable();
+}
+
+function deletePmProject(id) {
+  if (!confirm('이 프로젝트를 삭제할까요?\n삭제하면 복구할 수 없어요.')) return;
+  projects = projects.filter(x => x.id !== id);
+  saveProjects();
+  closePmPanel();
+  const el = document.getElementById('tab-count-projects');
+  if (el) el.textContent = projects.length;
 }
 
 function renderProjectRow(p) {
@@ -5026,6 +5195,81 @@ function openApiSettings(focus) {
       claudeInput.focus();
     }
   }, 150);
+}
+
+
+// ════════════════════════════════════════
+//  CLAUDE API 연결 테스트
+// ════════════════════════════════════════
+async function testClaudeApi() {
+  const input = document.getElementById('api-key-input');
+  const key = input?.value.trim() || localStorage.getItem('creyong-api-key') || '';
+  const btn = document.getElementById('claude-test-btn');
+  const result = document.getElementById('claude-test-result');
+
+  if (!key) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(251,146,60,0.1)';
+    result.style.border = '1px solid rgba(251,146,60,0.3)';
+    result.style.color = '#fb923c';
+    result.textContent = '⚠️ API 키를 먼저 입력하세요';
+    return;
+  }
+
+  // 로딩
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:4px"></span> 테스트 중...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1,
+        messages: [{ role: 'user', content: 'hi' }],
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      const model = data.model || 'claude';
+      result.style.display = 'block';
+      result.style.background = 'rgba(34,197,94,0.1)';
+      result.style.border = '1px solid rgba(34,197,94,0.3)';
+      result.style.color = '#4ade80';
+      result.innerHTML = `✅ 연결 성공! &nbsp;<span style="opacity:0.7">모델: ${model}</span>`;
+    } else {
+      const msg = data.error?.message || `HTTP ${res.status}`;
+      result.style.display = 'block';
+      result.style.background = 'rgba(239,68,68,0.1)';
+      result.style.border = '1px solid rgba(239,68,68,0.3)';
+      result.style.color = '#f87171';
+      if (res.status === 401) {
+        result.textContent = '❌ 인증 실패 — API 키를 확인하세요';
+      } else if (res.status === 429) {
+        result.textContent = '⚠️ 요청 한도 초과 — 잠시 후 재시도';
+      } else {
+        result.textContent = `❌ 오류: ${msg}`;
+      }
+    }
+  } catch (e) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,68,68,0.1)';
+    result.style.border = '1px solid rgba(239,68,68,0.3)';
+    result.style.color = '#f87171';
+    result.textContent = '❌ 네트워크 오류 — 인터넷 연결 확인';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔌 연결 테스트';
+  }
 }
 
 function saveApiKey() {
