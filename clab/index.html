@@ -7021,9 +7021,10 @@ function cgRenderHistogram(hist) {
   canvas.style.height   = '';
   canvas.style.maxHeight = '';
   const w = (canvas.parentElement?.offsetWidth || canvas.offsetWidth || 360);
-  const h = 220;
+  const h = 260;
   canvas.width = w;
   canvas.height = h;
+  canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#080810';
   ctx.fillRect(0, 0, w, h);
@@ -7050,7 +7051,7 @@ function cgRenderVectorscope(imageData) {
 
   // ── 정원 보장: CSS를 정사각형으로 고정 (max-height 해제 필수) ──
   const parent = canvas.parentElement;
-  const sz = Math.min(Math.max(parent?.offsetWidth || 0, 60), 300) || 260;
+  const sz = Math.min(Math.max(parent?.offsetWidth || 0, 60), 220) || 220;
   canvas.style.maxHeight = 'none';    // max-height 해제 ← 타원 방지 핵심
   canvas.width  = sz;
   canvas.height = sz;
@@ -7306,11 +7307,35 @@ async function cgRunGeminiAnalysis() {
   status.textContent = '🤖 AI 분석 중...';
 
   try {
+    // ── 사용 가능한 모델 자동 선택 (deprecated 모델 오류 방지) ──
+    status.textContent = '🔍 모델 확인 중...';
+    const VISION_PREF = [
+      'gemini-2.5-flash', 'gemini-2.5-pro',
+      'gemini-2.0-flash-lite', 'gemini-2.0-flash-001',
+      'gemini-1.5-flash-latest', 'gemini-1.5-flash',
+      'gemini-1.5-pro-latest', 'gemini-1.5-pro'
+    ];
+    let model = 'gemini-1.5-flash-latest'; // 최종 fallback
+    try {
+      const mRes  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}&pageSize=50`);
+      const mData = await mRes.json();
+      if (mRes.ok && mData.models) {
+        const available = mData.models
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent')
+                    && !m.name.includes('image-generation')
+                    && !m.name.includes('embedding')
+                    && !m.name.includes('aqa'))
+          .map(m => m.name.split('/').pop());
+        const pick = VISION_PREF.find(p => available.some(a => a === p || a.startsWith(p)));
+        if (pick) model = pick;
+        else if (available.length) model = available[0];
+      }
+    } catch(_) { /* ListModels 실패시 fallback 사용 */ }
+    status.textContent = `🤖 AI 분석 중... (${model})`;
+
     // 캔버스 이미지를 base64 JPEG로 변환 (용량 절약: 품질 0.7)
     const canvas  = document.getElementById('cg-hidden-canvas');
     const b64     = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-    // 색보정 분석은 비전 지원 모델 고정 (이미지 생성 모델과 분리)
-    const model   = 'gemini-2.0-flash';
 
     const prompt = `당신은 프로 컬러리스트입니다. 이 이미지를 색보정 관점에서 분석해주세요.
 
