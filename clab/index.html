@@ -970,7 +970,7 @@
             <button id="cg-scope-vec" onclick="cgSwitchScope('vectorscope')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.55);color:#a78bfa;cursor:pointer;transition:all .15s">벡터스코프</button>
             <button id="cg-scope-wave" onclick="cgSwitchScope('waveform')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;transition:all .15s">웨이브폼</button>
           </div>
-          <canvas id="cg-scope-canvas" style="width:100%;border-radius:12px;background:#080810;max-height:280px"></canvas>
+          <canvas id="cg-scope-canvas" style="display:block;border-radius:12px;background:#080810"></canvas>
         </div>
       </div>
 
@@ -7016,7 +7016,11 @@ function cgSwitchScope(type) {
 // ─── 렌더링: 히스토그램 ────────────────────────────────
 function cgRenderHistogram(hist) {
   const canvas = document.getElementById('cg-scope-canvas');
-  const w = canvas.offsetWidth || 360;
+  // 히스토그램: 가로 전체 사용
+  canvas.style.width    = '100%';
+  canvas.style.height   = '';
+  canvas.style.maxHeight = '';
+  const w = canvas.parentElement ? canvas.parentElement.offsetWidth : (canvas.offsetWidth || 360);
   const h = 220;
   canvas.width = w;
   canvas.height = h;
@@ -7044,9 +7048,10 @@ function cgRenderHistogram(hist) {
 function cgRenderVectorscope(imageData) {
   const canvas = document.getElementById('cg-scope-canvas');
 
-  // ── 정원 보장: CSS를 정사각형으로 고정 ──
+  // ── 정원 보장: CSS를 정사각형으로 고정 (max-height 해제 필수) ──
   const parent = canvas.parentElement;
   const sz = Math.min(parent ? parent.offsetWidth : 300, 300);
+  canvas.style.maxHeight = 'none';    // max-height 해제 ← 타원 방지 핵심
   canvas.width  = sz;
   canvas.height = sz;
   canvas.style.width  = sz + 'px';
@@ -7164,7 +7169,11 @@ function cgRenderVectorscope(imageData) {
 // ─── 렌더링: 웨이브폼 ─────────────────────────────────
 function cgRenderWaveform(imageData) {
   const canvas = document.getElementById('cg-scope-canvas');
-  const w = canvas.offsetWidth || 360;
+  // 웨이브폼: 가로 전체 사용
+  canvas.style.width    = '100%';
+  canvas.style.height   = '';
+  canvas.style.maxHeight = '';
+  const w = canvas.parentElement ? canvas.parentElement.offsetWidth : (canvas.offsetWidth || 360);
   const h = 220;
   canvas.width = w;
   canvas.height = h;
