@@ -802,9 +802,9 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <script>
 // ────────────────────────────────────────
 // 수강신청 폼 → Cloudflare Worker → Notion
-// WORKER_URL 은 CF Worker 배포 후 실제 URL로 교체
+// 구글 시트 Apps Script URL — 배포 후 아래에 붙여넣기
 // ────────────────────────────────────────
-var WORKER_URL = 'https://creyong-class-form.ACCOUNT.workers.dev';
+var FORM_URL = 'APPS_SCRIPT_URL_여기에_붙여넣기';
 
 /* ─── 페이지 전환 ─── */
 function showPage(name) {
@@ -860,7 +860,7 @@ function doRegister() {
   btn.textContent = '전송 중…';
   setAlert('reg-alert','','');
 
-  fetch(WORKER_URL, {
+  fetch(FORM_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive })
