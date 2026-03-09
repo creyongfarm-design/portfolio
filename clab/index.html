@@ -127,6 +127,61 @@
   .stage-conti { background: rgba(0,203,169,0.15); color: var(--accent3); }
   .stage-done { background: rgba(34,197,94,0.15); color: var(--green); }
   .project-date { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
+
+  /* ── 프로젝트 관리 테이블 (노션 스타일) ── */
+  .pm-layout { display: flex; gap: 0; align-items: flex-start; }
+  .pm-table-wrap { flex: 1; min-width: 0; overflow: hidden; }
+  .pm-toolbar { display: flex; align-items: center; gap: 12px; padding: 20px 0 16px; }
+  .pm-table-scroll { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  .pm-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 860px; }
+  .pm-table thead { position: sticky; top: 0; z-index: 5; }
+  .pm-table th { background: var(--surface2); border-bottom: 1px solid var(--border); border-right: 1px solid rgba(255,255,255,0.04); padding: 9px 12px; font-family: 'Space Mono',monospace; font-size: 10px; color: var(--muted); text-align: left; white-space: nowrap; font-weight: 500; }
+  .pm-table th:last-child { border-right: none; }
+  .pm-table td { border-bottom: 1px solid rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.04); padding: 0; vertical-align: middle; }
+  .pm-table td:last-child { border-right: none; }
+  .pm-table tr:last-child td { border-bottom: none; }
+  .pm-table tr { background: var(--surface); transition: background 0.15s; cursor: pointer; }
+  .pm-table tr:hover { background: rgba(0,203,169,0.04); }
+  .pm-table tr.pm-row-selected { background: rgba(0,203,169,0.08); }
+  .pm-cell { padding: 10px 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  .pm-cell-name { font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; max-width: 260px; }
+  .pm-tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
+  .pm-cat-유튜브롱폼 { background: rgba(249,115,22,0.2); color: #fb923c; }
+  .pm-cat-유튜브숏폼 { background: rgba(234,88,12,0.18); color: #fdba74; }
+  .pm-cat-인스타릴스 { background: rgba(139,92,246,0.2); color: #a78bfa; }
+  .pm-cat-상업영상 { background: rgba(59,130,246,0.2); color: #60a5fa; }
+  .pm-stage-프리프로덕션 { background: rgba(100,116,139,0.3); color: #94a3b8; }
+  .pm-stage-포스트프로덕션 { background: rgba(59,130,246,0.22); color: #60a5fa; }
+  .pm-stage-완료 { background: rgba(34,197,94,0.2); color: #4ade80; }
+  .pm-date-cell { font-family: 'Space Mono',monospace; font-size: 11px; color: var(--muted); padding: 10px 12px; display: block; }
+  .pm-budget-cell { font-family: 'Space Mono',monospace; font-size: 11px; padding: 10px 12px; display: block; }
+  .pm-check { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+  .pm-check input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+  .pm-add-row { padding: 10px 14px; font-size: 12px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.04); background: var(--surface); border-radius: 0 0 8px 8px; transition: all 0.15s; }
+  .pm-add-row:hover { background: rgba(0,203,169,0.06); color: var(--accent); }
+  /* 우측 디테일 패널 */
+  .pm-panel { width: 0; overflow: hidden; transition: width 0.3s ease; flex-shrink: 0; }
+  .pm-panel.open { width: 480px; overflow-y: auto; border-left: 1px solid var(--border); padding: 22px 24px; max-height: calc(100vh - 130px); position: sticky; top: 120px; }
+  .pm-panel-title-input { background: none; border: none; font-size: 20px; font-weight: 700; color: var(--text); font-family: 'Noto Sans KR'; outline: none; width: 100%; padding: 0; line-height: 1.3; }
+  .pm-panel-label { font-family: 'Space Mono',monospace; font-size: 10px; color: var(--muted); margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+  .pm-panel-input, .pm-panel-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 13px; font-family: 'Noto Sans KR'; outline: none; }
+  .pm-panel-input:focus, .pm-panel-select:focus { border-color: var(--accent); }
+  .pm-panel-select option { background: var(--surface2); }
+  .pm-panel-textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; color: var(--text); font-size: 14px; font-family: 'Noto Sans KR'; outline: none; resize: vertical; min-height: 360px; line-height: 1.7; }
+  .pm-panel-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,203,169,0.08); }
+  .pm-panel-row { margin-bottom: 12px; }
+  .pm-panel-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .pm-panel-check-row { display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; }
+  .pm-panel-check-row input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+  .pm-panel-divider { height: 1px; background: var(--border); margin: 14px 0; }
+  /* 이모지 픽커 */
+  .pm-emoji-wrap { position: relative; display: inline-block; }
+  .pm-emoji-btn { font-size: 34px; cursor: pointer; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px dashed transparent; transition: all 0.15s; flex-shrink: 0; }
+  .pm-emoji-btn:hover { border-color: var(--border); background: var(--surface2); }
+  .pm-emoji-picker { position: absolute; left: 0; top: 58px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px; z-index: 200; display: none; grid-template-columns: repeat(7, 1fr); gap: 2px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 240px; }
+  .pm-emoji-picker.open { display: grid; }
+  .pm-emoji-opt { font-size: 20px; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 5px; transition: background 0.1s; }
+  .pm-emoji-opt:hover { background: rgba(0,203,169,0.15); }
   .progress-bar-wrap { display: flex; align-items: center; gap: 6px; }
   .progress-bar { width: 48px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
@@ -626,60 +681,8 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" onerror="console.warn('ExcelJS 로드 실패')"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" onerror="console.warn('QRCode 로드 실패')"></script>
-
-<style id="pw-lock-style">
-#pw-lock-overlay{position:fixed;inset:0;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:99999}
-#pw-lock-overlay.hide{opacity:0;pointer-events:none;transition:opacity .4s}
-.pw-lock-box{width:100%;max-width:340px;padding:0 24px;text-align:center}
-.pw-lock-logo{font-size:10px;letter-spacing:6px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:32px}
-.pw-lock-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;color:#fff;margin-bottom:6px}
-.pw-lock-sub{font-size:13px;color:rgba(255,255,255,.38);margin-bottom:32px}
-.pw-input{width:100%;padding:15px 20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:#fff;font-size:18px;letter-spacing:6px;outline:none;text-align:center;transition:border-color .2s}
-.pw-input:focus{border-color:rgba(249,115,22,.5)}
-.pw-input::placeholder{letter-spacing:1px;font-size:13px;color:rgba(255,255,255,.22)}
-.pw-btn{width:100%;margin-top:12px;padding:15px;background:#f97316;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:700;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:background .2s}
-.pw-btn:hover{background:#ea6c0a}
-.pw-err{font-size:12px;color:#f87171;margin-top:10px;min-height:16px}
-@keyframes pw-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.pw-shake{animation:pw-shake .3s ease}
-</style>
 </head>
 <body>
-<div id="pw-lock-overlay">
-  <div class="pw-lock-box">
-    <div class="pw-lock-logo">Creyong</div>
-    <div class="pw-lock-title">C.LAB</div>
-    <div class="pw-lock-sub">관리자만 접근할 수 있습니다</div>
-    <input id="pw-input" class="pw-input" type="password" placeholder="비밀번호" maxlength="20" autocomplete="off">
-    <button class="pw-btn" onclick="pwCheck()">입장</button>
-    <div id="pw-err" class="pw-err"></div>
-  </div>
-</div>
-<script>
-(function(){
-  var PW='17171', KEY='clab_auth';
-  if(sessionStorage.getItem(KEY)==='1'){
-    document.getElementById('pw-lock-overlay').style.display='none';
-    return;
-  }
-  document.getElementById('pw-input').addEventListener('keydown',function(e){if(e.key==='Enter')pwCheck()});
-  window.pwCheck=function(){
-    var v=document.getElementById('pw-input').value;
-    if(v===PW){
-      sessionStorage.setItem(KEY,'1');
-      var el=document.getElementById('pw-lock-overlay');
-      el.classList.add('hide');
-      setTimeout(function(){el.style.display='none'},400);
-    }else{
-      document.getElementById('pw-err').textContent='비밀번호가 올바르지 않습니다';
-      var inp=document.getElementById('pw-input');
-      inp.value='';inp.classList.add('pw-shake');
-      setTimeout(function(){inp.classList.remove('pw-shake')},400);
-    }
-  };
-})();
-</script>
-
 
 
 <header>
@@ -807,18 +810,43 @@
 
 <!-- ═══ PROJECTS ═══ -->
 <div class="page" id="page-projects">
-  <div class="section">
-    <div class="section-header"><span class="section-title">📁 프로젝트 목록</span><div class="section-line"></div></div>
-    <button class="add-btn" onclick="openModal('new-project')">+ 새 프로젝트 추가</button>
+  <div class="section" style="padding-bottom:0">
+    <div class="pm-layout">
+      <!-- ── 테이블 영역 ── -->
+      <div class="pm-table-wrap">
+        <div class="pm-toolbar">
+          <span class="section-title">📁 프로젝트 관리</span>
+          <span id="pm-notion-badge" style="display:none;font-size:10px;color:var(--accent3);font-family:'Space Mono',monospace;padding:2px 8px;background:rgba(0,203,169,0.1);border:1px solid rgba(0,203,169,0.3);border-radius:20px;flex-shrink:0">📓 Notion</span>
+          <div class="section-line"></div>
+          <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 10px" title="새로고침" onclick="renderProjectTable()">↺</button>
+          <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 14px" onclick="addNewPmProject()">＋ 새 프로젝트</button>
+        </div>
+        <div class="pm-table-scroll">
+          <table class="pm-table">
+            <thead>
+              <tr>
+                <th style="min-width:200px">Aa 프로젝트명</th>
+                <th style="min-width:130px">≡ 구분</th>
+                <th style="min-width:130px">⚡ 진행률</th>
+                <th style="min-width:115px">📅 촬영예정일</th>
+                <th style="min-width:130px">≡ 촬영참석자</th>
+                <th style="min-width:110px">≡ 촬영장소</th>
+                <th style="min-width:115px">📅 업로드예정일</th>
+                <th style="min-width:60px;text-align:center">☑ 광고</th>
+                <th style="min-width:110px"># 제작비</th>
+              </tr>
+            </thead>
+            <tbody id="pm-tbody">
+              <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">로딩 중...</td></tr>
+            </tbody>
+          </table>
+          <div class="pm-add-row" onclick="addNewPmProject()">＋ 새 페이지</div>
+        </div>
+      </div>
+      <!-- ── 디테일 패널 ── -->
+      <div class="pm-panel" id="pm-panel"></div>
+    </div>
   </div>
-  <div class="filter-bar">
-    <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">전체</div>
-    <div class="filter-chip" data-filter="proposal" onclick="setFilter('proposal',this)">🟠 초기 제안</div>
-    <div class="filter-chip" data-filter="planning" onclick="setFilter('planning',this)">🟣 기획 구체화</div>
-    <div class="filter-chip" data-filter="conti" onclick="setFilter('conti',this)">🔵 콘티 제작</div>
-    <div class="filter-chip" data-filter="done" onclick="setFilter('done',this)">✅ 완료</div>
-  </div>
-  <div id="projects-filtered-list"></div>
 </div>
 
 <!-- ═══ PIPELINE ═══ -->
@@ -939,8 +967,12 @@
           <img id="cg-preview-img" style="width:100%;border-radius:12px;object-fit:cover;max-height:260px" />
         </div>
         <div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;letter-spacing:.5px">밝기 히스토그램</div>
-          <canvas id="cg-histogram-canvas" style="width:100%;border-radius:12px;background:#0f0f1a;max-height:260px"></canvas>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <button id="cg-scope-hist" onclick="cgSwitchScope('histogram')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;transition:all .15s">히스토그램</button>
+            <button id="cg-scope-vec" onclick="cgSwitchScope('vectorscope')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.55);color:#a78bfa;cursor:pointer;transition:all .15s">벡터스코프</button>
+            <button id="cg-scope-wave" onclick="cgSwitchScope('waveform')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;transition:all .15s">웨이브폼</button>
+          </div>
+          <canvas id="cg-scope-canvas" style="display:block;border-radius:12px;background:#080810"></canvas>
         </div>
       </div>
 
@@ -1781,10 +1813,19 @@
     <div class="form-group">
       <label class="form-label">🧠 Claude API Key <span style="color:var(--muted);font-weight:400;font-size:10px">기획안 AI 자동 생성</span></label>
       <input class="form-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." style="font-family:'Space Mono',monospace;font-size:12px" />
-      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)">
-        <span>브라우저에만 저장 · 서버 미전송</span>
-        <a href="https://console.anthropic.com/settings/api-keys" target="_blank" style="color:var(--accent3);text-decoration:none">발급 ↗</a>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+        <div style="display:flex;gap:6px">
+          <button onclick="testClaudeApi()" id="claude-test-btn"
+            style="background:rgba(0,203,169,0.12);border:1px solid rgba(0,203,169,0.35);color:var(--accent3);border-radius:8px;padding:5px 12px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px">
+            🔌 연결 테스트
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:11px;color:var(--muted)">브라우저에만 저장</span>
+          <a href="https://console.anthropic.com/settings/api-keys" target="_blank" style="color:var(--accent3);text-decoration:none;font-size:11px">발급 ↗</a>
+        </div>
       </div>
+      <div id="claude-test-result" style="display:none;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Space Mono',monospace"></div>
     </div>
     <div id="api-key-status" style="font-size:11px;margin-bottom:8px;display:none"></div>
 
@@ -1807,6 +1848,13 @@
         <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent3);text-decoration:none">발급 ↗</a>
       </div>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+      <button onclick="testGeminiApi()" id="gemini-test-btn"
+        style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.35);color:#c084fc;border-radius:8px;padding:5px 12px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px">
+        🔌 연결 테스트
+      </button>
+    </div>
+    <div id="gemini-test-result" style="display:none;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Space Mono',monospace"></div>
     <div id="gemini-key-status" style="font-size:11px;margin-bottom:4px;display:none"></div>
     <div class="form-group" style="margin-top:6px" id="gemini-model-row">
       <label class="form-label" style="font-size:10px;color:var(--muted)">Gemini 모델</label>
@@ -1837,10 +1885,23 @@
           <a href="https://www.notion.so/my-integrations" target="_blank" style="color:var(--accent3);text-decoration:none">발급 ↗</a>
         </div>
       </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">저장할 Notion 페이지 ID</label>
+      <div class="form-group">
+        <label class="form-label">프로젝트 DB ID <span style="color:var(--muted);font-weight:400;font-size:10px">📁 프로젝트 관리 탭 연동</span></label>
+        <input class="form-input" id="notion-db-id-input" type="text" placeholder="33df08d4fc24984901a0dcda7d1c7d5" style="font-family:'Space Mono',monospace;font-size:12px" />
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Notion DB URL의 32자리 ID · 통합에 DB 접근 권한 부여 필요</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:8px">
+        <button onclick="testNotionApi()" id="notion-test-btn"
+          style="background:rgba(0,203,169,0.12);border:1px solid rgba(0,203,169,0.35);color:var(--accent3);border-radius:8px;padding:5px 12px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px">
+          🔌 연결 테스트
+        </button>
+        <span id="notion-key-status" style="font-size:11px;display:none"></span>
+      </div>
+      <div id="notion-test-result" style="display:none;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Space Mono',monospace"></div>
+      <div class="form-group" style="margin-bottom:0;margin-top:10px">
+        <label class="form-label" style="font-size:10px;color:var(--muted)">기타 저장용 Notion 페이지 ID</label>
         <input class="form-input" id="notion-page-id-input" type="text" placeholder="abcd1234efgh5678..." style="font-family:'Space Mono',monospace;font-size:12px" />
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">Notion 페이지 URL의 마지막 32자리 ID · 통합에 해당 페이지 접근 권한 부여 필요</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Notion 페이지 URL의 마지막 32자리 ID</div>
       </div>
     </div>
 
@@ -2132,6 +2193,8 @@ function switchTab(tab, el) {
   if (tab === 'characters') { switchTab('conti', document.querySelector('[data-tab=conti]')); return; }
   if (tab === 'conti') { renderCharGrid(); }
   if (tab === 'location') renderLocations();
+  // 새로고침 후 마지막 탭 복원을 위해 저장
+  localStorage.setItem('creyong-last-tab', tab);
 }
 
 // ════════════════════════════════════════
@@ -2302,24 +2365,380 @@ function setFilter(filter, el) {
   renderFilteredProjects();
 }
 
-function renderFilteredProjects() {
-  const filtered = currentFilter === 'all' ? projects : projects.filter(p => p.stage === currentFilter);
-  const container = document.getElementById('projects-filtered-list');
-  if (!container) return;
-  if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎬</div>해당 단계 프로젝트가 없어요</div>`; return;
-  }
-  if (currentFilter === 'all') {
-    let html = '';
-    [{ key:'proposal', icon:'🟠', label:'초기 제안' },{ key:'planning', icon:'🟣', label:'기획 구체화' },{ key:'conti', icon:'🔵', label:'콘티 제작' },{ key:'done', icon:'✅', label:'완료' }].forEach(sc => {
-      const list = projects.filter(p => p.stage === sc.key);
-      if (!list.length) return;
-      html += `<div class="section" style="margin-bottom:32px"><div class="section-header" style="margin-bottom:12px"><span class="section-title">${sc.icon} ${sc.label}</span><div class="section-line"></div></div><div class="project-list">${list.map(renderProjectRow).join('')}</div></div>`;
+function renderFilteredProjects() { renderProjectTable(); }
+
+// ════════════════════════════════════════
+//  프로젝트 관리 테이블 (Notion 연동)
+// ════════════════════════════════════════
+
+let _pmOpenId   = null;
+let _pmNProjs   = [];   // Notion 모드 캐시
+let _pmSaveTmr  = {};   // debounce 타이머
+const PM_CATEGORIES = ['유튜브 롱폼', '유튜브 숏폼', '인스타 릴스', '상업영상'];
+
+function _pmCatCls(cat) { return 'pm-cat-' + (cat || '').replace(/ /g, ''); }
+function _pmHasNotion()  { return !!localStorage.getItem('creyong-notion-token'); }
+function _pmDbId()       { return (localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368').replace(/-/g,''); }
+
+// ── Notion REST 헬퍼 (로컬 서버 프록시 우선 → 직접 호출 폴백) ──
+async function _notionReq(method, path, body) {
+  const token = localStorage.getItem('creyong-notion-token') || '';
+
+  // 로컬 서버(크레용포털_서버시작.command)가 실행 중이면 프록시 경유 (CORS 우회)
+  const useProxy = (location.protocol !== 'file:' && location.hostname === 'localhost');
+  if (useProxy) {
+    const res  = await fetch('/api/notion-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, path, body, token }),
     });
-    container.innerHTML = html || `<div class="empty-state"><div class="empty-icon">🎬</div>프로젝트가 없어요</div>`;
-  } else {
-    container.innerHTML = `<div class="project-list">${filtered.map(renderProjectRow).join('')}</div>`;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+    return data;
   }
+
+  // 직접 호출 (CORS 허용 환경 or 배포 환경)
+  const opts = {
+    method,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Notion-Version': '2022-06-28',
+      'Content-Type': 'application/json',
+    },
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res  = await fetch(`https://api.notion.com/v1${path}`, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+  return data;
+}
+
+// ── Notion 페이지 → 포털 객체 ─────────────────────────
+function _n2p(page) {
+  const pr  = page.properties || {};
+  const txt = (p) => p?.rich_text?.[0]?.text?.content || p?.text?.[0]?.text?.content || '';
+  const ttl = (p) => p?.title?.[0]?.text?.content || '';
+  const sel = (p) => p?.select?.name || '';
+  const num = (p) => (p?.number ?? null);
+  const dat = (p) => p?.date?.start || '';
+  const chk = (p) => !!p?.checkbox;
+  const sts = (p) => p?.status?.name || '';
+  let emoji = '🎬';
+  if (page.icon?.type === 'emoji') emoji = page.icon.emoji;
+  return {
+    id: page.id, notionId: page.id, emoji,
+    name:          ttl(pr['작업 이름']),
+    category:      sel(pr['구분']),
+    prodStage:     num(pr['진행률']),
+    shootDate:     dat(pr['촬영예정일']),
+    attendees:     txt(pr['촬영참석자']),
+    shootLocation: txt(pr['촬영장소']),
+    uploadDate:    dat(pr['업로드예정일']),
+    isAd:          chk(pr['광고여부']),
+    budget:        num(pr['제작비']),
+    notes:         txt(pr['요약']),
+    status:        sts(pr['상태']),
+    client: '', type: '', stage: 'proposal',
+    date: new Date(page.created_time || Date.now()).toLocaleDateString('ko-KR'),
+    checks: {}, memo: '',
+  };
+}
+
+// ── 포털 객체 → Notion 속성 ──────────────────────────
+function _p2n(p) {
+  const props = {};
+  if (p.name      !== undefined) props['작업 이름']  = { title: [{ text: { content: p.name || '' } }] };
+  if (p.category  !== undefined) props['구분']        = p.category ? { select: { name: p.category } } : { select: null };
+  if (p.prodStage !== undefined) props['진행률']      = { number: p.prodStage !== '' && p.prodStage !== null ? Number(p.prodStage) : null };
+  if (p.shootDate !== undefined) props['촬영예정일']  = { date: p.shootDate ? { start: p.shootDate } : null };
+  if (p.attendees !== undefined) props['촬영참석자']  = { rich_text: p.attendees ? [{ text: { content: p.attendees } }] : [] };
+  if (p.shootLocation !== undefined) props['촬영장소'] = { rich_text: p.shootLocation ? [{ text: { content: p.shootLocation } }] : [] };
+  if (p.uploadDate !== undefined) props['업로드예정일'] = { date: p.uploadDate ? { start: p.uploadDate } : null };
+  if (p.isAd      !== undefined) props['광고여부']    = { checkbox: !!p.isAd };
+  if (p.budget    !== undefined) props['제작비']      = { number: p.budget !== '' && p.budget !== null ? Number(p.budget) : null };
+  if (p.notes     !== undefined) props['요약']        = { rich_text: p.notes ? [{ text: { content: p.notes } }] : [] };
+  return props;
+}
+
+// ── Notion DB 목록 불러오기 ───────────────────────────
+async function _loadNotionProjects() {
+  const data = await _notionReq('POST', `/databases/${_pmDbId()}/query`, {
+    sorts: [{ timestamp: 'created_time', direction: 'descending' }],
+    page_size: 100,
+  });
+  return (data.results || []).filter(p => !p.archived).map(_n2p);
+}
+
+// ── 테이블 행 렌더 (공통) ─────────────────────────────
+function _renderPmRows(rows) {
+  const tbody = document.getElementById('pm-tbody');
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:48px 20px;color:var(--muted)"><div style="font-size:28px;margin-bottom:10px">🎬</div>프로젝트가 없어요. 아래 버튼으로 추가해보세요!</td></tr>`;
+    return;
+  }
+  const stageCls = (v) => v >= 100 ? 'pm-stage-완료' : v > 0 ? 'pm-stage-프리프로덕션' : '';
+  tbody.innerHTML = rows.map(p => {
+    const stageHtml = (p.prodStage !== null && p.prodStage !== '')
+      ? `<span class="pm-tag ${stageCls(p.prodStage)}">${p.prodStage}%</span>` : '';
+    return `
+    <tr class="${_pmOpenId == p.id ? 'pm-row-selected' : ''}" onclick="openPmPanel('${p.id}')">
+      <td><span class="pm-cell pm-cell-name">${p.emoji||'📄'} ${escHtml(p.name||'제목 없음')}</span></td>
+      <td><span class="pm-cell">${p.category?`<span class="pm-tag ${_pmCatCls(p.category)}">${escHtml(p.category)}</span>`:''}</span></td>
+      <td><span class="pm-cell">${stageHtml}</span></td>
+      <td><span class="pm-date-cell">${p.shootDate?p.shootDate.replace(/-/g,'.'):''}</span></td>
+      <td><span class="pm-cell">${escHtml(p.attendees||'')}</span></td>
+      <td><span class="pm-cell">${escHtml(p.shootLocation||'')}</span></td>
+      <td><span class="pm-date-cell">${p.uploadDate?p.uploadDate.replace(/-/g,'.'):''}</span></td>
+      <td><div class="pm-check"><input type="checkbox" ${p.isAd?'checked':''} onclick="event.stopPropagation();togglePmAd('${p.id}',this.checked)"></div></td>
+      <td><span class="pm-budget-cell">${p.budget?'₩'+Number(p.budget).toLocaleString():''}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+async function renderProjectTable() {
+  const tbody = document.getElementById('pm-tbody');
+  if (!tbody) return;
+  if (_pmHasNotion()) {
+    // Notion 로드 (캐시 먼저 표시 → 실제 데이터로 교체)
+    const cached = JSON.parse(localStorage.getItem('creyong-pm-cache') || '[]');
+    if (cached.length) { _pmNProjs = cached; projects = cached; _renderPmRows(cached); }
+    else { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--accent);font-size:12px;font-family:'Space Mono',monospace">📓 Notion 불러오는 중...</td></tr>`; }
+    try {
+      _pmNProjs = await _loadNotionProjects();
+      projects  = _pmNProjs;
+      localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+      _renderPmRows(_pmNProjs);
+      const el = document.getElementById('tab-count-projects');
+      if (el) el.textContent = _pmNProjs.length;
+    } catch(e) {
+      if (!cached.length) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--red);font-size:12px">⚠️ Notion 연결 실패: ${escHtml(e.message)}</td></tr>`;
+      }
+      showToast(`⚠️ Notion 로드 실패: ${e.message}`, 'warn');
+    }
+  } else {
+    // 로컬 모드 (기존 동작)
+    _renderPmRows(projects);
+  }
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const PM_EMOJIS = ['🎬','📹','📱','🎥','📸','🎞️','🎤','🎧','💼','📋','✨','🌟','🔥','💡','🎯','🚀','👥','🏢','🌿','🎨','📲','🎵','🎶','🖥️','💰','🏆','📢','🤝','🌈','⚡','🎪','🎭'];
+
+async function addNewPmProject() {
+  const p = {
+    id: Date.now(), emoji: '🎬', name: '', category: '', prodStage: null,
+    shootDate: '', attendees: '', shootLocation: '', uploadDate: '',
+    isAd: false, budget: null, notes: '',
+    client: '', type: '', stage: 'proposal',
+    date: new Date().toLocaleDateString('ko-KR'), checks: {}, memo: '',
+  };
+  if (_pmHasNotion()) {
+    try {
+      showToast('📓 Notion에 프로젝트 생성 중...', 'info');
+      const created = await _notionReq('POST', '/pages', {
+        parent: { database_id: _pmDbId() },
+        icon: { type: 'emoji', emoji: '🎬' },
+        properties: _p2n(p),
+      });
+      p.id = created.id; p.notionId = created.id;
+      _pmNProjs.unshift(p); projects = _pmNProjs;
+      localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+    } catch(e) { showToast(`⚠️ Notion 생성 실패: ${e.message}`, 'warn'); return; }
+  } else {
+    projects.unshift(p);
+    saveProjects();
+  }
+  _renderPmRows(_pmHasNotion() ? _pmNProjs : projects);
+  const el = document.getElementById('tab-count-projects');
+  if (el) el.textContent = (_pmHasNotion() ? _pmNProjs : projects).length;
+  openPmPanel(p.id);
+  setTimeout(() => { const inp = document.getElementById('pm-f-name'); if (inp) inp.focus(); }, 100);
+}
+
+async function togglePmAd(id, checked) {
+  const arr = _pmHasNotion() ? _pmNProjs : projects;
+  const p = arr.find(x => x.id == id); if (!p) return;
+  p.isAd = !!checked;
+  if (_pmHasNotion()) {
+    localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+    try { await _notionReq('PATCH', `/pages/${id}`, { properties: _p2n({ isAd: p.isAd }) }); }
+    catch(e) { showToast(`⚠️ 저장 실패: ${e.message}`, 'warn'); }
+  } else { saveProjects(); }
+}
+
+function openPmPanel(id) {
+  _pmOpenId = id;
+  const arr = _pmHasNotion() ? _pmNProjs : projects;
+  const p = arr.find(x => x.id == id); if (!p) return;
+  const panel = document.getElementById('pm-panel');
+  panel.classList.add('open');
+  const emojiOpts = PM_EMOJIS.map(e => `<div class="pm-emoji-opt" onclick="selectPmEmoji('${id}','${e}')">${e}</div>`).join('');
+  const stageVal  = (p.prodStage !== null && p.prodStage !== '') ? p.prodStage : '';
+  const notionLink = _pmHasNotion()
+    ? `<a href="https://notion.so/${String(id).replace(/-/g,'')}" target="_blank" style="font-size:10px;color:var(--accent3);text-decoration:none;font-family:'Space Mono',monospace;margin-top:2px;display:block">📓 Notion에서 열기 ↗</a>`
+    : '';
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+      <div>
+        <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px">PROJECT DETAIL</span>
+        ${notionLink}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-danger" style="font-size:11px;padding:4px 10px" onclick="deletePmProject('${id}')">🗑</button>
+        <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="closePmPanel()">✕</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:14px">
+      <div class="pm-emoji-wrap">
+        <div class="pm-emoji-btn" id="pm-emoji-display" onclick="toggleEmojiPicker()">${p.emoji||'🎬'}</div>
+        <div class="pm-emoji-picker" id="pm-emoji-picker">${emojiOpts}</div>
+      </div>
+      <input class="pm-panel-title-input" id="pm-f-name" value="${escHtml(p.name||'')}"
+        placeholder="프로젝트명을 입력하세요"
+        onblur="savePmField('${id}','name',this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()"
+        style="margin-top:10px">
+    </div>
+    <div class="pm-panel-divider"></div>
+    <div class="pm-panel-grid2">
+      <div>
+        <div class="pm-panel-label">≡ 구분</div>
+        <select class="pm-panel-select" onchange="savePmField('${id}','category',this.value)">
+          <option value="">선택 안함</option>
+          ${PM_CATEGORIES.map(c=>`<option value="${c}"${p.category===c?' selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <div class="pm-panel-label">⚡ 진행률 (%)</div>
+        <input class="pm-panel-input" type="number" min="0" max="100" value="${stageVal}"
+          placeholder="0 ~ 100"
+          onblur="savePmField('${id}','prodStage',this.value===''?null:Number(this.value))">
+      </div>
+      <div>
+        <div class="pm-panel-label">📅 촬영 예정일</div>
+        <input class="pm-panel-input" type="date" value="${p.shootDate||''}" onchange="savePmField('${id}','shootDate',this.value)">
+      </div>
+      <div>
+        <div class="pm-panel-label">📅 업로드 예정일</div>
+        <input class="pm-panel-input" type="date" value="${p.uploadDate||''}" onchange="savePmField('${id}','uploadDate',this.value)">
+      </div>
+      <div>
+        <div class="pm-panel-label">≡ 촬영 참석자</div>
+        <input class="pm-panel-input" value="${escHtml(p.attendees||'')}" placeholder="크레용, 촬영팀..."
+          onblur="savePmField('${id}','attendees',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div>
+        <div class="pm-panel-label">≡ 촬영장소</div>
+        <input class="pm-panel-input" value="${escHtml(p.shootLocation||'')}" placeholder="편집실, 스튜디오..."
+          onblur="savePmField('${id}','shootLocation',this.value)" onkeydown="if(event.key==='Enter')this.blur()">
+      </div>
+      <div>
+        <div class="pm-panel-label"># 제작비 (₩)</div>
+        <input class="pm-panel-input" id="pm-f-budget" type="text"
+          value="${p.budget!==null&&p.budget!==''?Number(p.budget).toLocaleString('ko-KR'):''}"
+          placeholder="0"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onfocus="this.value=this.value.replace(/,/g,'')"
+          onblur="const raw=this.value.replace(/,/g,'');savePmField('${id}','budget',raw===''?null:Number(raw));if(raw)this.value=Number(raw).toLocaleString('ko-KR')">
+      </div>
+      <div>
+        <div class="pm-panel-label">☑ 광고여부</div>
+        <div class="pm-panel-check-row">
+          <input type="checkbox" id="pm-f-isAd" ${p.isAd?'checked':''} onchange="savePmField('${id}','isAd',this.checked)">
+          <label for="pm-f-isAd" style="cursor:pointer;font-size:12px">광고 / 협찬</label>
+        </div>
+      </div>
+    </div>
+    <div class="pm-panel-divider"></div>
+    <div class="pm-panel-row">
+      <div class="pm-panel-label" style="margin-bottom:8px">📝 기획안 / 아이디어 / 시나리오</div>
+      <textarea class="pm-panel-textarea" id="pm-f-notes"
+        placeholder="아이디어, 컨셉 방향, 레퍼런스 링크, 시나리오 초안..."
+        onblur="savePmField('${id}','notes',this.value)">${escHtml(p.notes||'')}</textarea>
+    </div>
+  `;
+  _renderPmRows(arr);
+  setTimeout(() => { document.addEventListener('click', _closePmEmojiOnOutside, { once: false }); }, 50);
+}
+
+function _closePmEmojiOnOutside(e) {
+  const wrap = document.querySelector('.pm-emoji-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    const picker = document.getElementById('pm-emoji-picker');
+    if (picker) picker.classList.remove('open');
+  }
+}
+
+function toggleEmojiPicker() {
+  const picker = document.getElementById('pm-emoji-picker');
+  if (picker) picker.classList.toggle('open');
+}
+
+async function selectPmEmoji(id, emoji) {
+  const arr = _pmHasNotion() ? _pmNProjs : projects;
+  const p = arr.find(x => x.id == id); if (!p) return;
+  p.emoji = emoji;
+  if (_pmHasNotion()) {
+    localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+    try { await _notionReq('PATCH', `/pages/${id}`, { icon: { type: 'emoji', emoji } }); }
+    catch(e) { showToast(`⚠️ 저장 실패: ${e.message}`, 'warn'); }
+  } else { saveProjects(); }
+  const btn = document.getElementById('pm-emoji-display');
+  if (btn) btn.textContent = emoji;
+  const picker = document.getElementById('pm-emoji-picker');
+  if (picker) picker.classList.remove('open');
+  _renderPmRows(arr);
+}
+
+function closePmPanel() {
+  _pmOpenId = null;
+  const panel = document.getElementById('pm-panel');
+  panel.classList.remove('open');
+  panel.innerHTML = '';
+  _renderPmRows(_pmHasNotion() ? _pmNProjs : projects);
+}
+
+async function savePmField(id, field, value) {
+  const arr = _pmHasNotion() ? _pmNProjs : projects;
+  const p = arr.find(x => x.id == id); if (!p) return;
+  if (field === 'isAd') p.isAd = !!value;
+  else if (field === 'budget') p.budget = (value===''||value===null) ? null : Number(value);
+  else if (field === 'prodStage') p.prodStage = value;
+  else p[field] = value;
+  if (_pmHasNotion()) {
+    localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+    clearTimeout(_pmSaveTmr[id+field]);
+    _pmSaveTmr[id+field] = setTimeout(async () => {
+      try {
+        const upd = {}; upd[field] = value;
+        await _notionReq('PATCH', `/pages/${id}`, { properties: _p2n(upd) });
+      } catch(e) { showToast(`⚠️ Notion 저장 실패: ${e.message}`, 'warn'); }
+    }, 600);
+  } else { saveProjects(); }
+  _renderPmRows(arr);
+}
+
+async function deletePmProject(id) {
+  if (!confirm('이 프로젝트를 삭제할까요?\n삭제하면 복구할 수 없어요.')) return;
+  if (_pmHasNotion()) {
+    try {
+      await _notionReq('PATCH', `/pages/${id}`, { archived: true });
+      _pmNProjs = _pmNProjs.filter(x => x.id != id);
+      projects  = _pmNProjs;
+      localStorage.setItem('creyong-pm-cache', JSON.stringify(_pmNProjs));
+    } catch(e) { showToast(`⚠️ Notion 삭제 실패: ${e.message}`, 'warn'); return; }
+  } else {
+    projects = projects.filter(x => x.id != id);
+    saveProjects();
+  }
+  closePmPanel();
+  const el = document.getElementById('tab-count-projects');
+  if (el) el.textContent = (_pmHasNotion() ? _pmNProjs : projects).length;
 }
 
 function renderProjectRow(p) {
@@ -4980,8 +5399,17 @@ function openApiSettings(focus) {
   setTimeout(toggleImageServiceFields, 50);
   const notionTokenInput = document.getElementById('notion-token-input');
   const notionPageInput  = document.getElementById('notion-page-id-input');
+  const notionDbInput    = document.getElementById('notion-db-id-input');
   if (notionTokenInput) notionTokenInput.value = localStorage.getItem('creyong-notion-token') || '';
   if (notionPageInput)  notionPageInput.value  = localStorage.getItem('creyong-notion-page-id') || '';
+  if (notionDbInput)    notionDbInput.value    = localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368';
+  const notionStatus = document.getElementById('notion-key-status');
+  if (notionStatus) {
+    const hasNotion = !!localStorage.getItem('creyong-notion-token');
+    notionStatus.style.display = hasNotion ? 'block' : 'none';
+    notionStatus.style.color = 'var(--green)';
+    notionStatus.textContent = hasNotion ? '✅ Notion 토큰 저장됨' : '';
+  }
   const githubTokenInput = document.getElementById('github-token-input');
   if (githubTokenInput) {
     githubTokenInput.value = localStorage.getItem('creyong-github-token') || '';
@@ -5028,6 +5456,187 @@ function openApiSettings(focus) {
   }, 150);
 }
 
+
+// ════════════════════════════════════════
+//  CLAUDE API 연결 테스트
+// ════════════════════════════════════════
+async function testClaudeApi() {
+  const input = document.getElementById('api-key-input');
+  const key = input?.value.trim() || localStorage.getItem('creyong-api-key') || '';
+  const btn = document.getElementById('claude-test-btn');
+  const result = document.getElementById('claude-test-result');
+
+  if (!key) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(251,146,60,0.1)';
+    result.style.border = '1px solid rgba(251,146,60,0.3)';
+    result.style.color = '#fb923c';
+    result.textContent = '⚠️ API 키를 먼저 입력하세요';
+    return;
+  }
+
+  // 로딩
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:4px"></span> 테스트 중...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1,
+        messages: [{ role: 'user', content: 'hi' }],
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      const model = data.model || 'claude';
+      result.style.display = 'block';
+      result.style.background = 'rgba(34,197,94,0.1)';
+      result.style.border = '1px solid rgba(34,197,94,0.3)';
+      result.style.color = '#4ade80';
+      result.innerHTML = `✅ 연결 성공! &nbsp;<span style="opacity:0.7">모델: ${model}</span>`;
+    } else {
+      const msg = data.error?.message || `HTTP ${res.status}`;
+      result.style.display = 'block';
+      result.style.background = 'rgba(239,68,68,0.1)';
+      result.style.border = '1px solid rgba(239,68,68,0.3)';
+      result.style.color = '#f87171';
+      if (res.status === 401) {
+        result.textContent = '❌ 인증 실패 — API 키를 확인하세요';
+      } else if (res.status === 429) {
+        result.textContent = '⚠️ 요청 한도 초과 — 잠시 후 재시도';
+      } else {
+        result.textContent = `❌ 오류: ${msg}`;
+      }
+    }
+  } catch (e) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,68,68,0.1)';
+    result.style.border = '1px solid rgba(239,68,68,0.3)';
+    result.style.color = '#f87171';
+    result.textContent = '❌ 네트워크 오류 — 인터넷 연결 확인';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔌 연결 테스트';
+  }
+}
+
+async function testGeminiApi() {
+  const input  = document.getElementById('gemini-key-input');
+  const key    = input?.value.trim() || localStorage.getItem('creyong-gemini-key') || '';
+  const btn    = document.getElementById('gemini-test-btn');
+  const result = document.getElementById('gemini-test-result');
+
+  if (!key) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(251,146,60,0.1)';
+    result.style.border = '1px solid rgba(251,146,60,0.3)';
+    result.style.color = '#fb923c';
+    result.textContent = '⚠️ API 키를 먼저 입력하세요';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:4px"></span> 테스트 중...';
+  result.style.display = 'none';
+
+  try {
+    // ListModels API — 모델명 없이 순수 키 유효성 검증 (모델명 오타 오류 원천 차단)
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=5`
+    );
+    const data = await res.json();
+
+    if (res.ok) {
+      const models = (data.models || []).map(m => m.name.split('/').pop());
+      const hasVision = models.some(m => m.includes('gemini'));
+      result.style.display = 'block';
+      result.style.background = 'rgba(34,197,94,0.1)';
+      result.style.border = '1px solid rgba(34,197,94,0.3)';
+      result.style.color = '#4ade80';
+      result.innerHTML = `✅ 연결 성공! &nbsp;<span style="opacity:0.65">${models.length}개 모델 접근 가능</span>`;
+    } else {
+      const msg = data.error?.message || `HTTP ${res.status}`;
+      result.style.display = 'block';
+      result.style.background = 'rgba(239,68,68,0.1)';
+      result.style.border = '1px solid rgba(239,68,68,0.3)';
+      result.style.color = '#f87171';
+      if (res.status === 400 || msg.toLowerCase().includes('api_key_invalid') || msg.toLowerCase().includes('invalid')) {
+        result.textContent = '❌ API 키 오류 — 키를 다시 확인하세요 (AIzaSy...)';
+      } else if (res.status === 403) {
+        result.textContent = '❌ 권한 없음 — Google AI Studio에서 Generative AI API 활성화 필요';
+      } else {
+        result.textContent = `❌ 오류 (${res.status}): ${msg}`;
+      }
+    }
+  } catch(e) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,68,68,0.1)';
+    result.style.border = '1px solid rgba(239,68,68,0.3)';
+    result.style.color = '#f87171';
+    result.textContent = '❌ 네트워크 오류 — 인터넷 연결 확인';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔌 연결 테스트';
+  }
+}
+
+async function testNotionApi() {
+  const tokenInput = document.getElementById('notion-token-input');
+  const dbInput    = document.getElementById('notion-db-id-input');
+  const key   = tokenInput?.value.trim() || localStorage.getItem('creyong-notion-token') || '';
+  const dbId  = (dbInput?.value.trim() || localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368').replace(/-/g,'');
+  const btn    = document.getElementById('notion-test-btn');
+  const result = document.getElementById('notion-test-result');
+  if (!key) {
+    result.style.display='block'; result.style.background='rgba(239,68,68,0.1)';
+    result.style.border='1px solid rgba(239,68,68,0.3)'; result.style.color='#f87171';
+    result.textContent='❌ 토큰을 먼저 입력해주세요'; return;
+  }
+  if (btn) { btn.disabled=true; btn.innerHTML='⟳ 테스트 중...'; }
+  result.style.display='none';
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${dbId}`, {
+      headers: { 'Authorization':`Bearer ${key}`, 'Notion-Version':'2022-06-28' }
+    });
+    const data = await res.json().catch(()=>({}));
+    if (res.ok) {
+      const dbTitle = data.title?.[0]?.text?.content || 'DB';
+      result.style.display='block'; result.style.background='rgba(34,197,94,0.1)';
+      result.style.border='1px solid rgba(34,197,94,0.3)'; result.style.color='var(--green)';
+      result.textContent=`✅ 연결 성공! "${dbTitle}" DB 접근 가능`;
+    } else if (res.status===401) {
+      result.style.display='block'; result.style.background='rgba(239,68,68,0.1)';
+      result.style.border='1px solid rgba(239,68,68,0.3)'; result.style.color='#f87171';
+      result.textContent='❌ 인증 실패 — Integration Token 확인 필요';
+    } else if (res.status===404) {
+      result.style.display='block'; result.style.background='rgba(239,68,68,0.1)';
+      result.style.border='1px solid rgba(239,68,68,0.3)'; result.style.color='#f87171';
+      result.textContent='❌ DB를 찾을 수 없음 — DB ID 확인 & 통합에 DB 공유 필요';
+    } else {
+      result.style.display='block'; result.style.background='rgba(239,68,68,0.1)';
+      result.style.border='1px solid rgba(239,68,68,0.3)'; result.style.color='#f87171';
+      result.textContent=`❌ 오류 (${res.status}): ${data.message||'알 수 없는 오류'}`;
+    }
+  } catch(e) {
+    result.style.display='block'; result.style.background='rgba(239,68,68,0.1)';
+    result.style.border='1px solid rgba(239,68,68,0.3)'; result.style.color='#f87171';
+    result.textContent='❌ CORS 오류 — 로컬 파일(file://) 환경에서는 차단될 수 있음. HTTP 서버로 포털을 열거나 확인 필요';
+  } finally {
+    if (btn) { btn.disabled=false; btn.innerHTML='🔌 연결 테스트'; }
+  }
+}
+
 function saveApiKey() {
   const claudeVal = document.getElementById('api-key-input')?.value.trim() || '';
   const geminiVal = document.getElementById('gemini-key-input')?.value.trim() || '';
@@ -5061,10 +5670,12 @@ function saveApiKey() {
   else localStorage.removeItem('creyong-sheets-url');
   const notionTokenVal  = (document.getElementById('notion-token-input')?.value || '').trim();
   const notionPageIdVal = (document.getElementById('notion-page-id-input')?.value || '').trim();
+  const notionDbIdVal   = (document.getElementById('notion-db-id-input')?.value || '').trim().replace(/-/g,'');
   if (notionTokenVal)  localStorage.setItem('creyong-notion-token', notionTokenVal);
   else localStorage.removeItem('creyong-notion-token');
   if (notionPageIdVal) localStorage.setItem('creyong-notion-page-id', notionPageIdVal);
   else localStorage.removeItem('creyong-notion-page-id');
+  localStorage.setItem('creyong-notion-db-id', notionDbIdVal || 'a74edacb87a242edb5ecaf7d5a01c368');
 
   // GitHub Token
   const githubTokenVal = (document.getElementById('github-token-input')?.value || '').trim();
@@ -5074,6 +5685,8 @@ function saveApiKey() {
   updateApiBtn();
   updateCharTabCount();
   _saveToServer(); // GitHub에 저장 (토큰 있으면 동기화)
+  // Notion 모드 변경 시 PM 테이블 새로고침
+  renderProjectTable();
 
   const msgs = [];
   if (claudeVal)      msgs.push('Claude 키');
@@ -5107,6 +5720,9 @@ function updateApiBtn() {
     btn.classList.remove('api-set');
     btn.textContent = '⚙️ API';
   }
+  // Notion PM 배지 표시
+  const badge = document.getElementById('pm-notion-badge');
+  if (badge) badge.style.display = _pmHasNotion() ? 'inline-block' : 'none';
 }
 
 function toggleImageServiceFields() {
@@ -6273,6 +6889,10 @@ function _autoBackup(payload) {
 }
 
 function _migrateFromLocalStorage() {
+  // Notion 모드일 때 pm-cache 우선 사용
+  if (_pmHasNotion()) {
+    try { const c = JSON.parse(localStorage.getItem('creyong-pm-cache') || '[]'); if (c.length) { projects = c; _pmNProjs = c; } } catch(e) {}
+  }
   if (!projects.length)   { try { projects   = JSON.parse(localStorage.getItem('creyong-projects')   || '[]'); } catch(e){} }
   if (!proposals.length)  { try { proposals  = JSON.parse(localStorage.getItem('creyong-proposals')  || '[]'); } catch(e){} }
   if (!contis.length)     { try { contis     = JSON.parse(localStorage.getItem('creyong-contis')     || '[]'); } catch(e){} }
@@ -6333,6 +6953,13 @@ async function _loadAndInit() {
   refreshAll();
   renderCalendar();
   updateApiBtn();
+
+  // ── 마지막으로 보던 탭 복원 ──
+  const _lastTab = localStorage.getItem('creyong-last-tab');
+  if (_lastTab && _lastTab !== 'overview') {
+    const _lastNavEl = document.querySelector(`[data-tab="${_lastTab}"]`);
+    if (_lastNavEl) switchTab(_lastTab, _lastNavEl);
+  }
 }
 
 _loadAndInit();
@@ -6357,7 +6984,8 @@ document.addEventListener('keydown', e => {
 ════════════════════════════════════ -->
 <script>
 // ─── 전역 상태 ───────────────────────────────────────
-let _cgImageData = null;  // 현재 분석 중인 이미지 ImageData
+let _cgImageData = null;        // 현재 분석 중인 이미지 ImageData
+let _cgCurrentScope = 'vectorscope'; // 기본 스코프: vectorscope
 
 // ─── 드롭존 핸들러 ────────────────────────────────────
 function cgHandleDrop(e) {
@@ -6408,12 +7036,16 @@ function cgAnalyzeImage(img) {
       const temp    = cgCalcColorTemp(_cgImageData);
       const lgg     = cgCalcLiftGammaGain(_cgImageData);
 
+      // 결과 영역 먼저 표시 — 캔버스의 offsetWidth 계산에 DOM visibility 필요
+      document.getElementById('cg-results').style.display = 'block';
+
       cgRenderPalette(palette);
-      cgRenderHistogram(lum.hist);
+      // 현재 선택된 스코프 렌더링
+      if (_cgCurrentScope === 'histogram') cgRenderHistogram(lum.hist);
+      else if (_cgCurrentScope === 'vectorscope') cgRenderVectorscope(_cgImageData);
+      else cgRenderWaveform(_cgImageData);
       cgRenderMetrics(temp, lum);
       cgRenderDaVinci(lgg);
-
-      document.getElementById('cg-results').style.display = 'block';
       document.getElementById('cg-ai-btn').style.display  = 'inline-block';
       document.getElementById('cg-ai-result').style.display = 'none';
       status.textContent = '✅ 분석 완료';
@@ -6424,68 +7056,86 @@ function cgAnalyzeImage(img) {
   }, 30);
 }
 
-// ─── 픽셀 샘플링 ──────────────────────────────────────
+// ─── 픽셀 샘플링 (채도 높은 픽셀 오버샘플링으로 팔레트 정확도 향상) ──
 function cgSamplePixels(imageData, maxCount) {
   const d = imageData.data;
   const total = imageData.width * imageData.height;
-  const step  = Math.max(1, Math.floor(total / maxCount));
-  const out   = [];
+
+  // 1차: 균등 샘플링
+  const step = Math.max(1, Math.floor(total / maxCount));
+  const out  = [];
   for (let i = 0; i < total; i += step) {
     const idx = i * 4;
-    const a = d[idx + 3];
-    if (a < 128) continue; // 투명 픽셀 제외
+    if (d[idx+3] < 128) continue;
     out.push([d[idx], d[idx+1], d[idx+2]]);
+  }
+
+  // 2차: 채도 높은 픽셀 추가 오버샘플 (빨강·파랑·노랑 등 선명한 색 누락 방지)
+  const satStep = Math.max(1, Math.floor(total / (maxCount * 4)));
+  for (let i = 0; i < total; i += satStep) {
+    const idx = i * 4;
+    if (d[idx+3] < 128) continue;
+    const r = d[idx], g = d[idx+1], b = d[idx+2];
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const sat = max > 20 ? (max - min) / max : 0;
+    if (sat > 0.28) out.push([r, g, b]);
   }
   return out;
 }
 
-// ─── K-Means 색 클러스터링 ────────────────────────────
+// ─── K-Means++ 색 클러스터링 (거리 가중 초기화로 팔레트 다양성 보장) ──
 function cgKMeans(pixels, k, maxIter) {
   if (pixels.length < k) k = pixels.length;
-  // 초기 중심: 픽셀 중에서 무작위 선택 (K-means++)
-  let centers = [];
-  const used = new Set();
+
+  // K-means++ 초기화: 거리² 비례 확률로 중심 선택 → 소수색(빨강 등) 놓침 방지
+  const centers = [];
+  centers.push([...pixels[Math.floor(Math.random() * pixels.length)]]);
   while (centers.length < k) {
-    let idx = Math.floor(Math.random() * pixels.length);
-    if (!used.has(idx)) { centers.push([...pixels[idx]]); used.add(idx); }
+    let totalDist = 0;
+    const dists = pixels.map(p => {
+      let minD = Infinity;
+      for (const c of centers) { const dd = cgColorDist2(p, c); if (dd < minD) minD = dd; }
+      totalDist += minD;
+      return minD;
+    });
+    let rand = Math.random() * totalDist;
+    let chosen = pixels.length - 1;
+    for (let i = 0; i < dists.length; i++) {
+      rand -= dists[i];
+      if (rand <= 0) { chosen = i; break; }
+    }
+    centers.push([...pixels[chosen]]);
   }
 
-  let assignments = new Array(pixels.length).fill(0);
+  const assignments = new Array(pixels.length).fill(0);
   for (let iter = 0; iter < maxIter; iter++) {
     let changed = false;
-    // 할당
     for (let i = 0; i < pixels.length; i++) {
       let best = 0, bestDist = Infinity;
-      for (let c = 0; c < k; c++) {
-        const d = cgColorDist2(pixels[i], centers[c]);
-        if (d < bestDist) { bestDist = d; best = c; }
+      for (let c = 0; c < centers.length; c++) {
+        const dd = cgColorDist2(pixels[i], centers[c]);
+        if (dd < bestDist) { bestDist = dd; best = c; }
       }
       if (assignments[i] !== best) { assignments[i] = best; changed = true; }
     }
     if (!changed) break;
-    // 중심 재계산
-    const sums  = Array.from({length:k}, () => [0,0,0]);
-    const cnts  = new Array(k).fill(0);
+    const sums = Array.from({length: k}, () => [0,0,0]);
+    const cnts = new Array(k).fill(0);
     for (let i = 0; i < pixels.length; i++) {
       const c = assignments[i];
-      sums[c][0] += pixels[i][0];
-      sums[c][1] += pixels[i][1];
-      sums[c][2] += pixels[i][2];
+      sums[c][0] += pixels[i][0]; sums[c][1] += pixels[i][1]; sums[c][2] += pixels[i][2];
       cnts[c]++;
     }
     for (let c = 0; c < k; c++) {
-      if (cnts[c] > 0) {
-        centers[c] = [sums[c][0]/cnts[c], sums[c][1]/cnts[c], sums[c][2]/cnts[c]];
-      }
+      if (cnts[c] > 0) centers[c] = [sums[c][0]/cnts[c], sums[c][1]/cnts[c], sums[c][2]/cnts[c]];
     }
   }
-  // 클러스터 크기순 정렬
   const clusterSizes = new Array(k).fill(0);
   assignments.forEach(c => clusterSizes[c]++);
-  const sorted = centers
+  return centers
     .map((c, i) => ({ rgb: c.map(Math.round), count: clusterSizes[i] }))
     .sort((a, b) => b.count - a.count);
-  return sorted;
 }
 
 function cgColorDist2(a, b) {
@@ -6582,31 +7232,235 @@ function cgRenderPalette(palette) {
   }).join('');
 }
 
+// ─── 스코프 탭 전환 ───────────────────────────────────
+function cgSwitchScope(type) {
+  _cgCurrentScope = type;
+  const map = { histogram: 'hist', vectorscope: 'vec', waveform: 'wave' };
+  Object.entries(map).forEach(([t, id]) => {
+    const btn = document.getElementById('cg-scope-' + id);
+    if (!btn) return;
+    const active = t === type;
+    btn.style.background     = active ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.05)';
+    btn.style.borderColor    = active ? 'rgba(99,102,241,0.55)' : 'rgba(255,255,255,0.12)';
+    btn.style.color          = active ? '#a78bfa' : 'var(--text-muted)';
+  });
+  if (!_cgImageData) return;
+  if (type === 'histogram') {
+    const lum = cgCalcLuminance(_cgImageData);
+    cgRenderHistogram(lum.hist);
+  } else if (type === 'vectorscope') {
+    cgRenderVectorscope(_cgImageData);
+  } else {
+    cgRenderWaveform(_cgImageData);
+  }
+}
+
 // ─── 렌더링: 히스토그램 ────────────────────────────────
 function cgRenderHistogram(hist) {
-  const canvas = document.getElementById('cg-histogram-canvas');
-  const w = canvas.offsetWidth || 360;
-  const h = 200;
+  const canvas = document.getElementById('cg-scope-canvas');
+  // 히스토그램: 가로 전체 사용
+  canvas.style.width    = '100%';
+  canvas.style.height   = '';
+  canvas.style.maxHeight = '';
+  const w = (canvas.parentElement?.offsetWidth || canvas.offsetWidth || 360);
+  const h = 260;
   canvas.width = w;
   canvas.height = h;
+  canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, w, h);
   const maxVal = Math.max(...hist);
   const barW   = w / 256;
-
   for (let i = 0; i < 256; i++) {
     const barH = maxVal ? (hist[i] / maxVal) * (h - 20) : 0;
-    // 색상: 어두운 → 밝은 그라디언트
     const lightness = Math.round(i / 255 * 100);
     ctx.fillStyle = `hsl(240,${20 + lightness*0.4}%,${10 + lightness*0.55}%)`;
     ctx.fillRect(i * barW, h - barH - 4, barW + 0.5, barH);
   }
-  // x축 레이블
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.font = '10px sans-serif';
   ctx.fillText('0', 2, h-1);
   ctx.fillText('128', w/2-10, h-1);
   ctx.fillText('255', w-20, h-1);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillText('HISTOGRAM', 5, 14);
+}
+
+// ─── 렌더링: 벡터스코프 (스킨톤 라인 포함) ─────────────
+function cgRenderVectorscope(imageData) {
+  const canvas = document.getElementById('cg-scope-canvas');
+
+  // ── 정원 보장: CSS를 정사각형으로 고정 (max-height 해제 필수) ──
+  const parent = canvas.parentElement;
+  const sz = Math.min(Math.max(parent?.offsetWidth || 0, 60), 260) || 260;
+  canvas.style.maxHeight = 'none';    // max-height 해제 ← 타원 방지 핵심
+  canvas.width  = sz;
+  canvas.height = sz;
+  canvas.style.width  = sz + 'px';
+  canvas.style.height = sz + 'px';
+  canvas.style.display = 'block';
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#07070f';
+  ctx.fillRect(0, 0, sz, sz);
+
+  const cx = sz / 2, cy = sz / 2;
+  const r  = sz / 2 - 18;
+
+  // ── 밀도 맵 생성 (모든 픽셀 누적) ──
+  const density = new Uint32Array(sz * sz);
+  const sumR    = new Uint32Array(sz * sz);
+  const sumG    = new Uint32Array(sz * sz);
+  const sumB    = new Uint32Array(sz * sz);
+
+  const d     = imageData.data;
+  const total = imageData.width * imageData.height;
+  const step  = Math.max(1, Math.floor(total / 12000));
+
+  for (let i = 0; i < total; i += step) {
+    const idx = i * 4;
+    if (d[idx+3] < 128) continue;
+    const R = d[idx], G = d[idx+1], B = d[idx+2];
+    const Y  = 0.299*R + 0.587*G + 0.114*B;
+    const U  = (B - Y) * 0.492;
+    const V2 = (R - Y) * 0.877;
+    const xi = Math.round(cx + (U / 128) * r);
+    const yi = Math.round(cy - (V2 / 128) * r);
+    if (xi < 0 || xi >= sz || yi < 0 || yi >= sz) continue;
+    const di = yi * sz + xi;
+    density[di]++;
+    sumR[di] += R; sumG[di] += G; sumB[di] += B;
+  }
+
+  // ── 오프스크린 캔버스에 픽셀 렌더링 (투명도 활용해 배경 보존) ──
+  const off  = document.createElement('canvas');
+  off.width  = sz; off.height = sz;
+  const octx = off.getContext('2d');
+  const imgd = octx.createImageData(sz, sz);
+  const p    = imgd.data;
+
+  let maxD = 1;
+  for (let i = 0; i < sz*sz; i++) if (density[i] > maxD) maxD = density[i];
+
+  for (let i = 0; i < sz*sz; i++) {
+    if (!density[i]) continue;
+    const cnt = density[i];
+    // 로그 스케일 밝기 (희소 픽셀도 보이게, 고밀도도 날아가지 않게)
+    const t  = Math.min(1, Math.log1p(cnt) / Math.log1p(maxD * 0.6 + 1));
+    const br = 0.3 + t * 0.7;
+    p[i*4]   = Math.min(255, Math.round(sumR[i]/cnt * br * 1.35));
+    p[i*4+1] = Math.min(255, Math.round(sumG[i]/cnt * br * 1.35));
+    p[i*4+2] = Math.min(255, Math.round(sumB[i]/cnt * br * 1.35));
+    p[i*4+3] = Math.min(255, Math.round(70 + t * 185));
+  }
+  octx.putImageData(imgd, 0, 0);
+  ctx.drawImage(off, 0, 0); // 배경 위에 합성
+
+  // ── 그리드 원 ──
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1.0].forEach(pct => {
+    ctx.strokeStyle = pct === 1.0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.arc(cx, cy, r * pct, 0, Math.PI * 2); ctx.stroke();
+  });
+  // 십자선
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+
+  // ── 컬러바 타겟 ──
+  const targets = [
+    { n:'R',  U:-37.5, V:156.8, c:'#f87171' },
+    { n:'Ye', U:-111,  V:25.6,  c:'#fbbf24' },
+    { n:'G',  U:-73.6, V:-131.3,c:'#4ade80' },
+    { n:'Cy', U:37.2,  V:-157.2,c:'#22d3ee' },
+    { n:'B',  U:111.1, V:-25.5, c:'#60a5fa' },
+    { n:'Mg', U:73.6,  V:131.3, c:'#e879f9' },
+  ];
+  targets.forEach(({n, U, V, c}) => {
+    const tx = cx + (U / 128) * r;
+    const ty = cy - (V / 128) * r;
+    ctx.fillStyle = c;
+    ctx.fillRect(tx - 3.5, ty - 3.5, 7, 7);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.fillText(n, tx + 5, ty + 3);
+  });
+
+  // ── 스킨톤 라인 (~123.5°) ──
+  const skinAngle = 123.5 * Math.PI / 180;
+  const ex = cx + Math.cos(skinAngle) * r;
+  const ey = cy - Math.sin(skinAngle) * r;
+  ctx.save();
+  ctx.setLineDash([5, 3]);
+  ctx.strokeStyle = 'rgba(255,200,70,0.9)';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,200,70,0.88)';
+  ctx.font = 'bold 9px sans-serif';
+  const lx = cx + Math.cos(skinAngle) * r * 0.52;
+  const ly = cy - Math.sin(skinAngle) * r * 0.52;
+  ctx.fillText('SKIN', lx - 10, ly - 4);
+
+  // ── 타이틀 ──
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('VECTORSCOPE', 6, 16);
+}
+
+// ─── 렌더링: 웨이브폼 ─────────────────────────────────
+function cgRenderWaveform(imageData) {
+  const canvas = document.getElementById('cg-scope-canvas');
+  // 웨이브폼: 가로 전체 사용
+  canvas.style.width    = '100%';
+  canvas.style.height   = '';
+  canvas.style.maxHeight = '';
+  const w = (canvas.parentElement?.offsetWidth || canvas.offsetWidth || 360);
+  const h = 260;
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, w, h);
+
+  // 그리드 라인 (0 / 64 / 128 / 192 / 255)
+  // 0 = 바닥 (8px 여백), 255 = 상단 (10px 여백)
+  [0, 64, 128, 192, 255].forEach(luma => {
+    const y = h - 8 - (luma / 255) * (h - 18);
+    ctx.strokeStyle = luma === 0 || luma === 255 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.font = '9px sans-serif';
+    ctx.fillText(luma, 3, y - 2);
+  });
+
+  // 픽셀 플롯
+  const d = imageData.data;
+  const iw = imageData.width, ih = imageData.height;
+  const rowStep = Math.max(1, Math.floor(ih / 90));
+  ctx.save();
+  ctx.globalAlpha = 0.38;
+  for (let yi = 0; yi < ih; yi += rowStep) {
+    for (let xi = 0; xi < iw; xi++) {
+      const idx = (yi * iw + xi) * 4;
+      if (d[idx+3] < 128) continue;
+      const R = d[idx], G = d[idx+1], B = d[idx+2];
+      const luma = 0.299*R + 0.587*G + 0.114*B;
+      const px = (xi / iw) * w;
+      const py = h - 8 - (luma / 255) * (h - 18);
+      ctx.fillStyle = `rgb(${R},${G},${B})`;
+      ctx.fillRect(px, py, 1, 1);
+    }
+  }
+  ctx.restore();
+
+  // 타이틀
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('WAVEFORM', 5, 14);
 }
 
 // ─── 렌더링: 수치 카드 ─────────────────────────────────
@@ -6695,10 +7549,35 @@ async function cgRunGeminiAnalysis() {
   status.textContent = '🤖 AI 분석 중...';
 
   try {
+    // ── 사용 가능한 모델 자동 선택 (deprecated 모델 오류 방지) ──
+    status.textContent = '🔍 모델 확인 중...';
+    const VISION_PREF = [
+      'gemini-2.5-flash', 'gemini-2.5-pro',
+      'gemini-2.0-flash-lite', 'gemini-2.0-flash-001',
+      'gemini-1.5-flash-latest', 'gemini-1.5-flash',
+      'gemini-1.5-pro-latest', 'gemini-1.5-pro'
+    ];
+    let model = 'gemini-1.5-flash-latest'; // 최종 fallback
+    try {
+      const mRes  = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiKey}&pageSize=50`);
+      const mData = await mRes.json();
+      if (mRes.ok && mData.models) {
+        const available = mData.models
+          .filter(m => (m.supportedGenerationMethods || []).includes('generateContent')
+                    && !m.name.includes('image-generation')
+                    && !m.name.includes('embedding')
+                    && !m.name.includes('aqa'))
+          .map(m => m.name.split('/').pop());
+        const pick = VISION_PREF.find(p => available.some(a => a === p || a.startsWith(p)));
+        if (pick) model = pick;
+        else if (available.length) model = available[0];
+      }
+    } catch(_) { /* ListModels 실패시 fallback 사용 */ }
+    status.textContent = `🤖 AI 분석 중... (${model})`;
+
     // 캔버스 이미지를 base64 JPEG로 변환 (용량 절약: 품질 0.7)
     const canvas  = document.getElementById('cg-hidden-canvas');
     const b64     = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-    const model   = localStorage.getItem('creyong-gemini-model') || 'gemini-2.0-flash';
 
     const prompt = `당신은 프로 컬러리스트입니다. 이 이미지를 색보정 관점에서 분석해주세요.
 
