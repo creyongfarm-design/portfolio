@@ -791,11 +791,11 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <div class="fg">
         <label class="fl">결제 방법 *</label>
         <div style="display:flex;gap:12px;margin-top:4px">
-          <label style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.pay-label').forEach(function(l){l.style.borderColor='rgba(255,255,255,.12)'});this.style.borderColor='#f97316'" class="pay-label">
-            <input type="radio" name="reg-payment" value="계좌이체" style="accent-color:#f97316;width:16px;height:16px"> 계좌이체
+          <label for="pay-account" style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" class="pay-label">
+            <input type="radio" name="reg-payment" id="pay-account" value="계좌이체" style="accent-color:#f97316;width:16px;height:16px"> 계좌이체
           </label>
-          <label style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.pay-label').forEach(function(l){l.style.borderColor='rgba(255,255,255,.12)'});this.style.borderColor='#f97316'" class="pay-label">
-            <input type="radio" name="reg-payment" value="신용카드" style="accent-color:#f97316;width:16px;height:16px"> 신용카드
+          <label for="pay-card" style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" class="pay-label">
+            <input type="radio" name="reg-payment" id="pay-card" value="신용카드" style="accent-color:#f97316;width:16px;height:16px"> 신용카드
           </label>
         </div>
       </div>
@@ -868,6 +868,16 @@ function bindApplyBtns() {
       if (target) target.scrollIntoView({ behavior: 'smooth' });
     });
   }
+
+  // 결제방법 라디오 버튼 — 선택 시 테두리 색상 변경
+  document.querySelectorAll('input[name="reg-payment"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      document.querySelectorAll('.pay-label').forEach(function(l) {
+        l.style.borderColor = 'rgba(255,255,255,.12)';
+      });
+      this.closest('.pay-label').style.borderColor = '#f97316';
+    });
+  });
 }
 
 /* ─── 수강 신청 제출 ─── */
