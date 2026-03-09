@@ -5367,7 +5367,7 @@ async function testGeminiApi() {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
       {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -5380,7 +5380,7 @@ async function testGeminiApi() {
       result.style.background = 'rgba(34,197,94,0.1)';
       result.style.border = '1px solid rgba(34,197,94,0.3)';
       result.style.color = '#4ade80';
-      result.innerHTML = '✅ 연결 성공! &nbsp;<span style="opacity:0.7">gemini-1.5-flash</span>';
+      result.innerHTML = '✅ 연결 성공! &nbsp;<span style="opacity:0.7">gemini-2.0-flash</span>';
     } else {
       const msg = data.error?.message || `HTTP ${res.status}`;
       result.style.display = 'block';
@@ -7043,48 +7043,84 @@ function cgRenderHistogram(hist) {
 // ─── 렌더링: 벡터스코프 (스킨톤 라인 포함) ─────────────
 function cgRenderVectorscope(imageData) {
   const canvas = document.getElementById('cg-scope-canvas');
-  const sz = Math.min(canvas.offsetWidth || 280, 280);
-  canvas.width = sz;
+
+  // ── 정원 보장: CSS를 정사각형으로 고정 ──
+  const parent = canvas.parentElement;
+  const sz = Math.min(parent ? parent.offsetWidth : 300, 300);
+  canvas.width  = sz;
   canvas.height = sz;
+  canvas.style.width  = sz + 'px';
+  canvas.style.height = sz + 'px';
+  canvas.style.display = 'block';
+
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#080810';
+  ctx.fillStyle = '#07070f';
   ctx.fillRect(0, 0, sz, sz);
 
   const cx = sz / 2, cy = sz / 2;
-  const r  = sz / 2 - 16;
+  const r  = sz / 2 - 18;
 
-  // 그리드 원
-  ctx.lineWidth = 1;
-  [0.25, 0.5, 0.75, 1.0].forEach(pct => {
-    ctx.strokeStyle = pct === 1.0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.07)';
-    ctx.beginPath(); ctx.arc(cx, cy, r * pct, 0, Math.PI * 2); ctx.stroke();
-  });
-  // 십자선
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+  // ── 밀도 맵 생성 (모든 픽셀 누적) ──
+  const density = new Uint32Array(sz * sz);
+  const sumR    = new Uint32Array(sz * sz);
+  const sumG    = new Uint32Array(sz * sz);
+  const sumB    = new Uint32Array(sz * sz);
 
-  // 픽셀 플롯 (YUV 변환)
-  const d = imageData.data;
+  const d     = imageData.data;
   const total = imageData.width * imageData.height;
-  const step  = Math.max(1, Math.floor(total / 7000));
-  ctx.save();
-  ctx.globalAlpha = 0.65;
+  const step  = Math.max(1, Math.floor(total / 12000));
+
   for (let i = 0; i < total; i += step) {
     const idx = i * 4;
     if (d[idx+3] < 128) continue;
     const R = d[idx], G = d[idx+1], B = d[idx+2];
     const Y  = 0.299*R + 0.587*G + 0.114*B;
-    const U  = (B - Y) * 0.492;   // Cb
-    const V2 = (R - Y) * 0.877;   // Cr
-    const px = cx + (U / 128) * r;
-    const py = cy - (V2 / 128) * r;
-    ctx.fillStyle = `rgb(${R},${G},${B})`;
-    ctx.fillRect(px - 0.7, py - 0.7, 1.5, 1.5);
+    const U  = (B - Y) * 0.492;
+    const V2 = (R - Y) * 0.877;
+    const xi = Math.round(cx + (U / 128) * r);
+    const yi = Math.round(cy - (V2 / 128) * r);
+    if (xi < 0 || xi >= sz || yi < 0 || yi >= sz) continue;
+    const di = yi * sz + xi;
+    density[di]++;
+    sumR[di] += R; sumG[di] += G; sumB[di] += B;
   }
-  ctx.restore();
 
-  // 컬러바 타겟 (100% 채도 기준)
+  // ── 오프스크린 캔버스에 픽셀 렌더링 (투명도 활용해 배경 보존) ──
+  const off  = document.createElement('canvas');
+  off.width  = sz; off.height = sz;
+  const octx = off.getContext('2d');
+  const imgd = octx.createImageData(sz, sz);
+  const p    = imgd.data;
+
+  let maxD = 1;
+  for (let i = 0; i < sz*sz; i++) if (density[i] > maxD) maxD = density[i];
+
+  for (let i = 0; i < sz*sz; i++) {
+    if (!density[i]) continue;
+    const cnt = density[i];
+    // 로그 스케일 밝기 (희소 픽셀도 보이게, 고밀도도 날아가지 않게)
+    const t  = Math.min(1, Math.log1p(cnt) / Math.log1p(maxD * 0.6 + 1));
+    const br = 0.3 + t * 0.7;
+    p[i*4]   = Math.min(255, Math.round(sumR[i]/cnt * br * 1.35));
+    p[i*4+1] = Math.min(255, Math.round(sumG[i]/cnt * br * 1.35));
+    p[i*4+2] = Math.min(255, Math.round(sumB[i]/cnt * br * 1.35));
+    p[i*4+3] = Math.min(255, Math.round(70 + t * 185));
+  }
+  octx.putImageData(imgd, 0, 0);
+  ctx.drawImage(off, 0, 0); // 배경 위에 합성
+
+  // ── 그리드 원 ──
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1.0].forEach(pct => {
+    ctx.strokeStyle = pct === 1.0 ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.06)';
+    ctx.beginPath(); ctx.arc(cx, cy, r * pct, 0, Math.PI * 2); ctx.stroke();
+  });
+  // 십자선
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+
+  // ── 컬러바 타겟 ──
   const targets = [
     { n:'R',  U:-37.5, V:156.8, c:'#f87171' },
     { n:'Ye', U:-111,  V:25.6,  c:'#fbbf24' },
@@ -7098,12 +7134,12 @@ function cgRenderVectorscope(imageData) {
     const ty = cy - (V / 128) * r;
     ctx.fillStyle = c;
     ctx.fillRect(tx - 3.5, ty - 3.5, 7, 7);
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = 'bold 8px sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.font = 'bold 9px sans-serif';
     ctx.fillText(n, tx + 5, ty + 3);
   });
 
-  // 스킨톤 라인 (~123.5°)
+  // ── 스킨톤 라인 (~123.5°) ──
   const skinAngle = 123.5 * Math.PI / 180;
   const ex = cx + Math.cos(skinAngle) * r;
   const ey = cy - Math.sin(skinAngle) * r;
@@ -7113,17 +7149,16 @@ function cgRenderVectorscope(imageData) {
   ctx.lineWidth = 1.8;
   ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
   ctx.restore();
-  // 스킨톤 라벨
-  ctx.fillStyle = 'rgba(255,200,70,0.85)';
+  ctx.fillStyle = 'rgba(255,200,70,0.88)';
   ctx.font = 'bold 9px sans-serif';
   const lx = cx + Math.cos(skinAngle) * r * 0.52;
   const ly = cy - Math.sin(skinAngle) * r * 0.52;
   ctx.fillText('SKIN', lx - 10, ly - 4);
 
-  // 타이틀
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  // ── 타이틀 ──
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
   ctx.font = '10px sans-serif';
-  ctx.fillText('VECTORSCOPE', 5, 14);
+  ctx.fillText('VECTORSCOPE', 6, 16);
 }
 
 // ─── 렌더링: 웨이브폼 ─────────────────────────────────
@@ -7139,7 +7174,7 @@ function cgRenderWaveform(imageData) {
 
   // 그리드 라인 (0 / 64 / 128 / 192 / 255)
   [0, 64, 128, 192, 255].forEach(luma => {
-    const y = h - 6 - (luma / 255) * (h - 16);
+    const y = h - 25 - (luma / 255) * (h - 40);
     ctx.strokeStyle = luma === 0 || luma === 255 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
@@ -7161,7 +7196,7 @@ function cgRenderWaveform(imageData) {
       const R = d[idx], G = d[idx+1], B = d[idx+2];
       const luma = 0.299*R + 0.587*G + 0.114*B;
       const px = (xi / iw) * w;
-      const py = h - 6 - (luma / 255) * (h - 16);
+      const py = h - 25 - (luma / 255) * (h - 40);
       ctx.fillStyle = `rgb(${R},${G},${B})`;
       ctx.fillRect(px, py, 1, 1);
     }
@@ -7264,7 +7299,7 @@ async function cgRunGeminiAnalysis() {
     const canvas  = document.getElementById('cg-hidden-canvas');
     const b64     = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
     // 색보정 분석은 비전 지원 모델 고정 (이미지 생성 모델과 분리)
-    const model   = 'gemini-1.5-flash';
+    const model   = 'gemini-2.0-flash';
 
     const prompt = `당신은 프로 컬러리스트입니다. 이 이미지를 색보정 관점에서 분석해주세요.
 
