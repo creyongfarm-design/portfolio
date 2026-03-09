@@ -859,6 +859,15 @@ function bindApplyBtns() {
     var el = document.getElementById(id);
     if (el) el.addEventListener('click', function() { showPage('register'); });
   });
+
+  // 수업 소개 보기 — why-section으로 스크롤
+  var scrollBtn = document.getElementById('btn-scroll-why');
+  if (scrollBtn) {
+    scrollBtn.addEventListener('click', function() {
+      var target = document.getElementById('why-section');
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
 }
 
 /* ─── 수강 신청 제출 ─── */
