@@ -2378,11 +2378,26 @@ const PM_CATEGORIES = ['유튜브 롱폼', '유튜브 숏폼', '인스타 릴스
 
 function _pmCatCls(cat) { return 'pm-cat-' + (cat || '').replace(/ /g, ''); }
 function _pmHasNotion()  { return !!localStorage.getItem('creyong-notion-token'); }
-function _pmDbId()       { return (localStorage.getItem('creyong-notion-db-id') || '33df08d48fc24984901a0dcda7d1c7d5').replace(/-/g,''); }
+function _pmDbId()       { return (localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368').replace(/-/g,''); }
 
-// ── Notion REST 헬퍼 ──────────────────────────────────
+// ── Notion REST 헬퍼 (로컬 서버 프록시 우선 → 직접 호출 폴백) ──
 async function _notionReq(method, path, body) {
   const token = localStorage.getItem('creyong-notion-token') || '';
+
+  // 로컬 서버(크레용포털_서버시작.command)가 실행 중이면 프록시 경유 (CORS 우회)
+  const useProxy = (location.protocol !== 'file:' && location.hostname === 'localhost');
+  if (useProxy) {
+    const res  = await fetch('/api/notion-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method, path, body, token }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+    return data;
+  }
+
+  // 직접 호출 (CORS 허용 환경 or 배포 환경)
   const opts = {
     method,
     headers: {
@@ -5387,7 +5402,7 @@ function openApiSettings(focus) {
   const notionDbInput    = document.getElementById('notion-db-id-input');
   if (notionTokenInput) notionTokenInput.value = localStorage.getItem('creyong-notion-token') || '';
   if (notionPageInput)  notionPageInput.value  = localStorage.getItem('creyong-notion-page-id') || '';
-  if (notionDbInput)    notionDbInput.value    = localStorage.getItem('creyong-notion-db-id') || '33df08d48fc24984901a0dcda7d1c7d5';
+  if (notionDbInput)    notionDbInput.value    = localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368';
   const notionStatus = document.getElementById('notion-key-status');
   if (notionStatus) {
     const hasNotion = !!localStorage.getItem('creyong-notion-token');
@@ -5580,7 +5595,7 @@ async function testNotionApi() {
   const tokenInput = document.getElementById('notion-token-input');
   const dbInput    = document.getElementById('notion-db-id-input');
   const key   = tokenInput?.value.trim() || localStorage.getItem('creyong-notion-token') || '';
-  const dbId  = (dbInput?.value.trim() || localStorage.getItem('creyong-notion-db-id') || '33df08d48fc24984901a0dcda7d1c7d5').replace(/-/g,'');
+  const dbId  = (dbInput?.value.trim() || localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368').replace(/-/g,'');
   const btn    = document.getElementById('notion-test-btn');
   const result = document.getElementById('notion-test-result');
   if (!key) {
@@ -5660,7 +5675,7 @@ function saveApiKey() {
   else localStorage.removeItem('creyong-notion-token');
   if (notionPageIdVal) localStorage.setItem('creyong-notion-page-id', notionPageIdVal);
   else localStorage.removeItem('creyong-notion-page-id');
-  localStorage.setItem('creyong-notion-db-id', notionDbIdVal || '33df08d48fc24984901a0dcda7d1c7d5');
+  localStorage.setItem('creyong-notion-db-id', notionDbIdVal || 'a74edacb87a242edb5ecaf7d5a01c368');
 
   // GitHub Token
   const githubTokenVal = (document.getElementById('github-token-input')?.value || '').trim();
