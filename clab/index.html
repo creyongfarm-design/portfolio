@@ -2469,8 +2469,12 @@ function openPmPanel(id) {
       </div>
       <div>
         <div class="pm-panel-label"># 제작비 (₩)</div>
-        <input class="pm-panel-input" type="number" value="${p.budget||''}" placeholder="0"
-          onblur="savePmField(${id},'budget',this.value)">
+        <input class="pm-panel-input" id="pm-f-budget" type="text"
+          value="${p.budget ? Number(p.budget).toLocaleString('ko-KR') : ''}"
+          placeholder="0"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onfocus="this.value=this.value.replace(/,/g,'')"
+          onblur="const raw=this.value.replace(/,/g,'');savePmField(${id},'budget',raw);if(raw)this.value=Number(raw).toLocaleString('ko-KR')">
       </div>
       <div>
         <div class="pm-panel-label">☑ 광고여부</div>
