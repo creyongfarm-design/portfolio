@@ -275,7 +275,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 .cp-seats{font-size:12px;color:rgba(255,255,255,.35)}
 </style>
 </head>
-<body>
+<body ontouchstart="">
 
 <div class="topbar">🎬 오픈 특가 &nbsp;·&nbsp; 1기 한정 ₩299,000 &nbsp;·&nbsp; 3/26 평일반 &amp; 3/28 주말반</div>
 
@@ -788,6 +788,24 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
         <textarea class="fi" id="reg-motivation" rows="3" placeholder="어떤 것을 배우고 싶으신가요?" style="resize:vertical;padding:12px 14px;height:80px"></textarea>
       </div>
 
+      <div class="fg">
+        <label class="fl">결제 방법 *</label>
+        <div style="display:flex;gap:12px;margin-top:4px">
+          <label style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.pay-label').forEach(function(l){l.style.borderColor='rgba(255,255,255,.12)'});this.style.borderColor='#f97316'" class="pay-label">
+            <input type="radio" name="reg-payment" value="계좌이체" style="accent-color:#f97316;width:16px;height:16px"> 계좌이체
+          </label>
+          <label style="flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s" onclick="this.querySelector('input').checked=true;document.querySelectorAll('.pay-label').forEach(function(l){l.style.borderColor='rgba(255,255,255,.12)'});this.style.borderColor='#f97316'" class="pay-label">
+            <input type="radio" name="reg-payment" value="신용카드" style="accent-color:#f97316;width:16px;height:16px"> 신용카드
+          </label>
+        </div>
+      </div>
+
+      <div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:12px;padding:16px 18px;margin:4px 0 8px;font-size:13px;color:#ccc;line-height:1.75">
+        ⚡ <strong style="color:#f97316">수강 확정은 결제 순서대로 이루어집니다.</strong><br>
+        정원이 5명으로 한정되어 있어 조기 마감될 수 있습니다. 신청 후 빠른 결제를 권장드립니다.<br>
+        결제 방법 안내는 신청 접수 후 개별 연락드립니다.
+      </div>
+
       <button class="fb-btn" id="reg-submit-btn" onclick="doRegister()">신청 완료하기</button>
       <div id="reg-success" style="display:none;text-align:center;padding:24px 0">
         <div style="font-size:36px;margin-bottom:12px">🎉</div>
@@ -852,12 +870,15 @@ function doRegister() {
   var level = document.getElementById('reg-level').value;
   var equip = document.getElementById('reg-equipment').value.trim();
   var motive= document.getElementById('reg-motivation').value.trim();
+  var payEl = document.querySelector('input[name="reg-payment"]:checked');
+  var payment = payEl ? payEl.value : '';
 
-  if (!cls)   { setAlert('reg-alert','수업을 선택해주세요.','err'); return; }
-  if (!name)  { setAlert('reg-alert','이름을 입력해주세요.','err'); return; }
-  if (!phone) { setAlert('reg-alert','연락처를 입력해주세요.','err'); return; }
-  if (!email) { setAlert('reg-alert','이메일을 입력해주세요.','err'); return; }
-  if (!level) { setAlert('reg-alert','편집 경험을 선택해주세요.','err'); return; }
+  if (!cls)     { setAlert('reg-alert','수업을 선택해주세요.','err'); return; }
+  if (!name)    { setAlert('reg-alert','이름을 입력해주세요.','err'); return; }
+  if (!phone)   { setAlert('reg-alert','연락처를 입력해주세요.','err'); return; }
+  if (!email)   { setAlert('reg-alert','이메일을 입력해주세요.','err'); return; }
+  if (!level)   { setAlert('reg-alert','편집 경험을 선택해주세요.','err'); return; }
+  if (!payment) { setAlert('reg-alert','결제 방법을 선택해주세요.','err'); return; }
 
   var btn = document.getElementById('reg-submit-btn');
   btn.disabled = true;
@@ -867,7 +888,7 @@ function doRegister() {
   fetch(FORM_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive })
+    body: JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive, payment: payment })
   })
   .then(function(res) { return res.json(); })
   .then(function(data) {
