@@ -965,8 +965,12 @@
           <img id="cg-preview-img" style="width:100%;border-radius:12px;object-fit:cover;max-height:260px" />
         </div>
         <div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;font-weight:600;letter-spacing:.5px">밝기 히스토그램</div>
-          <canvas id="cg-histogram-canvas" style="width:100%;border-radius:12px;background:#0f0f1a;max-height:260px"></canvas>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <button id="cg-scope-hist" onclick="cgSwitchScope('histogram')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;transition:all .15s">히스토그램</button>
+            <button id="cg-scope-vec" onclick="cgSwitchScope('vectorscope')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(99,102,241,0.25);border:1px solid rgba(99,102,241,0.55);color:#a78bfa;cursor:pointer;transition:all .15s">벡터스코프</button>
+            <button id="cg-scope-wave" onclick="cgSwitchScope('waveform')" style="font-size:11px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);color:var(--text-muted);cursor:pointer;transition:all .15s">웨이브폼</button>
+          </div>
+          <canvas id="cg-scope-canvas" style="width:100%;border-radius:12px;background:#080810;max-height:280px"></canvas>
         </div>
       </div>
 
@@ -1842,6 +1846,13 @@
         <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent3);text-decoration:none">발급 ↗</a>
       </div>
     </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px">
+      <button onclick="testGeminiApi()" id="gemini-test-btn"
+        style="background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.35);color:#c084fc;border-radius:8px;padding:5px 12px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px">
+        🔌 연결 테스트
+      </button>
+    </div>
+    <div id="gemini-test-result" style="display:none;margin-top:8px;padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Space Mono',monospace"></div>
     <div id="gemini-key-status" style="font-size:11px;margin-bottom:4px;display:none"></div>
     <div class="form-group" style="margin-top:6px" id="gemini-model-row">
       <label class="form-label" style="font-size:10px;color:var(--muted)">Gemini 모델</label>
@@ -5333,6 +5344,67 @@ async function testClaudeApi() {
   }
 }
 
+async function testGeminiApi() {
+  const input  = document.getElementById('gemini-key-input');
+  const key    = input?.value.trim() || localStorage.getItem('creyong-gemini-key') || '';
+  const btn    = document.getElementById('gemini-test-btn');
+  const result = document.getElementById('gemini-test-result');
+
+  if (!key) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(251,146,60,0.1)';
+    result.style.border = '1px solid rgba(251,146,60,0.3)';
+    result.style.color = '#fb923c';
+    result.textContent = '⚠️ API 키를 먼저 입력하세요';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:10px;height:10px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:4px"></span> 테스트 중...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ contents:[{ parts:[{ text:'hi' }] }], generationConfig:{ maxOutputTokens:1 } })
+      }
+    );
+    const data = await res.json();
+    if (res.ok) {
+      result.style.display = 'block';
+      result.style.background = 'rgba(34,197,94,0.1)';
+      result.style.border = '1px solid rgba(34,197,94,0.3)';
+      result.style.color = '#4ade80';
+      result.innerHTML = '✅ 연결 성공! &nbsp;<span style="opacity:0.7">gemini-1.5-flash</span>';
+    } else {
+      const msg = data.error?.message || `HTTP ${res.status}`;
+      result.style.display = 'block';
+      result.style.background = 'rgba(239,68,68,0.1)';
+      result.style.border = '1px solid rgba(239,68,68,0.3)';
+      result.style.color = '#f87171';
+      if (res.status === 400 && msg.includes('API_KEY_INVALID')) {
+        result.textContent = '❌ API 키 오류 — 키를 확인하세요';
+      } else if (res.status === 403) {
+        result.textContent = '❌ 권한 없음 — Google AI Studio에서 키 확인';
+      } else {
+        result.textContent = `❌ 오류: ${msg}`;
+      }
+    }
+  } catch(e) {
+    result.style.display = 'block';
+    result.style.background = 'rgba(239,68,68,0.1)';
+    result.style.border = '1px solid rgba(239,68,68,0.3)';
+    result.style.color = '#f87171';
+    result.textContent = '❌ 네트워크 오류 — 인터넷 연결 확인';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '🔌 연결 테스트';
+  }
+}
+
 function saveApiKey() {
   const claudeVal = document.getElementById('api-key-input')?.value.trim() || '';
   const geminiVal = document.getElementById('gemini-key-input')?.value.trim() || '';
@@ -6662,7 +6734,8 @@ document.addEventListener('keydown', e => {
 ════════════════════════════════════ -->
 <script>
 // ─── 전역 상태 ───────────────────────────────────────
-let _cgImageData = null;  // 현재 분석 중인 이미지 ImageData
+let _cgImageData = null;        // 현재 분석 중인 이미지 ImageData
+let _cgCurrentScope = 'vectorscope'; // 기본 스코프: vectorscope
 
 // ─── 드롭존 핸들러 ────────────────────────────────────
 function cgHandleDrop(e) {
@@ -6714,7 +6787,10 @@ function cgAnalyzeImage(img) {
       const lgg     = cgCalcLiftGammaGain(_cgImageData);
 
       cgRenderPalette(palette);
-      cgRenderHistogram(lum.hist);
+      // 현재 선택된 스코프 렌더링
+      if (_cgCurrentScope === 'histogram') cgRenderHistogram(lum.hist);
+      else if (_cgCurrentScope === 'vectorscope') cgRenderVectorscope(_cgImageData);
+      else cgRenderWaveform(_cgImageData);
       cgRenderMetrics(temp, lum);
       cgRenderDaVinci(lgg);
 
@@ -6729,68 +6805,86 @@ function cgAnalyzeImage(img) {
   }, 30);
 }
 
-// ─── 픽셀 샘플링 ──────────────────────────────────────
+// ─── 픽셀 샘플링 (채도 높은 픽셀 오버샘플링으로 팔레트 정확도 향상) ──
 function cgSamplePixels(imageData, maxCount) {
   const d = imageData.data;
   const total = imageData.width * imageData.height;
-  const step  = Math.max(1, Math.floor(total / maxCount));
-  const out   = [];
+
+  // 1차: 균등 샘플링
+  const step = Math.max(1, Math.floor(total / maxCount));
+  const out  = [];
   for (let i = 0; i < total; i += step) {
     const idx = i * 4;
-    const a = d[idx + 3];
-    if (a < 128) continue; // 투명 픽셀 제외
+    if (d[idx+3] < 128) continue;
     out.push([d[idx], d[idx+1], d[idx+2]]);
+  }
+
+  // 2차: 채도 높은 픽셀 추가 오버샘플 (빨강·파랑·노랑 등 선명한 색 누락 방지)
+  const satStep = Math.max(1, Math.floor(total / (maxCount * 4)));
+  for (let i = 0; i < total; i += satStep) {
+    const idx = i * 4;
+    if (d[idx+3] < 128) continue;
+    const r = d[idx], g = d[idx+1], b = d[idx+2];
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const sat = max > 20 ? (max - min) / max : 0;
+    if (sat > 0.28) out.push([r, g, b]);
   }
   return out;
 }
 
-// ─── K-Means 색 클러스터링 ────────────────────────────
+// ─── K-Means++ 색 클러스터링 (거리 가중 초기화로 팔레트 다양성 보장) ──
 function cgKMeans(pixels, k, maxIter) {
   if (pixels.length < k) k = pixels.length;
-  // 초기 중심: 픽셀 중에서 무작위 선택 (K-means++)
-  let centers = [];
-  const used = new Set();
+
+  // K-means++ 초기화: 거리² 비례 확률로 중심 선택 → 소수색(빨강 등) 놓침 방지
+  const centers = [];
+  centers.push([...pixels[Math.floor(Math.random() * pixels.length)]]);
   while (centers.length < k) {
-    let idx = Math.floor(Math.random() * pixels.length);
-    if (!used.has(idx)) { centers.push([...pixels[idx]]); used.add(idx); }
+    let totalDist = 0;
+    const dists = pixels.map(p => {
+      let minD = Infinity;
+      for (const c of centers) { const dd = cgColorDist2(p, c); if (dd < minD) minD = dd; }
+      totalDist += minD;
+      return minD;
+    });
+    let rand = Math.random() * totalDist;
+    let chosen = pixels.length - 1;
+    for (let i = 0; i < dists.length; i++) {
+      rand -= dists[i];
+      if (rand <= 0) { chosen = i; break; }
+    }
+    centers.push([...pixels[chosen]]);
   }
 
-  let assignments = new Array(pixels.length).fill(0);
+  const assignments = new Array(pixels.length).fill(0);
   for (let iter = 0; iter < maxIter; iter++) {
     let changed = false;
-    // 할당
     for (let i = 0; i < pixels.length; i++) {
       let best = 0, bestDist = Infinity;
-      for (let c = 0; c < k; c++) {
-        const d = cgColorDist2(pixels[i], centers[c]);
-        if (d < bestDist) { bestDist = d; best = c; }
+      for (let c = 0; c < centers.length; c++) {
+        const dd = cgColorDist2(pixels[i], centers[c]);
+        if (dd < bestDist) { bestDist = dd; best = c; }
       }
       if (assignments[i] !== best) { assignments[i] = best; changed = true; }
     }
     if (!changed) break;
-    // 중심 재계산
-    const sums  = Array.from({length:k}, () => [0,0,0]);
-    const cnts  = new Array(k).fill(0);
+    const sums = Array.from({length: k}, () => [0,0,0]);
+    const cnts = new Array(k).fill(0);
     for (let i = 0; i < pixels.length; i++) {
       const c = assignments[i];
-      sums[c][0] += pixels[i][0];
-      sums[c][1] += pixels[i][1];
-      sums[c][2] += pixels[i][2];
+      sums[c][0] += pixels[i][0]; sums[c][1] += pixels[i][1]; sums[c][2] += pixels[i][2];
       cnts[c]++;
     }
     for (let c = 0; c < k; c++) {
-      if (cnts[c] > 0) {
-        centers[c] = [sums[c][0]/cnts[c], sums[c][1]/cnts[c], sums[c][2]/cnts[c]];
-      }
+      if (cnts[c] > 0) centers[c] = [sums[c][0]/cnts[c], sums[c][1]/cnts[c], sums[c][2]/cnts[c]];
     }
   }
-  // 클러스터 크기순 정렬
   const clusterSizes = new Array(k).fill(0);
   assignments.forEach(c => clusterSizes[c]++);
-  const sorted = centers
+  return centers
     .map((c, i) => ({ rgb: c.map(Math.round), count: clusterSizes[i] }))
     .sort((a, b) => b.count - a.count);
-  return sorted;
 }
 
 function cgColorDist2(a, b) {
@@ -6887,31 +6981,188 @@ function cgRenderPalette(palette) {
   }).join('');
 }
 
+// ─── 스코프 탭 전환 ───────────────────────────────────
+function cgSwitchScope(type) {
+  _cgCurrentScope = type;
+  const map = { histogram: 'hist', vectorscope: 'vec', waveform: 'wave' };
+  Object.entries(map).forEach(([t, id]) => {
+    const btn = document.getElementById('cg-scope-' + id);
+    if (!btn) return;
+    const active = t === type;
+    btn.style.background     = active ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.05)';
+    btn.style.borderColor    = active ? 'rgba(99,102,241,0.55)' : 'rgba(255,255,255,0.12)';
+    btn.style.color          = active ? '#a78bfa' : 'var(--text-muted)';
+  });
+  if (!_cgImageData) return;
+  if (type === 'histogram') {
+    const lum = cgCalcLuminance(_cgImageData);
+    cgRenderHistogram(lum.hist);
+  } else if (type === 'vectorscope') {
+    cgRenderVectorscope(_cgImageData);
+  } else {
+    cgRenderWaveform(_cgImageData);
+  }
+}
+
 // ─── 렌더링: 히스토그램 ────────────────────────────────
 function cgRenderHistogram(hist) {
-  const canvas = document.getElementById('cg-histogram-canvas');
+  const canvas = document.getElementById('cg-scope-canvas');
   const w = canvas.offsetWidth || 360;
-  const h = 200;
+  const h = 220;
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, w, h);
   const maxVal = Math.max(...hist);
   const barW   = w / 256;
-
   for (let i = 0; i < 256; i++) {
     const barH = maxVal ? (hist[i] / maxVal) * (h - 20) : 0;
-    // 색상: 어두운 → 밝은 그라디언트
     const lightness = Math.round(i / 255 * 100);
     ctx.fillStyle = `hsl(240,${20 + lightness*0.4}%,${10 + lightness*0.55}%)`;
     ctx.fillRect(i * barW, h - barH - 4, barW + 0.5, barH);
   }
-  // x축 레이블
   ctx.fillStyle = 'rgba(255,255,255,0.3)';
   ctx.font = '10px sans-serif';
   ctx.fillText('0', 2, h-1);
   ctx.fillText('128', w/2-10, h-1);
   ctx.fillText('255', w-20, h-1);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fillText('HISTOGRAM', 5, 14);
+}
+
+// ─── 렌더링: 벡터스코프 (스킨톤 라인 포함) ─────────────
+function cgRenderVectorscope(imageData) {
+  const canvas = document.getElementById('cg-scope-canvas');
+  const sz = Math.min(canvas.offsetWidth || 280, 280);
+  canvas.width = sz;
+  canvas.height = sz;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, sz, sz);
+
+  const cx = sz / 2, cy = sz / 2;
+  const r  = sz / 2 - 16;
+
+  // 그리드 원
+  ctx.lineWidth = 1;
+  [0.25, 0.5, 0.75, 1.0].forEach(pct => {
+    ctx.strokeStyle = pct === 1.0 ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.07)';
+    ctx.beginPath(); ctx.arc(cx, cy, r * pct, 0, Math.PI * 2); ctx.stroke();
+  });
+  // 십자선
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+
+  // 픽셀 플롯 (YUV 변환)
+  const d = imageData.data;
+  const total = imageData.width * imageData.height;
+  const step  = Math.max(1, Math.floor(total / 7000));
+  ctx.save();
+  ctx.globalAlpha = 0.65;
+  for (let i = 0; i < total; i += step) {
+    const idx = i * 4;
+    if (d[idx+3] < 128) continue;
+    const R = d[idx], G = d[idx+1], B = d[idx+2];
+    const Y  = 0.299*R + 0.587*G + 0.114*B;
+    const U  = (B - Y) * 0.492;   // Cb
+    const V2 = (R - Y) * 0.877;   // Cr
+    const px = cx + (U / 128) * r;
+    const py = cy - (V2 / 128) * r;
+    ctx.fillStyle = `rgb(${R},${G},${B})`;
+    ctx.fillRect(px - 0.7, py - 0.7, 1.5, 1.5);
+  }
+  ctx.restore();
+
+  // 컬러바 타겟 (100% 채도 기준)
+  const targets = [
+    { n:'R',  U:-37.5, V:156.8, c:'#f87171' },
+    { n:'Ye', U:-111,  V:25.6,  c:'#fbbf24' },
+    { n:'G',  U:-73.6, V:-131.3,c:'#4ade80' },
+    { n:'Cy', U:37.2,  V:-157.2,c:'#22d3ee' },
+    { n:'B',  U:111.1, V:-25.5, c:'#60a5fa' },
+    { n:'Mg', U:73.6,  V:131.3, c:'#e879f9' },
+  ];
+  targets.forEach(({n, U, V, c}) => {
+    const tx = cx + (U / 128) * r;
+    const ty = cy - (V / 128) * r;
+    ctx.fillStyle = c;
+    ctx.fillRect(tx - 3.5, ty - 3.5, 7, 7);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText(n, tx + 5, ty + 3);
+  });
+
+  // 스킨톤 라인 (~123.5°)
+  const skinAngle = 123.5 * Math.PI / 180;
+  const ex = cx + Math.cos(skinAngle) * r;
+  const ey = cy - Math.sin(skinAngle) * r;
+  ctx.save();
+  ctx.setLineDash([5, 3]);
+  ctx.strokeStyle = 'rgba(255,200,70,0.9)';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+  ctx.restore();
+  // 스킨톤 라벨
+  ctx.fillStyle = 'rgba(255,200,70,0.85)';
+  ctx.font = 'bold 9px sans-serif';
+  const lx = cx + Math.cos(skinAngle) * r * 0.52;
+  const ly = cy - Math.sin(skinAngle) * r * 0.52;
+  ctx.fillText('SKIN', lx - 10, ly - 4);
+
+  // 타이틀
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('VECTORSCOPE', 5, 14);
+}
+
+// ─── 렌더링: 웨이브폼 ─────────────────────────────────
+function cgRenderWaveform(imageData) {
+  const canvas = document.getElementById('cg-scope-canvas');
+  const w = canvas.offsetWidth || 360;
+  const h = 220;
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, w, h);
+
+  // 그리드 라인 (0 / 64 / 128 / 192 / 255)
+  [0, 64, 128, 192, 255].forEach(luma => {
+    const y = h - 6 - (luma / 255) * (h - 16);
+    ctx.strokeStyle = luma === 0 || luma === 255 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.font = '9px sans-serif';
+    ctx.fillText(luma, 3, y - 2);
+  });
+
+  // 픽셀 플롯
+  const d = imageData.data;
+  const iw = imageData.width, ih = imageData.height;
+  const rowStep = Math.max(1, Math.floor(ih / 90));
+  ctx.save();
+  ctx.globalAlpha = 0.38;
+  for (let yi = 0; yi < ih; yi += rowStep) {
+    for (let xi = 0; xi < iw; xi++) {
+      const idx = (yi * iw + xi) * 4;
+      if (d[idx+3] < 128) continue;
+      const R = d[idx], G = d[idx+1], B = d[idx+2];
+      const luma = 0.299*R + 0.587*G + 0.114*B;
+      const px = (xi / iw) * w;
+      const py = h - 6 - (luma / 255) * (h - 16);
+      ctx.fillStyle = `rgb(${R},${G},${B})`;
+      ctx.fillRect(px, py, 1, 1);
+    }
+  }
+  ctx.restore();
+
+  // 타이틀
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('WAVEFORM', 5, 14);
 }
 
 // ─── 렌더링: 수치 카드 ─────────────────────────────────
@@ -7003,7 +7254,8 @@ async function cgRunGeminiAnalysis() {
     // 캔버스 이미지를 base64 JPEG로 변환 (용량 절약: 품질 0.7)
     const canvas  = document.getElementById('cg-hidden-canvas');
     const b64     = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-    const model   = localStorage.getItem('creyong-gemini-model') || 'gemini-2.0-flash';
+    // 색보정 분석은 비전 지원 모델 고정 (이미지 생성 모델과 분리)
+    const model   = 'gemini-1.5-flash';
 
     const prompt = `당신은 프로 컬러리스트입니다. 이 이미지를 색보정 관점에서 분석해주세요.
 
