@@ -7051,7 +7051,7 @@ function cgRenderVectorscope(imageData) {
 
   // ── 정원 보장: CSS를 정사각형으로 고정 (max-height 해제 필수) ──
   const parent = canvas.parentElement;
-  const sz = Math.min(Math.max(parent?.offsetWidth || 0, 60), 220) || 220;
+  const sz = Math.min(Math.max(parent?.offsetWidth || 0, 60), 260) || 260;
   canvas.style.maxHeight = 'none';    // max-height 해제 ← 타원 방지 핵심
   canvas.width  = sz;
   canvas.height = sz;
