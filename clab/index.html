@@ -2178,6 +2178,8 @@ function switchTab(tab, el) {
   if (tab === 'characters') { switchTab('conti', document.querySelector('[data-tab=conti]')); return; }
   if (tab === 'conti') { renderCharGrid(); }
   if (tab === 'location') renderLocations();
+  // 새로고침 후 마지막 탭 복원을 위해 저장
+  localStorage.setItem('creyong-last-tab', tab);
 }
 
 // ════════════════════════════════════════
@@ -6710,6 +6712,13 @@ async function _loadAndInit() {
   refreshAll();
   renderCalendar();
   updateApiBtn();
+
+  // ── 마지막으로 보던 탭 복원 ──
+  const _lastTab = localStorage.getItem('creyong-last-tab');
+  if (_lastTab && _lastTab !== 'overview') {
+    const _lastNavEl = document.querySelector(`[data-tab="${_lastTab}"]`);
+    if (_lastNavEl) switchTab(_lastTab, _lastNavEl);
+  }
 }
 
 _loadAndInit();
