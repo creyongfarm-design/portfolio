@@ -5366,33 +5366,32 @@ async function testGeminiApi() {
   result.style.display = 'none';
 
   try {
+    // ListModels API — 모델명 없이 순수 키 유효성 검증 (모델명 오타 오류 원천 차단)
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ contents:[{ parts:[{ text:'hi' }] }], generationConfig:{ maxOutputTokens:1 } })
-      }
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${key}&pageSize=5`
     );
     const data = await res.json();
+
     if (res.ok) {
+      const models = (data.models || []).map(m => m.name.split('/').pop());
+      const hasVision = models.some(m => m.includes('gemini'));
       result.style.display = 'block';
       result.style.background = 'rgba(34,197,94,0.1)';
       result.style.border = '1px solid rgba(34,197,94,0.3)';
       result.style.color = '#4ade80';
-      result.innerHTML = '✅ 연결 성공! &nbsp;<span style="opacity:0.7">gemini-2.0-flash</span>';
+      result.innerHTML = `✅ 연결 성공! &nbsp;<span style="opacity:0.65">${models.length}개 모델 접근 가능</span>`;
     } else {
       const msg = data.error?.message || `HTTP ${res.status}`;
       result.style.display = 'block';
       result.style.background = 'rgba(239,68,68,0.1)';
       result.style.border = '1px solid rgba(239,68,68,0.3)';
       result.style.color = '#f87171';
-      if (res.status === 400 && msg.includes('API_KEY_INVALID')) {
-        result.textContent = '❌ API 키 오류 — 키를 확인하세요';
+      if (res.status === 400 || msg.toLowerCase().includes('api_key_invalid') || msg.toLowerCase().includes('invalid')) {
+        result.textContent = '❌ API 키 오류 — 키를 다시 확인하세요 (AIzaSy...)';
       } else if (res.status === 403) {
-        result.textContent = '❌ 권한 없음 — Google AI Studio에서 키 확인';
+        result.textContent = '❌ 권한 없음 — Google AI Studio에서 Generative AI API 활성화 필요';
       } else {
-        result.textContent = `❌ 오류: ${msg}`;
+        result.textContent = `❌ 오류 (${res.status}): ${msg}`;
       }
     }
   } catch(e) {
@@ -7175,16 +7174,18 @@ function cgRenderWaveform(imageData) {
   canvas.style.height   = '';
   canvas.style.maxHeight = '';
   const w = (canvas.parentElement?.offsetWidth || canvas.offsetWidth || 360);
-  const h = 220;
+  const h = 260;
   canvas.width = w;
   canvas.height = h;
+  canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#080810';
   ctx.fillRect(0, 0, w, h);
 
   // 그리드 라인 (0 / 64 / 128 / 192 / 255)
+  // 0 = 바닥 (8px 여백), 255 = 상단 (10px 여백)
   [0, 64, 128, 192, 255].forEach(luma => {
-    const y = h - 25 - (luma / 255) * (h - 40);
+    const y = h - 8 - (luma / 255) * (h - 18);
     ctx.strokeStyle = luma === 0 || luma === 255 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.07)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
@@ -7206,7 +7207,7 @@ function cgRenderWaveform(imageData) {
       const R = d[idx], G = d[idx+1], B = d[idx+2];
       const luma = 0.299*R + 0.587*G + 0.114*B;
       const px = (xi / iw) * w;
-      const py = h - 25 - (luma / 255) * (h - 40);
+      const py = h - 8 - (luma / 255) * (h - 18);
       ctx.fillStyle = `rgb(${R},${G},${B})`;
       ctx.fillRect(px, py, 1, 1);
     }
