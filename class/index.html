@@ -278,7 +278,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </head>
 <body ontouchstart="">
 
-<div class="topbar">🎬 오픈 특가 &nbsp;·&nbsp; 1기 한정 ₩299,000 &nbsp;·&nbsp; 3/26 평일반 &amp; 3/28 주말반</div>
+<div class="topbar">🎬 오픈 특가 &nbsp;·&nbsp; 1기 한정 ₩299,000 &nbsp;·&nbsp; 3/26 평일반 <span style="background:#ef4444;color:#fff;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:800;margin:0 4px;vertical-align:middle">SOLD OUT</span>&nbsp;·&nbsp; 3/28 주말반 &amp; 3/31 화요일반 추가개설</div>
 
 <nav class="main-nav" id="main-nav">
   <div class="nav-logo">CREYONG FILM SCHOOL</div>
@@ -293,22 +293,29 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-inner">
-    <div class="hero-badge"><span class="hero-dot"></span> 단 5명만 · 3/26 평일반 · 3/28 주말반</div>
+    <div class="hero-badge"><span class="hero-dot"></span> 3/26 평일반 마감 · 3/28 주말반 · 3/31 화요일반 추가개설</div>
     <h1 class="hero-title"><span class="grad" style="display:block;font-size:clamp(32px,5.5vw,80px)">다빈치 리졸브</span><span style="display:block;color:#fff;font-size:clamp(38px,7vw,100px)">하루 끝장 수업</span></h1>
     <p class="hero-sub">
       촬영 · 편집 · 색보정 · AI 워크스테이션까지<br>
       <strong>1인 영상 제작자의 모든 것을 하루에</strong>
     </p>
     <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:36px">
-      <div class="class-pick-card" onclick="selectClass('weekday',this)" id="pick-weekday">
+      <div class="class-pick-card" id="pick-weekday" style="opacity:.45;cursor:not-allowed;pointer-events:none;position:relative">
+        <div style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800">SOLD OUT</div>
         <div class="cp-tag">평일반</div>
         <div class="cp-date">3월 26일 (목)</div>
         <div class="cp-time">10:00 ~ 19:30</div>
-        <div class="cp-seats">최대 5명</div>
+        <div class="cp-seats" style="color:#ef4444;font-weight:700">마감</div>
       </div>
       <div class="class-pick-card" onclick="selectClass('weekend',this)" id="pick-weekend">
         <div class="cp-tag">주말반</div>
         <div class="cp-date">3월 28일 (토)</div>
+        <div class="cp-time">10:00 ~ 19:30</div>
+        <div class="cp-seats">최대 5명</div>
+      </div>
+      <div class="class-pick-card" onclick="selectClass('tuesday',this)" id="pick-tuesday">
+        <div class="cp-tag" style="color:#a78bfa">추가개설</div>
+        <div class="cp-date">3월 31일 (화)</div>
         <div class="cp-time">10:00 ~ 19:30</div>
         <div class="cp-seats">최대 5명</div>
       </div>
@@ -747,7 +754,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="sticky-old">₩499,000</span>
       <span class="sticky-new">₩299,000</span>
     </div>
-    <div class="sticky-note">1기 오픈 특가 · 5명 한정 · 3/26 평일 · 3/28 주말</div>
+    <div class="sticky-note">1기 오픈 특가 · 3/26 마감 · 3/28 주말 · 3/31 화요일 추가개설</div>
   </div>
   <button class="sticky-btn" id="btn-apply-sticky">신청하기 →</button>
 </div>
@@ -767,8 +774,9 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
         <label class="fl">수업 선택 *</label>
         <select class="fi" id="reg-class">
           <option value="">선택해주세요</option>
-          <option value="3/26 목 평일반">3월 26일(목) 평일반 — 10:00~19:30</option>
+          <option value="3/26 목 평일반" disabled>3월 26일(목) 평일반 — 마감</option>
           <option value="3/28 토 주말반">3월 28일(토) 주말반 — 10:00~19:30</option>
+          <option value="3/31 화 화요일반">3월 31일(화) 화요일반 — 10:00~19:30 (추가개설)</option>
         </select>
       </div>
       <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" id="reg-name" placeholder="홍길동"></div>
