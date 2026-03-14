@@ -189,6 +189,30 @@
   .pm-check input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
   .pm-add-row { padding: 10px 14px; font-size: 12px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.04); background: var(--surface); border-radius: 0 0 8px 8px; transition: all 0.15s; }
   .pm-add-row:hover { background: rgba(0,203,169,0.06); color: var(--accent); }
+  /* 콘텐츠 달력 */
+  .cal-nav { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .cal-nav-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:5px 12px; cursor:pointer; font-size:15px; transition:all 0.2s; line-height:1; }
+  .cal-nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .cal-month-label { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--text); flex:1; text-align:center; }
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+  .cal-day-header { text-align:center; font-family:'Space Mono',monospace; font-size:10px; font-weight:700; padding:5px 0; color:var(--muted); }
+  .cal-cell { background:var(--surface); border:1px solid var(--border); border-radius:8px; min-height:74px; padding:6px; cursor:pointer; transition:all 0.15s; overflow:hidden; }
+  .cal-cell:hover { border-color:rgba(0,203,169,0.4); background:rgba(0,203,169,0.04); }
+  .cal-cell.cal-empty { background:transparent; border-color:transparent; cursor:default; pointer-events:none; }
+  .cal-cell.cal-today { border-color:rgba(0,203,169,0.55); background:rgba(0,203,169,0.07); }
+  .cal-date { font-family:'Space Mono',monospace; font-size:11px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+  .cal-date.is-today { color:var(--accent); }
+  .cal-events { display:flex; flex-direction:column; gap:2px; }
+  .cal-event { font-size:10px; padding:2px 5px; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; transition:filter 0.15s; line-height:1.4; }
+  .cal-event:hover { filter:brightness(1.25); }
+  .cal-event-shoot  { background:rgba(0,203,169,0.15); color:var(--accent); border:1px solid rgba(0,203,169,0.3); }
+  .cal-event-upload { background:rgba(2,136,209,0.15); color:#60a5fa; border:1px solid rgba(2,136,209,0.3); }
+  .cal-legend { display:flex; gap:14px; margin-bottom:12px; }
+  .cal-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; }
+  .cal-legend-dot { width:10px; height:10px; border-radius:3px; }
+  .pm-view-toggle { display:flex; gap:3px; background:var(--surface2); border-radius:8px; padding:3px; border:1px solid var(--border); }
+  .pm-view-btn { padding:4px 10px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.18s; background:transparent; color:var(--muted); font-family:'Space Mono',monospace; }
+  .pm-view-btn.active { background:var(--accent); color:#000; }
   /* 우측 디테일 패널 */
   .pm-panel { width: 0; overflow: hidden; transition: width 0.3s ease; flex-shrink: 0; }
   .pm-panel.open { width: 480px; overflow-y: auto; border-left: 1px solid var(--border); padding: 22px 24px; max-height: calc(100vh - 130px); position: sticky; top: 120px; }
@@ -860,29 +884,56 @@ if (location.protocol === 'file:') {
           <span class="section-title">📁 프로젝트 관리</span>
           <span id="pm-notion-badge" style="display:none;font-size:10px;color:var(--accent3);font-family:'Space Mono',monospace;padding:2px 8px;background:rgba(0,203,169,0.1);border:1px solid rgba(0,203,169,0.3);border-radius:20px;flex-shrink:0">📓 Notion</span>
           <div class="section-line"></div>
-          <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 10px" title="새로고침" onclick="renderProjectTable()">↺</button>
+          <!-- 뷰 전환 토글 -->
+          <div class="pm-view-toggle">
+            <button class="pm-view-btn active" id="pm-view-btn-list" onclick="switchPmView('list')">☰ 리스트</button>
+            <button class="pm-view-btn" id="pm-view-btn-cal"  onclick="switchPmView('calendar')">📅 달력</button>
+          </div>
+          <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 10px" title="새로고침" onclick="_pmViewMode==='calendar'?renderPmCalendar():renderProjectTable()">↺</button>
           <button class="btn btn-ghost" style="font-size:11px;flex-shrink:0;padding:6px 14px" onclick="addNewPmProject()">＋ 새 프로젝트</button>
         </div>
-        <div class="pm-table-scroll">
-          <table class="pm-table">
-            <thead>
-              <tr>
-                <th style="min-width:200px">Aa 프로젝트명</th>
-                <th style="min-width:130px">≡ 구분</th>
-                <th style="min-width:130px">⚡ 진행률</th>
-                <th style="min-width:115px">📅 촬영예정일</th>
-                <th style="min-width:130px">≡ 촬영참석자</th>
-                <th style="min-width:110px">≡ 촬영장소</th>
-                <th style="min-width:115px">📅 업로드 예정일</th>
-                <th style="min-width:60px;text-align:center">☑ 광고</th>
-                <th style="min-width:110px"># 제작비</th>
-              </tr>
-            </thead>
-            <tbody id="pm-tbody">
-              <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">로딩 중...</td></tr>
-            </tbody>
-          </table>
-          <div class="pm-add-row" onclick="addNewPmProject()">＋ 새 페이지</div>
+
+        <!-- 리스트 뷰 -->
+        <div id="pm-list-section">
+          <div class="pm-table-scroll">
+            <table class="pm-table">
+              <thead>
+                <tr>
+                  <th style="min-width:200px">Aa 프로젝트명</th>
+                  <th style="min-width:130px">≡ 구분</th>
+                  <th style="min-width:130px">⚡ 진행률</th>
+                  <th style="min-width:115px">📅 촬영예정일</th>
+                  <th style="min-width:130px">≡ 촬영참석자</th>
+                  <th style="min-width:110px">≡ 촬영장소</th>
+                  <th style="min-width:115px">📅 업로드 예정일</th>
+                  <th style="min-width:60px;text-align:center">☑ 광고</th>
+                  <th style="min-width:110px"># 제작비</th>
+                </tr>
+              </thead>
+              <tbody id="pm-tbody">
+                <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted)">로딩 중...</td></tr>
+              </tbody>
+            </table>
+            <div class="pm-add-row" onclick="addNewPmProject()">＋ 새 페이지</div>
+          </div>
+        </div>
+
+        <!-- 달력 뷰 -->
+        <div id="pm-calendar-section" style="display:none;padding:4px 0">
+          <!-- 범례 -->
+          <div class="cal-legend">
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(0,203,169,0.5)"></div>촬영예정일</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(2,136,209,0.5)"></div>업로드 예정일</div>
+          </div>
+          <!-- 월 네비게이션 -->
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="_calPrevMonth()">‹</button>
+            <div class="cal-month-label" id="pm-cal-label">2026년 3월</div>
+            <button class="cal-nav-btn" onclick="_calGoToday()" style="font-size:11px;padding:5px 10px">오늘</button>
+            <button class="cal-nav-btn" onclick="_calNextMonth()">›</button>
+          </div>
+          <!-- 달력 그리드 -->
+          <div class="cal-grid" id="pm-calendar-grid"></div>
         </div>
       </div>
       <!-- ── 디테일 패널 ── -->
@@ -5983,6 +6034,98 @@ function openApiSettings(focus) {
 // ════════════════════════════════════════
 //  설정 탭 전환
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+//  콘텐츠 달력
+// ════════════════════════════════════════
+let _calYear  = new Date().getFullYear();
+let _calMonth = new Date().getMonth();
+let _pmViewMode = 'list';
+
+function switchPmView(view) {
+  _pmViewMode = view;
+  const listEl    = document.getElementById('pm-list-section');
+  const calEl     = document.getElementById('pm-calendar-section');
+  const btnList   = document.getElementById('pm-view-btn-list');
+  const btnCal    = document.getElementById('pm-view-btn-cal');
+  if (view === 'calendar') {
+    if (listEl)  listEl.style.display  = 'none';
+    if (calEl)   calEl.style.display   = 'block';
+    if (btnList) { btnList.classList.remove('active'); }
+    if (btnCal)  { btnCal.classList.add('active'); }
+    renderPmCalendar();
+  } else {
+    if (listEl)  listEl.style.display  = 'block';
+    if (calEl)   calEl.style.display   = 'none';
+    if (btnList) { btnList.classList.add('active'); }
+    if (btnCal)  { btnCal.classList.remove('active'); }
+  }
+}
+
+function renderPmCalendar() {
+  const container = document.getElementById('pm-calendar-grid');
+  if (!container) return;
+  const year = _calYear, month = _calMonth;
+  const today = new Date();
+  const label = document.getElementById('pm-cal-label');
+  const monthNames = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  if (label) label.textContent = `${year}년 ${monthNames[month]}`;
+
+  // 날짜별 프로젝트 맵
+  const shootMap = {}, uploadMap = {};
+  (_pmNProjs || []).forEach(p => {
+    if (p.shootDate)  { const d = p.shootDate.slice(0,10);  if (!shootMap[d])  shootMap[d]  = []; shootMap[d].push(p);  }
+    if (p.uploadDate) { const d = p.uploadDate.slice(0,10); if (!uploadMap[d]) uploadMap[d] = []; uploadMap[d].push(p); }
+  });
+
+  const firstDay   = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const dayNames   = ['일','월','화','수','목','금','토'];
+  let html = '';
+
+  // 요일 헤더
+  dayNames.forEach((d, i) => {
+    const c = i === 0 ? '#f87171' : i === 6 ? '#60a5fa' : 'var(--muted)';
+    html += `<div class="cal-day-header" style="color:${c}">${d}</div>`;
+  });
+
+  // 빈 셀
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-cell cal-empty"></div>`;
+
+  // 날짜 셀
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const shoots  = shootMap[ds]  || [];
+    const uploads = uploadMap[ds] || [];
+    let ev = '';
+    shoots.forEach(p  => { ev += `<div class="cal-event cal-event-shoot"  onclick="event.stopPropagation();_calOpenProj('${p.id}')">🎥 ${p.name.slice(0,7)}${p.name.length>7?'…':''}</div>`; });
+    uploads.forEach(p => { ev += `<div class="cal-event cal-event-upload" onclick="event.stopPropagation();_calOpenProj('${p.id}')">📤 ${p.name.slice(0,7)}${p.name.length>7?'…':''}</div>`; });
+    html += `<div class="cal-cell${isToday?' cal-today':''}" onclick="_calDayClick('${ds}')">
+      <div class="cal-date${isToday?' is-today':''}">${d}</div>
+      <div class="cal-events">${ev}</div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+function _calPrevMonth() { _calMonth--; if (_calMonth < 0) { _calMonth = 11; _calYear--; } renderPmCalendar(); }
+function _calNextMonth() { _calMonth++; if (_calMonth > 11) { _calMonth = 0;  _calYear++; } renderPmCalendar(); }
+function _calGoToday()   { _calYear = new Date().getFullYear(); _calMonth = new Date().getMonth(); renderPmCalendar(); }
+
+function _calOpenProj(id) {
+  switchPmView('list');
+  setTimeout(() => {
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row) { row.click(); row.scrollIntoView({ behavior:'smooth', block:'center' }); }
+  }, 80);
+}
+
+function _calDayClick(dateStr) {
+  const all = (_pmNProjs||[]).filter(p => p.shootDate?.startsWith(dateStr) || p.uploadDate?.startsWith(dateStr));
+  if (all.length === 1) { _calOpenProj(all[0].id); }
+  else if (all.length > 1) { _calOpenProj(all[0].id); }
+}
+
 function switchSettingsTab(tab, btn) {
   ['notion','analytics','ai','etc'].forEach(t => {
     const content = document.getElementById('stab-content-' + t);
