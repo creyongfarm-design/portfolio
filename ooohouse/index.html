@@ -318,6 +318,19 @@ footer strong { color:rgba(255,255,255,0.7); }
   .hero-title { letter-spacing:0.06em; }
 }
 </style>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CREYONG Google Analytics 4
+       👉 analytics.google.com 에서 발급한 Measurement ID로
+          G-L8L08Q7VPR 를 실제 ID로 교체 후 GitHub에 올리세요
+  ═══════════════════════════════════════════════════════ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L8L08Q7VPR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-L8L08Q7VPR');
+  </script>
 </head>
 <body>
 
@@ -896,5 +909,44 @@ document.getElementById('reserve-modal').addEventListener('click', function(e) {
 </script>
 
 
+
+  <!-- ── CREYONG GA4 이벤트 트래킹 ── -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+
+    // 예약 문의하기 버튼 (히어로)
+    document.querySelectorAll('a[href="#contact"].btn-primary').forEach(function(el) {
+      el.addEventListener('click', function() {
+        gtag('event', 'click_inquiry_studio', {
+          event_category: '스튜디오페이지',
+          event_label: '예약 문의하기 버튼',
+        });
+      });
+    });
+
+    // 카카오 예약 버튼
+    var kakaoBtn = document.querySelector('.contact-kakao');
+    if (kakaoBtn) {
+      kakaoBtn.addEventListener('click', function() {
+        gtag('event', 'click_kakao_studio', {
+          event_category: '스튜디오페이지',
+          event_label: '카카오 채널 예약',
+        });
+      });
+    }
+
+    // 전화 문의 링크
+    var phoneLink = document.querySelector('a[href^="tel:"]');
+    if (phoneLink) {
+      phoneLink.addEventListener('click', function() {
+        gtag('event', 'click_phone_studio', {
+          event_category: '스튜디오페이지',
+          event_label: '전화 문의',
+        });
+      });
+    }
+
+  });
+  </script>
 </body>
 </html>
