@@ -281,19 +281,17 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
 .film-award.green{color:#34d399}
 
 /* ─── MENTOR TEACHING HISTORY ─── */
-.mentor-history{margin-top:60px;text-align:left}
-.mentor-history-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:4px;text-transform:uppercase;margin-bottom:18px;text-align:center}
-.mh-row{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;margin-bottom:9px;border-left:3px solid}
-.mh-row.mh-orange{border-left-color:#f97316}
-.mh-row.mh-purple{border-left-color:#818cf8}
-.mh-row.mh-green{border-left-color:#34d399}
-.mh-icon{font-size:17px;flex-shrink:0;margin-top:2px}
-.mh-badge{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;width:34px;flex-shrink:0;margin-top:3px}
-.mh-orange .mh-badge{color:#f97316}
-.mh-purple .mh-badge{color:#818cf8}
-.mh-green  .mh-badge{color:#34d399}
-.mh-names{font-size:13.5px;font-weight:800;color:#e8e8e8;letter-spacing:-0.3px}
-.mh-sub{font-size:11px;color:#555;margin-top:3px}
+.mentor-history{margin-top:64px;max-width:600px;margin-left:auto;margin-right:auto}
+.mentor-history-title{font-size:10px;font-weight:700;color:rgba(255,255,255,.22);letter-spacing:4px;text-transform:uppercase;margin-bottom:28px;text-align:center}
+.mh-row{display:flex;align-items:center;gap:0;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.mh-row:first-of-type{border-top:1px solid rgba(255,255,255,.06)}
+.mh-cat{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;width:44px;flex-shrink:0}
+.mh-orange .mh-cat{color:#f97316}
+.mh-purple .mh-cat{color:#818cf8}
+.mh-green  .mh-cat{color:#34d399}
+.mh-divider{width:1px;height:16px;background:rgba(255,255,255,.1);flex-shrink:0;margin:0 20px}
+.mh-names{font-size:14px;font-weight:700;color:#ccc;letter-spacing:-0.3px;line-height:1.5}
+.mh-sub{font-size:11px;color:#3d3d3d;margin-top:3px}
 
 @media(max-width:768px){
   .filmography{padding:64px 24px}
@@ -402,7 +400,7 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
 <section class="filmography">
   <div class="filmography-inner">
     <p class="filmography-label reveal">All Works</p>
-    <h3 class="filmography-title reveal d1">전체 작품 이력</h3>
+    <h3 class="filmography-title reveal d1">주요 작품 이력</h3>
     <div class="filmography-cols">
 
       <!-- 웹드라마 -->
@@ -800,29 +798,29 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
     <div class="mentor-history reveal d3">
       <p class="mentor-history-title">강의 이력</p>
 
-      <div class="mh-row mh-orange reveal d2">
-        <span class="mh-icon">🎓</span>
-        <span class="mh-badge">대학</span>
+      <div class="mh-row mh-orange">
+        <span class="mh-cat">대학</span>
+        <div class="mh-divider"></div>
         <div>
-          <div class="mh-names">서울시립대 / 고려대 / 숭실대 / 청주대</div>
+          <div class="mh-names">서울시립대 · 고려대 · 숭실대 · 청주대</div>
           <div class="mh-sub">영상제작 + 진로교육 특강</div>
         </div>
       </div>
 
-      <div class="mh-row mh-purple reveal d3">
-        <span class="mh-icon">🏢</span>
-        <span class="mh-badge">기업</span>
+      <div class="mh-row mh-purple">
+        <span class="mh-cat">기업</span>
+        <div class="mh-divider"></div>
         <div>
-          <div class="mh-names">KBS 특강 / 금호석유화학 / 신세계백화점</div>
-          <div class="mh-sub">영상제작 특강 / 임직원 UCC 제작 교육</div>
+          <div class="mh-names">KBS 특강 · 금호석유화학 · 신세계백화점</div>
+          <div class="mh-sub">영상제작 특강 · 임직원 UCC 제작 교육</div>
         </div>
       </div>
 
-      <div class="mh-row mh-green reveal d4">
-        <span class="mh-icon">🏛️</span>
-        <span class="mh-badge">공공</span>
+      <div class="mh-row mh-green">
+        <span class="mh-cat">공공</span>
+        <div class="mh-divider"></div>
         <div>
-          <div class="mh-names">서울시설공단 / 한국노인인력개발원</div>
+          <div class="mh-names">서울시설공단 · 한국노인인력개발원</div>
           <div class="mh-sub">공공기관 영상 교육</div>
         </div>
       </div>
