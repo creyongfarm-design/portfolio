@@ -162,6 +162,24 @@
   .pm-cat-인스타릴스 { background: rgba(139,92,246,0.2); color: #a78bfa; }
   .pm-cat-상업영상 { background: rgba(59,130,246,0.2); color: #60a5fa; }
   .pm-stage-프리프로덕션 { background: rgba(100,116,139,0.3); color: #94a3b8; }
+
+  /* ── Analytics Tab ── */
+  .ga4-kpi-card { background:var(--surface2); border-radius:12px; padding:18px; border:1px solid rgba(255,255,255,.05); transition:border-color .2s; }
+  .ga4-kpi-card:hover { border-color:rgba(99,102,241,.3); }
+  .ga4-kpi-label { font-size:11px; color:var(--muted); font-weight:600; letter-spacing:.4px; margin-bottom:10px; }
+  .ga4-kpi-val { font-size:28px; font-weight:800; color:#fff; letter-spacing:-1px; margin-bottom:4px; font-family:'Space Mono',monospace; }
+  .ga4-kpi-sub { font-size:10px; color:rgba(255,255,255,.2); font-family:'Space Mono',monospace; }
+  .ga4-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .ga4-bar-label { font-size:11px; color:var(--fg); width:110px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ga4-bar-track { flex:1; height:6px; background:rgba(255,255,255,.07); border-radius:4px; overflow:hidden; }
+  .ga4-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+  .ga4-bar-count { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; width:40px; text-align:right; flex-shrink:0; }
+  .ga4-event-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:12px; }
+  .ga4-event-row:last-child { border-bottom:none; }
+  .ga4-event-name { color:var(--fg); font-family:'Space Mono',monospace; }
+  .ga4-event-count { color:var(--accent); font-weight:700; font-family:'Space Mono',monospace; }
+  .ga4-empty { font-size:12px; color:rgba(255,255,255,.2); text-align:center; padding:20px 0; }
+  .ga4-period.active { background:rgba(99,102,241,.2); color:#a78bfa; border-color:rgba(99,102,241,.4); }
   .pm-stage-컨펌대기중 { background: rgba(234,179,8,0.22); color: #fbbf24; }
   .pm-stage-포스트프로덕션 { background: rgba(59,130,246,0.22); color: #60a5fa; }
   .pm-stage-완료 { background: rgba(34,197,94,0.2); color: #4ade80; }
@@ -736,6 +754,7 @@ if (location.protocol === 'file:') {
   <div class="nav-tab" data-tab="collab" onclick="switchTab('collab',this)">🤝 협업 <span class="tab-count" id="tab-count-collabs">0</span></div>
   <div class="nav-tab" data-tab="tools" onclick="switchTab('tools',this)">🛠️ AI 툴킷</div>
   <div class="nav-tab" data-tab="pipeline" onclick="switchTab('pipeline',this)">⚡ 파이프라인</div>
+  <div class="nav-tab" data-tab="analytics" onclick="switchTab('analytics',this)">📈 애널리틱스</div>
   <div class="nav-tab" data-tab="colorgrade" onclick="switchTab('colorgrade',this)">🎨 색보정</div>
 </nav>
 
@@ -1608,7 +1627,109 @@ if (location.protocol === 'file:') {
 
   </div>
 
-  <!-- 협업 에디터 모달 -->
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     📈 ANALYTICS TAB
+══════════════════════════════════════════════════ -->
+<div class="page" id="page-analytics">
+  <div class="section">
+
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="section-title">📈 사이트 애널리틱스</span>
+        <div class="section-badge">GA4</div>
+        <span id="ga4-conn-badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(34,197,94,.15);color:#4ade80;border:1px solid rgba(34,197,94,.25)">● 연결됨</span>
+      </div>
+      <!-- 기간 선택 -->
+      <div style="display:flex;gap:6px" id="ga4-period-btns">
+        <button class="btn btn-ghost ga4-period active" data-days="1"  onclick="setGa4Period(1,this)"  style="font-size:11px">오늘</button>
+        <button class="btn btn-ghost ga4-period"        data-days="7"  onclick="setGa4Period(7,this)"  style="font-size:11px">7일</button>
+        <button class="btn btn-ghost ga4-period"        data-days="30" onclick="setGa4Period(30,this)" style="font-size:11px">30일</button>
+        <button class="btn btn-ghost" onclick="loadAnalytics()" style="font-size:11px">🔄 새로고침</button>
+      </div>
+    </div>
+
+    <!-- 미연결 상태 -->
+    <div id="ga4-setup-guide" style="display:none;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:12px;padding:24px;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700;color:#a78bfa;margin-bottom:8px">🔌 Google Analytics 연결이 필요해요</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:16px">
+        아래 3단계로 설정하면 방문자 통계를 여기서 바로 볼 수 있어요.
+      </div>
+      <div style="font-size:12px;line-height:2;color:var(--fg)">
+        <b style="color:#a78bfa">1단계</b> — <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--accent3)">Google Cloud Console ↗</a> → 프로젝트 생성 → <b>Google Analytics Data API</b> 활성화<br>
+        <b style="color:#a78bfa">2단계</b> — IAM → 서비스 계정 생성 → JSON 키 다운로드<br>
+        <b style="color:#a78bfa">3단계</b> — <a href="https://analytics.google.com" target="_blank" style="color:var(--accent3)">GA4 관리 ↗</a> → 속성 → 계정 액세스 관리 → 서비스 계정 이메일 추가(뷰어)<br>
+        <b style="color:#a78bfa">4단계</b> — 아래 ⚙️ 설정에서 속성 ID + JSON 키 붙여넣기
+      </div>
+      <button class="btn btn-primary" style="margin-top:16px;font-size:12px" onclick="openModal('api-settings')">⚙️ GA4 설정하기</button>
+    </div>
+
+    <!-- KPI 카드 4개 -->
+    <div id="ga4-kpi-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+      <div class="ga4-kpi-card" id="kpi-users">
+        <div class="ga4-kpi-label">방문자 수</div>
+        <div class="ga4-kpi-val" id="kpi-users-val">—</div>
+        <div class="ga4-kpi-sub" id="kpi-users-sub">activeUsers</div>
+      </div>
+      <div class="ga4-kpi-card" id="kpi-views">
+        <div class="ga4-kpi-label">페이지뷰</div>
+        <div class="ga4-kpi-val" id="kpi-views-val">—</div>
+        <div class="ga4-kpi-sub" id="kpi-views-sub">screenPageViews</div>
+      </div>
+      <div class="ga4-kpi-card" id="kpi-duration">
+        <div class="ga4-kpi-label">평균 체류시간</div>
+        <div class="ga4-kpi-val" id="kpi-duration-val">—</div>
+        <div class="ga4-kpi-sub" id="kpi-duration-sub">averageSessionDuration</div>
+      </div>
+      <div class="ga4-kpi-card" id="kpi-bounce">
+        <div class="ga4-kpi-label">이탈률</div>
+        <div class="ga4-kpi-val" id="kpi-bounce-val">—</div>
+        <div class="ga4-kpi-sub" id="kpi-bounce-sub">bounceRate</div>
+      </div>
+    </div>
+
+    <!-- 페이지별 + 유입경로 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+
+      <!-- 페이지별 방문자 -->
+      <div style="background:var(--surface2);border-radius:12px;padding:18px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:14px">📄 페이지별 방문자</div>
+        <div id="ga4-pages-chart">
+          <div class="ga4-empty">데이터 로딩 전</div>
+        </div>
+      </div>
+
+      <!-- 유입 경로 -->
+      <div style="background:var(--surface2);border-radius:12px;padding:18px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:14px">🔀 유입 경로</div>
+        <div id="ga4-sources-chart">
+          <div class="ga4-empty">데이터 로딩 전</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 버튼 클릭 이벤트 -->
+    <div style="background:var(--surface2);border-radius:12px;padding:18px">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:14px">🖱️ 버튼 클릭 이벤트</div>
+      <div id="ga4-events-table">
+        <div class="ga4-empty">데이터 로딩 전</div>
+      </div>
+    </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="ga4-loading" style="display:none;text-align:center;padding:40px;color:var(--muted);font-size:13px">
+      ⏳ GA4 데이터 불러오는 중...
+    </div>
+
+    <!-- 에러 -->
+    <div id="ga4-error" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:10px;padding:14px;margin-top:12px;font-size:12px;color:#f87171;font-family:'Space Mono',monospace"></div>
+
+  </div>
+</div>
+
+<!-- 협업 에디터 모달 -->
   <div class="modal-overlay" id="modal-collab-editor" onclick="if(event.target===this)closeCollabEditor()">
     <div class="modal" style="max-width:520px">
       <div class="modal-header">
@@ -1927,6 +2048,21 @@ if (location.protocol === 'file:') {
         <input class="form-input" id="notion-page-id-input" type="text" placeholder="abcd1234efgh5678..." style="font-family:'Space Mono',monospace;font-size:12px" />
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Notion 페이지 URL의 마지막 32자리 ID</div>
       </div>
+      <!-- GA4 설정 -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)">
+        <div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:10px;letter-spacing:.5px">📈 ANALYTICS (GA4)</div>
+        <div class="form-group">
+          <label class="form-label">GA4 속성 ID <span style="font-weight:400;font-size:10px;color:var(--muted)">숫자만 (예: 123456789)</span></label>
+          <input class="form-input" id="ga4-property-id-input" type="text" placeholder="123456789" style="font-family:'Space Mono',monospace;font-size:12px" />
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">GA4 관리 → 속성 설정 → 속성 ID</div>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">서비스 계정 JSON 키</label>
+          <textarea class="form-input" id="ga4-sa-json-input" rows="3" placeholder='{"type":"service_account","project_id":"...","private_key":"-----BEGIN PRIVATE KEY-----\n...","client_email":"...@...iam.gserviceaccount.com",...}' style="font-family:'Space Mono',monospace;font-size:10px;resize:vertical"></textarea>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Google Cloud Console → IAM → 서비스 계정 → 키 → JSON 전체 붙여넣기</div>
+        </div>
+      </div>
+
       <div class="form-group" style="margin-bottom:0;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06)">
         <label class="form-label">☁️ 클라우드 프록시 URL <span style="font-weight:400;font-size:10px;color:var(--muted)">creyong.net 배포 시 필요</span></label>
         <input class="form-input" id="notion-proxy-url-input" type="text" placeholder="https://notion-proxy.크레용.workers.dev" style="font-family:'Space Mono',monospace;font-size:11px" />
@@ -2221,6 +2357,7 @@ function switchTab(tab, el) {
   if (tab === 'overview') renderOverview();
   if (tab === 'projects') renderFilteredProjects();
   if (tab === 'pipeline') renderPipelineProjects();
+  if (tab === 'analytics') loadAnalytics();
   if (tab === 'proposal-writer') { showProposalListView(); renderProposalList(); }
   if (tab === 'conti') { showContiListView(); renderContiList(); }
   if (tab === 'characters') { switchTab('conti', document.querySelector('[data-tab=conti]')); return; }
@@ -2762,6 +2899,213 @@ function closePmPanel() {
   panel.innerHTML = '';
   _renderPmRows(_pmHasNotion() ? _pmNProjs : projects);
 }
+
+// ══════════════════════════════════════════════════
+// 📈 ANALYTICS — GA4 Data API (CF Worker 경유)
+// ══════════════════════════════════════════════════
+let _ga4Days = 7;
+
+function setGa4Period(days, btn) {
+  _ga4Days = days;
+  document.querySelectorAll('.ga4-period').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  loadAnalytics();
+}
+
+function _ga4IsConfigured() {
+  return !!(localStorage.getItem('creyong-ga4-property-id') &&
+            localStorage.getItem('creyong-ga4-sa-json') &&
+            (localStorage.getItem('creyong-notion-proxy-url') || location.hostname === 'localhost'));
+}
+
+async function _ga4Req(body) {
+  const isLocalhost = location.hostname === 'localhost';
+  const proxyUrl    = isLocalhost ? '/api/notion-proxy' : (localStorage.getItem('creyong-notion-proxy-url') || '');
+  const ga4Url      = proxyUrl.replace(/\/$/, '') + '/ga4';
+  const saRaw       = localStorage.getItem('creyong-ga4-sa-json') || '';
+  const propId      = (localStorage.getItem('creyong-ga4-property-id') || '').trim();
+
+  const res = await fetch(ga4Url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...body, propertyId: propId, serviceAccount: JSON.parse(saRaw) }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+  return data;
+}
+
+function _ga4DateRange() {
+  if (_ga4Days === 1) return { startDate: 'today', endDate: 'today' };
+  return { startDate: `${_ga4Days}daysAgo`, endDate: 'today' };
+}
+
+function _ga4FmtSec(sec) {
+  const s = Math.round(Number(sec) || 0);
+  if (s < 60) return s + '초';
+  return Math.floor(s/60) + '분 ' + (s%60) + '초';
+}
+
+function _ga4FmtNum(n) {
+  return Number(n||0).toLocaleString('ko-KR');
+}
+
+function _ga4PageName(path) {
+  if (!path || path === '/') return '홈 (creyong.net)';
+  if (path.startsWith('/class')) return '수업 (/class)';
+  if (path.startsWith('/ooohouse')) return '스튜디오 (/ooohouse)';
+  if (path.startsWith('/clab')) return '포털 (/clab)';
+  return path;
+}
+
+function _ga4SourceName(src) {
+  const map = { 'Organic Search':'🔍 검색', 'Direct':'🔗 직접', 'Organic Social':'📱 SNS',
+                'Referral':'🌐 외부링크', 'Email':'📧 이메일', 'Paid Search':'💰 광고', '(other)':'기타' };
+  return map[src] || src;
+}
+
+const _GA4_EVENTS = {
+  click_class_page:      '수업페이지 이동 (홈)',
+  click_studio_inquiry:  '스튜디오 문의 (홈)',
+  click_apply_class:     '수강신청 클릭',
+  complete_apply_class:  '✅ 수강신청 완료',
+  click_inquiry_studio:  '예약문의 클릭',
+  click_kakao_studio:    '카카오 예약',
+  click_phone_studio:    '전화 문의',
+};
+
+async function loadAnalytics() {
+  const guide   = document.getElementById('ga4-setup-guide');
+  const loading = document.getElementById('ga4-loading');
+  const errEl   = document.getElementById('ga4-error');
+  const badge   = document.getElementById('ga4-conn-badge');
+
+  errEl.style.display = 'none';
+  if (!_ga4IsConfigured()) {
+    guide.style.display = 'block';
+    badge.style.display = 'none';
+    _ga4SetEmpty();
+    return;
+  }
+  guide.style.display = 'none';
+  badge.style.display = 'inline';
+  loading.style.display = 'block';
+
+  try {
+    const dr = _ga4DateRange();
+
+    // ① KPI (기본 지표)
+    const kpiData = await _ga4Req({
+      report: 'kpi',
+      dateRanges: [dr],
+      metrics: ['activeUsers','screenPageViews','averageSessionDuration','bounceRate'],
+    });
+    _ga4RenderKPI(kpiData);
+
+    // ② 페이지별
+    const pageData = await _ga4Req({
+      report: 'pages',
+      dateRanges: [dr],
+      dimensions: ['pagePath'],
+      metrics: ['activeUsers','screenPageViews'],
+    });
+    _ga4RenderBars('ga4-pages-chart', pageData, 'activeUsers', '#6366f1', _ga4PageName);
+
+    // ③ 유입경로
+    const srcData = await _ga4Req({
+      report: 'sources',
+      dateRanges: [dr],
+      dimensions: ['sessionDefaultChannelGroup'],
+      metrics: ['sessions'],
+    });
+    _ga4RenderBars('ga4-sources-chart', srcData, 'sessions', '#00cbaa', _ga4SourceName);
+
+    // ④ 이벤트
+    const evData = await _ga4Req({
+      report: 'events',
+      dateRanges: [dr],
+      dimensions: ['eventName'],
+      metrics: ['eventCount'],
+      eventNames: Object.keys(_GA4_EVENTS),
+    });
+    _ga4RenderEvents(evData);
+
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ ' + e.message + '\n\n설정 확인: ⚙️ 설정 → GA4 속성 ID / 서비스 계정 JSON';
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+function _ga4SetEmpty() {
+  ['kpi-users-val','kpi-views-val','kpi-duration-val','kpi-bounce-val'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.textContent = '—';
+  });
+  document.getElementById('ga4-pages-chart').innerHTML   = '<div class="ga4-empty">GA4 연결 후 표시</div>';
+  document.getElementById('ga4-sources-chart').innerHTML = '<div class="ga4-empty">GA4 연결 후 표시</div>';
+  document.getElementById('ga4-events-table').innerHTML  = '<div class="ga4-empty">GA4 연결 후 표시</div>';
+}
+
+function _ga4RenderKPI(data) {
+  // GA4 runReport 응답 파싱
+  const row = data?.rows?.[0]?.metricValues || [];
+  const vals = [
+    { id:'kpi-users-val',    v: _ga4FmtNum(row[0]?.value), sub: '명' },
+    { id:'kpi-views-val',    v: _ga4FmtNum(row[1]?.value), sub: '회' },
+    { id:'kpi-duration-val', v: _ga4FmtSec(row[2]?.value), sub: '' },
+    { id:'kpi-bounce-val',   v: Math.round((row[3]?.value||0)*100) + '%', sub: '' },
+  ];
+  vals.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el) el.textContent = item.v;
+  });
+}
+
+function _ga4RenderBars(containerId, data, metricKey, color, labelFn) {
+  const container = document.getElementById(containerId);
+  const rows = data?.rows || [];
+  if (!rows.length) { container.innerHTML = '<div class="ga4-empty">데이터 없음</div>'; return; }
+
+  // 메트릭 인덱스 찾기
+  const metricNames = data?.metricHeaders?.map(h => h.name) || [];
+  const mIdx = metricNames.indexOf(metricKey);
+  const dimIdx = 0;
+
+  const items = rows.map(r => ({
+    label: labelFn ? labelFn(r.dimensionValues?.[dimIdx]?.value || '') : (r.dimensionValues?.[dimIdx]?.value || ''),
+    value: parseInt(r.metricValues?.[mIdx]?.value || 0),
+  })).sort((a,b) => b.value - a.value).slice(0, 6);
+
+  const max = items[0]?.value || 1;
+  container.innerHTML = items.map(item => `
+    <div class="ga4-bar-row">
+      <div class="ga4-bar-label" title="${item.label}">${item.label}</div>
+      <div class="ga4-bar-track">
+        <div class="ga4-bar-fill" style="width:${Math.round(item.value/max*100)}%;background:${color}"></div>
+      </div>
+      <div class="ga4-bar-count">${_ga4FmtNum(item.value)}</div>
+    </div>`).join('');
+}
+
+function _ga4RenderEvents(data) {
+  const container = document.getElementById('ga4-events-table');
+  const rows = data?.rows || [];
+  if (!rows.length) { container.innerHTML = '<div class="ga4-empty">클릭 이벤트 없음 (배포 후 수집 시작)</div>'; return; }
+
+  const items = rows.map(r => ({
+    name:  r.dimensionValues?.[0]?.value || '',
+    count: parseInt(r.metricValues?.[0]?.value || 0),
+  })).sort((a,b) => b.count - a.count);
+
+  container.innerHTML = items.map(item => `
+    <div class="ga4-event-row">
+      <span class="ga4-event-name">${_GA4_EVENTS[item.name] || item.name}</span>
+      <span class="ga4-event-count">${_ga4FmtNum(item.count)}회</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
 
 async function togglePmCategory(id, cat, checked) {
   const arr = _pmHasNotion() ? _pmNProjs : projects;
@@ -5480,6 +5824,10 @@ function openApiSettings(focus) {
   if (notionDbInput)    notionDbInput.value    = localStorage.getItem('creyong-notion-db-id') || 'a74edacb87a242edb5ecaf7d5a01c368';
   const notionProxyInput = document.getElementById('notion-proxy-url-input');
   if (notionProxyInput) notionProxyInput.value = localStorage.getItem('creyong-notion-proxy-url') || '';
+  const ga4PropInput = document.getElementById('ga4-property-id-input');
+  const ga4SaInput   = document.getElementById('ga4-sa-json-input');
+  if (ga4PropInput) ga4PropInput.value = localStorage.getItem('creyong-ga4-property-id') || '';
+  if (ga4SaInput)   ga4SaInput.value   = localStorage.getItem('creyong-ga4-sa-json') || '';
   const notionStatus = document.getElementById('notion-key-status');
   if (notionStatus) {
     const hasNotion = !!localStorage.getItem('creyong-notion-token');
@@ -5808,6 +6156,12 @@ function saveApiKey() {
   const notionProxyUrlVal = (document.getElementById('notion-proxy-url-input')?.value || '').trim();
   if (notionProxyUrlVal) localStorage.setItem('creyong-notion-proxy-url', notionProxyUrlVal);
   else localStorage.removeItem('creyong-notion-proxy-url');
+  const ga4PropVal = (document.getElementById('ga4-property-id-input')?.value || '').trim();
+  const ga4SaVal   = (document.getElementById('ga4-sa-json-input')?.value   || '').trim();
+  if (ga4PropVal) localStorage.setItem('creyong-ga4-property-id', ga4PropVal);
+  else localStorage.removeItem('creyong-ga4-property-id');
+  if (ga4SaVal) localStorage.setItem('creyong-ga4-sa-json', ga4SaVal);
+  else localStorage.removeItem('creyong-ga4-sa-json');
 
   // GitHub Token
   const githubTokenVal = (document.getElementById('github-token-input')?.value || '').trim();
