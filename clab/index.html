@@ -1391,6 +1391,13 @@ if (location.protocol === 'file:') {
             <input class="form-input" id="ct-opt-mood" placeholder="예: 따뜻·감성적, 세련·임팩트" oninput="scheduleContiSave()" />
           </div>
           <div class="form-group">
+            <label class="form-label">🖼️ 이미지 스타일</label>
+            <select class="form-select" id="ct-opt-imgstyle" onchange="scheduleContiSave()">
+              <option value="realistic">📷 실사 (Photorealistic)</option>
+              <option value="storyboard">✏️ 스토리보드 일러스트</option>
+            </select>
+          </div>
+          <div class="form-group">
             <label class="form-label">⏱️ 목표 총 시간</label>
             <div style="display:flex;gap:8px;align-items:center">
               <input class="form-input" type="number" id="ct-opt-total-mins" value="0" min="0" max="600" placeholder="분" style="text-align:center" oninput="scheduleContiSave()" />
@@ -4403,6 +4410,8 @@ function fillContiForm(conti) {
   document.getElementById('ct-opt-mood').value = o.mood || '';
   const genreEl = document.getElementById('ct-opt-genre');
   if (genreEl) genreEl.value = o.genre || '웹드라마';
+  const imgstyleEl = document.getElementById('ct-opt-imgstyle');
+  if (imgstyleEl) imgstyleEl.value = o.imgstyle || 'realistic';
   setTargetTotalSecs(o.totalSecs || 30);
   document.getElementById('ct-opt-subject').value = o.subject || '';
   document.getElementById('ct-opt-direction').value = o.direction || '';
@@ -4457,6 +4466,7 @@ function saveConti() {
     size: document.getElementById('ct-opt-size')?.value || '16:9',
     mood: document.getElementById('ct-opt-mood')?.value || '',
     genre: document.getElementById('ct-opt-genre')?.value || '웹드라마',
+    imgstyle: document.getElementById('ct-opt-imgstyle')?.value || 'realistic',
     totalSecs: getTargetTotalSecs(),
     subject: document.getElementById('ct-opt-subject')?.value || '',
     direction: document.getElementById('ct-opt-direction')?.value || '',
@@ -5007,6 +5017,10 @@ async function generateCutImage(sid, cid) {
           const refImgEl = refBoxEl?.querySelector('img');
           const locBoxEl = document.getElementById(`ct-loc-box-${sid}-${cid}`);
           const locImgEl = locBoxEl?.querySelector('img');
+          const _isSB = (document.getElementById('ct-opt-imgstyle')?.value || 'realistic') === 'storyboard';
+          const _sbPrefix = '스토리보드 일러스트 스타일로 생성하세요. 손으로 그린 잉크 라인 아트, 인물에 따뜻한 베이지/살색 플랫 채색, 배경은 단색 또는 회색조, 한국 드라마/CF 스토리보드 특유의 표현력 있는 인물 묘사.';
+          const _realPrefix = '실사 스틸컷으로 생성하세요.';
+          const _styleNote = _isSB ? _sbPrefix : _realPrefix;
           let contentParts;
           if (refImgEl?.src && refImgEl.src.startsWith('data:')) {
             const [refHdr, refB64] = refImgEl.src.split(',');
@@ -5016,14 +5030,14 @@ async function generateCutImage(sid, cid) {
               const [locHdr, locB64] = locImgEl.src.split(',');
               const locMime = locHdr.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
               contentParts = [
-                { text: '첫 번째 이미지(구도 레퍼런스)의 카메라 앵글, 프레이밍, 구도, 피사체 위치를 참고하고, 두 번째 이미지(장소 레퍼런스)의 배경·공간·분위기를 참고하여 새로운 실사 스틸컷을 생성하세요. 의상·얼굴은 아래 텍스트 설명을 따르세요.' },
+                { text: `${_styleNote} 첫 번째 이미지(구도 레퍼런스)의 카메라 앵글·프레이밍·구도·피사체 위치를 참고하고, 두 번째 이미지(장소 레퍼런스)의 배경·공간·분위기를 참고하세요. 의상·얼굴은 아래 텍스트 설명을 따르세요.` },
                 { inlineData: { mimeType: refMime, data: refB64 } },
                 { inlineData: { mimeType: locMime, data: locB64 } },
                 { text: '생성할 씬 정보:\n' + prompt.slice(0, 600) },
               ];
             } else {
               contentParts = [
-                { text: '아래 레퍼런스 이미지의 카메라 앵글, 프레이밍, 구도, 피사체 위치를 참고하여 같은 구도로 촬영된 새로운 실사 스틸컷을 생성하세요. 의상·얼굴·배경은 아래 텍스트 설명을 따르세요.' },
+                { text: `${_styleNote} 아래 레퍼런스 이미지의 카메라 앵글·프레이밍·구도·피사체 위치를 참고하여 같은 구도로 생성하세요. 의상·얼굴·배경은 아래 텍스트 설명을 따르세요.` },
                 { inlineData: { mimeType: refMime, data: refB64 } },
                 { text: '생성할 씬 정보:\n' + prompt.slice(0, 700) },
               ];
@@ -5033,7 +5047,7 @@ async function generateCutImage(sid, cid) {
             const [locHdr, locB64] = locImgEl.src.split(',');
             const locMime = locHdr.match(/data:([^;]+)/)?.[1] || 'image/jpeg';
             contentParts = [
-              { text: '아래 장소 레퍼런스 이미지의 배경·공간·분위기를 참고하여 해당 장소에서 촬영된 새로운 실사 스틸컷을 생성하세요. 구도·의상·인물은 아래 텍스트 설명을 따르세요.' },
+              { text: `${_styleNote} 아래 장소 레퍼런스 이미지의 배경·공간·분위기를 참고하여 해당 장소에서 촬영된 장면을 생성하세요. 구도·의상·인물은 아래 텍스트 설명을 따르세요.` },
               { inlineData: { mimeType: locMime, data: locB64 } },
               { text: '생성할 씬 정보:\n' + prompt.slice(0, 700) },
             ];
@@ -5149,6 +5163,7 @@ function buildCutImagePrompt(sid, cid) {
   const props = document.getElementById(`ct-props-${sid}-${cid}`)?.value || '';
   const mood = document.getElementById('ct-opt-mood')?.value || '';
   const genre = document.getElementById('ct-opt-genre')?.value || '웹드라마';
+  const imgStyle = document.getElementById('ct-opt-imgstyle')?.value || 'realistic';
 
   const angleMap = {
     'ECU':'EXTREME CLOSE-UP — THE ENTIRE FRAME IS FILLED WITH ONLY ONE SINGLE TINY DETAIL: one eye, only the lips, just fingertips, a single ear, or a coin-sized object. EXTREME MACRO magnification. Absolutely zero surrounding context visible. No face outline, no background, just that one micro-detail filling 100% of frame. NEVER show a full face.',
@@ -5184,9 +5199,13 @@ function buildCutImagePrompt(sid, cid) {
     charDescs && `Character details: ${charDescs}`,
     props && `Props/Setting elements: ${props}`,
     mood && `Mood/Atmosphere: ${mood}`,
-    `Style: ${genre} photorealistic film still, real human actors, 35mm cinema photography, natural cinematic lighting`,
+    imgStyle === 'storyboard'
+      ? `Style: professional storyboard illustration, hand-drawn ink line art, clean black outlines, warm flat skin-tone coloring on characters (beige/peach tones), desaturated or light gray background, Korean drama/CF storyboard aesthetic, expressive character poses and faces, 2D illustration, sketch art, no photo realism`
+      : `Style: ${genre} photorealistic film still, real human actors, 35mm cinema photography, natural cinematic lighting`,
     frameSpec,
-    'STRICT RULES: no text, no subtitles, no captions, no watermarks, no logos, no UI elements, no on-screen graphics, no corner text, no borders. Clean pure cinematic frame only.',
+    imgStyle === 'storyboard'
+      ? 'STRICT RULES: no text, no watermarks, no logos. Hand-drawn storyboard illustration only. No photographic elements.'
+      : 'STRICT RULES: no text, no subtitles, no captions, no watermarks, no logos, no UI elements, no on-screen graphics, no corner text, no borders. Clean pure cinematic frame only.',
   ].filter(Boolean);
 
   return parts.join('. ');
