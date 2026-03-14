@@ -2134,15 +2134,6 @@ if (location.protocol === 'file:') {
 
     <!-- 탭 4: 기타 -->
     <div id="stab-content-etc" style="display:none">
-      <div class="form-group">
-        <label class="form-label">GitHub Token <a href="https://github.com/settings/tokens" target="_blank" style="color:#4ade80;text-decoration:none;font-size:10px;font-weight:400;margin-left:6px">발급 ↗</a></label>
-        <div style="display:flex;gap:6px;align-items:center">
-          <input class="form-input" id="github-token-input" type="password" placeholder="ghp_..." style="font-family:'Space Mono',monospace;font-size:12px;flex:1" />
-          <button id="eye-btn-github-token-input" onclick="toggleFieldVisibility('github-token-input')" title="보기/숨기기" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0">👁️</button>
-          <button onclick="copyFieldValue('github-token-input')" title="복사" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;cursor:pointer;font-size:14px;color:var(--muted);flex-shrink:0">📋</button>
-        </div>
-        <div id="github-token-status" style="font-size:11px;margin-top:4px;display:none"></div>
-      </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">Google Sheets URL <span style="color:var(--muted);font-weight:400;font-size:10px">콘티 내보내기용</span></label>
         <input class="form-input" id="sheets-webhook-url" type="text" placeholder="https://script.google.com/macros/s/..." style="font-size:11px;font-family:'Space Mono',monospace" />
