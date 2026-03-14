@@ -264,6 +264,41 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
   .modal{padding:32px 22px}
 }
 
+
+/* ─── DIRECTOR FILMOGRAPHY ─── */
+.filmography{background:#0d0d0d;padding:100px 64px}
+.filmography-inner{max-width:1100px;margin:0 auto}
+.filmography-label{font-size:10px;letter-spacing:5px;color:#f97316;font-weight:700;text-transform:uppercase;margin-bottom:14px}
+.filmography-title{font-size:clamp(28px,4vw,50px);font-weight:900;color:#fff;letter-spacing:-2px;margin-bottom:52px}
+.filmography-cols{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.film-cat-label{font-size:11px;font-weight:700;letter-spacing:3px;color:#f97316;text-transform:uppercase;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08)}
+.film-item{display:flex;gap:18px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.055)}
+.film-item:last-child{border-bottom:none}
+.film-year{font-size:12px;font-weight:700;color:rgba(249,115,22,.75);letter-spacing:1px;min-width:34px;padding-top:3px;flex-shrink:0}
+.film-title{font-size:14.5px;font-weight:700;color:#e8e8e8;letter-spacing:-0.3px;margin-bottom:5px}
+.film-badges{display:flex;flex-direction:column;gap:3px}
+.film-award{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#fbbf24;font-weight:600;letter-spacing:0.1px;line-height:1.5}
+.film-award.green{color:#34d399}
+
+/* ─── MENTOR TEACHING HISTORY ─── */
+.mentor-history{margin-top:60px;text-align:left}
+.mentor-history-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:4px;text-transform:uppercase;margin-bottom:18px;text-align:center}
+.mh-row{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;margin-bottom:9px;border-left:3px solid}
+.mh-row.mh-orange{border-left-color:#f97316}
+.mh-row.mh-purple{border-left-color:#818cf8}
+.mh-row.mh-green{border-left-color:#34d399}
+.mh-icon{font-size:17px;flex-shrink:0;margin-top:2px}
+.mh-badge{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;width:34px;flex-shrink:0;margin-top:3px}
+.mh-orange .mh-badge{color:#f97316}
+.mh-purple .mh-badge{color:#818cf8}
+.mh-green  .mh-badge{color:#34d399}
+.mh-names{font-size:13.5px;font-weight:800;color:#e8e8e8;letter-spacing:-0.3px}
+.mh-sub{font-size:11px;color:#555;margin-top:3px}
+
+@media(max-width:768px){
+  .filmography{padding:64px 24px}
+  .filmography-cols{grid-template-columns:1fr;gap:36px}
+}
 </style>
 
   <!-- ═══════════════════════════════════════════════════════
@@ -360,6 +395,113 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
     <span class="sec-hero-eye reveal">Creyong · Film Works</span>
     <h2 class="sec-hero-title reveal d1">Director</h2>
     <p class="sec-hero-script reveal d2">Creyong production</p>
+  </div>
+</section>
+
+<!-- DIRECTOR FILMOGRAPHY -->
+<section class="filmography">
+  <div class="filmography-inner">
+    <p class="filmography-label reveal">All Works</p>
+    <h3 class="filmography-title reveal d1">전체 작품 이력</h3>
+    <div class="filmography-cols">
+
+      <!-- 웹드라마 -->
+      <div>
+        <p class="film-cat-label reveal">웹드라마</p>
+
+        <div class="film-item reveal d1">
+          <span class="film-year">2025</span>
+          <div>
+            <div class="film-title">한국노인인력개발원 〈춘자의 전성시대 2〉</div>
+            <div class="film-badges"><span class="film-award green">보건복지부 산하</span></div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d2">
+          <span class="film-year">2025</span>
+          <div>
+            <div class="film-title">한국노인인력개발원 〈춘자의 전성시대〉</div>
+            <div class="film-badges">
+              <span class="film-award">🏆 여수국제웹드라마영화제 심사위원 특별상</span>
+              <span class="film-award">🎪 Melbourne WebFest 공식 초청</span>
+              <span class="film-award">🎖 Vienna Film Awards Honorable Mention</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d2">
+          <span class="film-year">2024</span>
+          <div>
+            <div class="film-title">성북구청 웹드라마 〈Love Beats〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d3">
+          <span class="film-year">2023</span>
+          <div>
+            <div class="film-title">스타벅스코리아 〈안녕하세요 스타벅스입니다〉</div>
+            <div class="film-badges">
+              <span class="film-award">🚀 트렌드코리아 2024 '올해의 콘텐츠 트렌드' 선정</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d3">
+          <span class="film-year">2022</span>
+          <div>
+            <div class="film-title">서초구청 웹드라마 〈너에게 난〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d4">
+          <span class="film-year">2021</span>
+          <div>
+            <div class="film-title">서초구청 웹드라마 〈혼자라고 생각말기〉</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 브랜드 광고 -->
+      <div>
+        <p class="film-cat-label reveal">브랜드 광고</p>
+
+        <div class="film-item reveal d1">
+          <span class="film-year">2024</span>
+          <div>
+            <div class="film-title">스타벅스코리아 25주년 〈스타벅스 네버랜드〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d2">
+          <span class="film-year">2023</span>
+          <div>
+            <div class="film-title">고향사랑기부제 〈고향 친구의 친구를 사랑했네〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d3">
+          <span class="film-year">2021</span>
+          <div>
+            <div class="film-title">농협은행 〈최준 카페사장이 된 이유〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d3">
+          <span class="film-year">2020</span>
+          <div>
+            <div class="film-title">LG전자 휘센 〈모두의 바람으로〉</div>
+          </div>
+        </div>
+
+        <div class="film-item reveal d4">
+          <span class="film-year">2018</span>
+          <div>
+            <div class="film-title">평창동계올림픽 인천 성화봉송 광고</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -653,6 +795,39 @@ footer{background:#0d0d0d;padding:28px 64px;display:flex;justify-content:space-b
       <div class="mentor-card reveal d3"><span class="mentor-card-icon">🖥️</span><div class="mentor-card-title">AI 워크스테이션 제공</div><p class="mentor-card-desc">필름메이커 전용 고사양 AI 워크스테이션으로 다빈치 리졸브 풀 실습</p></div>
       <div class="mentor-card reveal d4"><span class="mentor-card-icon">💬</span><div class="mentor-card-title">수료 후 1:1 피드백 무제한</div><p class="mentor-card-desc">수업 이후에도 작업물에 대한 1:1 피드백을 무제한으로 제공</p></div>
     </div>
+
+    <!-- 강의 이력 -->
+    <div class="mentor-history reveal d3">
+      <p class="mentor-history-title">강의 이력</p>
+
+      <div class="mh-row mh-orange reveal d2">
+        <span class="mh-icon">🎓</span>
+        <span class="mh-badge">대학</span>
+        <div>
+          <div class="mh-names">서울시립대 / 고려대 / 숭실대 / 청주대</div>
+          <div class="mh-sub">영상제작 + 진로교육 특강</div>
+        </div>
+      </div>
+
+      <div class="mh-row mh-purple reveal d3">
+        <span class="mh-icon">🏢</span>
+        <span class="mh-badge">기업</span>
+        <div>
+          <div class="mh-names">KBS 특강 / 금호석유화학 / 신세계백화점</div>
+          <div class="mh-sub">영상제작 특강 / 임직원 UCC 제작 교육</div>
+        </div>
+      </div>
+
+      <div class="mh-row mh-green reveal d4">
+        <span class="mh-icon">🏛️</span>
+        <span class="mh-badge">공공</span>
+        <div>
+          <div class="mh-names">서울시설공단 / 한국노인인력개발원</div>
+          <div class="mh-sub">공공기관 영상 교육</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
