@@ -5050,8 +5050,9 @@ async function generateCutImage(sid, cid) {
           const locBoxEl = document.getElementById(`ct-loc-box-${sid}-${cid}`);
           const locImgEl = locBoxEl?.querySelector('img');
           const _isSB = (document.getElementById('ct-opt-imgstyle')?.value || 'realistic') === 'storyboard';
-          const _sbPrefix = '전문 영화/CF 스토리보드 작가의 연필 스케치 스타일로 생성하세요. 흑연 연필의 자신감 있는 터치, 명암과 크로스해칭으로 입체감 표현, 사실적인 인체 비례와 자연스러운 표정, 시네마틱 구도. 만화나 애니메이션이 아닌 실제 프리프로덕션 스토리보드 느낌. 이미지 안에 어떤 글자도 넣지 마세요.';
-          const _realPrefix = '실사 스틸컷으로 생성하세요. 이미지 안에 어떤 글자도 넣지 마세요.';
+          const _noTextRule = '절대 규칙: 이미지 안에 글자를 절대 넣지 마세요. 한글, 영어, 숫자, 기호, 간판, 자막, 워터마크, 로고 등 어떤 문자도 포함하지 마세요. 텍스트가 없는 순수한 그림만 생성하세요.';
+          const _sbPrefix = `전문 영화/CF 스토리보드 작가의 연필 스케치 스타일로 생성하세요. 흑연 연필의 자신감 있는 터치, 명암과 크로스해칭으로 입체감 표현, 사실적인 인체 비례와 자연스러운 표정, 시네마틱 구도. 만화나 애니메이션이 아닌 실제 프리프로덕션 스토리보드 느낌. ${_noTextRule}`;
+          const _realPrefix = `실사 스틸컷으로 생성하세요. ${_noTextRule}`;
           const _styleNote = _isSB ? _sbPrefix : _realPrefix;
           let contentParts;
           if (refImgEl?.src && refImgEl.src.startsWith('data:')) {
@@ -5084,7 +5085,7 @@ async function generateCutImage(sid, cid) {
               { text: '생성할 씬 정보:\n' + prompt.slice(0, 700) },
             ];
           } else {
-            contentParts = [{ text: prompt.slice(0, 800) }];
+            contentParts = [{ text: _styleNote + '\n\n' + prompt.slice(0, 800) }];
           }
           const resp = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`,
@@ -5093,7 +5094,7 @@ async function generateCutImage(sid, cid) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 contents: [{ parts: contentParts }],
-                generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+                generationConfig: { responseModalities: ['IMAGE', 'TEXT'], aspectRatio: getContiAspectRatio().replace(':', '_') },
               }),
             }
           );
