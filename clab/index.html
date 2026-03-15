@@ -5050,8 +5050,8 @@ async function generateCutImage(sid, cid) {
           const locBoxEl = document.getElementById(`ct-loc-box-${sid}-${cid}`);
           const locImgEl = locBoxEl?.querySelector('img');
           const _isSB = (document.getElementById('ct-opt-imgstyle')?.value || 'realistic') === 'storyboard';
-          const _sbPrefix = '스토리보드 일러스트 스타일로 생성하세요. 손으로 그린 잉크 라인 아트, 인물에 따뜻한 베이지/살색 플랫 채색, 배경은 단색 또는 회색조, 한국 드라마/CF 스토리보드 특유의 표현력 있는 인물 묘사.';
-          const _realPrefix = '실사 스틸컷으로 생성하세요.';
+          const _sbPrefix = '전문 영화/CF 스토리보드 작가의 연필 스케치 스타일로 생성하세요. 흑연 연필의 자신감 있는 터치, 명암과 크로스해칭으로 입체감 표현, 사실적인 인체 비례와 자연스러운 표정, 시네마틱 구도. 만화나 애니메이션이 아닌 실제 프리프로덕션 스토리보드 느낌. 이미지 안에 어떤 글자도 넣지 마세요.';
+          const _realPrefix = '실사 스틸컷으로 생성하세요. 이미지 안에 어떤 글자도 넣지 마세요.';
           const _styleNote = _isSB ? _sbPrefix : _realPrefix;
           let contentParts;
           if (refImgEl?.src && refImgEl.src.startsWith('data:')) {
@@ -5245,12 +5245,10 @@ function buildCutImagePrompt(sid, cid) {
     props && `Props/Setting elements: ${props}`,
     mood && `Mood/Atmosphere: ${mood}`,
     imgStyle === 'storyboard'
-      ? `Style: professional storyboard illustration, hand-drawn ink line art, clean black outlines, warm flat skin-tone coloring on characters (beige/peach tones), desaturated or light gray background, Korean drama/CF storyboard aesthetic, expressive character poses and faces, 2D illustration, sketch art, no photo realism`
+      ? `Style: professional Korean film/CF storyboard artist sketch, graphite pencil drawing with confident loose strokes, subtle shading and cross-hatching for depth, realistic human proportions and natural anatomy, cinematic composition, muted warm tonal values, minimal color — only light warm wash on skin and selective accent tones, clean white or light gray paper background, emphasis on dynamic poses, authentic facial expressions, and accurate camera framing. NOT cartoon, NOT anime, NOT comic book. Think professional pre-production storyboard by a skilled film storyboard artist.`
       : `Style: ${genre} photorealistic film still, real human actors, 35mm cinema photography, natural cinematic lighting`,
     frameSpec,
-    imgStyle === 'storyboard'
-      ? 'STRICT RULES: no text, no watermarks, no logos. Hand-drawn storyboard illustration only. No photographic elements.'
-      : 'STRICT RULES: no text, no subtitles, no captions, no watermarks, no logos, no UI elements, no on-screen graphics, no corner text, no borders. Clean pure cinematic frame only.',
+    'STRICT RULES: absolutely no text, no titles, no subtitles, no captions, no dialogue, no watermarks, no logos, no UI elements, no on-screen graphics, no corner text, no labels, no annotations, no borders, no letters of any language anywhere in the image. Clean visual frame only.',
   ].filter(Boolean);
 
   return parts.join('. ');
