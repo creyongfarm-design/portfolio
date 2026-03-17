@@ -295,6 +295,19 @@ label { font-size: 12px; color: #7a7690; margin-bottom: 6px; display: block; fon
 .empty-icon { font-size:40px; margin-bottom:12px; }
 
 /* ── 히스토리 카드 ── */
+.tag-chip-row {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: text;
+  user-select: all;
+  word-break: break-all;
+}
+
 .hist-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -780,6 +793,42 @@ label { font-size: 12px; color: #7a7690; margin-bottom: 6px; display: block; fon
 
 <!-- ═══ 글 복사하기 ═══ -->
 <div id="tab-copy" class="panel">
+
+  <!-- 자주 쓰는 태그 -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-head">🏷️ 자주 쓰는 태그</div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:14px">
+
+      <!-- 블로그용 -->
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+          <span style="font-size:12px; font-weight:800; color:var(--pink)">📝 블로그용 (네이버)</span>
+          <button class="btn btn-sm btn-pink" onclick="copyTagSet('tags-blog')">📋 복사</button>
+        </div>
+        <div id="tags-blog" class="tag-chip-row">#예운옥 #촬영스튜디오 #일산스튜디오 #단독스튜디오 #촬영대관 #스튜디오대관 #로케이션 #화보촬영 #유튜브촬영 #CF촬영 #드라마촬영 #예능촬영 #인터뷰촬영 #일산촬영장소 #핑크인테리어</div>
+      </div>
+
+      <!-- 카페용 -->
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+          <span style="font-size:12px; font-weight:800; color:#0891b2">☕ 카페용 (로케이션뱅크)</span>
+          <button class="btn btn-sm" onclick="copyTagSet('tags-cafe')" style="background:#e0f7fc; color:#0891b2; font-weight:700">📋 복사</button>
+        </div>
+        <div id="tags-cafe" class="tag-chip-row">#예운옥 #일산 #촬영스튜디오 #단독주택스튜디오 #촬영대관 #스튜디오대관 #로케이션 #핑크인테리어 #통창 #빗방울조명 #야외캠핑데크</div>
+      </div>
+
+      <!-- 인스타용 -->
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+          <span style="font-size:12px; font-weight:800; color:var(--purple)">📸 인스타그램용</span>
+          <button class="btn btn-sm" onclick="copyTagSet('tags-insta')" style="background:#f0ebff; color:var(--purple); font-weight:700">📋 복사</button>
+        </div>
+        <div id="tags-insta" class="tag-chip-row">#예운옥 #yewunok #촬영스튜디오 #스튜디오대관 #일산스튜디오 #화보촬영 #단독스튜디오 #로케이션헌팅 #촬영장소추천 #핑크인테리어 #스튜디오추천</div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="flex" style="margin-bottom:16px">
     <a href="https://blog.naver.com/ckddyd33" target="_blank">
       <button class="btn btn-gray">📝 네이버 블로그 열기</button>
@@ -1877,6 +1926,27 @@ async function updateStats() {
 // ─────────────────────────────────────
 //  토스트
 // ─────────────────────────────────────
+// ─────────────────────────────────────
+//  태그 복사
+// ─────────────────────────────────────
+function copyTagSet(elId) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var text = el.textContent.trim();
+  navigator.clipboard.writeText(text).then(function() {
+    toast('✅ 태그 복사됐어요! 바로 붙여넣기 하세요', 'success');
+  }).catch(function() {
+    // 폴백: 임시 textarea
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('✅ 태그 복사됐어요!', 'success');
+  });
+}
+
 var toastTimer = null;
 function toast(msg, type) {
   var el = document.getElementById('toast');
