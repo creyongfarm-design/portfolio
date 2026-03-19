@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>다빈치 리졸브 하루 끝장 수업 | CREYONG FILM SCHOOL</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>emailjs.init('03zOCfXVuB7tIIx7o');</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -963,6 +965,13 @@ function doRegister() {
       } else if (payVal === '신용카드') {
         document.getElementById('success-card').style.display = 'block';
       }
+      // EmailJS 확인 메일 발송
+      emailjs.send('service_70pb6b9', 'template_pmvujbo', {
+        to_name: name,
+        to_email: email,
+        class_date: cls,
+        email: email
+      }).catch(function(){});
     } else {
       var msg = '오류 (HTTP ' + obj.status + ')';
       if (data && data.error) msg += ': ' + data.error;
