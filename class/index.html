@@ -281,8 +281,8 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <body ontouchstart="">
 
 <div class="topbar" id="topbar">
-  <span class="tb-full">🔥 3/31 화요일반 잔여 1자리 &nbsp;·&nbsp; 3/26 평일반 <span style="background:#ef4444;color:#fff;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:800;margin:0 4px;vertical-align:middle">SOLD OUT</span>&nbsp;·&nbsp; 3/28 주말반 · 3/31 화요일반 추가개설 (마지막 1자리)</span>
-  <span class="tb-mobile">🔥 3/31 화요일반 잔여 1자리!</span>
+  <span class="tb-full">3/26 평일반 · 3/31 화요일반 <span style="background:#ef4444;color:#fff;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:800;margin:0 4px;vertical-align:middle">SOLD OUT</span>&nbsp;·&nbsp; 🔥 3/28 주말반 잔여 2자리</span>
+  <span class="tb-mobile">🔥 3/28 주말반 잔여 2자리!</span>
 </div>
 
 <nav class="main-nav" id="main-nav">
@@ -298,7 +298,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-inner">
-    <div class="hero-badge"><span class="hero-dot"></span> 3/26 평일반 마감 · 3/28 주말반 · 3/31 화요일반 잔여 1자리</div>
+    <div class="hero-badge"><span class="hero-dot"></span> 3/26 평일반 · 3/31 화요일반 마감 · 🔥 3/28 주말반 잔여 2자리</div>
     <h1 class="hero-title"><span class="grad" style="display:block;font-size:clamp(32px,5.5vw,80px)">다빈치 리졸브</span><span style="display:block;color:#fff;font-size:clamp(38px,7vw,100px)">하루 끝장 수업</span></h1>
     <p class="hero-sub">
       촬영 · 편집 · 색보정 · AI 워크스테이션까지<br>
@@ -316,13 +316,14 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
         <div class="cp-tag">주말반</div>
         <div class="cp-date">3월 28일 (토)</div>
         <div class="cp-time">10:00 ~ 19:30</div>
-        <div class="cp-seats">최대 5명</div>
+        <div class="cp-seats" style="color:#f97316;font-weight:800">🔥 잔여 2자리</div>
       </div>
-      <div class="class-pick-card" onclick="selectClass('tuesday',this)" id="pick-tuesday">
+      <div class="class-pick-card" id="pick-tuesday" style="opacity:.45;cursor:not-allowed;pointer-events:none;position:relative">
+        <div style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:800">SOLD OUT</div>
         <div class="cp-tag" style="color:#a78bfa">추가개설</div>
         <div class="cp-date">3월 31일 (화)</div>
         <div class="cp-time">10:00 ~ 19:30</div>
-        <div class="cp-seats" style="color:#f97316;font-weight:800">🔥 잔여 1자리</div>
+        <div class="cp-seats" style="color:#ef4444;font-weight:700">마감</div>
       </div>
     </div>
     <div class="hero-btns">
@@ -677,7 +678,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="p-won">₩</span>
       <span class="p-new">299,000</span>
     </div>
-    <div class="pricing-desc">3/31 화요일반 잔여 <strong style="color:#f97316">1자리</strong>. 마감 시 조기 종료됩니다.</div>
+    <div class="pricing-desc">3/28 주말반 잔여 <strong style="color:#f97316">2자리</strong>. 마감 시 조기 종료됩니다.</div>
     <div class="pricing-feats">
       <div class="pf">조명 · 촬영 현장 실습 포함</div>
       <div class="pf">필름메이커 전용 AI 워크스테이션 제공</div>
@@ -759,7 +760,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="sticky-old">₩499,000</span>
       <span class="sticky-new">₩299,000</span>
     </div>
-    <div class="sticky-note">🔥 3/31 화요일반 잔여 1자리 · 3/28 주말반 모집 중</div>
+    <div class="sticky-note">🔥 3/28 주말반 잔여 2자리 · 3/31 화요일반 마감</div>
   </div>
   <button class="sticky-btn" id="btn-apply-sticky">신청하기 →</button>
 </div>
@@ -781,7 +782,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
           <option value="">선택해주세요</option>
           <option value="3/26 목 평일반" disabled>3월 26일(목) 평일반 — 마감</option>
           <option value="3/28 토 주말반">3월 28일(토) 주말반 — 10:00~19:30</option>
-          <option value="3/31 화 화요일반">3월 31일(화) 화요일반 — 10:00~19:30 (추가개설)</option>
+          <option value="3/31 화 화요일반" disabled>3월 31일(화) 화요일반 — 마감</option>
         </select>
       </div>
       <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" id="reg-name" placeholder="홍길동"></div>
