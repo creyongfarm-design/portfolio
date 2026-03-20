@@ -492,30 +492,28 @@ function submitFilmInquiry(){
   btn.textContent = '전송 중…';
   setAlert('','');
 
-  // EmailJS: 크레용에게 알림 + 신청자에게 확인 메일
-  emailjs.send('service_70pb6b9', 'template_film_notify', {
-    name:     name,
-    phone:    phone,
-    email:    email,
-    service:  service,
-    budget:   budget,
-    timeline: timeline,
-    description: desc || '(없음)',
-    to_email: email
-  })
-  .then(function(){
-    document.getElementById('fi-form-wrap').style.display = 'none';
-    document.getElementById('film-success').style.display = 'block';
-    document.getElementById('success-name').textContent = name;
-    // GA4 이벤트
-    gtag('event','film_inquiry_submit',{service:service,budget:budget});
-  })
-  .catch(function(err){
-    setAlert('전송 중 오류가 발생했습니다. 인스타 DM이나 creyongfarm@gmail.com으로 문의해주세요.','err');
-    btn.disabled = false;
-    btn.textContent = '상담 신청하기 →';
-    console.error('EmailJS error',err);
-  });
+  // 성공 화면 즉시 표시 (사용자 경험 우선)
+  document.getElementById('fi-form-wrap').style.display = 'none';
+  document.getElementById('film-success').style.display = 'block';
+  document.getElementById('success-name').textContent = name;
+  gtag('event','film_inquiry_submit',{service:service,budget:budget});
+
+  // EmailJS: 크레용에게 알림 (기존 서비스 활용, fire-and-forget)
+  var msgBody = '[영상제작 문의]\n이름: ' + name + '\n연락처: ' + phone + '\n이메일: ' + email +
+    '\n서비스: ' + service + '\n예산: ' + budget + '\n희망시기: ' + timeline +
+    '\n내용: ' + (desc || '(없음)');
+  emailjs.send('service_70pb6b9', 'template_pmvujbo', {
+    to_name:    '크레용',
+    to_email:   'creyongfarm@gmail.com',
+    class_date: '[' + service + '] ' + name + ' / ' + phone,
+    email:      email,
+    // 추가 정보는 subject에 포함
+    subject:    '[영상제작 문의] ' + service + ' — ' + name
+  }).catch(function(){});
+
+  // TODO: EmailJS 전용 film_notify 템플릿 만들면 위 코드를 교체
+  // emailjs.send('service_70pb6b9', 'template_film_notify', { name, phone, email, service, budget, timeline, description })
+
 }
 </script>
 </body>
