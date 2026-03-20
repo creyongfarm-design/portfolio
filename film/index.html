@@ -126,7 +126,7 @@ img{max-width:100%}
 
 /* ──────── SERVICES ──────── */
 .services{background:#fff}
-.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:56px}
 .svc-card{border:1px solid #e5e7eb;border-radius:20px;padding:40px 32px;transition:.25s;position:relative;overflow:hidden}
 .svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
 .svc-card:hover{transform:translateY(-6px);box-shadow:0 20px 60px rgba(0,0,0,.08);border-color:var(--gold)}
@@ -139,16 +139,25 @@ img{max-width:100%}
 
 /* ──────── PORTFOLIO ──────── */
 .portfolio{background:var(--lgray)}
-.portfolio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
-.pf-item{border-radius:12px;overflow:hidden;aspect-ratio:16/9;background:var(--mid);position:relative;cursor:pointer}
-.pf-item a{display:block;width:100%;height:100%;position:relative}
-.pf-item img{width:100%;height:100%;object-fit:cover;transition:.3s}
-.pf-item:hover img{transform:scale(1.05)}
-.pf-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7) 0%,transparent 50%);opacity:0;transition:.3s;display:flex;align-items:flex-end;padding:16px}
-.pf-item:hover .pf-overlay{opacity:1}
-.pf-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:48px;height:48px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;opacity:0;transition:.3s}
-.pf-item:hover .pf-play{opacity:1}
-.pf-more{text-align:center;margin-top:32px}
+.pf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;margin-top:48px}
+.pf-card{background:#fff;border-radius:16px;overflow:hidden;transition:.25s;border:1px solid #e9e9e9}
+.pf-card:hover{transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,.1)}
+.pf-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--mid)}
+.pf-thumb img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.pf-card:hover .pf-thumb img{transform:scale(1.05)}
+.pf-thumb-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s}
+.pf-card:hover .pf-thumb-overlay{opacity:1}
+.pf-play-btn{width:56px;height:56px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.pf-type-badge{position:absolute;top:12px;left:12px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;background:rgba(0,0,0,.6);color:#fff;backdrop-filter:blur(4px)}
+.pf-type-badge.award{background:var(--gold);color:#111}
+.pf-body{padding:24px 26px 28px}
+.pf-client{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;margin-bottom:8px}
+.pf-title{font-size:18px;font-weight:800;color:#111;margin-bottom:10px;line-height:1.35}
+.pf-intent{font-size:13px;color:var(--gray);line-height:1.7;margin-bottom:14px}
+.pf-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pf-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--lgray);color:#555}
+.pf-stat{font-size:11px;font-weight:700;color:var(--gold);padding:4px 10px;border-radius:20px;background:#fff8ee;border:1px solid #f5e5c0}
+.pf-more{text-align:center;margin-top:36px}
 .btn-dark{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--black);color:#fff;border-radius:8px;font-size:14px;font-weight:700;transition:.2s}
 .btn-dark:hover{background:var(--mid);transform:translateY(-2px)}
 
@@ -226,8 +235,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
   .fail-inner{grid-template-columns:1fr}
   .diff-grid{grid-template-columns:1fr}
   .cases-grid{grid-template-columns:1fr}
-  .services-grid{grid-template-columns:1fr}
-  .portfolio-grid{grid-template-columns:repeat(2,1fr)}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .pf-grid{grid-template-columns:1fr}
   .process-steps{grid-template-columns:repeat(2,1fr);gap:32px}
   .process-steps::before{display:none}
   .form-grid{grid-template-columns:1fr}
@@ -235,7 +244,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
   .section{padding:72px 24px}
 }
 @media(max-width:600px){
-  .portfolio-grid{grid-template-columns:1fr}
+  .pf-grid{grid-template-columns:1fr}
   .hero-actions{flex-direction:column}
   .btn-gold,.btn-outline{width:100%;justify-content:center}
 }
@@ -496,6 +505,16 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
           <span class="svc-tag">인터뷰·홍보</span>
         </div>
       </div>
+      <div class="svc-card reveal d4">
+        <div class="svc-icon">📱</div>
+        <div class="svc-name">브랜드 숏폼</div>
+        <div class="svc-desc">트렌드를 이해하는 팀이 만드는 세로형 SNS 콘텐츠. 스타벅스 브랜드 릴스 시리즈는 편당 평균 30만 조회를 기록했습니다. 광고가 아닌 콘텐츠로 소비됩니다.</div>
+        <div class="svc-tags">
+          <span class="svc-tag">릴스·쇼츠</span>
+          <span class="svc-tag">SNS 콘텐츠</span>
+          <span class="svc-tag">바이럴 기획</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -507,16 +526,218 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
       <div class="section-eyebrow">포트폴리오</div>
       <h2 class="section-title">대표 작업물</h2>
     </div>
-    <div class="portfolio-grid">
-      <div class="pf-item reveal d1"><a href="https://youtu.be/azYovbTA0jw" target="_blank"><img src="https://img.youtube.com/vi/azYovbTA0jw/mqdefault.jpg" alt="춘자의 전성시대"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">춘자의 전성시대 (국제영화제 수상)</span></div><div class="pf-play">▶</div></a></div>
-      <div class="pf-item reveal d2"><a href="https://youtu.be/UW6-WMGa-yM" target="_blank"><img src="https://img.youtube.com/vi/UW6-WMGa-yM/mqdefault.jpg" alt="성북구 웹드라마 Love beats"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">성북구 웹드라마 — Love beats</span></div><div class="pf-play">▶</div></a></div>
-      <div class="pf-item reveal d3"><a href="https://youtu.be/dxye5c4jUgM" target="_blank"><img src="https://img.youtube.com/vi/dxye5c4jUgM/mqdefault.jpg" alt="서초구 웹드라마 너에게난"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">서초구 웹드라마 — 너에게난</span></div><div class="pf-play">▶</div></a></div>
-      <div class="pf-item reveal d4"><a href="https://youtu.be/HAV76UvQ-5w" target="_blank"><img src="https://img.youtube.com/vi/HAV76UvQ-5w/mqdefault.jpg" alt="LG전자 휘센 브랜드필름"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">LG전자 휘센 — 모두의 바람으로</span></div><div class="pf-play">▶</div></a></div>
-      <div class="pf-item reveal d5"><a href="https://youtu.be/oiBY7NCqUMg" target="_blank"><img src="https://img.youtube.com/vi/oiBY7NCqUMg/mqdefault.jpg" alt="농협은행 외환홍보영상"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">농협은행 — 최준! 카페사장이 된 이유</span></div><div class="pf-play">▶</div></a></div>
-      <div class="pf-item reveal d1"><a href="https://youtu.be/pEA_rUePq4U" target="_blank"><img src="https://img.youtube.com/vi/pEA_rUePq4U/mqdefault.jpg" alt="농협은행 헤이지니"><div class="pf-overlay"><span style="color:#fff;font-size:13px;font-weight:600">농협은행 — 헤이지니의 은행원 체험</span></div><div class="pf-play">▶</div></a></div>
+    <div class="pf-grid">
+
+      <!-- 01. 춘자의 전성시대 -->
+      <div class="pf-card reveal d1">
+        <a href="https://youtu.be/azYovbTA0jw" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/azYovbTA0jw/mqdefault.jpg" alt="춘자의 전성시대">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge award">🏆 국제영화제 수상</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">한국노인인력개발원</div>
+          <div class="pf-title">〈춘자의 전성시대〉</div>
+          <div class="pf-intent">공공기관 예산으로 이 정도를 만들 수 있다는 것을 보여주고 싶었습니다. 노인 일자리 정책을 '캠페인'이 아닌 진짜 사람의 이야기로 담았고, 93개국 2,341편 경쟁 속에서 여수국제웹드라마영화제 심사위원 특별상을 수상했습니다. Melbourne Web Fest 초청, 비엔나 국제영화상 선정.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">웹드라마</span>
+            <span class="pf-tag">공공기관</span>
+            <span class="pf-stat">93개국 경쟁 · 3개국 수상·초청</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02. 안녕하세요 스타벅스입니다 -->
+      <div class="pf-card reveal d2">
+        <a href="https://youtu.be/xlNgGn210Zw" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/xlNgGn210Zw/mqdefault.jpg" alt="안녕하세요 스타벅스입니다">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge award">☕ 420만 조회</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">Starbucks Korea (SCK컴퍼니)</div>
+          <div class="pf-title">〈안녕하세요 스타벅스입니다〉</div>
+          <div class="pf-intent">광고처럼 보이지 않는 광고. 매장 직원들의 실제 이야기를 웹드라마 형식으로 담아, 브랜드가 아닌 사람의 이야기로 공감을 얻었습니다. 공개 80일 만에 420만 조회, 편당 평균 30만 조회. 트렌드코리아 2024 선정 사례.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">웹드라마</span>
+            <span class="pf-tag">브랜디드 콘텐츠</span>
+            <span class="pf-stat">누적 420만 조회</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03. 스타벅스 네버랜드 25주년 -->
+      <div class="pf-card reveal d3">
+        <a href="https://youtu.be/Lnk85DRD854" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/Lnk85DRD854/mqdefault.jpg" alt="스타벅스 네버랜드 25주년">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">기념영상</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">Starbucks Korea — 25주년</div>
+          <div class="pf-title">〈스타벅스 네버랜드〉</div>
+          <div class="pf-intent">스타벅스 코리아 25주년을 기념하는 영상. 단순한 기념이 아니라, 25년간 스타벅스와 함께한 사람들의 이야기를 판타지 형식으로 담았습니다. 브랜드의 철학과 감성을 영상 언어로 표현한 작업입니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">기념영상</span>
+            <span class="pf-tag">브랜드 스토리</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 04. 삼성바이오로직스 브랜드필름 -->
+      <div class="pf-card reveal d4">
+        <a href="https://youtu.be/wpNUleiB2AA" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/wpNUleiB2AA/mqdefault.jpg" alt="삼성바이오로직스 Driven. For Life.">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">브랜드필름</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">삼성바이오로직스</div>
+          <div class="pf-title">〈Driven. For Life.〉</div>
+          <div class="pf-intent">글로벌 바이오 기업이 왜 이 일을 하는지, 그 존재 이유를 영상으로 담았습니다. 제품 소개가 아닌 브랜드 철학의 이야기. "브랜드에 대한 고민을 고객사와 함께" 풀어가는 크레용프로덕션의 방식이 담긴 작업입니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">브랜드필름</span>
+            <span class="pf-tag">기업 철학</span>
+            <span class="pf-tag">글로벌</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05. LG전자 휘센 -->
+      <div class="pf-card reveal d1">
+        <a href="https://youtu.be/HAV76UvQ-5w" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/HAV76UvQ-5w/mqdefault.jpg" alt="LG전자 휘센 모두의 바람으로">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">브랜드필름</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">LG전자 휘센</div>
+          <div class="pf-title">〈모두의 바람으로〉</div>
+          <div class="pf-intent">에어컨을 파는 영상이 아니라, 여름을 이기는 사람들의 이야기. 제품 스펙 대신 삶의 장면을 담았습니다. 대기업 브랜드필름에서도 기획의 결이 다를 수 있다는 것을 보여준 프로젝트입니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">브랜드필름</span>
+            <span class="pf-tag">감성 광고</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06. 스타벅스 브랜드 숏폼 릴스 -->
+      <div class="pf-card reveal d2">
+        <a href="https://youtu.be/4gO34JoYwiU" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/4gO34JoYwiU/mqdefault.jpg" alt="스타벅스 브랜드 숏폼 릴스">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge award">📱 편당 30만 조회</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">Starbucks Korea — 브랜드 숏폼</div>
+          <div class="pf-title">스타벅스 브랜드 릴스 시리즈</div>
+          <div class="pf-intent">세로형 숏폼도 퀄리티가 다를 수 있습니다. 트렌드를 따라가는 것이 아니라, 브랜드 감성을 유지하면서 SNS 문법에 맞게 재해석했습니다. 스타벅스 공식 채널 브랜드 릴스 시리즈, 편당 평균 30만 조회.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">브랜드 숏폼</span>
+            <span class="pf-tag">릴스</span>
+            <span class="pf-stat">편당 평균 30만 조회</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07. 성북구청 웹드라마 Love beats -->
+      <div class="pf-card reveal d3">
+        <a href="https://youtu.be/UW6-WMGa-yM" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/UW6-WMGa-yM/mqdefault.jpg" alt="성북구 웹드라마 Love beats">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">공공 웹드라마</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">성북구청</div>
+          <div class="pf-title">〈Love beats〉</div>
+          <div class="pf-intent">지역 공공기관의 메시지를 드라마로 전달합니다. 정책 홍보가 '봐야 하는' 영상이 아닌, '보고 싶은' 영상이 될 수 있다는 것을 보여준 프로젝트. 감성적인 로맨스 포맷 안에 진정성 있는 지역사회 이야기를 담았습니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">웹드라마</span>
+            <span class="pf-tag">공공기관</span>
+            <span class="pf-tag">지역 브랜딩</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 08. 서초구청 웹드라마 너에게난 -->
+      <div class="pf-card reveal d4">
+        <a href="https://youtu.be/dxye5c4jUgM" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/dxye5c4jUgM/mqdefault.jpg" alt="서초구 웹드라마 너에게난">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">공공 웹드라마</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">서초구청</div>
+          <div class="pf-title">〈너에게난〉</div>
+          <div class="pf-intent">서초구의 문화와 사람을 이야기 속에 녹였습니다. 공공기관 콘텐츠라는 틀 안에서도 드라마적 긴장감과 감성적 완성도를 유지한 작업. 지자체 홍보 영상의 새로운 기준을 만들고 싶었습니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">웹드라마</span>
+            <span class="pf-tag">공공기관</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 09. 농협은행 최준 -->
+      <div class="pf-card reveal d1">
+        <a href="https://youtu.be/oiBY7NCqUMg" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/oiBY7NCqUMg/mqdefault.jpg" alt="농협은행 최준 카페사장이 된 이유">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">유튜브 콘텐츠</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">농협은행</div>
+          <div class="pf-title">〈최준! 카페사장이 된 이유〉</div>
+          <div class="pf-intent">인기 캐릭터 '최준'을 활용한 브랜디드 유튜브 콘텐츠. 은행 서비스를 직접 홍보하지 않고, 캐릭터의 이야기 속에 자연스럽게 브랜드를 녹여냈습니다. 콘텐츠처럼 소비되는 광고 제작 방식.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">브랜디드 콘텐츠</span>
+            <span class="pf-tag">유튜브</span>
+            <span class="pf-tag">IP 활용</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. 농협은행 헤이지니 -->
+      <div class="pf-card reveal d2">
+        <a href="https://youtu.be/pEA_rUePq4U" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/pEA_rUePq4U/mqdefault.jpg" alt="농협은행 헤이지니 은행원 체험">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">유튜브 콘텐츠</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">농협은행</div>
+          <div class="pf-title">〈헤이지니의 은행원 체험〉</div>
+          <div class="pf-intent">어린이 크리에이터 헤이지니와 함께한 농협은행 콘텐츠. 금융이 딱딱하게 느껴지는 세대에게, 친근하고 즐거운 방식으로 브랜드를 알리는 방법을 고민한 작업입니다. 타깃에 맞는 캐스팅과 기획이 핵심.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">유튜브 콘텐츠</span>
+            <span class="pf-tag">타깃 마케팅</span>
+            <span class="pf-tag">크리에이터 협업</span>
+          </div>
+        </div>
+      </div>
+
     </div>
     <div class="pf-more reveal">
-      <a href="https://creyong.net/#work" class="btn-dark" target="_blank">전체 포트폴리오 보기 →</a>
+      <a href="https://vimeo.com/creyong" class="btn-dark" target="_blank">전체 포트폴리오 보기 (Vimeo) →</a>
     </div>
   </div>
 </section>
@@ -541,6 +762,9 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
       <div class="client-badge">한국농업방송</div>
       <div class="client-badge">웹케시</div>
       <div class="client-badge">제이버드</div>
+      <div class="client-badge">하만카돈</div>
+      <div class="client-badge">경상남도교육청</div>
+      <div class="client-badge">오스트리아 관광청</div>
     </div>
   </div>
 </div>
@@ -620,6 +844,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
             <option value="webdrama">웹드라마</option>
             <option value="brandfill">브랜드필름</option>
             <option value="youtube">기업 유튜브</option>
+            <option value="shortform">브랜드 숏폼</option>
             <option value="unknown">아직 미정 (상담 중 결정)</option>
           </select>
         </div>
@@ -668,8 +893,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
     <div class="footer-logo">CREYONG <span>PRODUCTION</span></div>
     <div class="footer-links">
       <a href="https://creyong.net">홈페이지</a>
-      <a href="https://creyong.net/filmschool/">필름스쿨</a>
-      <a href="https://creyong.net/studio/">스튜디오 예운옥</a>
+      <a href="https://creyong.net/class">필름스쿨</a>
+      <a href="https://creyong.net/ooohouse">스튜디오 예운옥</a>
       <a href="https://instagram.com/creyongfarm" target="_blank">인스타그램</a>
     </div>
     <div class="footer-copy">© 2025 CREYONG PRODUCTION</div>
@@ -703,7 +928,7 @@ function handleSubmit(e) {
   const name = document.getElementById('name').value;
   document.getElementById('consultForm').style.display = 'none';
   const success = document.getElementById('formSuccess');
-  document.getElementById('successMsg').textContent = `감사합니다, ${name}님. 48시간 내로 직접 연락드리겠습니다.`;
+  document.getElementById('successMsg').textContent = `감사합니다, ${name}님. 곧 직접 연락드리겠습니다.`;
   success.style.display = 'block';
 
   // Optionally submit to Formspree or other service
