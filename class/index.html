@@ -959,6 +959,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 // 구글 시트 Apps Script URL — 배포 후 아래에 붙여넣기
 // ────────────────────────────────────────
 var FORM_URL = 'https://creyong-class-form.creyongfarm.workers.dev';
+var NOTIFY_URL = 'https://notify-2gi.creyongfarm.workers.dev';
 
 /* ─── 결제방법 선택 ─── */
 function selectPayment(label) {
@@ -1120,10 +1121,10 @@ function submitNotify(e) {
   var phoneVal = normalizePhone(phoneRaw);
   btn.disabled = true;
   btn.textContent = '전송 중…';
-  fetch(FORM_URL, {
+  fetch(NOTIFY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'notify', name: nameVal, phone: phoneVal, email: emailVal })
+    body: JSON.stringify({ name: nameVal, phone: phoneVal, email: emailVal })
   }).then(function() {
     form.style.display = 'none';
     document.getElementById('notify-ok-msg').style.display = 'block';
