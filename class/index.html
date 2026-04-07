@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>다빈치 리졸브 하루 끝장 수업 | CREYONG FILM SCHOOL</title>
+<title>다빈치 리졸브 하루 끝장 수업 2기 | CREYONG FILM SCHOOL</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>emailjs.init('03zOCfXVuB7tIIx7o');</script>
 <style>
@@ -313,12 +313,12 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </head>
 <body ontouchstart="">
 
-<div class="topbar" id="topbar"><span style="background:rgba(0,0,0,.25);padding:2px 10px;border-radius:4px;margin-right:8px">🔴 SOLD OUT</span> 1기 전 타임 마감 · 2기 4월 중 오픈 예정 · 지금 알림 신청 👇</div>
+<div class="topbar" id="topbar">🎬 2기 주말반 4/25(토) &nbsp;·&nbsp; 평일반 4/29(수) &nbsp;·&nbsp; <strong>지금 바로 수강 신청 →</strong></div>
 
 <nav class="main-nav" id="main-nav">
   <div class="nav-logo">CREYONG FILM SCHOOL</div>
   <div class="nav-menu">
-    <button class="nav-btn nav-primary" onclick="document.getElementById('notify-form').scrollIntoView({behavior:'smooth'})">알림 신청</button>
+    <button class="nav-btn nav-primary" onclick="showPage('register')">수강 신청</button>
   </div>
 </nav>
 
@@ -328,36 +328,34 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-inner">
-    <div class="hero-badge"><span style="background:#ef4444;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px"></span> 🔴 1기 전 타임 마감 · 2기 오픈 예정</div>
+    <div class="hero-badge"><span style="background:#22c55e;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;animation:blink 1.5s infinite"></span> 2기 수강 신청 오픈!</div>
     <h1 class="hero-title"><span class="grad" style="display:block;font-size:clamp(32px,5.5vw,80px)">다빈치 리졸브</span><span style="display:block;color:#fff;font-size:clamp(38px,7vw,100px)">하루 끝장 수업</span></h1>
     <p class="hero-sub">
       촬영 · 편집 · 색보정 · AI 워크스테이션까지<br>
       <strong>1인 영상 제작자의 모든 것을 하루에</strong>
     </p>
 
-    <div class="closed-banner">
-      <div style="font-size:32px;margin-bottom:8px">🔴</div>
-      <div class="closed-badge">SOLD OUT · 1기 전 타임 마감</div>
-      <div class="closed-title">4월 중 2기 오픈 예정</div>
-      <div class="closed-sub">평일반 · 주말반 · 추가개설반 — 모두 마감되었습니다</div>
-    </div>
-
-    <div class="notify-form-wrap" id="notify-form">
-      <div class="sold-banner">🔴 1기 전 타임 마감</div>
-      <h3>2기 수강일정 알림 받기</h3>
-      <p>오픈 즉시 카카오톡으로 가장 먼저 알려드려요</p>
-      <form id="notify-form-el" onsubmit="return submitNotify(event)">
-        <div class="notify-fields">
-          <input type="text" name="name" placeholder="이름" required>
-          <input type="tel" name="phone" placeholder="전화번호 (010-0000-0000)" required>
-          <input type="email" name="email" placeholder="이메일 (선택)">
-          <button type="submit">📬 알림 신청하기</button>
-        </div>
-      </form>
-      <div class="notify-ok" id="notify-ok-msg">✅ 신청 완료! 2기 오픈 시 카카오톡으로 알려드릴게요.</div>
+    <div class="hero-dates" style="margin-bottom:28px">
+      <div class="hd-item">
+        <div class="hd-label">2기 주말반</div>
+        <div class="hd-val">📅 4월 25일 (토)</div>
+      </div>
+      <div class="hd-item">
+        <div class="hd-label">2기 평일반</div>
+        <div class="hd-val">📅 4월 29일 (수)</div>
+      </div>
+      <div class="hd-item">
+        <div class="hd-label">시간</div>
+        <div class="hd-val">10:00 ~ 20:00</div>
+      </div>
+      <div class="hd-item">
+        <div class="hd-label">인원</div>
+        <div class="hd-val">5명 소수정예</div>
+      </div>
     </div>
 
     <div class="hero-btns" style="margin-top:24px">
+      <button class="btn-main" id="btn-apply-hero" onclick="showPage('register')">수강 신청하기 →</button>
       <button class="btn-ghost" id="btn-scroll-why">수업 소개 보기</button>
     </div>
   </div>
@@ -368,7 +366,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
     <span class="pr-old">₩499,000</span>
     <span class="pr-new">₩299,000</span>
     <span class="pr-badge">수강료</span>
-    <span class="pr-note">2기 오픈 시 알림 신청 가능</span>
+    <span class="pr-badge">2기 조기등록 특가</span>
   </div>
 </div>
 
@@ -396,7 +394,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <!-- REVIEWS -->
 <section style="background:rgba(255,255,255,.015)">
 <div class="wrap">
-  <div class="kicker">1기 REVIEWS</div>
+  <div class="kicker">1기 수강생 후기</div>
   <h2 class="sec-h2">수강생 후기</h2>
   <p class="sec-lead" style="text-align:center">1기 수강생들이 직접 남긴 후기입니다.</p>
   <div id="review-container">
@@ -776,14 +774,14 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="p-won">₩</span>
       <span class="p-new">299,000</span>
     </div>
-    <div class="pricing-desc">2기 수강료는 추후 공지됩니다.</div>
+    <div class="pricing-desc">2기 특가. 5명 마감 시 종료됩니다.</div>
     <div class="pricing-feats">
       <div class="pf">조명 · 촬영 현장 실습 포함</div>
       <div class="pf">필름메이커 전용 AI 워크스테이션 제공</div>
       <div class="pf">수료 후 1:1 피드백 무제한</div>
       <div class="pf">단 5명 소수 정예 · 강사 밀착 지도</div>
     </div>
-    <button class="btn-apply" onclick="document.getElementById('notify-form').scrollIntoView({behavior:'smooth'})">2기 오픈 알림 받기</button>
+    <button class="btn-apply" id="btn-apply-pricing" onclick="showPage('register')">지금 수강 신청하기 →</button>
   </div>
 </div>
 </section>
@@ -858,9 +856,9 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="sticky-old">₩499,000</span>
       <span class="sticky-new">₩299,000</span>
     </div>
-    <div class="sticky-note">1기 전 타임 마감 · 2기 4월 중 오픈 예정</div>
+    <div class="sticky-note">2기 주말반 4/25 · 평일반 4/29</div>
   </div>
-  <button class="sticky-btn" onclick="document.getElementById('notify-form').scrollIntoView({behavior:'smooth'})">알림 신청 →</button>
+  <button class="sticky-btn" id="btn-apply-sticky" onclick="showPage('register')">수강 신청 →</button>
 </div>
 
 </div><!-- /page-main -->
@@ -871,15 +869,15 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
     <div style="padding:16px 0 0"><button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 홈으로</button></div>
     <div class="form-box">
       <div class="form-h">수강 신청</div>
-      <div class="form-sub">다빈치 리졸브 하루 끝장 수업 · 1기 오픈 특가 ₩299,000 · 5명 한정</div>
+      <div class="form-sub">다빈치 리졸브 하루 끝장 수업 2기 · ₩299,000 · 5명 소수 정예</div>
       <div id="reg-alert"></div>
 
       <div class="fg">
         <label class="fl">수업 선택 *</label>
         <select class="fi" id="reg-class">
           <option value="">선택해주세요</option>
-          <option value="평일반">평일반</option>
-          <option value="주말반">주말반</option>
+          <option value="4/25 토 주말반 (2기)">📅 4월 25일(토) — 2기 주말반</option>
+          <option value="4/29 수 평일반 (2기)">📅 4월 29일(수) — 2기 평일반</option>
         </select>
       </div>
       <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" id="reg-name" placeholder="홍길동"></div>
