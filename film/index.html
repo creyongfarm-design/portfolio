@@ -37,7 +37,8 @@ img{max-width:100%}
 /* ──────── HERO ──────── */
 .hero{min-height:100vh;background:var(--black);display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 32px 80px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,168,76,.08) 0%, transparent 65%);pointer-events:none}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border:1px solid rgba(201,168,76,.3);border-radius:100px;font-size:12px;font-weight:600;color:var(--gold);letter-spacing:1px;margin-bottom:32px;font-family:'Space Grotesk',sans-serif}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border:1px solid rgba(201,168,76,.3);border-radius:100px;font-size:12px;font-weight:600;color:var(--gold);letter-spacing:1px;margin-bottom:24px;font-family:'Space Grotesk',sans-serif}
+.hero-brand{font-family:'Space Grotesk',sans-serif;font-size:clamp(20px,3.5vw,32px);font-weight:800;color:rgba(255,255,255,.9);letter-spacing:6px;text-transform:uppercase;margin-bottom:20px;opacity:.85}
 .hero-eyebrow::before{content:'';width:6px;height:6px;background:var(--gold);border-radius:50%}
 .hero h1{font-size:clamp(36px,6vw,72px);font-weight:900;color:#fff;line-height:1.15;letter-spacing:-1px;margin-bottom:24px}
 .hero h1 em{font-style:normal;color:var(--gold)}
@@ -287,6 +288,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
 <section class="hero">
   <div>
     <div class="hero-eyebrow">스타벅스 공식 영상 파트너 · 국제영화제 수상 · 13년 프로덕션</div>
+    <div class="hero-brand">크레용프로덕션</div>
     <h1>
       대기업이 반복해서 찾아오는<br>
       <em>영상 제작사입니다</em>
@@ -638,7 +640,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         <div class="pf-body">
           <div class="pf-client">Starbucks Korea</div>
           <div class="pf-title">스타벅스 예능 롱폼 시리즈 ②</div>
-          <div class="pf-intent">스타벅스 공식 채널에서 공개된 예능 형식의 롱폼 콘텐츠. 브랜드를 직접 드러내지 않아도 브랜드가 느껴지게 하는 크레용프로덕션의 기획 방식이 담긴 작업입니다.</div>
+          <div class="pf-intent">스타벅스 브랜드를 전면에 드러내는 예능형 롱폼 콘텐츠. 광고임에도 '보고 싶은 영상'이 되도록 기획했습니다. 스타벅스 공식 채널에서 공개된 크레용프로덕션 제작 시리즈.</div>
           <div class="pf-meta">
             <span class="pf-tag">예능 롱폼</span>
             <span class="pf-tag">브랜디드 콘텐츠</span>
@@ -666,28 +668,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </div>
       </div>
 
-      <!-- 06. LG전자 휘센 -->
-      <div class="pf-card reveal d1">
-        <a href="https://youtu.be/HAV76UvQ-5w" target="_blank">
-          <div class="pf-thumb">
-            <img src="https://img.youtube.com/vi/HAV76UvQ-5w/mqdefault.jpg" alt="LG전자 휘센 모두의 바람으로">
-            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
-            <span class="pf-type-badge">브랜드필름</span>
-          </div>
-        </a>
-        <div class="pf-body">
-          <div class="pf-client">LG전자 휘센</div>
-          <div class="pf-title">〈모두의 바람으로〉</div>
-          <div class="pf-intent">에어컨을 파는 영상이 아니라, 여름을 이기는 사람들의 이야기. 제품 스펙 대신 삶의 장면을 담았습니다. 대기업 브랜드필름에서도 기획의 결이 다를 수 있다는 것을 보여준 프로젝트입니다.</div>
-          <div class="pf-meta">
-            <span class="pf-tag">브랜드필름</span>
-            <span class="pf-tag">감성 광고</span>
-          </div>
-        </div>
-      </div>
-
       <!-- 06. 스타벅스 브랜드 숏폼 컬렉션 -->
-      <div class="pf-card reveal d2">
+      <div class="pf-card reveal d1">
         <div class="pf-shorts-top">
           <a href="https://youtu.be/4gO34JoYwiU" target="_blank" class="pf-short-item">
             <img src="https://img.youtube.com/vi/4gO34JoYwiU/mqdefault.jpg" alt="숏폼 1">
@@ -713,7 +695,26 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
           <div class="pf-meta">
             <span class="pf-tag">브랜드 숏폼</span>
             <span class="pf-tag">릴스</span>
-            <span class="pf-stat">편당 평균 30만 조회</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07. LG전자 휘센 -->
+      <div class="pf-card reveal d2">
+        <a href="https://youtu.be/HAV76UvQ-5w" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/HAV76UvQ-5w/mqdefault.jpg" alt="LG전자 휘센 모두의 바람으로">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">브랜드필름</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">LG전자 휘센</div>
+          <div class="pf-title">〈모두의 바람으로〉</div>
+          <div class="pf-intent">에어컨을 파는 영상이 아니라, 여름을 이기는 사람들의 이야기. 제품 스펙 대신 삶의 장면을 담았습니다. 대기업 브랜드필름에서도 기획의 결이 다를 수 있다는 것을 보여준 프로젝트입니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">브랜드필름</span>
+            <span class="pf-tag">감성 광고</span>
           </div>
         </div>
       </div>
@@ -821,26 +822,6 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </div>
       </div>
 
-      <!-- 10. 농협은행 헤이지니 -->
-      <div class="pf-card reveal d2">
-        <a href="https://youtu.be/pEA_rUePq4U" target="_blank">
-          <div class="pf-thumb">
-            <img src="https://img.youtube.com/vi/pEA_rUePq4U/mqdefault.jpg" alt="농협은행 헤이지니 은행원 체험">
-            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
-            <span class="pf-type-badge">유튜브 콘텐츠</span>
-          </div>
-        </a>
-        <div class="pf-body">
-          <div class="pf-client">농협은행</div>
-          <div class="pf-title">〈헤이지니의 은행원 체험〉</div>
-          <div class="pf-intent">어린이 크리에이터 헤이지니와 함께한 농협은행 콘텐츠. 금융이 딱딱하게 느껴지는 세대에게, 친근하고 즐거운 방식으로 브랜드를 알리는 방법을 고민한 작업입니다. 타깃에 맞는 캐스팅과 기획이 핵심.</div>
-          <div class="pf-meta">
-            <span class="pf-tag">유튜브 콘텐츠</span>
-            <span class="pf-tag">타깃 마케팅</span>
-            <span class="pf-tag">크리에이터 협업</span>
-          </div>
-        </div>
-      </div>
 
     </div>
     <div class="pf-more reveal">
