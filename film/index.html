@@ -158,7 +158,14 @@ img{max-width:100%}
 .pf-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--lgray);color:#555}
 .pf-stat{font-size:11px;font-weight:700;color:var(--gold);padding:4px 10px;border-radius:20px;background:#fff8ee;border:1px solid #f5e5c0}
 .pf-more{text-align:center;margin-top:36px}
+/* Narrative bridge */
+.narrative-bridge{background:var(--black);padding:0}
+.narrative-bridge-inner{max-width:var(--max);margin:0 auto;padding:20px 32px;display:flex;align-items:center;gap:16px}
+.narrative-bridge-line{flex:1;height:1px;background:rgba(201,168,76,.25)}
+.narrative-bridge-pill{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:3px;text-transform:uppercase;font-family:'Space Grotesk',sans-serif;white-space:nowrap;padding:8px 20px;border:1px solid rgba(201,168,76,.4);border-radius:100px}
 /* Shortform collection card */
+.pf-shorts-top{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;border-radius:14px 14px 0 0;overflow:hidden}
+.pf-shorts-top .pf-short-item{border-radius:0;aspect-ratio:16/9}
 .pf-shorts-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px}
 .pf-short-item{border-radius:8px;overflow:hidden;aspect-ratio:9/16;position:relative;background:var(--mid)}
 .pf-short-item img{width:100%;height:100%;object-fit:cover;transition:.3s}
@@ -386,22 +393,27 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
       <div class="fail-right-title">CREYONG PRODUCTION의 방식</div>
       <div class="fail-checks">
         <div class="fail-check">감독 직접 책임제 — 기획부터 납품까지 한 사람이 책임집니다</div>
-        <div class="fail-check">스타벅스 10년 파트너 — 브랜드를 가장 잘 아는 팀</div>
+        <div class="fail-check">스타벅스 10년 파트너 — 브랜드를 누구보다 잘 아는 팀</div>
         <div class="fail-check">크리에이터 직접 운영 — 알고리즘을 아는 제작자가 만듭니다</div>
-        <div class="fail-check">국제영화제 심사위원 특별상 — 93개국 2,341편 출품작 중</div>
-        <div class="fail-check">다빈치 리졸브 색보정 — 영화급 퀄리티, 광고처럼 안 보입니다</div>
+        <div class="fail-check">영화급 색보정 파이프라인 — 색감 하나로 브랜드 감성이 완성됩니다</div>
+        <div class="fail-check">한 번에 소수의 프로젝트 집중 — 맡은 작업이 끝날 때까지 함께합니다</div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- NARRATIVE BRIDGE -->
+<div class="narrative-bridge">
+  <div class="narrative-bridge-inner">
+    <div class="narrative-bridge-line"></div>
+    <div class="narrative-bridge-pill">그래서 크레용프로덕션입니다</div>
+    <div class="narrative-bridge-line"></div>
+  </div>
+</div>
+
 <!-- DIFFERENTIATOR -->
 <section class="section diff">
   <div class="container">
-    <div class="reveal">
-      <div class="section-eyebrow">크레용프로덕션만의 차별점</div>
-      <h2 class="section-title">왜 크레용프로덕션인가</h2>
-    </div>
     <div class="diff-grid">
       <div class="diff-card reveal d1">
         <div class="diff-num">01</div>
@@ -411,9 +423,9 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
       </div>
       <div class="diff-card reveal d2">
         <div class="diff-num">02</div>
-        <div class="diff-title">국제영화제 수상이 증명하는 기획력</div>
-        <div class="diff-desc">웹드라마 〈춘자의 전성시대〉로 93개국 2,341편 출품작 중 여수국제웹드라마영화제 심사위원 특별상을 수상했습니다. Melbourne Web Fest 공식 초청, 비엔나 국제영화상 선정까지. 영상 기획의 깊이가 다릅니다.</div>
-        <div class="diff-badge">🏆 국제영화제 수상</div>
+        <div class="diff-title">국제 시장에서 검증된 기획력</div>
+        <div class="diff-desc">웹드라마 〈춘자의 전성시대〉는 여수국제웹드라마영화제 심사위원 특별상, Melbourne Web Fest 공식 초청, 비엔나 국제영화상 선정을 받았습니다. 93개국 2,341편 경쟁작 중에서. 스토리 기획의 완성도가 다릅니다.</div>
+        <div class="diff-badge">🏆 여수·멜버른·비엔나 국제영화제</div>
       </div>
       <div class="diff-card reveal d3">
         <div class="diff-num">03</div>
@@ -493,8 +505,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
 <section class="section services" id="services">
   <div class="container">
     <div class="reveal">
-      <div class="section-eyebrow">서비스</div>
-      <h2 class="section-title">크레용프로덕션이 만드는 세 가지 영상</h2>
+      <div class="section-eyebrow">제작 포맷</div>
+      <h2 class="section-title">주로 이런 영상을 만듭니다</h2>
       <p class="section-desc">어떤 포맷이든 기획의 깊이가 다릅니다. 촬영 전에 충분히 이야기합니다.</p>
     </div>
     <div class="services-grid">
@@ -568,7 +580,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
           <div class="pf-meta">
             <span class="pf-tag">웹드라마</span>
             <span class="pf-tag">공공기관</span>
-            <span class="pf-stat">93개국 경쟁 · 3개국 수상·초청</span>
+            <span class="pf-stat">여수국제웹드라마영화제 심사위원 특별상</span>
           </div>
         </div>
       </div>
@@ -594,29 +606,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </div>
       </div>
 
-      <!-- 03. 스타벅스 네버랜드 25주년 -->
+      <!-- 03. 스타벅스 예능 롱폼 1 — 나란히 시작 -->
       <div class="pf-card reveal d3">
-        <a href="https://youtu.be/Lnk85DRD854" target="_blank">
-          <div class="pf-thumb">
-            <img src="https://img.youtube.com/vi/Lnk85DRD854/mqdefault.jpg" alt="스타벅스 네버랜드 25주년">
-            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
-            <span class="pf-type-badge">기념영상</span>
-          </div>
-        </a>
-        <div class="pf-body">
-          <div class="pf-client">Starbucks Korea — 25주년</div>
-          <div class="pf-title">〈스타벅스 네버랜드〉</div>
-          <div class="pf-intent">스타벅스 코리아 25주년을 기념하는 영상. 단순한 기념이 아니라, 25년간 스타벅스와 함께한 사람들의 이야기를 판타지 형식으로 담았습니다. 브랜드의 철학과 감성을 영상 언어로 표현한 작업입니다.</div>
-          <div class="pf-meta">
-            <span class="pf-tag">기념영상</span>
-            <span class="pf-tag">브랜드 스토리</span>
-          </div>
-        </div>
-      </div>
-
-
-      <!-- 04-a. 스타벅스 예능 롱폼 1 -->
-      <div class="pf-card reveal d4">
         <a href="https://youtu.be/sr5CQuWByo0" target="_blank">
           <div class="pf-thumb">
             <img src="https://img.youtube.com/vi/sr5CQuWByo0/mqdefault.jpg" alt="스타벅스 예능 롱폼">
@@ -635,8 +626,8 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </div>
       </div>
 
-      <!-- 04-b. 스타벅스 예능 롱폼 2 -->
-      <div class="pf-card reveal d1">
+      <!-- 04. 스타벅스 예능 롱폼 2 — 나란히 -->
+      <div class="pf-card reveal d4">
         <a href="https://youtu.be/RRfqLwuz4sg" target="_blank">
           <div class="pf-thumb">
             <img src="https://img.youtube.com/vi/RRfqLwuz4sg/mqdefault.jpg" alt="스타벅스 예능 롱폼 2">
@@ -655,7 +646,27 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </div>
       </div>
 
-      <!-- 05. LG전자 휘센 -->
+      <!-- 05. 스타벅스 네버랜드 25주년 -->
+      <div class="pf-card reveal d1">
+        <a href="https://youtu.be/Lnk85DRD854" target="_blank">
+          <div class="pf-thumb">
+            <img src="https://img.youtube.com/vi/Lnk85DRD854/mqdefault.jpg" alt="스타벅스 네버랜드 25주년">
+            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
+            <span class="pf-type-badge">기념영상</span>
+          </div>
+        </a>
+        <div class="pf-body">
+          <div class="pf-client">Starbucks Korea — 25주년</div>
+          <div class="pf-title">〈스타벅스 네버랜드〉</div>
+          <div class="pf-intent">스타벅스 코리아 25주년을 기념하는 영상. 25년간 스타벅스와 함께한 사람들의 이야기를 판타지 형식으로 담았습니다. 브랜드의 철학과 감성을 영상 언어로 표현한 작업입니다.</div>
+          <div class="pf-meta">
+            <span class="pf-tag">기념영상</span>
+            <span class="pf-tag">브랜드 스토리</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06. LG전자 휘센 -->
       <div class="pf-card reveal d1">
         <a href="https://youtu.be/HAV76UvQ-5w" target="_blank">
           <div class="pf-thumb">
@@ -677,23 +688,34 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
 
       <!-- 06. 스타벅스 브랜드 숏폼 컬렉션 -->
       <div class="pf-card reveal d2">
-        <a href="https://youtu.be/4gO34JoYwiU" target="_blank">
-          <div class="pf-thumb">
-            <img src="https://img.youtube.com/vi/4gO34JoYwiU/mqdefault.jpg" alt="스타벅스 브랜드 숏폼 릴스">
-            <div class="pf-thumb-overlay"><div class="pf-play-btn">▶</div></div>
-            <span class="pf-type-badge award">📱 편당 30만 조회</span>
-          </div>
-        </a>
+        <div class="pf-shorts-top">
+          <a href="https://youtu.be/4gO34JoYwiU" target="_blank" class="pf-short-item">
+            <img src="https://img.youtube.com/vi/4gO34JoYwiU/mqdefault.jpg" alt="숏폼 1">
+            <div class="pf-short-item-play">▶</div>
+          </a>
+          <a href="https://youtu.be/pTEcatiXRNM" target="_blank" class="pf-short-item">
+            <img src="https://img.youtube.com/vi/pTEcatiXRNM/mqdefault.jpg" alt="숏폼 2">
+            <div class="pf-short-item-play">▶</div>
+          </a>
+          <a href="https://youtu.be/Y7j3UJtfEIY" target="_blank" class="pf-short-item">
+            <img src="https://img.youtube.com/vi/Y7j3UJtfEIY/mqdefault.jpg" alt="숏폼 3">
+            <div class="pf-short-item-play">▶</div>
+          </a>
+          <a href="https://youtu.be/k6wwYn82I1Q" target="_blank" class="pf-short-item">
+            <img src="https://img.youtube.com/vi/k6wwYn82I1Q/mqdefault.jpg" alt="숏폼 4">
+            <div class="pf-short-item-play">▶</div>
+          </a>
+        </div>
         <div class="pf-body">
-          <div class="pf-client">Starbucks Korea — 브랜드 숏폼 시리즈</div>
+          <div class="pf-client" style="margin-top:4px">Starbucks Korea — 브랜드 숏폼 시리즈</div>
           <div class="pf-title">스타벅스 브랜드 릴스 컬렉션</div>
-          <div class="pf-intent">트렌드를 따라가는 게 아니라, 스타벅스 브랜드 감성을 유지하면서 SNS 문법으로 재해석했습니다. 매장·파트너·리워드 프로그램 등 일상의 순간들을 유쾌하고 세련된 시선으로 담아낸 시리즈. 편당 평균 30만 조회.</div>
+          <div class="pf-intent">트렌드를 따라가는 게 아니라, 스타벅스 브랜드 감성을 유지하면서 SNS 문법으로 재해석했습니다. 매장·파트너·리워드 프로그램 등 일상의 순간들을 유쾌하고 세련된 시선으로 담아낸 시리즈.</div>
           <div class="pf-meta">
             <span class="pf-tag">브랜드 숏폼</span>
             <span class="pf-tag">릴스</span>
             <span class="pf-stat">편당 평균 30만 조회</span>
           </div>
-          <div class="pf-shorts-row">
+          <div class="pf-shorts-row" style="display:none">
             <a href="https://youtu.be/4gO34JoYwiU" target="_blank" class="pf-short-item">
               <img src="https://img.youtube.com/vi/4gO34JoYwiU/mqdefault.jpg" alt="숏폼 1">
               <div class="pf-short-item-play">▶</div>
@@ -725,7 +747,7 @@ footer{background:var(--black);padding:48px 32px;border-top:1px solid rgba(255,2
         </a>
         <div class="pf-body">
           <div class="pf-client">평창동계올림픽 조직위원회</div>
-          <div class="pf-title">〈성화봉송 광고 필름〉</div>
+          <div class="pf-title">평창동계올림픽 성화봉송 광고</div>
           <div class="pf-intent">국가적 이벤트를 영상으로 담는다는 것의 무게감. 2018 평창 동계올림픽 성화봉송 광고 필름. 단 몇 초 안에 올림픽의 정신과 감동을 전달해야 하는 도전적인 작업이었습니다.</div>
           <div class="pf-meta">
             <span class="pf-tag">광고 필름</span>
