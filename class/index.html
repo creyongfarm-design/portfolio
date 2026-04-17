@@ -313,7 +313,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </head>
 <body ontouchstart="">
 
-<div class="topbar" id="topbar">🎬 2기 주말반 4/25(토) &nbsp;·&nbsp; 평일반 4/29(수) &nbsp;·&nbsp; <strong>지금 바로 수강 신청 →</strong></div>
+<div class="topbar" id="topbar">🎬 2기 주말반 4/25(토) 신청 가능 &nbsp;·&nbsp; <span style="text-decoration:line-through;opacity:0.6">평일반 4/29(수)</span> <span style="background:#e53935;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;">마감</span> &nbsp;·&nbsp; <strong>주말반 지금 신청 →</strong></div>
 
 <nav class="main-nav" id="main-nav">
   <div class="nav-logo">CREYONG FILM SCHOOL</div>
@@ -340,9 +340,10 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
         <div class="hd-label">2기 주말반</div>
         <div class="hd-val">📅 4월 25일 (토)</div>
       </div>
-      <div class="hd-item">
-        <div class="hd-label">2기 평일반</div>
-        <div class="hd-val">📅 4월 29일 (수)</div>
+      <div class="hd-item" style="opacity:0.55;position:relative">
+        <div style="position:absolute;top:-8px;right:-8px;background:#e53935;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px">마감</div>
+        <div class="hd-label" style="text-decoration:line-through">2기 평일반</div>
+        <div class="hd-val" style="text-decoration:line-through">📅 4월 29일 (수)</div>
       </div>
       <div class="hd-item">
         <div class="hd-label">시간</div>
@@ -857,7 +858,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="sticky-old">₩499,000</span>
       <span class="sticky-new">₩299,000</span>
     </div>
-    <div class="sticky-note">2기 주말반 4/25 · 평일반 4/29</div>
+    <div class="sticky-note">2기 주말반 4/25(토) · 잔여석 있음</div>
   </div>
   <button class="sticky-btn" id="btn-apply-sticky" onclick="showPage('register')">수강 신청 →</button>
 </div>
@@ -878,7 +879,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
         <select class="fi" id="reg-class">
           <option value="">선택해주세요</option>
           <option value="4/25 토 주말반 (2기)">📅 4월 25일(토) — 2기 주말반</option>
-          <option value="4/29 수 평일반 (2기)">📅 4월 29일(수) — 2기 평일반</option>
+          <option value="" disabled>📅 4월 29일(수) — 2기 평일반 (마감)</option>
         </select>
       </div>
       <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" id="reg-name" placeholder="홍길동"></div>
