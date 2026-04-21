@@ -313,12 +313,12 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </head>
 <body ontouchstart="">
 
-<div class="topbar" id="topbar">🎬 2기 주말반 4/25(토) 신청 가능 &nbsp;·&nbsp; <span style="text-decoration:line-through;opacity:0.6">평일반 4/29(수)</span> <span style="background:#e53935;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;">마감</span> &nbsp;·&nbsp; <strong>주말반 지금 신청 →</strong></div>
+<div class="topbar" id="topbar">🎬 2기 주말반 4/25(토) &nbsp;·&nbsp; <span style="background:#e53935;color:#fff;font-size:11px;padding:3px 10px;border-radius:4px;font-weight:700;letter-spacing:1px;">🔴 마감</span></div>
 
 <nav class="main-nav" id="main-nav">
   <div class="nav-logo">CREYONG FILM SCHOOL</div>
   <div class="nav-menu">
-    <button class="nav-btn nav-primary" onclick="showPage('register')">수강 신청</button>
+    <button class="nav-btn" style="background:#888;color:#fff;cursor:not-allowed;">마감</button>
   </div>
 </nav>
 
@@ -356,7 +356,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
     </div>
 
     <div class="hero-btns" style="margin-top:24px">
-      <button class="btn-main" id="btn-apply-hero" onclick="showPage('register')">수강 신청하기 →</button>
+      <button class="btn-main" style="background:#888;cursor:not-allowed;box-shadow:none;">🔴 마감되었습니다</button>
       <button class="btn-ghost" id="btn-scroll-why">수업 소개 보기</button>
     </div>
   </div>
@@ -858,9 +858,9 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <span class="sticky-old">₩499,000</span>
       <span class="sticky-new">₩299,000</span>
     </div>
-    <div class="sticky-note">2기 주말반 4/25(토) · 잔여 <strong style="color:#f97316">2석</strong></div>
+    <div class="sticky-note" style="color:#e53935;font-weight:700;">🔴 2기 주말반 4/25 마감</div>
   </div>
-  <button class="sticky-btn" id="btn-apply-sticky" onclick="showPage('register')">수강 신청 →</button>
+  <button class="sticky-btn" style="background:#888;cursor:not-allowed;box-shadow:none;">마감되었습니다</button>
 </div>
 
 </div><!-- /page-main -->
