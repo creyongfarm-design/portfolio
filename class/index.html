@@ -783,7 +783,24 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
       <div class="pf">수료 후 1:1 피드백 무제한</div>
       <div class="pf">단 5명 소수 정예 · 강사 밀착 지도</div>
     </div>
-    <button class="btn-apply" id="btn-apply-pricing" onclick="showPage('register')">지금 수강 신청하기 →</button>
+    <!-- 마감 배너 + 알림 신청 폼 -->
+    <div style="margin-top:20px">
+      <span class="sold-banner">🔴 SOLD OUT · 2기 마감</span>
+      <p style="font-size:13px;color:rgba(255,255,255,.45);margin:0 0 16px">다음 기 개설 시 가장 먼저 안내드립니다</p>
+    </div>
+    <div class="notify-form-wrap">
+      <h3>🔔 다음 기 오픈 알림 신청</h3>
+      <p>이름과 연락처만 남겨주세요. 3기 모집 때 바로 알려드릴게요!</p>
+      <form id="notify-form-el" onsubmit="submitNotify(event)">
+        <div class="notify-fields">
+          <input type="text" name="name" placeholder="이름" required>
+          <input type="tel" name="phone" placeholder="전화번호 (010-XXXX-XXXX)" required>
+          <input type="email" name="email" placeholder="이메일 (선택)">
+          <button type="submit">알림 신청하기 🔔</button>
+        </div>
+      </form>
+      <div class="notify-ok" id="notify-ok-msg">✅ 신청 완료! 3기 오픈 시 연락드리겠습니다 :)</div>
+    </div>
   </div>
 </div>
 </section>
@@ -860,7 +877,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
     </div>
     <div class="sticky-note" style="color:#e53935;font-weight:700;">🔴 2기 주말반 4/25 마감</div>
   </div>
-  <button class="sticky-btn" style="background:#888;cursor:not-allowed;box-shadow:none;">마감되었습니다</button>
+  <button class="sticky-btn" onclick="document.getElementById('notify-form-el').scrollIntoView({behavior:'smooth',block:'center'})">🔔 다음 기 알림 신청</button>
 </div>
 
 </div><!-- /page-main -->
