@@ -313,12 +313,12 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </head>
 <body ontouchstart="">
 
-<div class="topbar" id="topbar">🎬 다빈치 리졸브 하루 끝장 수업 &nbsp;·&nbsp; <span style="background:#e53935;color:#fff;font-size:11px;padding:3px 10px;border-radius:4px;font-weight:700;letter-spacing:1px;">1기·2기 전 타임 마감 완료</span></div>
+<div class="topbar" id="topbar">🎬 다빈치 리졸브 하루 끝장 수업 &nbsp;·&nbsp; <span style="background:#16a34a;color:#fff;font-size:11px;padding:3px 10px;border-radius:4px;font-weight:700;letter-spacing:1px;">🟢 3기 수강신청 오픈! 5/23(토)</span></div>
 
 <nav class="main-nav" id="main-nav">
   <div class="nav-logo">CREYONG FILM SCHOOL</div>
   <div class="nav-menu">
-    <button class="nav-btn nav-primary" onclick="showPage('register')">🔔 알림 신청</button>
+    <button class="nav-btn nav-primary" onclick="showPage('register')">✅ 수강신청하기</button>
   </div>
 </nav>
 
@@ -328,7 +328,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-inner">
-    <div class="hero-badge"><span style="background:#e53935;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;"></span> 1기 · 2기 전 타임 마감 완료</div>
+    <div class="hero-badge"><span style="background:#22c55e;width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;animation:blink 2s infinite"></span> 3기 수강신청 오픈</div>
     <h1 class="hero-title"><span class="grad" style="display:block;font-size:clamp(32px,5.5vw,80px)">다빈치 리졸브</span><span style="display:block;color:#fff;font-size:clamp(38px,7vw,100px)">하루 끝장 수업</span></h1>
     <p class="hero-sub">
       촬영 · 편집 · 색보정 · AI 워크스테이션까지<br>
@@ -337,12 +337,12 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 
     <div style="margin-bottom:28px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center">
       <span style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;">🔴 1기 전 타임 마감</span>
-      <span style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#f87171;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;">🔴 2기 전 타임 마감</span>
-      <span style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);color:#f97316;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;">3기 준비 중</span>
+      <span style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.4);color:#22c55e;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;">📅 3기 · 5/23(토)</span>
+      <span style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.4);color:#22c55e;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;">✅ 수강신청 진행 중</span>
     </div>
 
     <div class="hero-btns" style="margin-top:24px">
-      <button class="btn-main" onclick="showPage('register')">🔔 다음 기 알림 신청하기</button>
+      <button class="btn-main" onclick="showPage('register')">✅ 3기 수강신청하기</button>
       <button class="btn-ghost" id="btn-scroll-why">수업 소개 보기</button>
     </div>
   </div>
@@ -844,7 +844,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 </footer>
 
 <div class="sticky-cta" style="justify-content:center">
-  <button class="sticky-btn" style="font-size:17px;padding:15px 40px;" onclick="showPage('register')">🔔 다음 기 알림 신청하기</button>
+  <button class="sticky-btn" style="font-size:17px;padding:15px 40px;" onclick="showPage('register')">✅ 3기 수강신청하기</button>
 </div>
 
 </div><!-- /page-main -->
@@ -853,22 +853,89 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 <div id="page-register" class="page">
   <div class="form-wrap">
     <div style="padding:16px 0 0"><button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 홈으로</button></div>
-    <div class="form-box">
-      <div style="text-align:center;margin-bottom:8px;font-size:36px">🔔</div>
-      <div class="form-h" style="text-align:center">다음 기 오픈 알림 신청</div>
-      <div class="form-sub" style="text-align:center">1기·2기 전 타임 마감됐습니다.<br>3기 모집 시 가장 먼저 연락드릴게요!</div>
+    <div class="form-box" style="max-width:520px">
+
+      <div style="text-align:center;margin-bottom:4px;font-size:36px">🎬</div>
+      <div class="form-h" style="text-align:center">3기 수강신청</div>
+      <div class="form-sub" style="text-align:center;margin-bottom:20px">
+        <span style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#22c55e;font-size:12px;font-weight:800;padding:4px 14px;border-radius:100px;display:inline-block;margin-bottom:10px;">📅 2026. 5. 23(토) · 하루 종일</span><br>
+        다빈치 리졸브 하루 끝장 수업 · ₩299,000
+      </div>
+
       <div id="reg-alert"></div>
 
-      <form id="notify-form-el" onsubmit="submitNotify(event)" style="margin-top:8px">
-        <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" name="name" placeholder="홍길동" required></div>
-        <div class="fg"><label class="fl">연락처 *</label><input type="tel" class="fi" name="phone" placeholder="010-0000-0000" required></div>
-        <div class="fg"><label class="fl">이메일 (선택)</label><input type="email" class="fi" name="email" placeholder="your@email.com"></div>
-        <button class="fb-btn" type="submit">알림 신청하기 🔔</button>
-      </form>
-      <div class="notify-ok" id="notify-ok-msg" style="padding:32px 0;text-align:center;display:none">
-        <div style="font-size:40px;margin-bottom:12px">✅</div>
-        <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px">알림 신청 완료!</div>
-        <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px">3기 오픈 시 가장 먼저 연락드릴게요 :)</div>
+      <div class="fg">
+        <label class="fl">수업 선택 *</label>
+        <select class="fi" id="reg-class">
+          <option value="">— 선택해주세요 —</option>
+          <option value="3기 · 2026.05.23(토)">3기 · 2026.05.23(토)</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">이름 *</label><input type="text" class="fi" id="reg-name" placeholder="홍길동" required></div>
+      <div class="fg"><label class="fl">연락처 *</label><input type="tel" class="fi" id="reg-phone" placeholder="010-0000-0000" required></div>
+      <div class="fg"><label class="fl">이메일 *</label><input type="email" class="fi" id="reg-email" placeholder="your@email.com" required></div>
+      <div class="fg">
+        <label class="fl">편집 경험 *</label>
+        <select class="fi" id="reg-level">
+          <option value="">— 선택해주세요 —</option>
+          <option value="처음">처음 — 다빈치리졸브 처음 써봐요</option>
+          <option value="초급">초급 — 기본 편집은 할 수 있어요</option>
+          <option value="중급">중급 — 색보정/오디오도 어느정도 해봤어요</option>
+          <option value="고급">고급 — 실무 레벨 향상이 목적이에요</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">보유 장비 (선택)</label><input type="text" class="fi" id="reg-equipment" placeholder="예: 소니 A7C, 맥북 M2 등"></div>
+      <div class="fg">
+        <label class="fl">신청 동기 (선택)</label>
+        <textarea class="fi" id="reg-motivation" rows="3" style="resize:vertical" placeholder="어떤 이유로 수강 신청하시나요?"></textarea>
+      </div>
+
+      <div class="fg">
+        <label class="fl">결제 방법 *</label>
+        <div style="display:flex;gap:12px;margin-top:4px">
+          <label class="pay-label" onclick="selectPayment(this)" style="flex:1;padding:14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s">
+            <input type="radio" name="reg-payment" value="계좌이체" style="display:none">
+            <div style="font-size:20px;margin-bottom:4px">🏦</div>
+            <div style="font-size:13px;font-weight:700;color:#fff">계좌이체</div>
+          </label>
+          <label class="pay-label" onclick="selectPayment(this)" style="flex:1;padding:14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;cursor:pointer;text-align:center;transition:border-color .2s">
+            <input type="radio" name="reg-payment" value="신용카드" style="display:none">
+            <div style="font-size:20px;margin-bottom:4px">💳</div>
+            <div style="font-size:13px;font-weight:700;color:#fff">신용카드</div>
+          </label>
+        </div>
+      </div>
+
+      <button class="fb-btn" id="reg-submit-btn" type="button" onclick="doRegister()">신청 완료하기 ✅</button>
+
+      <!-- 성공 메시지 -->
+      <div id="reg-success" style="display:none;padding:32px 0;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">🎉</div>
+        <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px">수강 신청 완료!</div>
+        <div style="font-size:14px;color:#888;line-height:1.8;margin-bottom:24px">
+          확인 메일을 발송했습니다.<br>결제 완료 후 최종 확정됩니다.
+        </div>
+
+        <!-- 계좌이체 -->
+        <div id="success-bank" style="display:none;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);border-radius:14px;padding:20px;margin-bottom:20px;text-align:left">
+          <div style="font-size:13px;font-weight:800;color:#22c55e;margin-bottom:10px">🏦 계좌이체 안내</div>
+          <div style="font-size:14px;color:#ccc;line-height:2">
+            국민은행 &nbsp;<strong style="color:#fff">000000-00-000000</strong><br>
+            예금주 &nbsp;<strong style="color:#fff">크레용프로덕션</strong><br>
+            금액 &nbsp;<strong style="color:#f97316">₩299,000</strong>
+          </div>
+          <div style="font-size:12px;color:#666;margin-top:10px">* 입금자명을 신청 이름과 동일하게 해주세요</div>
+        </div>
+
+        <!-- 신용카드 -->
+        <div id="success-card" style="display:none;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.25);border-radius:14px;padding:20px;margin-bottom:20px;text-align:left">
+          <div style="font-size:13px;font-weight:800;color:#f97316;margin-bottom:10px">💳 카드 결제 안내</div>
+          <div style="font-size:14px;color:#ccc;line-height:1.8">
+            카카오페이 등 결제 링크를 이메일로 안내드릴게요.<br>
+            <span style="color:#888;font-size:12px">확인 메일을 확인해 주세요.</span>
+          </div>
+        </div>
+
         <button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 홈으로 돌아가기</button>
       </div>
 
