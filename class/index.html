@@ -990,6 +990,7 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 // ────────────────────────────────────────
 var FORM_URL = 'https://creyong-class-form.creyongfarm.workers.dev';
 var NOTIFY_URL = 'https://script.google.com/macros/s/AKfycbycaqyD0MxG_e0-jx5dGgYEK5cGyERBd7but0FnxFXoA6DyCawLLJloPfaKTAzO6MCb/exec';
+var NOTIFY_URL_NOTION = 'https://notify-2gi.creyongfarm.workers.dev'; // 노션 2중 백업
 
 /* ─── 결제방법 선택 ─── */
 function selectPayment(label) {
@@ -1151,10 +1152,13 @@ function submitNotify(e) {
   var phoneVal = normalizePhone(phoneRaw);
   btn.disabled = true;
   btn.textContent = '전송 중…';
+  var postBody = JSON.stringify({ name: nameVal, phone: phoneVal, email: emailVal });
+  // 노션 2중 백업 (화면 표시 무관하게 백그라운드 전송)
+  fetch(NOTIFY_URL_NOTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: postBody }).catch(function(){});
   fetch(NOTIFY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: nameVal, phone: phoneVal, email: emailVal })
+    body: postBody
   }).then(function() {
     form.style.display = 'none';
     document.getElementById('notify-ok-msg').style.display = 'block';
