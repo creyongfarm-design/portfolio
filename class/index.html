@@ -948,32 +948,91 @@ footer{background:#040404;border-top:1px solid rgba(255,255,255,.05);padding:52p
 
 </div><!-- /page-main -->
 
-<!-- ==================== REGISTER PAGE (5기 알림 신청) ==================== -->
+<!-- ==================== REGISTER PAGE (5기 수강 신청) ==================== -->
 <div id="page-register" class="page">
   <div class="form-wrap">
     <div style="padding:16px 0 0"><button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 홈으로</button></div>
-    <div class="form-box" style="max-width:480px">
+    <div class="form-box" style="max-width:520px">
 
       <div style="text-align:center;margin-bottom:4px;font-size:36px">🎬</div>
       <div class="form-h" style="text-align:center">5기 수강 신청</div>
       <div class="form-sub" style="text-align:center;margin-bottom:24px">
         <span style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:#22c55e;font-size:12px;font-weight:800;padding:4px 14px;border-radius:100px;display:inline-block;margin-bottom:10px;">✅ 5기 수강 모집 중</span><br>
-        지금 바로 신청 가능합니다. 단 5명 소수 정예로 진행됩니다.
+        단 5명 소수 정예 · 자리가 마감되기 전에 신청해주세요
       </div>
 
-      <form id="notify-form-el" onsubmit="return submitNotify(event)">
-        <div class="fg"><label class="fl">이름 *</label><input name="name" type="text" class="fi" placeholder="홍길동" required></div>
-        <div class="fg"><label class="fl">연락처 *</label><input name="phone" type="tel" class="fi" placeholder="010-0000-0000" required></div>
-        <div class="fg"><label class="fl">이메일 (선택)</label><input name="email" type="email" class="fi" placeholder="your@email.com"></div>
-        <button class="fb-btn" type="submit">✅ 수강 신청하기</button>
-      </form>
+      <div id="reg-alert"></div>
 
-      <div id="notify-ok-msg" style="display:none;padding:32px 0;text-align:center">
+      <input type="hidden" id="reg-class" value="5기">
+
+      <div class="fg"><label class="fl">이름 *</label><input id="reg-name" type="text" class="fi" placeholder="홍길동" required></div>
+      <div class="fg"><label class="fl">연락처 *</label><input id="reg-phone" type="tel" class="fi" placeholder="010-0000-0000" required></div>
+      <div class="fg"><label class="fl">이메일 *</label><input id="reg-email" type="email" class="fi" placeholder="your@email.com" required></div>
+
+      <div class="fg">
+        <label class="fl">편집 경험 *</label>
+        <select id="reg-level" class="fi" style="background:#111;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 14px;">
+          <option value="">선택해주세요</option>
+          <option value="완전 처음">완전 처음 (영상 편집 경험 없음)</option>
+          <option value="기초 편집 가능">기초 편집 가능 (컷편집 정도)</option>
+          <option value="어느 정도 경험 있음">어느 정도 경험 있음 (유튜브 영상 제작 가능)</option>
+          <option value="다빈치리졸브 경험 있음">다빈치리졸브 경험 있음</option>
+        </select>
+      </div>
+
+      <div class="fg"><label class="fl">보유 장비 <span style="color:#555;font-weight:400">(선택)</span></label><input id="reg-equipment" type="text" class="fi" placeholder="카메라 기종, 드론, 짐벌 등 (없어도 무관)"></div>
+
+      <div class="fg">
+        <label class="fl">신청 동기 *</label>
+        <textarea id="reg-motivation" class="fi" rows="3" placeholder="수강 신청 동기나 배우고 싶은 것을 간단히 적어주세요" style="resize:vertical;min-height:80px;"></textarea>
+      </div>
+
+      <!-- 결제 방법 -->
+      <div class="fg">
+        <label class="fl">결제 방법 *</label>
+        <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
+          <label class="pay-label" onclick="selectPayment(this)" style="flex:1;min-width:130px;border:2px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s;display:flex;align-items:center;gap:10px">
+            <input type="radio" name="reg-payment" value="계좌이체" style="display:none">
+            <span style="font-size:20px">🏦</span>
+            <div><div style="font-size:14px;font-weight:800;color:#fff">계좌이체</div><div style="font-size:12px;color:#666">무통장 입금</div></div>
+          </label>
+          <label class="pay-label" onclick="selectPayment(this)" style="flex:1;min-width:130px;border:2px solid rgba(255,255,255,.12);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .2s;display:flex;align-items:center;gap:10px">
+            <input type="radio" name="reg-payment" value="신용카드" style="display:none">
+            <span style="font-size:20px">💳</span>
+            <div><div style="font-size:14px;font-weight:800;color:#fff">신용카드</div><div style="font-size:12px;color:#666">카드 결제</div></div>
+          </label>
+        </div>
+      </div>
+
+      <button id="reg-submit-btn" class="fb-btn" type="button" onclick="doRegister()">✅ 수강 신청 완료하기</button>
+
+      <!-- 신청 완료 메시지 -->
+      <div id="reg-success" style="display:none;padding:32px 0;text-align:center">
         <div style="font-size:48px;margin-bottom:12px">🎉</div>
         <div style="font-size:20px;font-weight:900;color:#fff;margin-bottom:8px">수강 신청 완료!</div>
-        <div style="font-size:14px;color:#888;line-height:1.8;margin-bottom:24px">
-          신청해주셔서 감사합니다.<br>입금 안내를 포함한 상세 안내를 곧 연락드리겠습니다 🎬
+        <div style="font-size:14px;color:#888;line-height:1.8;margin-bottom:20px">신청해주셔서 감사합니다.<br>곧 연락드리겠습니다 🎬</div>
+
+        <!-- 계좌이체 안내 -->
+        <div id="success-bank" style="display:none;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.25);border-radius:12px;padding:20px;margin-bottom:16px;text-align:left">
+          <div style="font-size:13px;font-weight:800;color:#f97316;margin-bottom:10px">💰 입금 안내</div>
+          <div style="font-size:14px;color:#ccc;line-height:2">
+            은행: <strong style="color:#fff">카카오뱅크</strong><br>
+            계좌: <strong style="color:#fff">3333-XXXX-XXXX</strong><br>
+            예금주: <strong style="color:#fff">크레용</strong><br>
+            금액: <strong style="color:#f97316">₩299,000</strong><br>
+            <span style="font-size:12px;color:#666">입금자명은 신청하신 이름으로 해주세요</span>
+          </div>
         </div>
+
+        <!-- 신용카드 안내 -->
+        <div id="success-card" style="display:none;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.25);border-radius:12px;padding:20px;margin-bottom:16px;text-align:left">
+          <div style="font-size:13px;font-weight:800;color:#22c55e;margin-bottom:10px">💳 카드 결제 안내</div>
+          <div style="font-size:14px;color:#ccc;line-height:1.8">
+            담당자가 카드 결제 링크를 문자/카카오톡으로 전송해드립니다.<br>
+            <span style="font-size:12px;color:#666">보통 1시간 이내 발송됩니다</span>
+          </div>
+        </div>
+
         <button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 홈으로 돌아가기</button>
       </div>
 
@@ -1069,10 +1128,16 @@ function doRegister() {
   btn.textContent = '전송 중…';
   setAlert('reg-alert','','');
 
+  var postData = JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive, payment: payment });
+  // 구글시트 dual-save (백그라운드)
+  fetch(NOTIFY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: postData }).catch(function(){});
+  // 노션 dual-save (백그라운드)
+  fetch(NOTIFY_URL_NOTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: postData }).catch(function(){});
+
   fetch(FORM_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive, payment: payment })
+    body: postData
   })
   .then(function(res) {
     return res.text().then(function(txt) {
