@@ -1165,10 +1165,8 @@ function doRegister() {
   setAlert('reg-alert','','');
 
   var postData = JSON.stringify({ class: cls, name: name, phone: phone, email: email, level: level, equipment: equip, motivation: motive, payment: payment });
-  // 구글시트 dual-save (백그라운드)
+  // 구글시트 저장 (백그라운드)
   fetch(NOTIFY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: postData }).catch(function(){});
-  // 노션 dual-save (백그라운드)
-  fetch(NOTIFY_URL_NOTION, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: postData }).catch(function(){});
 
   fetch(FORM_URL, {
     method: 'POST',
