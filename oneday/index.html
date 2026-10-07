@@ -1024,7 +1024,15 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
           <option value="기타">기타</option>
         </select>
       </div>
-      <div class="fg"><label class="fl">노트북 기종 (선택)</label><input type="text" class="fi" id="reg-laptop" placeholder="예: 맥북 프로 M2, LG 그램 등"></div>
+      <div class="fg">
+        <label class="fl">노트북 종류 *</label>
+        <select class="fi" id="reg-os" style="background:#fffdf9">
+          <option value="">— 선택해주세요 —</option>
+          <option value="맥">맥 (MacBook)</option>
+          <option value="윈도우">윈도우 노트북</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">노트북 모델 (선택)</label><input type="text" class="fi" id="reg-laptop" placeholder="예: 맥북 프로 M2, LG 그램 등"></div>
       <div class="fg">
         <label class="fl">신청 동기 (선택)</label>
         <textarea class="fi" id="reg-motivation" rows="3" style="resize:vertical" placeholder="다빈치로 갈아타려는 이유, 특히 배우고 싶은 부분"></textarea>
@@ -1116,7 +1124,9 @@ function doRegister() {
   var phone   = document.getElementById('reg-phone').value.trim();
   var email   = document.getElementById('reg-email').value.trim().toLowerCase();
   var sw      = document.getElementById('reg-software').value;
-  var laptop  = document.getElementById('reg-laptop').value.trim();
+  var os      = document.getElementById('reg-os').value;
+  var model   = document.getElementById('reg-laptop').value.trim();
+  var laptop  = os ? ('[' + os + '] ' + model).trim() : model;
   var motive  = document.getElementById('reg-motivation').value.trim();
   var payEl   = document.querySelector('input[name="reg-payment"]:checked');
   var payment = payEl ? payEl.value : '';
@@ -1125,6 +1135,7 @@ function doRegister() {
   if (!phone)   { setAlert('reg-alert','연락처를 입력해주세요.','err'); return; }
   if (!email)   { setAlert('reg-alert','이메일을 입력해주세요.','err'); return; }
   if (!sw)      { setAlert('reg-alert','현재 쓰는 편집 프로그램을 선택해주세요.','err'); return; }
+  if (!os)      { setAlert('reg-alert','맥인지 윈도우인지 선택해주세요.','err'); return; }
   if (!payment) { setAlert('reg-alert','결제 방법을 선택해주세요.','err'); return; }
 
   var btn = document.getElementById('reg-submit-btn');
