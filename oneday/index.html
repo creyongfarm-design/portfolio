@@ -480,6 +480,9 @@ section[id]{scroll-margin-top:110px}
 .ed-badge{position:absolute;left:-38px;bottom:64px;width:104px;height:104px;z-index:3;transform:rotate(-8deg);filter:drop-shadow(0 18px 30px rgba(60,30,10,.28));animation:edfloat 6s ease-in-out infinite}
 @keyframes edfloat{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-5deg) translateY(-8px)}}
 @media(max-width:900px){.ed-badge{width:76px;height:76px;left:-14px;bottom:40px}}
+
+.ed-label{display:flex;align-items:center;gap:14px}
+.ed-label-icon{width:40px;height:40px;display:block;opacity:1}
 </style>
 </head>
 <body ontouchstart="">
@@ -498,7 +501,7 @@ section[id]{scroll-margin-top:110px}
 <section class="hero ed-hero">
   <div class="ed-hero-grid">
     <div class="ed-hero-left">
-      <div class="ed-label">DAVINCI RESOLVE / ONE DAY CLASS</div>
+      <div class="ed-label"><img src="davinci-logo.png" alt="DaVinci Resolve" class="ed-label-icon">DAVINCI RESOLVE 21 / ONE DAY CLASS</div>
       <h1 class="ed-title"><span class="ed-pre">프리미어 · 파이널컷 · 캡컷에서</span>다빈치로,<br><span class="grad">하루 만에</span></h1>
       <p class="ed-sub">색보정부터 바로 시작하는 3시간 원데이</p>
       <div class="ed-rule"></div>
@@ -516,7 +519,6 @@ section[id]{scroll-margin-top:110px}
     <div class="ed-hero-right">
       <div class="ed-frame">
         <div class="ed-frame-label">DIRECTOR / CREYONG</div>
-        <img src="davinci-logo.png" alt="DaVinci Resolve" class="ed-badge">
         <div class="ed-frame-in photo"><img src="hero_photo.jpg" alt="모니터를 보며 웃고 있는 크레용 감독"></div>
         <div class="ed-frame-foot">13 YEARS ON SET</div>
       </div>
