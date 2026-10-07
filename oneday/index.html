@@ -1025,6 +1025,15 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
         </select>
       </div>
       <div class="fg">
+        <label class="fl">다빈치 리졸브 버전 *</label>
+        <select class="fi" id="reg-dvr" style="background:#fffdf9">
+          <option value="">— 선택해주세요 —</option>
+          <option value="무료">무료 버전</option>
+          <option value="유료(Studio)">유료 버전 (Studio)</option>
+          <option value="미설치">아직 설치 안 함</option>
+        </select>
+      </div>
+      <div class="fg">
         <label class="fl">노트북 종류 *</label>
         <select class="fi" id="reg-os" style="background:#fffdf9">
           <option value="">— 선택해주세요 —</option>
@@ -1124,6 +1133,7 @@ function doRegister() {
   var phone   = document.getElementById('reg-phone').value.trim();
   var email   = document.getElementById('reg-email').value.trim().toLowerCase();
   var sw      = document.getElementById('reg-software').value;
+  var dvr     = document.getElementById('reg-dvr').value;
   var os      = document.getElementById('reg-os').value;
   var model   = document.getElementById('reg-laptop').value.trim();
   var laptop  = os ? ('[' + os + '] ' + model).trim() : model;
@@ -1135,6 +1145,7 @@ function doRegister() {
   if (!phone)   { setAlert('reg-alert','연락처를 입력해주세요.','err'); return; }
   if (!email)   { setAlert('reg-alert','이메일을 입력해주세요.','err'); return; }
   if (!sw)      { setAlert('reg-alert','현재 쓰는 편집 프로그램을 선택해주세요.','err'); return; }
+  if (!dvr)     { setAlert('reg-alert','다빈치 리졸브 버전을 선택해주세요.','err'); return; }
   if (!os)      { setAlert('reg-alert','맥인지 윈도우인지 선택해주세요.','err'); return; }
   if (!payment) { setAlert('reg-alert','결제 방법을 선택해주세요.','err'); return; }
 
@@ -1142,7 +1153,7 @@ function doRegister() {
   btn.disabled = true; btn.textContent = '전송 중…';
   setAlert('reg-alert','','');
 
-  var payload = { name: name, phone: normalizePhone(phone), email: email, software: sw, laptop: laptop, motivation: motive, payment: payment };
+  var payload = { name: name, phone: normalizePhone(phone), email: email, software: sw + ' / 다빈치 ' + dvr, laptop: laptop, motivation: motive, payment: payment };
   var parse = function(res){ return res.text().then(function(t){ try { return JSON.parse(t); } catch(e){ return null; } }); };
   fetch(ONEDAY_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
   .then(parse)
