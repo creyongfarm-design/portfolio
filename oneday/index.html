@@ -1037,11 +1037,11 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
         <label class="fl">노트북 종류 *</label>
         <select class="fi" id="reg-os" style="background:#fffdf9">
           <option value="">— 선택해주세요 —</option>
-          <option value="맥">맥 (MacBook)</option>
+          <option value="맥 M시리즈">맥 · M시리즈 (M1~M4)</option>
+          <option value="맥 인텔">맥 · 인텔 칩</option>
           <option value="윈도우">윈도우 노트북</option>
         </select>
       </div>
-      <div class="fg"><label class="fl">노트북 모델 (선택)</label><input type="text" class="fi" id="reg-laptop" placeholder="예: 맥북 프로 M2, LG 그램 등"></div>
       <div class="fg">
         <label class="fl">신청 동기 (선택)</label>
         <textarea class="fi" id="reg-motivation" rows="3" style="resize:vertical" placeholder="다빈치로 갈아타려는 이유, 특히 배우고 싶은 부분"></textarea>
@@ -1135,8 +1135,7 @@ function doRegister() {
   var sw      = document.getElementById('reg-software').value;
   var dvr     = document.getElementById('reg-dvr').value;
   var os      = document.getElementById('reg-os').value;
-  var model   = document.getElementById('reg-laptop').value.trim();
-  var laptop  = os ? ('[' + os + '] ' + model).trim() : model;
+  var laptop  = os;
   var motive  = document.getElementById('reg-motivation').value.trim();
   var payEl   = document.querySelector('input[name="reg-payment"]:checked');
   var payment = payEl ? payEl.value : '';
