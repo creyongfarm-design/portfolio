@@ -474,13 +474,19 @@ body,button,input,select,textarea,h1,h2,h3{font-family:'Paperlogy',-apple-system
 .ed-pre{display:block;font-size:clamp(17px,1.9vw,24px);font-weight:600;letter-spacing:-.3px;color:var(--mute);margin-bottom:14px}
 
 section[id]{scroll-margin-top:110px}
+
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-icon{width:26px;height:26px;display:block}
+.ed-badge{position:absolute;left:-38px;bottom:64px;width:104px;height:104px;z-index:3;transform:rotate(-8deg);filter:drop-shadow(0 18px 30px rgba(60,30,10,.28));animation:edfloat 6s ease-in-out infinite}
+@keyframes edfloat{0%,100%{transform:rotate(-8deg) translateY(0)}50%{transform:rotate(-5deg) translateY(-8px)}}
+@media(max-width:900px){.ed-badge{width:76px;height:76px;left:-14px;bottom:40px}}
 </style>
 </head>
 <body ontouchstart="">
 <div class="topbar" id="topbar">🎨 다빈치 리졸브 갈아타기 원데이 &nbsp;·&nbsp; <span style="background:#f97316;color:var(--ink);font-size:11px;padding:3px 10px;border-radius:4px;font-weight:700;letter-spacing:1px;">11.10(화) · 선착순 12명</span></div>
 
 <nav class="main-nav" id="main-nav">
-  <div class="nav-logo">DAVINCI / ONE DAY</div>
+  <div class="nav-logo"><img src="davinci-logo.png" alt="" class="nav-icon">DAVINCI / ONE DAY</div>
   <div class="nav-menu">
     <a class="nav-link" href="#workflow">WORKFLOW</a><a class="nav-link" href="#why-creyong">WHY CREYONG</a><a class="nav-link" href="#curriculum">CURRICULUM</a><a class="nav-link" href="#venue">VENUE</a><a class="nav-link" href="#pricing">PRICING</a><button class="nav-btn nav-primary" onclick="showPage('register')">신청하기</button>
   </div>
@@ -510,6 +516,7 @@ section[id]{scroll-margin-top:110px}
     <div class="ed-hero-right">
       <div class="ed-frame">
         <div class="ed-frame-label">DIRECTOR / CREYONG</div>
+        <img src="davinci-logo.png" alt="DaVinci Resolve" class="ed-badge">
         <div class="ed-frame-in photo"><img src="hero_photo.jpg" alt="모니터를 보며 웃고 있는 크레용 감독"></div>
         <div class="ed-frame-foot">13 YEARS ON SET</div>
       </div>
@@ -941,7 +948,7 @@ section[id]{scroll-margin-top:110px}
   <div class="footer-logo">CREYONG FILM SCHOOL</div>
   <div class="footer-txt">
     크레용프로덕션 · 문의: creyongfarm@gmail.com · <a href="http://pf.kakao.com/_IQRaX/chat" target="_blank" style="color:#555;text-decoration:underline">카카오톡 문의</a><br><br>
-    © 2026 CREYONG FILM SCHOOL. All rights reserved.
+    © 2026 CREYONG FILM SCHOOL. All rights reserved.<br><span style="font-size:11px">DaVinci Resolve는 Blackmagic Design의 상표입니다.</span>
   </div>
 </footer>
 
