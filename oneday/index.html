@@ -1083,7 +1083,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
         <div id="success-card" style="display:none;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.25);border-radius:14px;padding:20px;margin-bottom:20px;text-align:left">
           <div style="font-size:13px;font-weight:800;color:#f97316;margin-bottom:10px">💳 카드 결제 안내</div>
           <div style="font-size:14px;color:var(--ink);line-height:1.8;margin-bottom:14px">아래 버튼을 눌러 네이버 스마트스토어에서 결제해주세요.<br><span style="font-size:12px;color:#888">주문자명을 신청 이름과 같게 해주세요.</span></div>
-          <a href="https://smartstore.naver.com/creyong33/products/5996165490" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:3px;background:#03c75a;color:#fff;font-weight:700;font-size:15px;text-decoration:none">네이버페이 · 카드로 결제하기 →</a>
+          <a id="pay-link" href="https://smartstore.naver.com/creyong33/products/13796896841" target="_blank" rel="noopener" style="display:block;text-align:center;padding:14px;border-radius:3px;background:#03c75a;color:#fff;font-weight:700;font-size:15px;text-decoration:none">네이버페이 · 카드로 결제하기 →</a>
         </div>
 
         <button onclick="showPage('main')" class="nav-btn nav-ghost" style="font-size:13px">← 상세페이지로 돌아가기</button>
@@ -1169,7 +1169,7 @@ function doRegister() {
       btn.style.display = 'none';
       document.getElementById('reg-success').style.display = 'block';
       document.getElementById(payment === '계좌이체' ? 'success-bank' : 'success-card').style.display = 'block';
-      if (data.success) { var amt = document.getElementById('pay-amount'); if (amt && typeof data.early === 'boolean') amt.innerHTML = data.early ? '₩120,000 <span style="font-size:12px;color:#888">(얼리버드)</span>' : '₩150,000'; }
+      if (data.success) { var pl = document.getElementById('pay-link'); if (pl && data.early === false) pl.href = 'https://smartstore.naver.com/creyong33/products/5996165490'; var amt = document.getElementById('pay-amount'); if (amt && typeof data.early === 'boolean') amt.innerHTML = data.early ? '₩120,000 <span style="font-size:12px;color:#888">(얼리버드)</span>' : '₩150,000'; }
     } else {
       setAlert('reg-alert','전송에 실패했어요. 잠시 후 다시 시도하거나 카카오톡으로 문의해주세요.','err');
       btn.disabled = false; btn.textContent = '신청 완료하기 ✅';
