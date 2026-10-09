@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>
+/* CREYONG 방문 기록 (본인 제외: ?me=on) */
+(function(){
+  try{ if(localStorage.getItem('cy_notrack')) return; }catch(e){}
+  var U='https://creyong-oneday.creyongfarm.workers.dev/track';
+  var path=location.pathname.replace(/\/+$/,'');
+  var page=(path.split('/')[1]||'main').slice(0,20);
+  var q=new URLSearchParams(location.search), c=q.get('utm_campaign')||'';
+  try{ if(c) sessionStorage.setItem('cy_c',c); else c=sessionStorage.getItem('cy_c')||''; }catch(e){}
+  function send(ev){ try{ var b=JSON.stringify({event:ev,page:page,campaign:c}); if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
+  window.cyTrack=send;
+  try{ var k='cy_v_'+page, d=new Date(Date.now()+324e5).toISOString().slice(0,10); if(localStorage.getItem(k)!==d){ localStorage.setItem(k,d); send('visit'); } }catch(e){ send('visit'); }
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>예운옥 — 핑크빛 무지개구름을 닮은 독특한 전원주택 스튜디오</title>
