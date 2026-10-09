@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<!-- Google tag (gtag.js) — 본인 접속 제외: 주소 끝에 ?me=on 한 번 접속하면 이 브라우저는 집계 제외, ?me=off로 해제 -->
+<script>try{var q=location.search;if(q.indexOf('me=on')>-1)localStorage.setItem('cy_notrack','1');if(q.indexOf('me=off')>-1)localStorage.removeItem('cy_notrack');if(localStorage.getItem('cy_notrack'))window['ga-disable-G-L8L08Q7VPR']=true;}catch(e){}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L8L08Q7VPR"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-L8L08Q7VPR');</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>다빈치 리졸브 환승편집 원데이 | CREYONG FILM SCHOOL</title>
@@ -1169,7 +1173,7 @@ function doRegister() {
       btn.style.display = 'none';
       document.getElementById('reg-success').style.display = 'block';
       document.getElementById(payment === '계좌이체' ? 'success-bank' : 'success-card').style.display = 'block';
-      if (data.success) { var pl = document.getElementById('pay-link'); if (pl && data.early === false) pl.href = 'https://smartstore.naver.com/creyong33/products/13796903713'; var amt = document.getElementById('pay-amount'); if (amt && typeof data.early === 'boolean') amt.innerHTML = data.early ? '₩120,000 <span style="font-size:12px;color:#888">(얼리버드)</span>' : '₩150,000'; }
+      if (data.success) { ga('generate_lead', { currency:'KRW', value: data.early === false ? 150000 : 120000, payment_type: payment, early_bird: data.early !== false }); var pl = document.getElementById('pay-link'); if (pl && data.early === false) pl.href = 'https://smartstore.naver.com/creyong33/products/13796903713'; var amt = document.getElementById('pay-amount'); if (amt && typeof data.early === 'boolean') amt.innerHTML = data.early ? '₩120,000 <span style="font-size:12px;color:#888">(얼리버드)</span>' : '₩150,000'; }
     } else {
       setAlert('reg-alert','전송에 실패했어요. 잠시 후 다시 시도하거나 카카오톡으로 문의해주세요.','err');
       btn.disabled = false; btn.textContent = '신청 완료하기 ✅';
@@ -1245,6 +1249,17 @@ document.addEventListener('click', function(e){
   var t = document.querySelector(a.getAttribute('href'));
   if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
 });
+
+/* ===== GA4 이벤트 ===== */
+function ga(ev, p){ try { if (window.gtag) gtag('event', ev, p || {}); } catch(e){} }
+(function(){
+  var _show = window.showPage;
+  window.showPage = function(name){ if (name === 'register') ga('apply_click'); return _show.apply(this, arguments); };
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('#pay-link'); if (a) ga('begin_checkout', { currency:'KRW', payment_type:'smartstore', link_url:a.href });
+    var n = e.target.closest('a.nav-link'); if (n) ga('nav_click', { section: n.getAttribute('href') });
+  });
+})();
 </script>
 
 </body>
