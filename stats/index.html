@@ -112,7 +112,7 @@ function render(){
   }
   document.getElementById('cal').innerHTML=h;
   // other pages
-  var names2={oneday:'원데이 수업 페이지 (creyong.net/oneday)',class:'하루 끝장 수업 페이지 (creyong.net/class)',main:'크레용 홈페이지 첫 화면 (creyong.net)'};
+  var names2={oneday:'원데이 수업 페이지 (creyong.net/oneday)',class:'하루 끝장 수업 페이지 (creyong.net/class)',main:'크레용 홈페이지 첫 화면 (creyong.net)',studio:'예운옥 스튜디오 페이지 (creyong.net/studio)'};
   var rows=Object.keys(names2).map(function(p){ var t=0; for(var d=w0; d<=TODAY; d=addDays(d,1)) t+=((DATA[d]||{})[p]||{}).visit||0; return '<tr><td>'+names2[p]+'</td><td>'+t+'명</td></tr>'; }).join('');
   document.getElementById('pages').innerHTML='<table>'+rows+'</table>';
   // campaigns
