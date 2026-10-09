@@ -11,7 +11,7 @@
   try{ if(localStorage.getItem('cy_notrack')) return; }catch(e){}
   var U='https://creyong-oneday.creyongfarm.workers.dev/track';
   var path=location.pathname.replace(/\/+$/,'');
-  var page=path.indexOf('/oneday')===0?'oneday':path.indexOf('/class')===0?'class':(path===''?'main':'etc');
+  var page=(path.split('/')[1]||'main').slice(0,20);
   var q=new URLSearchParams(location.search), c=q.get('utm_campaign')||'';
   try{ if(c) sessionStorage.setItem('cy_c',c); else c=sessionStorage.getItem('cy_c')||''; }catch(e){}
   function send(ev){ try{ var b=JSON.stringify({event:ev,page:page,campaign:c}); if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
