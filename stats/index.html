@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>CREYONG 방문 통계</title>
+<script>try{localStorage.setItem('cy_notrack','1');window['ga-disable-G-L8L08Q7VPR']=true;}catch(e){}</script>
+<style>
+@font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-4Regular.woff2') format('woff2');font-weight:400}
+@font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700}
+@font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Paperlogy',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f6f1e9;color:#1f1b17;padding:28px 20px 60px}
+.wrap{max-width:1100px;margin:0 auto}
+h1{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
+.sub{font-size:13px;color:#8a8278;margin-bottom:22px}
+.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:9px 16px;border:1px solid rgba(31,27,23,.18);border-radius:999px;background:transparent;font:inherit;font-size:14px;cursor:pointer;color:#1f1b17}
+.tab.on{background:#1f1b17;color:#f6f1e9;border-color:#1f1b17}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.kpi{background:#fffdf9;border:1px solid rgba(31,27,23,.1);border-radius:14px;padding:18px}
+.kpi .l{font-size:13px;color:#6b645b;margin-bottom:6px}
+.kpi .v{font-size:40px;font-weight:900;letter-spacing:-1px;line-height:1}
+.kpi .s{font-size:12px;color:#8a8278;margin-top:8px}
+.kpi.hl .v{color:#d9733b}
+.row2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-top:12px}
+.card{background:#fffdf9;border:1px solid rgba(31,27,23,.1);border-radius:14px;padding:18px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.nav{display:flex;gap:6px}
+.nav button{border:1px solid rgba(31,27,23,.18);background:transparent;border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.dow{font-size:12px;color:#8a8278;text-align:center;padding-bottom:4px}
+.day{min-height:78px;border-radius:10px;padding:7px 8px;background:#f6f1e9;font-size:12px;position:relative}
+.day.empty{background:transparent}
+.day .n{font-size:11px;color:#8a8278}
+.day .vv{font-size:20px;font-weight:900;margin-top:2px}
+.day .ee{font-size:11px;color:#6b645b;margin-top:2px;line-height:1.4}
+.day.today{outline:2px solid #d9733b}
+.day.lead .vv{color:#d9733b}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;color:#8a8278;font-weight:400;text-align:right;padding:6px 4px;border-bottom:1px solid rgba(31,27,23,.1)}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 4px;border-bottom:1px solid rgba(31,27,23,.06);text-align:right}
+td b{color:#d9733b}
+.empty-msg{color:#8a8278;font-size:13px;padding:10px 0}
+.legend{font-size:12px;color:#8a8278;margin-top:10px}
+@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.day{min-height:62px}.day .vv{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CREYONG 방문 통계</h1>
+  <div class="sub" id="updated">불러오는 중…</div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="oneday">원데이</button>
+    <button class="tab" data-p="class">정규 수업</button>
+    <button class="tab" data-p="main">메인</button>
+    <button class="tab" data-p="all">전체</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="l">오늘 방문자</div><div class="v" id="k-today">–</div><div class="s" id="k-today-s"></div></div>
+    <div class="kpi"><div class="l">최근 7일 방문자</div><div class="v" id="k-week">–</div><div class="s" id="k-week-s"></div></div>
+    <div class="kpi"><div class="l">신청하기 클릭 (7일)</div><div class="v" id="k-click">–</div><div class="s">신청서 화면을 연 횟수</div></div>
+    <div class="kpi hl"><div class="l">신청 완료 (7일)</div><div class="v" id="k-lead">–</div><div class="s" id="k-lead-s"></div></div>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <h2><span id="mtitle">달력</span><span class="nav"><button id="prev">‹</button><button id="next">›</button></span></h2>
+      <div class="cal" id="cal"></div>
+      <div class="legend">큰 숫자 = 방문자 · 아래 = 신청하기 클릭 / 신청 완료 · 주황 = 신청 완료 있는 날</div>
+    </div>
+    <div class="card">
+      <h2>릴스 · 유입 링크별 (전체 기간)</h2>
+      <div id="camp"></div>
+    </div>
+  </div>
+</div>
+<script>
+var API='https://creyong-oneday.creyongfarm.workers.dev/stats?days=180';
+var DATA={}, TODAY='', PAGE='oneday', VIEW=null;
+function pick(dayObj){
+  if(!dayObj) return {};
+  if(PAGE!=='all') return dayObj[PAGE]||{};
+  var t={}; Object.keys(dayObj).forEach(function(p){ var o=dayObj[p]; ['visit','apply_click','generate_lead','begin_checkout'].forEach(function(e){ t[e]=(t[e]||0)+(o[e]||0); });
+    if(o.campaigns){ t.campaigns=t.campaigns||{}; Object.keys(o.campaigns).forEach(function(c){ var s=t.campaigns[c]=t.campaigns[c]||{}; Object.keys(o.campaigns[c]).forEach(function(e){ s[e]=(s[e]||0)+o.campaigns[c][e]; }); }); } });
+  return t;
+}
+function addDays(s,n){ var d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+function sum(ev,from,to){ var t=0; for(var d=from; d<=to; d=addDays(d,1)) t+=(pick(DATA[d])[ev]||0); return t; }
+function render(){
+  var w0=addDays(TODAY,-6), p0=addDays(TODAY,-13), p1=addDays(TODAY,-7);
+  var td=pick(DATA[TODAY]), yd=pick(DATA[addDays(TODAY,-1)]);
+  document.getElementById('k-today').textContent=td.visit||0;
+  document.getElementById('k-today-s').textContent='어제 '+(yd.visit||0)+'명';
+  var wk=sum('visit',w0,TODAY), pw=sum('visit',p0,p1);
+  document.getElementById('k-week').textContent=wk;
+  document.getElementById('k-week-s').textContent='지난주 '+pw+'명';
+  document.getElementById('k-click').textContent=sum('apply_click',w0,TODAY);
+  var ld=sum('generate_lead',w0,TODAY);
+  document.getElementById('k-lead').textContent=ld;
+  document.getElementById('k-lead-s').textContent='방문 대비 '+(wk?Math.round(ld/wk*1000)/10:0)+'%';
+  // calendar
+  var y=VIEW.getUTCFullYear(), m=VIEW.getUTCMonth();
+  document.getElementById('mtitle').textContent=y+'년 '+(m+1)+'월';
+  var first=new Date(Date.UTC(y,m,1)), last=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  var h=['일','월','화','수','목','금','토'].map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
+  for(var i=0;i<first.getUTCDay();i++) h+='<div class="day empty"></div>';
+  for(var d=1; d<=last; d++){
+    var key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'), o=pick(DATA[key]);
+    var cls='day'+(key===TODAY?' today':'')+((o.generate_lead||0)>0?' lead':'');
+    var ee=(o.apply_click||o.generate_lead)?('클릭 '+(o.apply_click||0)+' · 신청 '+(o.generate_lead||0)):'';
+    h+='<div class="'+cls+'"><div class="n">'+d+'</div><div class="vv">'+(key>TODAY?'':(o.visit||0))+'</div><div class="ee">'+ee+'</div></div>';
+  }
+  document.getElementById('cal').innerHTML=h;
+  // campaigns
+  var c={}; Object.keys(DATA).forEach(function(k){ var o=pick(DATA[k]); if(o.campaigns) Object.keys(o.campaigns).forEach(function(n){ var s=c[n]=c[n]||{}; Object.keys(o.campaigns[n]).forEach(function(e){ s[e]=(s[e]||0)+o.campaigns[n][e]; }); }); });
+  var names=Object.keys(c).sort(function(a,b){return (c[b].visit||0)-(c[a].visit||0);});
+  document.getElementById('camp').innerHTML = names.length ? '<table><tr><th>링크 이름</th><th>방문</th><th>클릭</th><th>신청</th></tr>'+names.map(function(n){var s=c[n];return '<tr><td>'+n.replace(/</g,'')+'</td><td>'+(s.visit||0)+'</td><td>'+(s.apply_click||0)+'</td><td><b>'+(s.generate_lead||0)+'</b></td></tr>';}).join('')+'</table>' : '<div class="empty-msg">아직 릴스 링크로 들어온 방문이 없어요.<br>릴스 링크: creyong.net/oneday/?utm_campaign=reels1</div>';
+}
+document.getElementById('tabs').addEventListener('click',function(e){ var b=e.target.closest('.tab'); if(!b) return; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); PAGE=b.dataset.p; render(); });
+document.getElementById('prev').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()-1); render(); };
+document.getElementById('next').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()+1); render(); };
+fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+  DATA=j.days||{}; TODAY=j.today; VIEW=new Date(TODAY.slice(0,7)+'-01T00:00:00Z');
+  document.getElementById('updated').textContent='기준 '+TODAY+' · 2026.10.09부터 집계 · 이 페이지를 연 기기는 자동으로 집계에서 빠져요';
+  render();
+}).catch(function(){ document.getElementById('updated').textContent='통계를 불러오지 못했어요. 잠시 후 새로고침해주세요.'; });
+</script>
+</body>
+</html>
