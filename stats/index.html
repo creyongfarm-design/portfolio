@@ -50,8 +50,15 @@ td b{color:#d9733b}
 </head>
 <body>
 <div class="wrap">
-  <h1>원데이 수업 페이지 방문 통계</h1>
+  <h1 id="title">원데이 수업 페이지 방문 통계</h1>
   <div class="sub" id="updated">불러오는 중…</div>
+  <div class="tabs" id="tabs">
+    <button class="tab on" data-p="oneday">원데이 수업</button>
+    <button class="tab" data-p="class">하루 끝장 수업</button>
+    <button class="tab" data-p="main">홈페이지 첫 화면</button>
+    <button class="tab" data-p="ooohouse">예운옥 스튜디오</button>
+    <button class="tab" data-p="all">전체 합계</button>
+  </div>
   <div class="kpis">
     <div class="kpi"><div class="l">오늘 방문자</div><div class="v" id="k-today">–</div><div class="s" id="k-today-s"></div></div>
     <div class="kpi"><div class="l">최근 7일 방문자</div><div class="v" id="k-week">–</div><div class="s" id="k-week-s"></div></div>
@@ -120,6 +127,8 @@ function render(){
   var names=Object.keys(c).sort(function(a,b){return (c[b].visit||0)-(c[a].visit||0);});
   document.getElementById('camp').innerHTML = names.length ? '<table><tr><th>링크 이름</th><th>방문</th><th>클릭</th><th>신청</th></tr>'+names.map(function(n){var s=c[n];return '<tr><td>'+n.replace(/</g,'')+'</td><td>'+(s.visit||0)+'</td><td>'+(s.apply_click||0)+'</td><td><b>'+(s.generate_lead||0)+'</b></td></tr>';}).join('')+'</table>' : '<div class="empty-msg">아직 릴스 링크로 들어온 방문이 없어요.<br>릴스 링크: creyong.net/oneday/?utm_campaign=reels1</div>';
 }
+var TITLES={oneday:'원데이 수업 페이지',class:'하루 끝장 수업 페이지',main:'홈페이지 첫 화면',ooohouse:'예운옥 스튜디오 페이지',all:'전체 페이지 합계'};
+document.getElementById('tabs').addEventListener('click',function(e){ var b=e.target.closest('.tab'); if(!b) return; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); PAGE=b.dataset.p; document.getElementById('title').textContent=TITLES[PAGE]+' 방문 통계'; render(); });
 document.getElementById('prev').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()-1); render(); };
 document.getElementById('next').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()+1); render(); };
 fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
