@@ -4,138 +4,209 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>CREYONG 방문 통계</title>
+<title>CREYONG 방문 분석</title>
 <script>try{localStorage.setItem('cy_notrack','1');window['ga-disable-G-L8L08Q7VPR']=true;}catch(e){}</script>
 <style>
 @font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-4Regular.woff2') format('woff2');font-weight:400}
 @font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-7Bold.woff2') format('woff2');font-weight:700}
 @font-face{font-family:'Paperlogy';src:url('/oneday/fonts/Paperlogy-9Black.woff2') format('woff2');font-weight:900}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Paperlogy',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f6f1e9;color:#1f1b17;padding:28px 20px 60px}
-.wrap{max-width:1100px;margin:0 auto}
-h1{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px}
-.sub{font-size:13px;color:#8a8278;margin-bottom:22px}
-.tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
-.tab{padding:9px 16px;border:1px solid rgba(31,27,23,.18);border-radius:999px;background:transparent;font:inherit;font-size:14px;cursor:pointer;color:#1f1b17}
-.tab.on{background:#1f1b17;color:#f6f1e9;border-color:#1f1b17}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
-.kpi{background:#fffdf9;border:1px solid rgba(31,27,23,.1);border-radius:14px;padding:18px}
-.kpi .l{font-size:13px;color:#6b645b;margin-bottom:6px}
-.kpi .v{font-size:40px;font-weight:900;letter-spacing:-1px;line-height:1}
-.kpi .s{font-size:12px;color:#8a8278;margin-top:8px}
-.kpi.hl .v{color:#d9733b}
-.row2{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-top:12px}
-.card{background:#fffdf9;border:1px solid rgba(31,27,23,.1);border-radius:14px;padding:18px}
-.card h2{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
-.nav{display:flex;gap:6px}
-.nav button{border:1px solid rgba(31,27,23,.18);background:transparent;border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.dow{font-size:12px;color:#8a8278;text-align:center;padding-bottom:4px}
-.day{min-height:78px;border-radius:10px;padding:7px 8px;background:#f6f1e9;font-size:12px;position:relative}
-.day.empty{background:transparent}
-.day .n{font-size:11px;color:#8a8278}
-.day .vv{font-size:20px;font-weight:900;margin-top:2px}
-.day .ee{font-size:11px;color:#6b645b;margin-top:2px;line-height:1.4}
-.day.today{outline:2px solid #d9733b}
-.day.lead .vv{color:#d9733b}
+:root{--ink:#1f1b17;--mute:#6b645b;--soft:#8a8278;--line:rgba(31,27,23,.1);--card:#fffdf9;--bg:#f6f1e9;--hl:#d9733b;--hl2:#f0c9a8}
+body{font-family:'Paperlogy',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);padding:26px 18px 70px}
+.wrap{max-width:1120px;margin:0 auto}
+h1{font-size:22px;font-weight:900;letter-spacing:-.5px}
+.sub{font-size:13px;color:var(--soft);margin:4px 0 18px}
+.bar-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tab{padding:8px 15px;border:1px solid rgba(31,27,23,.18);border-radius:999px;background:transparent;font:inherit;font-size:14px;cursor:pointer;color:var(--ink)}
+.tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab.sm{font-size:13px;padding:6px 12px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card h2 small{font-size:12px;color:var(--soft);font-weight:400}
+.kpi .l{font-size:13px;color:var(--mute);margin-bottom:6px}
+.kpi .v{font-size:38px;font-weight:900;letter-spacing:-1px;line-height:1}
+.kpi .s{font-size:12px;color:var(--soft);margin-top:8px}
+.kpi.hl .v{color:var(--hl)}
+.insight{list-style:none}
+.insight li{padding:10px 0;border-bottom:1px solid var(--line);font-size:15px;line-height:1.6}
+.insight li:last-child{border-bottom:none}
+.insight b{color:var(--hl)}
+.fn{display:grid;grid-template-columns:150px 1fr 90px;align-items:center;gap:10px;padding:6px 0;font-size:14px}
+.track{height:26px;background:#efe8dd;border-radius:6px;overflow:hidden}
+.fill{height:100%;background:var(--hl);border-radius:6px;min-width:2px}
+.fill.soft{background:var(--hl2)}
+.fn .num{text-align:right;color:var(--mute);font-size:13px}
+.fn .num b{color:var(--ink);font-size:15px}
+.drop{font-size:12px;color:#b24a2b;padding-left:160px;margin:-2px 0 4px}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th{font-size:12px;color:#8a8278;font-weight:400;text-align:right;padding:6px 4px;border-bottom:1px solid rgba(31,27,23,.1)}
+th{font-size:12px;color:var(--soft);font-weight:400;text-align:right;padding:6px 4px;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left}
 td{padding:9px 4px;border-bottom:1px solid rgba(31,27,23,.06);text-align:right}
-td b{color:#d9733b}
-.empty-msg{color:#8a8278;font-size:13px;padding:10px 0}
-.legend{font-size:12px;color:#8a8278;margin-top:10px}
-@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}.row2{grid-template-columns:1fr}.day{min-height:62px}.day .vv{font-size:16px}}
+td b{color:var(--hl)}
+.hours{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;align-items:end;height:120px}
+.hours div{background:var(--hl2);border-radius:3px 3px 0 0;min-height:2px}
+.hours div.top{background:var(--hl)}
+.hlab{display:grid;grid-template-columns:repeat(24,1fr);font-size:10px;color:var(--soft);margin-top:4px;text-align:center}
+.mini{display:grid;grid-template-columns:90px 1fr 50px;gap:8px;align-items:center;font-size:13px;padding:4px 0}
+.mini .track{height:16px}
+.mini .n{text-align:right;color:var(--mute)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dow{font-size:12px;color:var(--soft);text-align:center}
+.day{min-height:70px;border-radius:9px;padding:6px 7px;background:var(--bg);font-size:12px}
+.day.empty{background:transparent}
+.day .n{font-size:11px;color:var(--soft)}
+.day .vv{font-size:18px;font-weight:900}
+.day .ee{font-size:10.5px;color:var(--mute);line-height:1.35}
+.day.today{outline:2px solid var(--hl)}
+.day.lead .vv{color:var(--hl)}
+.day .mk{display:block;margin-top:3px;font-size:10.5px;background:var(--ink);color:var(--bg);border-radius:4px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav{display:flex;gap:6px}
+.nav button{border:1px solid rgba(31,27,23,.18);background:transparent;border-radius:8px;padding:3px 10px;font:inherit;cursor:pointer}
+.empty-msg{color:var(--soft);font-size:13px;line-height:1.7}
+.mt{margin-top:12px}
+@media(max-width:860px){.g4{grid-template-columns:1fr 1fr}.g2,.g3{grid-template-columns:1fr}.fn{grid-template-columns:110px 1fr 70px}.drop{padding-left:120px}.day{min-height:56px}.day .vv{font-size:15px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1 id="title">원데이 수업 페이지 방문 통계</h1>
+  <h1 id="title">원데이 수업 페이지 방문 분석</h1>
   <div class="sub" id="updated">불러오는 중…</div>
-  <div class="tabs" id="tabs">
+  <div class="bar-row" id="pages">
     <button class="tab on" data-p="oneday">원데이 수업</button>
     <button class="tab" data-p="class">하루 끝장 수업</button>
     <button class="tab" data-p="main">홈페이지 첫 화면</button>
     <button class="tab" data-p="ooohouse">예운옥 스튜디오</button>
     <button class="tab" data-p="all">전체 합계</button>
   </div>
-  <div class="kpis">
-    <div class="kpi"><div class="l">오늘 방문자</div><div class="v" id="k-today">–</div><div class="s" id="k-today-s"></div></div>
-    <div class="kpi"><div class="l">최근 7일 방문자</div><div class="v" id="k-week">–</div><div class="s" id="k-week-s"></div></div>
-    <div class="kpi"><div class="l">신청하기 클릭 (7일)</div><div class="v" id="k-click">–</div><div class="s">신청서 화면을 연 횟수</div></div>
-    <div class="kpi hl"><div class="l">신청 완료 (7일)</div><div class="v" id="k-lead">–</div><div class="s" id="k-lead-s"></div></div>
+  <div class="bar-row" id="range" style="margin-bottom:16px">
+    <button class="tab sm" data-d="1">오늘</button>
+    <button class="tab sm on" data-d="7">최근 7일</button>
+    <button class="tab sm" data-d="30">최근 30일</button>
+    <button class="tab sm" data-d="3650">전체 기간</button>
   </div>
-  <div class="row2">
-    <div class="card">
-      <h2><span id="mtitle">달력</span><span class="nav"><button id="prev">‹</button><button id="next">›</button></span></h2>
-      <div class="cal" id="cal"></div>
-      <div class="legend">큰 숫자 = 방문자 · 아래 = 신청하기 클릭 / 신청 완료 · 주황 = 신청 완료 있는 날</div>
-    </div>
-    <div class="card">
-      <h2>릴스 · 유입 링크별 (전체 기간)</h2>
-      <div id="camp"></div>
-    </div>
+
+  <div class="grid g4">
+    <div class="card kpi"><div class="l">방문자</div><div class="v" id="k1">–</div><div class="s" id="k1s"></div></div>
+    <div class="card kpi hl"><div class="l">신청 완료</div><div class="v" id="k2">–</div><div class="s" id="k2s"></div></div>
+    <div class="card kpi"><div class="l">방문 대비 신청률</div><div class="v" id="k3">–</div><div class="s">100명 오면 몇 명이 신청하나</div></div>
+    <div class="card kpi"><div class="l">평균 머문 시간</div><div class="v" id="k4">–</div><div class="s" id="k4s"></div></div>
   </div>
-  <div class="card" style="margin-top:12px">
-    <h2>다른 페이지 방문자 (최근 7일)</h2>
-    <div id="pages"></div>
+
+  <div class="card mt"><h2>한눈에 보기 <small>숫자를 보고 자동으로 정리한 내용이에요</small></h2><ul class="insight" id="insights"></ul></div>
+
+  <div class="grid g2 mt">
+    <div class="card"><h2>방문에서 신청까지 <small>단계마다 몇 명이 남았나</small></h2><div id="funnel"></div></div>
+    <div class="card"><h2>어디까지 보고 나가나 <small>섹션을 본 비율</small></h2><div id="sections"></div></div>
+  </div>
+
+  <div class="grid g2 mt">
+    <div class="card"><h2>어디서 들어왔나</h2><div id="sources"></div></div>
+    <div class="card"><h2>릴스 · 링크 이름별 <small>?utm_campaign=이름</small></h2><div id="campaigns"></div></div>
+  </div>
+
+  <div class="card mt">
+    <h2><span id="mtitle">달력</span><span class="nav"><button id="prev">‹</button><button id="next">›</button></span></h2>
+    <div class="cal" id="cal"></div>
+    <div class="empty-msg" style="margin-top:8px">큰 숫자 = 방문자 · 아래 = 신청하기 클릭 / 신청 완료 · 검은 칸 = 릴스 업로드 같은 메모</div>
+  </div>
+
+  <div class="grid g2 mt">
+    <div class="card"><h2>몇 시에 들어오나</h2><div class="hours" id="hours"></div><div class="hlab" id="hlab"></div></div>
+    <div class="card"><h2>무슨 요일에 들어오나</h2><div id="dows"></div></div>
+  </div>
+
+  <div class="grid g3 mt">
+    <div class="card"><h2>얼마나 머무나</h2><div id="stay"></div></div>
+    <div class="card"><h2>폰 · 컴퓨터</h2><div id="dev"></div><h2 class="mt">처음 · 다시 온 사람</h2><div id="nr"></div></div>
+    <div class="card"><h2>많이 열어본 질문</h2><div id="faq"></div></div>
   </div>
 </div>
 <script>
-var API='https://creyong-oneday.creyongfarm.workers.dev/stats?days=180';
-var DATA={}, TODAY='', PAGE='oneday', VIEW=null;
-function pick(dayObj){
-  if(!dayObj) return {};
-  if(PAGE!=='all') return dayObj[PAGE]||{};
-  var t={}; Object.keys(dayObj).forEach(function(p){ var o=dayObj[p]; ['visit','apply_click','generate_lead','begin_checkout'].forEach(function(e){ t[e]=(t[e]||0)+(o[e]||0); });
-    if(o.campaigns){ t.campaigns=t.campaigns||{}; Object.keys(o.campaigns).forEach(function(c){ var s=t.campaigns[c]=t.campaigns[c]||{}; Object.keys(o.campaigns[c]).forEach(function(e){ s[e]=(s[e]||0)+o.campaigns[c][e]; }); }); } });
-  return t;
-}
-function addDays(s,n){ var d=new Date(s+'T00:00:00Z'); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
-function sum(ev,from,to){ var t=0; for(var d=from; d<=to; d=addDays(d,1)) t+=(pick(DATA[d])[ev]||0); return t; }
-function render(){
-  var w0=addDays(TODAY,-6), p0=addDays(TODAY,-13), p1=addDays(TODAY,-7);
-  var td=pick(DATA[TODAY]), yd=pick(DATA[addDays(TODAY,-1)]);
-  document.getElementById('k-today').textContent=td.visit||0;
-  document.getElementById('k-today-s').textContent='어제 '+(yd.visit||0)+'명';
-  var wk=sum('visit',w0,TODAY), pw=sum('visit',p0,p1);
-  document.getElementById('k-week').textContent=wk;
-  document.getElementById('k-week-s').textContent='지난주 '+pw+'명';
-  document.getElementById('k-click').textContent=sum('apply_click',w0,TODAY);
-  var ld=sum('generate_lead',w0,TODAY);
-  document.getElementById('k-lead').textContent=ld;
-  document.getElementById('k-lead-s').textContent='방문 대비 '+(wk?Math.round(ld/wk*1000)/10:0)+'%';
-  // calendar
-  var y=VIEW.getUTCFullYear(), m=VIEW.getUTCMonth();
-  document.getElementById('mtitle').textContent=y+'년 '+(m+1)+'월';
-  var first=new Date(Date.UTC(y,m,1)), last=new Date(Date.UTC(y,m+1,0)).getUTCDate();
-  var h=['일','월','화','수','목','금','토'].map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
-  for(var i=0;i<first.getUTCDay();i++) h+='<div class="day empty"></div>';
-  for(var d=1; d<=last; d++){
-    var key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'), o=pick(DATA[key]);
-    var cls='day'+(key===TODAY?' today':'')+((o.generate_lead||0)>0?' lead':'');
-    var ee=(o.apply_click||o.generate_lead)?('클릭 '+(o.apply_click||0)+' · 신청 '+(o.generate_lead||0)):'';
-    h+='<div class="'+cls+'"><div class="n">'+d+'</div><div class="vv">'+(key>TODAY?'':(o.visit||0))+'</div><div class="ee">'+ee+'</div></div>';
-  }
-  document.getElementById('cal').innerHTML=h;
-  // other pages
-  var names2={oneday:'원데이 수업 페이지 (creyong.net/oneday)',class:'하루 끝장 수업 페이지 (creyong.net/class)',main:'크레용 홈페이지 첫 화면 (creyong.net)',ooohouse:'예운옥 스튜디오 페이지 (creyong.net/ooohouse)'};
-  var rows=Object.keys(names2).map(function(p){ var t=0; for(var d=w0; d<=TODAY; d=addDays(d,1)) t+=((DATA[d]||{})[p]||{}).visit||0; return '<tr><td>'+names2[p]+'</td><td>'+t+'명</td></tr>'; }).join('');
-  document.getElementById('pages').innerHTML='<table>'+rows+'</table>';
-  // campaigns
-  var c={}; Object.keys(DATA).forEach(function(k){ var o=pick(DATA[k]); if(o.campaigns) Object.keys(o.campaigns).forEach(function(n){ var s=c[n]=c[n]||{}; Object.keys(o.campaigns[n]).forEach(function(e){ s[e]=(s[e]||0)+o.campaigns[n][e]; }); }); });
-  var names=Object.keys(c).sort(function(a,b){return (c[b].visit||0)-(c[a].visit||0);});
-  document.getElementById('camp').innerHTML = names.length ? '<table><tr><th>링크 이름</th><th>방문</th><th>클릭</th><th>신청</th></tr>'+names.map(function(n){var s=c[n];return '<tr><td>'+n.replace(/</g,'')+'</td><td>'+(s.visit||0)+'</td><td>'+(s.apply_click||0)+'</td><td><b>'+(s.generate_lead||0)+'</b></td></tr>';}).join('')+'</table>' : '<div class="empty-msg">아직 릴스 링크로 들어온 방문이 없어요.<br>릴스 링크: creyong.net/oneday/?utm_campaign=reels1</div>';
-}
+var API='https://creyong-oneday.creyongfarm.workers.dev/stats';
+var PAGE='oneday', DAYS=7, D=null, MONTH=null, CAL={};
 var TITLES={oneday:'원데이 수업 페이지',class:'하루 끝장 수업 페이지',main:'홈페이지 첫 화면',ooohouse:'예운옥 스튜디오 페이지',all:'전체 페이지 합계'};
-document.getElementById('tabs').addEventListener('click',function(e){ var b=e.target.closest('.tab'); if(!b) return; document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); PAGE=b.dataset.p; document.getElementById('title').textContent=TITLES[PAGE]+' 방문 통계'; render(); });
-document.getElementById('prev').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()-1); render(); };
-document.getElementById('next').onclick=function(){ VIEW.setUTCMonth(VIEW.getUTCMonth()+1); render(); };
-fetch(API,{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
-  DATA=j.days||{}; TODAY=j.today; VIEW=new Date(TODAY.slice(0,7)+'-01T00:00:00Z');
-  document.getElementById('updated').textContent='기준 '+TODAY+' · 2026.10.09부터 집계 · 이 페이지를 연 기기는 자동으로 집계에서 빠져요';
-  render();
-}).catch(function(){ document.getElementById('updated').textContent='통계를 불러오지 못했어요. 잠시 후 새로고침해주세요.'; });
+var SEC={'why-section':'갈아타야 하는 이유',workflow:'워크플로우',  'why-creyong':'왜 크레용인가',who:'이런 분을 위한',curriculum:'커리큘럼',includes:'가져가는 것',reviews:'후기',instructor:'강사 소개',venue:'장소',pricing:'수강료',faq:'자주 묻는 질문'};
+var ORDER=['why-section','workflow','why-creyong','who','curriculum','includes','reviews','instructor','venue','pricing','faq'];
+var DOW=['일','월','화','수','목','금','토'];
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[<>&]/g,'');}
+function pct(a,b){return b?Math.round(a/b*1000)/10:0;}
+function mmss(s){s=Math.round(s||0);return s<60?s+'초':Math.floor(s/60)+'분 '+(s%60)+'초';}
+function bars(el,rows,label){ var max=Math.max.apply(null,rows.map(function(r){return r.n;}).concat(1)); el.innerHTML=rows.length?rows.map(function(r){return '<div class="mini"><span>'+esc(label?label(r.k):r.k)+'</span><div class="track"><div class="fill soft" style="width:'+(r.n/max*100)+'%"></div></div><span class="n">'+r.n+'</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>'; }
+function table(el,rows){ el.innerHTML=rows.length?'<table><tr><th>이름</th><th>방문자</th><th>신청하기</th><th>신청</th><th>신청률</th></tr>'+rows.map(function(r){return '<tr><td>'+esc(r.k)+'</td><td>'+r.visitors+'</td><td>'+r.applies+'</td><td><b>'+r.leads+'</b></td><td>'+pct(r.leads,r.visitors)+'%</td></tr>';}).join('')+'</table>':'<div class="empty-msg">아직 기록이 없어요.<br>프로필 링크에 creyong.net/oneday/?utm_campaign=insta 처럼 이름을 붙이면 여기서 나눠 보여요.</div>'; }
+
+function insights(){
+  var L=[], k=D.kpi, v=k.visitors;
+  if(v<30) L.push('아직 데이터가 적어요 (방문자 <b>'+v+'명</b>). 30명이 넘으면 경향이 보이기 시작해요.');
+  var src=D.sources.filter(function(r){return r.k!=='이전 기록';});
+  if(src.length){ var tot=src.reduce(function(a,r){return a+r.visitors;},0); L.push('가장 많이 들어온 곳은 <b>'+esc(src[0].k)+'</b>예요 (방문자의 '+pct(src[0].visitors,tot)+'%).');
+    var best=src.filter(function(r){return r.visitors>=5;}).sort(function(a,b){return b.leads/b.visitors-a.leads/a.visitors;})[0];
+    if(best&&best.leads) L.push('신청으로 가장 잘 이어지는 곳은 <b>'+esc(best.k)+'</b>예요 (신청률 '+pct(best.leads,best.visitors)+'%).'); }
+  var f=D.funnel, worst=null;
+  for(var i=1;i<f.length-1;i++){ if(f[i-1].n>=5){ var r=f[i].n/f[i-1].n; if(!worst||r<worst.r) worst={r:r,a:f[i-1].label,b:f[i].label}; } }
+  if(worst) L.push('가장 많이 빠지는 구간: <b>'+worst.a+' → '+worst.b+'</b> ('+Math.round(worst.r*100)+'%만 다음 단계로 가요).');
+  var pr=f[2]?f[2].n:0, ap=f[3]?f[3].n:0; if(pr>=5) L.push('수강료까지 본 사람 중 <b>'+pct(ap,pr)+'%</b>가 신청하기를 눌렀어요.');
+  var hrs=D.hours.slice().sort(function(a,b){return b.n-a.n;}); if(v>=10&&hrs.length){ var h=hrs[0].k; L.push('방문이 가장 많은 시간은 <b>'+h+'시~'+((h+1)%24)+'시</b>예요. 광고·업로드 시간을 이 앞에 맞춰보세요.'); }
+  var mob=(D.devices.filter(function(r){return r.k==='모바일';})[0]||{}).n||0, dt=D.devices.reduce(function(a,r){return a+r.n;},0); if(dt>=5) L.push('방문자의 <b>'+pct(mob,dt)+'%</b>가 폰으로 봐요.');
+  var quick=(D.stayBuckets.filter(function(r){return r.k==='10초 미만';})[0]||{}).n||0, st=D.stayBuckets.reduce(function(a,r){return a+r.n;},0); if(st>=5) L.push('<b>'+pct(quick,st)+'%</b>는 10초 안에 나가요. 첫 화면 문구·사진이 이 숫자를 좌우해요.');
+  if(D.faq.length) L.push('가장 많이 열어본 질문: <b>'+esc(D.faq[0].k)+'</b> — 릴스나 상세페이지 앞쪽에서 먼저 답해주면 좋아요.');
+  $('insights').innerHTML=L.map(function(t){return '<li>'+t+'</li>';}).join('')||'<li>아직 기록이 없어요.</li>';
+}
+
+function render(){
+  var k=D.kpi;
+  $('k1').textContent=k.visitors; $('k1s').textContent='방문 '+k.sessions+'회';
+  $('k2').textContent=k.leads; $('k2s').textContent=D.payments.map(function(p){return esc(p.k||'방법 미상')+' '+p.n;}).join(' · ')||'—';
+  $('k3').textContent=pct(k.leads,k.visitors)+'%';
+  $('k4').textContent=k.stayN?mmss(k.avgStay):'–'; $('k4s').textContent=k.stayN?k.stayN+'번 측정':'측정 전';
+  insights();
+  // funnel
+  var f=D.funnel, top=Math.max(f[0].n,1), h='';
+  f.forEach(function(s,i){ if(i>0&&f[i-1].n>0){ var lost=f[i-1].n-s.n; if(lost>0) h+='<div class="drop">↓ '+lost+'명 빠짐</div>'; }
+    h+='<div class="fn"><span>'+s.label+'</span><div class="track"><div class="fill'+(i?' soft':'')+'" style="width:'+(s.n/top*100)+'%"></div></div><span class="num"><b>'+s.n+'</b> '+(i?pct(s.n,top)+'%':'')+'</span></div>'; });
+  $('funnel').innerHTML=h;
+  // sections
+  var sm={}; D.sections.forEach(function(r){sm[r.k]=r.n;}); var base=Math.max(k.sessions,1);
+  var keys=ORDER.filter(function(x){return x in sm;}).concat(Object.keys(sm).filter(function(x){return ORDER.indexOf(x)<0;}));
+  $('sections').innerHTML=keys.length?keys.map(function(x){return '<div class="mini"><span>'+esc(SEC[x]||x)+'</span><div class="track"><div class="fill soft" style="width:'+Math.min(100,sm[x]/base*100)+'%"></div></div><span class="n">'+pct(sm[x],base)+'%</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>';
+  table($('sources'),D.sources); table($('campaigns'),D.campaigns);
+  // hours
+  var hm={}; D.hours.forEach(function(r){hm[r.k]=r.n;}); var hmax=Math.max.apply(null,[1].concat(D.hours.map(function(r){return r.n;})));
+  var hh='',hl=''; for(var i=0;i<24;i++){ var n=hm[i]||0; hh+='<div class="'+(n===hmax&&n>0?'top':'')+'" title="'+i+'시 '+n+'명" style="height:'+(n/hmax*100)+'%"></div>'; hl+='<span>'+(i%3===0?i:'')+'</span>'; }
+  $('hours').innerHTML=hh; $('hlab').innerHTML=hl;
+  var dm={}; D.dows.forEach(function(r){dm[r.k]=r.n;}); bars($('dows'),[1,2,3,4,5,6,0].map(function(i){return {k:DOW[i]+'요일',n:dm[i]||0};}));
+  var so=['10초 미만','10~30초','30초~1분','1~3분','3분 이상'], sb={}; D.stayBuckets.forEach(function(r){sb[r.k]=r.n;});
+  bars($('stay'),so.map(function(x){return {k:x,n:sb[x]||0};}).filter(function(r,i,a){return a.some(function(z){return z.n;});}));
+  bars($('dev'),D.devices); bars($('nr'),D.newret.map(function(r){return {k:r.k?'처음 온 사람':'다시 온 사람',n:r.n};}));
+  bars($('faq'),D.faq);
+  renderCal();
+}
+function renderCal(){
+  var y=MONTH.getUTCFullYear(), m=MONTH.getUTCMonth(); $('mtitle').textContent=y+'년 '+(m+1)+'월 날짜별';
+  var first=new Date(Date.UTC(y,m,1)).getUTCDay(), last=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  var dd={}; (CAL.daily||[]).forEach(function(r){dd[r.day]=r;}); var mk={}; (CAL.marks||[]).forEach(function(r){(mk[r.day]=mk[r.day]||[]).push(r.label);});
+  var h=DOW.map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
+  for(var i=0;i<first;i++) h+='<div class="day empty"></div>';
+  for(var d=1;d<=last;d++){ var key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'), o=dd[key]||{};
+    h+='<div class="day'+(key===CAL.today?' today':'')+((o.leads||0)>0?' lead':'')+'"><div class="n">'+d+'</div><div class="vv">'+(key>CAL.today?'':(o.visitors||0))+'</div><div class="ee">'+((o.applies||o.leads)?'클릭 '+(o.applies||0)+' · 신청 '+(o.leads||0):'')+'</div>'+(mk[key]||[]).map(function(t){return '<span class="mk">'+esc(t)+'</span>';}).join('')+'</div>'; }
+  $('cal').innerHTML=h;
+}
+function load(){
+  $('updated').textContent='불러오는 중…';
+  Promise.all([fetch(API+'?page='+PAGE+'&days='+DAYS,{cache:'no-store'}).then(function(r){return r.json();}),
+               fetch(API+'?page='+PAGE+'&days=400',{cache:'no-store'}).then(function(r){return r.json();})]).then(function(a){
+    D=a[0]; CAL=a[1]; if(!MONTH) MONTH=new Date(D.today.slice(0,7)+'-01T00:00:00Z');
+    $('updated').textContent='기준 '+D.today+' · '+(DAYS>=3650?'전체 기간':D.from+'부터')+' · 2026.10.09부터 집계 · 이 페이지를 연 기기는 집계에서 빠져요';
+    render();
+  }).catch(function(){ $('updated').textContent='통계를 불러오지 못했어요. 잠시 후 새로고침해주세요.'; });
+}
+$('pages').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('#pages .tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');PAGE=b.dataset.p;$('title').textContent=TITLES[PAGE]+' 방문 분석';load();});
+$('range').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('#range .tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');DAYS=+b.dataset.d;load();});
+$('prev').onclick=function(){MONTH.setUTCMonth(MONTH.getUTCMonth()-1);renderCal();};
+$('next').onclick=function(){MONTH.setUTCMonth(MONTH.getUTCMonth()+1);renderCal();};
+load();
 </script>
 </body>
 </html>
