@@ -2,17 +2,44 @@
 <html lang="ko">
 <head>
 <script>
-/* CREYONG 방문 기록 (본인 제외: ?me=on) */
+/* CREYONG 방문 분석 v2 (본인 제외: ?me=on) */
 (function(){
-  try{ if(localStorage.getItem('cy_notrack')) return; }catch(e){}
+  var ls,ss; try{ls=localStorage;ss=sessionStorage; if(ls.getItem('cy_notrack')) return;}catch(e){return;}
   var U='https://creyong-oneday.creyongfarm.workers.dev/track';
-  var path=location.pathname.replace(/\/+$/,'');
-  var page=(path.split('/')[1]||'main').slice(0,20);
-  var q=new URLSearchParams(location.search), c=q.get('utm_campaign')||'';
-  try{ if(c) sessionStorage.setItem('cy_c',c); else c=sessionStorage.getItem('cy_c')||''; }catch(e){}
-  function send(ev){ try{ var b=JSON.stringify({event:ev,page:page,campaign:c}); if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
+  var page=(location.pathname.split('/')[1]||'main').slice(0,20);
+  function rid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+  var nv=!ls.getItem('cy_vid'); var vid=ls.getItem('cy_vid')||rid(); ls.setItem('cy_vid',vid);
+  var sid=ss.getItem('cy_sid')||rid(); ss.setItem('cy_sid',sid);
+  var q=new URLSearchParams(location.search), ua=navigator.userAgent, ref=document.referrer;
+  function srcName(){
+    var u=(q.get('utm_source')||'').toLowerCase();
+    if(u){ if(/insta|ig/.test(u))return'인스타그램'; if(/you/.test(u))return'유튜브'; if(/kakao/.test(u))return'카카오톡'; if(/naver|blog/.test(u))return'네이버'; if(/thread/.test(u))return'스레드'; if(/taling/.test(u))return'탈잉'; return u.slice(0,20); }
+    if(/Instagram/i.test(ua))return'인스타그램'; if(/Barcelona|Threads/i.test(ua))return'스레드'; if(/KAKAOTALK/i.test(ua))return'카카오톡'; if(/NAVER/i.test(ua))return'네이버'; if(/FBAN|FBAV/i.test(ua))return'페이스북';
+    var h=''; try{h=new URL(ref).hostname;}catch(e){}
+    if(!h||/creyong\.net$/.test(h))return'';
+    if(/instagram/.test(h))return'인스타그램'; if(/youtu/.test(h))return'유튜브'; if(/naver/.test(h))return'네이버'; if(/google/.test(h))return'구글';
+    if(/kakao|daum/.test(h))return'카카오톡'; if(/taling/.test(h))return'탈잉'; if(/threads/.test(h))return'스레드'; if(/facebook/.test(h))return'페이스북';
+    return h.replace(/^www\./,'').slice(0,30);
+  }
+  var s=srcName(); if(s) ss.setItem('cy_src',s); else s=ss.getItem('cy_src')||'직접 접속';
+  var c=q.get('utm_campaign')||''; if(c) ss.setItem('cy_c',c); else c=ss.getItem('cy_c')||'';
+  var d=/Mobi|Android|iPhone|iPad/i.test(ua)?'모바일':'PC';
+  function send(ev,x){ try{ var b=JSON.stringify({e:ev,p:page,s:s,c:c,d:d,n:nv?1:0,v:vid,i:sid,x:x==null?'':String(x)});
+    if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
   window.cyTrack=send;
-  try{ var k='cy_v_'+page, d=new Date(Date.now()+324e5).toISOString().slice(0,10); if(localStorage.getItem(k)!==d){ localStorage.setItem(k,d); send('visit'); } }catch(e){ send('visit'); }
+  if(!ss.getItem('cy_vis_'+page)){ ss.setItem('cy_vis_'+page,'1'); send('visit'); }
+  var t0=Date.now(), left=false;
+  function leave(){ if(left) return; left=true; send('leave', Math.min(3600,Math.round((Date.now()-t0)/1000))); }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') leave(); });
+  window.addEventListener('pagehide',leave);
+  document.addEventListener('DOMContentLoaded',function(){
+    if('IntersectionObserver' in window){
+      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{threshold:0.3});
+      document.querySelectorAll('section[id]').forEach(function(el){ io.observe(el); });
+    }
+    document.addEventListener('click',function(e){ var f=e.target.closest('.faq-q'); if(f){ var it=f.closest('.faq-item'); setTimeout(function(){ if(!it||it.classList.contains('open')) send('faq_open',f.textContent.replace('▼','').trim().slice(0,40)); },50);} });
+    var fs=false; document.addEventListener('focusin',function(e){ if(!fs&&e.target.closest&&e.target.closest('#page-register')&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ fs=true; send('form_start'); } });
+  });
 })();
 </script>
 <meta charset="UTF-8">
