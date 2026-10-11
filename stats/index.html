@@ -144,7 +144,7 @@ function insights(){
   if(src.length){ var tot=src.reduce(function(a,r){return a+r.visitors;},0); L.push('가장 많이 들어온 곳은 <b>'+esc(src[0].k)+'</b>예요 (방문자의 '+pct(src[0].visitors,tot)+'%).');
     var best=src.filter(function(r){return r.visitors>=5;}).sort(function(a,b){return b.leads/b.visitors-a.leads/a.visitors;})[0];
     if(best&&best.leads) L.push('신청으로 가장 잘 이어지는 곳은 <b>'+esc(best.k)+'</b>예요 (신청률 '+pct(best.leads,best.visitors)+'%).'); }
-  var f=D.funnel, worst=null;
+  var f=D.funnel, worst=null; if((k.tracked||0)<5) f=[];
   for(var i=1;i<f.length-1;i++){ if(f[i-1].n>=5){ var r=f[i].n/f[i-1].n; if(!worst||r<worst.r) worst={r:r,a:f[i-1].label,b:f[i].label}; } }
   if(worst) L.push('가장 많이 빠지는 구간: <b>'+worst.a+' → '+worst.b+'</b> ('+Math.round(worst.r*100)+'%만 다음 단계로 가요).');
   var pr=f[2]?f[2].n:0, ap=f[3]?f[3].n:0; if(pr>=5) L.push('수강료까지 본 사람 중 <b>'+pct(ap,pr)+'%</b>가 신청하기를 눌렀어요.');
@@ -168,7 +168,7 @@ function render(){
     h+='<div class="fn"><span>'+s.label+'</span><div class="track"><div class="fill'+(i?' soft':'')+'" style="width:'+(s.n/top*100)+'%"></div></div><span class="num"><b>'+s.n+'</b> '+(i?pct(s.n,top)+'%':'')+'</span></div>'; });
   $('funnel').innerHTML=h;
   // sections
-  var sm={}; D.sections.forEach(function(r){sm[r.k]=r.n;}); var base=Math.max(k.sessions,1);
+  var sm={}; D.sections.forEach(function(r){sm[r.k]=r.n;}); var base=Math.max(k.tracked||0,1);
   var keys=ORDER.filter(function(x){return x in sm;}).concat(Object.keys(sm).filter(function(x){return ORDER.indexOf(x)<0;}));
   $('sections').innerHTML=keys.length?keys.map(function(x){return '<div class="mini"><span>'+esc(SEC[x]||x)+'</span><div class="track"><div class="fill soft" style="width:'+Math.min(100,sm[x]/base*100)+'%"></div></div><span class="n">'+pct(sm[x],base)+'%</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>';
   table($('sources'),D.sources); table($('campaigns'),D.campaigns);
