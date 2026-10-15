@@ -603,7 +603,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
 
 <div class="price-bar">
   <div class="price-bar-in">
-    <span class="pr-badge">얼리버드 · 선착순 3명</span>
+    <span class="pr-badge cy-early">얼리버드 · 선착순 3명</span>
     <span class="pr-new">₩120,000</span>
     <span class="pr-old">정가 ₩150,000</span>
     <span class="pr-note">📅 11.10(화) 14:00 · 선착순 8명</span>
@@ -710,7 +710,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
     <div class="who-card"><div class="who-ico">📷</div><div class="who-txt"><strong>로그로 찍어놓고 보정이 막막한 분</strong>S-Log · N-Log · C-Log로 촬영은 했는데, 회색 영상을 어떻게 살려야 할지 모르는 분</div></div>
     <div class="who-card"><div class="who-ico">💼</div><div class="who-txt"><strong>외주 영상을 만드는 프리랜서</strong>"색감 좀 더 고급스럽게요" 같은 클라이언트 요청에 자신 있게 대응하고 싶은 분</div></div>
   </div>
-  <p style="font-size:13px;color:#666;margin-top:20px;line-height:1.8">※ 다른 편집 프로그램을 써본 분을 위한 수업입니다. 영상 편집이 처음이라면 <a id="taling-link" href="https://www.taling.me/talent/63592" target="_blank" style="color:#f97316;font-weight:700">탈잉 「다빈치 리졸브 왕초보」 온라인 강의</a>를 추천드려요.</p>
+  <p style="font-size:13px;color:#666;margin-top:20px;line-height:1.8">※ 다른 편집 프로그램을 써본 분을 위한 수업입니다. 영상 편집이 처음이라면 <a id="taling-link" href="https://www.taling.me/mkt/davinci_tutor" target="_blank" style="color:#f97316;font-weight:700">탈잉 「다빈치 리졸브 왕초보」 온라인 강의</a>를 추천드려요.</p>
 </div>
 </section>
 
@@ -973,7 +973,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
       <span class="p-won">₩</span>
       <span class="p-new">120,000</span>
     </div>
-    <div class="pricing-desc">얼리버드 선착순 3명 · 이후 정가 150,000원<br>11월 10일(화) 14:00 ~ 17:00</div>
+    <div class="pricing-desc"><span class="cy-early">얼리버드 선착순 3명</span> · 이후 정가 150,000원<br>11월 10일(화) 14:00 ~ 17:00</div>
     <div class="pricing-feats">
       <div class="pf">색보정 2시간 집중 실습</div>
       <div class="pf">컷편집 · 딜리버리 · 클로드 MCP 연결 시연까지 3시간 완성</div>
@@ -1003,7 +1003,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
     </div>
     <div class="faq-item">
       <button class="faq-q">영상 편집이 처음인데 들을 수 있나요? <span class="faq-arrow">▼</span></button>
-      <div class="faq-ans"><div class="faq-ans-in">이 수업은 프리미어 · 파이널컷 등 다른 편집 프로그램을 써본 분을 위한 수업이라 진도가 빠릅니다. 편집이 처음이라면 기초부터 차근차근 배울 수 있는 <a href="https://www.taling.me/talent/63592" target="_blank" class="taling-link" style="color:#f97316;font-weight:700">탈잉 「다빈치 리졸브 왕초보」 온라인 강의</a>를 먼저 추천드려요.</div></div>
+      <div class="faq-ans"><div class="faq-ans-in">이 수업은 프리미어 · 파이널컷 등 다른 편집 프로그램을 써본 분을 위한 수업이라 진도가 빠릅니다. 편집이 처음이라면 기초부터 차근차근 배울 수 있는 <a href="https://www.taling.me/mkt/davinci_tutor" target="_blank" class="taling-link" style="color:#f97316;font-weight:700">탈잉 「다빈치 리졸브 왕초보」 온라인 강의</a>를 먼저 추천드려요.</div></div>
     </div>
     <div class="faq-item">
       <button class="faq-q">노트북 사양은 어느 정도면 되나요? <span class="faq-arrow">▼</span></button>
@@ -1033,7 +1033,7 @@ nav.main-nav.scrolled{box-shadow:0 8px 30px rgba(31,27,23,.06)}
   <div class="sticky-left">
     <span class="sticky-old">₩150,000</span>
     <span class="sticky-new">₩120,000</span>
-    <span class="sticky-note">얼리버드 선착순 3명</span>
+    <span class="sticky-note cy-early">얼리버드 선착순 3명</span>
   </div>
   <button class="sticky-btn" onclick="showPage('register')">수강 신청하기</button>
 </div>
@@ -1301,6 +1301,13 @@ function ga(ev, p){ try { if (window.gtag) gtag('event', ev, p || {}); } catch(e
     var n = e.target.closest('a.nav-link'); if (n) ga('nav_click', { section: n.getAttribute('href') });
   });
 })();
+
+/* 얼리버드 남은 자리 실시간 표시 */
+fetch('https://creyong-oneday.creyongfarm.workers.dev/seats').then(function(r){return r.json();}).then(function(d){
+  if (typeof d.early_left !== 'number') return;
+  var t = d.early_left === 1 ? '얼리버드 마지막 1자리!' : d.early_left > 1 ? '얼리버드 ' + d.early_left + '자리 남음' : '얼리버드 마감 · 정가 15만원';
+  document.querySelectorAll('.cy-early').forEach(function(el){ el.textContent = t; });
+}).catch(function(){});
 </script>
 
 </body>
