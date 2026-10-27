@@ -67,6 +67,10 @@ td b{color:var(--hl)}
 .empty-msg{color:var(--soft);font-size:13px;line-height:1.7}
 .mt{margin-top:12px}
 @media(max-width:860px){.g4{grid-template-columns:1fr 1fr}.g2,.g3{grid-template-columns:1fr}.fn{grid-template-columns:110px 1fr 70px}.drop{padding-left:120px}.day{min-height:56px}.day .vv{font-size:15px}}
+.pick{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute);margin-left:4px}
+.pick input{font:inherit;font-size:13px;padding:5px 8px;border:1px solid rgba(31,27,23,.18);border-radius:8px;background:#fffdf9;color:var(--ink)}
+.day{cursor:pointer}.day.empty{cursor:default}.day:hover{outline:1px solid var(--hl2)}
+.day.sel{background:var(--hl2)}
 </style>
 </head>
 <body>
@@ -85,6 +89,7 @@ td b{color:var(--hl)}
     <button class="tab sm on" data-d="7">최근 7일</button>
     <button class="tab sm" data-d="30">최근 30일</button>
     <button class="tab sm" data-d="3650">전체 기간</button>
+    <span class="pick"><input type="date" id="dfrom"> ~ <input type="date" id="dto"> <button class="tab sm" id="dapply">이 기간 보기</button></span>
   </div>
 
   <div class="grid g4">
@@ -125,7 +130,7 @@ td b{color:var(--hl)}
 </div>
 <script>
 var API='https://creyong-oneday.creyongfarm.workers.dev/stats';
-var PAGE='oneday', DAYS=7, D=null, MONTH=null, CAL={};
+var PAGE='oneday', DAYS=7, FROM='', TO='', D=null, MONTH=null, CAL={};
 var TITLES={oneday:'원데이 수업 페이지',class:'하루 끝장 수업 페이지',main:'홈페이지 첫 화면',ooohouse:'예운옥 스튜디오 페이지',all:'전체 페이지 합계'};
 var SEC={'why-section':'갈아타야 하는 이유',workflow:'워크플로우',  'why-creyong':'왜 크레용인가',who:'이런 분을 위한',curriculum:'커리큘럼',includes:'가져가는 것',reviews:'후기',instructor:'강사 소개',venue:'장소',pricing:'수강료',faq:'자주 묻는 질문'};
 var ORDER=['why-section','workflow','why-creyong','who','curriculum','includes','reviews','instructor','venue','pricing','faq'];
@@ -190,22 +195,26 @@ function renderCal(){
   var h=DOW.map(function(d){return '<div class="dow">'+d+'</div>';}).join('');
   for(var i=0;i<first;i++) h+='<div class="day empty"></div>';
   for(var d=1;d<=last;d++){ var key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'), o=dd[key]||{};
-    h+='<div class="day'+(key===CAL.today?' today':'')+((o.leads||0)>0?' lead':'')+'"><div class="n">'+d+'</div><div class="vv">'+(key>CAL.today?'':(o.visitors||0))+'</div><div class="ee">'+((o.applies||o.leads)?'클릭 '+(o.applies||0)+' · 신청 '+(o.leads||0):'')+'</div>'+(mk[key]||[]).map(function(t){return '<span class="mk">'+esc(t)+'</span>';}).join('')+'</div>'; }
+    h+='<div data-day="'+key+'" class="day'+(key===CAL.today?' today':'')+(FROM&&FROM===TO&&key===FROM?' sel':'')+((o.leads||0)>0?' lead':'')+'"><div class="n">'+d+'</div><div class="vv">'+(key>CAL.today?'':(o.visitors||0))+'</div><div class="ee">'+((o.applies||o.leads)?'클릭 '+(o.applies||0)+' · 신청 '+(o.leads||0):'')+'</div>'+(mk[key]||[]).map(function(t){return '<span class="mk">'+esc(t)+'</span>';}).join('')+'</div>'; }
   $('cal').innerHTML=h;
 }
 function load(){
   $('updated').textContent='불러오는 중…';
-  Promise.all([fetch(API+'?page='+PAGE+'&days='+DAYS,{cache:'no-store'}).then(function(r){return r.json();}),
+  Promise.all([fetch(API+'?page='+PAGE+(FROM?'&from='+FROM+'&to='+TO:'&days='+DAYS),{cache:'no-store'}).then(function(r){return r.json();}),
                fetch(API+'?page='+PAGE+'&days=400',{cache:'no-store'}).then(function(r){return r.json();})]).then(function(a){
     D=a[0]; CAL=a[1]; if(!MONTH) MONTH=new Date(D.today.slice(0,7)+'-01T00:00:00Z');
-    $('updated').textContent='기준 '+D.today+' · '+(DAYS>=3650?'전체 기간':D.from+'부터')+' · 2026.10.09부터 집계 · 이 페이지를 연 기기는 집계에서 빠져요';
+    $('updated').textContent=(FROM?(FROM===TO?FROM+' 하루':FROM+' ~ '+TO):(DAYS>=3650?'전체 기간':D.from+' ~ '+D.today))+' 기준 · 2026.10.09부터 집계 · 달력 날짜를 누르면 그날만 볼 수 있어요';
     render();
   }).catch(function(){ $('updated').textContent='통계를 불러오지 못했어요. 잠시 후 새로고침해주세요.'; });
 }
 $('pages').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('#pages .tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');PAGE=b.dataset.p;$('title').textContent=TITLES[PAGE]+' 방문 분석';load();});
-$('range').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('#range .tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');DAYS=+b.dataset.d;load();});
+$('range').addEventListener('click',function(e){var b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('#range .tab').forEach(function(x){x.classList.remove('on');});b.classList.add('on');DAYS=+b.dataset.d;FROM=TO='';load();});
 $('prev').onclick=function(){MONTH.setUTCMonth(MONTH.getUTCMonth()-1);renderCal();};
 $('next').onclick=function(){MONTH.setUTCMonth(MONTH.getUTCMonth()+1);renderCal();};
+
+function setRange(f,t){ if(!f) return; if(t&&t<f){var x=f;f=t;t=x;} FROM=f; TO=t||f; document.querySelectorAll('#range .tab').forEach(function(x){x.classList.remove('on');}); $('dfrom').value=FROM; $('dto').value=TO; load(); }
+$('cal').addEventListener('click',function(e){ var c=e.target.closest('.day[data-day]'); if(!c) return; var k=c.dataset.day; if(CAL.today&&k>CAL.today) return; setRange(k,k); window.scrollTo({top:0,behavior:'smooth'}); });
+$('dapply').addEventListener('click',function(e){ e.stopPropagation(); setRange($('dfrom').value,$('dto').value||$('dfrom').value); });
 load();
 </script>
 </body>
