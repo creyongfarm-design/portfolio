@@ -405,7 +405,7 @@ footer a:hover{color:#fff}
         <button type="submit" class="btn form-submit">상담 신청하기 →</button>
       </form>
       <div id="formSuccess"><b>신청이 접수됐습니다!</b><span id="successMsg"></span></div>
-      <div class="direct">직접 문의 <a href="mailto:creyongfarm@gmail.com">creyongfarm@gmail.com</a> / 인스타 DM <a href="https://instagram.com/creyongfarm" target="_blank" rel="noopener">@creyongfarm</a></div>
+      <div class="direct">직접 문의 <a href="tel:01074994557">010-7499-4557</a> / <a href="mailto:creyongfarm@gmail.com">creyongfarm@gmail.com</a> / 인스타 DM <a href="https://instagram.com/creyongfarm" target="_blank" rel="noopener">@creyongfarm</a></div>
     </div>
   </div>
 </section>
@@ -438,7 +438,7 @@ async function handleSubmit(e){
     document.getElementById('formSuccess').style.display='block';
   }catch(err){
     btn.textContent='상담 신청하기 →';btn.disabled=false;
-    document.querySelector('.direct').innerHTML='전송이 되지 않았습니다. <a href="mailto:creyongfarm@gmail.com">creyongfarm@gmail.com</a> 또는 인스타 DM <a href="https://instagram.com/creyongfarm">@creyongfarm</a>으로 연락 주세요.';
+    document.querySelector('.direct').innerHTML='전송이 되지 않았습니다. 전화 <a href="tel:01074994557">010-7499-4557</a>, <a href="mailto:creyongfarm@gmail.com">creyongfarm@gmail.com</a> 또는 인스타 DM <a href="https://instagram.com/creyongfarm">@creyongfarm</a>으로 연락 주세요.';
   }
 }
 </script>
