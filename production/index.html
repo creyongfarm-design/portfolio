@@ -1,59 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<script>try{var q=location.search;if(q.indexOf('me=on')>-1)localStorage.setItem('cy_notrack','1');if(q.indexOf('me=off')>-1)localStorage.removeItem('cy_notrack');}catch(e){}</script>
-<script>
-/* CREYONG 방문 분석 v2 (본인 제외: ?me=on) */
-(function(){
-  var ls,ss; try{ls=localStorage;ss=sessionStorage; if(ls.getItem('cy_notrack')) return;}catch(e){return;}
-  var U='https://creyong-oneday.creyongfarm.workers.dev/track';
-  var page=(location.pathname.split('/')[1]||'main').slice(0,20);
-  function rid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
-  var nv=!ls.getItem('cy_vid'); var vid=ls.getItem('cy_vid')||rid(); ls.setItem('cy_vid',vid);
-  var sid=ss.getItem('cy_sid')||rid(); ss.setItem('cy_sid',sid);
-  var q=new URLSearchParams(location.search), ua=navigator.userAgent, ref=document.referrer;
-  function srcName(){
-    var u=(q.get('utm_source')||'').toLowerCase();
-    if(u){ if(/insta|ig/.test(u))return'인스타그램'; if(/you/.test(u))return'유튜브'; if(/kakao/.test(u))return'카카오톡'; if(/naver|blog/.test(u))return'네이버'; if(/thread/.test(u))return'스레드'; if(/taling/.test(u))return'탈잉'; return u.slice(0,20); }
-    if(/Instagram/i.test(ua))return'인스타그램'; if(/Barcelona|Threads/i.test(ua))return'스레드'; if(/KAKAOTALK/i.test(ua))return'카카오톡'; if(/NAVER/i.test(ua))return'네이버'; if(/FBAN|FBAV/i.test(ua))return'페이스북';
-    var h=''; try{h=new URL(ref).hostname;}catch(e){}
-    if(!h||/creyong\.net$/.test(h))return'';
-    if(/instagram/.test(h))return'인스타그램'; if(/youtu/.test(h))return'유튜브'; if(/naver/.test(h))return'네이버'; if(/google/.test(h))return'구글';
-    if(/kakao|daum/.test(h))return'카카오톡'; if(/taling/.test(h))return'탈잉'; if(/threads/.test(h))return'스레드'; if(/facebook/.test(h))return'페이스북';
-    return h.replace(/^www\./,'').slice(0,30);
-  }
-  var s=srcName(); if(s) ss.setItem('cy_src',s); else s=ss.getItem('cy_src')||'직접 접속';
-  var c=q.get('utm_campaign')||''; if(c) ss.setItem('cy_c',c); else c=ss.getItem('cy_c')||'';
-  var d=/Mobi|Android|iPhone|iPad/i.test(ua)?'모바일':'PC';
-  function send(ev,x){ try{ var b=JSON.stringify({e:ev,p:page,s:s,c:c,d:d,n:nv?1:0,v:vid,i:sid,x:x==null?'':String(x)});
-    if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
-  window.cyTrack=send;
-  if(!ss.getItem('cy_vis_'+page)){ ss.setItem('cy_vis_'+page,'1'); send('visit'); }
-  var t0=Date.now(), left=false;
-  function leave(){ if(left) return; left=true; send('leave', Math.min(3600,Math.round((Date.now()-t0)/1000))); }
-  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') leave(); });
-  window.addEventListener('pagehide',leave);
-  document.addEventListener('DOMContentLoaded',function(){
-    if('IntersectionObserver' in window){
-      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{threshold:0.3});
-      document.querySelectorAll('section[id]').forEach(function(el){ io.observe(el); });
-    }
-    /* 상담 버튼 클릭 · 작품 클릭(통계의 '많이 연 항목' 칸을 작품 클릭 집계로 씀) */
-    document.addEventListener('click',function(e){
-      var a=e.target.closest&&e.target.closest('a[href="#consultation"],#fwBtn'); if(a){ send('apply_click',(a.className||a.id||'').split(' ')[0]); return; }
-      var w=e.target.closest&&e.target.closest('a.play,a.film,.pf-card a'); if(w){ var box=w.closest('.work,.pf-card')||w; var t=box.querySelector('h3,.pf-title,.info b'); send('faq_open',(t?t.textContent:w.href).replace(/[〈〉]/g,'').trim().slice(0,40)); }
-    });
-    var fs=false; document.addEventListener('focusin',function(e){ if(!fs&&e.target.closest&&e.target.closest('#consultForm,#fwForm')&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ fs=true; send('form_start'); } });
-  });
-  /* 상담 신청 완료: 이름·연락처는 보내지 않고 영상|예산|시기만. 이름에 '테스트'가 있으면 집계 제외 */
-  window.cyLead=function(name,x){ send(/테스트|test/i.test(name||'')?'test_lead':'generate_lead',x); };
-  window.cySrc=function(){ return s+(c?' / '+c:''); };
-})();
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>크레용프로덕션 — 브랜드 웹드라마 · 브랜드필름 제작</title>
-<meta name="description" content="2026 서울국제웹페스트 베스트브랜드상 수상. 브랜드와 기관의 이야기를 웹드라마와 스토리가 있는 브랜드필름으로 만듭니다.">
+<meta name="description" content="2026 서울국제웹페스트 베스트브랜드상, 캐나다 쇼츠 우수상 수상. 브랜드와 기관의 이야기를 웹드라마와 스토리가 있는 브랜드필름으로 만듭니다.">
 <meta property="og:title" content="브랜드를 담은 웹드라마로 상을 받았습니다 — 크레용프로덕션">
 <meta property="og:description" content="웹드라마 · 스토리가 있는 브랜드필름 제작. 무료 상담 신청">
 <meta property="og:image" content="https://creyong.net/production/img/hero3.jpg">
@@ -99,7 +50,7 @@ h2{font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.3;letter-spacing
 
 /* awards */
 .awards{padding:70px 0;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);background:var(--dark)}
-.award-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;align-items:center}
+.award-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px 24px;align-items:center}
 .award{text-align:center}
 .award img{height:92px;margin:0 auto 14px;object-fit:contain}
 .award .laurel-text{height:92px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;letter-spacing:1px;line-height:1.3;border:1px solid rgba(201,168,76,.4);border-radius:12px;color:var(--gold)}
@@ -224,7 +175,6 @@ footer a:hover{color:#fff}
   .wrap{padding:0 22px}
   .nav{padding:0 20px}
   .award-grid{grid-template-columns:1fr 1fr;gap:34px 20px}
-  .award.tk{grid-column:1/3}
   .why-grid{grid-template-columns:1fr;gap:34px}
   .work{grid-template-columns:1fr;gap:24px}
   .films{grid-template-columns:1fr}
@@ -249,7 +199,7 @@ footer a:hover{color:#fff}
 <header class="hero">
   <div class="hero-bg"></div>
   <div class="wrap">
-    <div class="badge"><span class="new">NEW</span><span class="txt">2026 서울국제웹페스트 베스트브랜드상</span></div>
+    <div class="badge"><span class="new">NEW</span><span class="txt">서울국제웹페스트 베스트브랜드상 · 캐나다 쇼츠 우수상</span></div>
     <h1>브랜드를 담은<br>웹드라마로<br>상을 받았습니다</h1>
     <p>브랜드와 기관의 이야기를 웹드라마와 스토리가 있는 브랜드필름으로 만듭니다.</p>
     <div class="cta">
@@ -262,7 +212,8 @@ footer a:hover{color:#fff}
 <section class="awards">
   <div class="wrap">
     <div class="award-grid">
-      <div class="award"><div class="laurel-text">2026<br>SEOUL WEBFEST<br>BEST BRAND</div><b>베스트브랜드상</b><span>〈춘자의 전성시대 2〉 / 40개국 800여 편 출품</span></div>
+      <div class="award"><img src="img/l_seoul.png" alt="제12회 서울국제웹페스트 베스트브랜드상"><b>베스트브랜드상</b><span>〈춘자의 전성시대 2〉 / 40개국 800여 편 출품</span></div>
+      <div class="award"><img src="img/l_canada.png" alt="Canada Shorts Award of Excellence"><b>우수상</b><span>〈춘자의 전성시대 2〉 / 2026 캐나다 쇼츠 국제단편영화제</span></div>
       <div class="award"><img src="img/l_yeosu.png" alt="여수국제웹드라마영화제"><b>심사위원 특별상</b><span>〈춘자의 전성시대〉 / 93개국 2,341편 출품</span></div>
       <div class="award"><img src="img/l_melb.png" alt="Melbourne WebFest"><b>공식 초청</b><span>〈춘자의 전성시대〉 / 멜버른 웹페스트</span></div>
       <div class="award"><img src="img/l_vienna.png" alt="Vienna International Film Awards"><b>어너러블 멘션</b><span>〈춘자의 전성시대〉 / 비엔나 국제영화제</span></div>
@@ -277,7 +228,7 @@ footer a:hover{color:#fff}
     <div class="label">FOR PR TEAM</div>
     <div class="pr-head"><div>
     <h2>영상 한 편이<br>홍보팀의 큰 성과가 됩니다</h2>
-    <p class="lead">〈춘자의 전성시대〉는 93개국 2,341편이 출품된 영화제에서 상을 받았고, 후속작까지 수상이 이어졌습니다. 담당자분들도 기대하지 못했던 성과였습니다.</p>
+    <p class="lead">〈춘자의 전성시대〉는 93개국 2,341편이 출품된 영화제에서 상을 받았고, 후속작 〈춘자의 전성시대 2〉도 국제영화제 두 곳에서 상을 받았습니다. 담당자분들도 기대하지 못했던 성과였습니다.</p>
     </div><div class="pr-photo"><img src="img/pr.jpg" alt="춘자의 전성시대 2 촬영 마지막 날 배우들과 감독"></div></div>
     <div class="pr-box">
       <div class="pr"><div class="n">01</div><b>수상 소식이<br>보도자료가 됩니다</b><span>국제영화제 수상과 초청 소식이 여러 매체 기사로 이어졌습니다.</span></div>
@@ -342,7 +293,10 @@ footer a:hover{color:#fff}
         <h3>〈춘자의 전성시대 2〉</h3>
         <div class="client">한국노인인력개발원</div>
         <p>시니어 인턴 춘자의 두 번째 이야기. 1편의 이야기를 이어가면서도 전하고 싶은 메시지를 놓치지 않는 것이 이번 작품의 숙제였습니다.</p>
-        <ul><li>2026 서울국제웹페스트 베스트브랜드상 (40개국 800여 편 출품)</li></ul>
+        <ul>
+          <li>제12회 서울국제웹페스트 베스트브랜드상 (40개국 800여 편 출품)</li>
+          <li>2026 캐나다 쇼츠 국제단편영화제 우수상 (Award of Excellence)</li>
+        </ul>
         <a class="play" href="https://youtu.be/Em9yqOx6emc" target="_blank" rel="noopener">▶ 영상 보기</a>
       </div>
     </div>
@@ -475,10 +429,9 @@ async function handleSubmit(e){
     const res=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({access_key:'34a2ae38-ed31-44d2-98a9-aa6e2aed8ef0',
         subject:`[크레용프로덕션 · 프로덕션 랜딩] 상담 신청 — ${name} / ${service}`,
-        name,email,phone,'유입':'production 랜딩 페이지','유입 경로':(window.cySrc?cySrc():''),'서비스':service,'예산':budget,'시기':timing,'내용':message||'(없음)'})});
+        name,email,phone,'유입':'production 랜딩 페이지','서비스':service,'예산':budget,'시기':timing,'내용':message||'(없음)'})});
     const data=await res.json();
     if(!data.success) throw new Error('fail');
-    if(window.cyLead) cyLead(name,[service,budget,timing].join('|'));
     document.getElementById('consultForm').style.display='none';
     document.getElementById('successMsg').textContent=`감사합니다, ${name}님. 곧 직접 연락드리겠습니다.`;
     document.getElementById('formSuccess').style.display='block';
