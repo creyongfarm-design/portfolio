@@ -91,6 +91,9 @@ h2{font-size:clamp(28px,4vw,42px);font-weight:700;line-height:1.3;letter-spacing
 .press{padding:0;overflow:hidden}
 .press .pth{aspect-ratio:16/9;background:#050505;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .press .pth img{width:100%;height:100%;object-fit:cover}
+.press .pth{position:relative}
+.press .pth .bgb{position:absolute;inset:-24px;background-position:center;background-size:cover;filter:blur(18px) brightness(.45)}
+.press .pth img.pos{position:relative;width:auto;height:100%;object-fit:contain}
 .press .pth img.lau{width:auto;height:58%;object-fit:contain}
 .press .pin{display:flex;flex-direction:column;padding:20px 22px 20px;flex:1}
 @media(max-width:860px){.pr-head{grid-template-columns:1fr;gap:26px}}
@@ -236,12 +239,12 @@ footer a:hover{color:#fff}
     <h2>언론 보도</h2>
     <p class="lead">작품 공개와 수상 소식이 여러 매체에 실렸습니다.</p>
     <div class="press-grid">
-      <a class="press" href="http://www.celuvmedia.com/article.php?aid=1793592679530182011" target="_blank" rel="noopener"><div class="pth"><img src="img/chunja2.jpg" alt=""></div><div class="pin"><span class="src">셀럽미디어</span><b>40개국 800여 편 각축…제12회 서울국제웹페스티벌 화려한 피날레</b><span class="meta">〈춘자의 전성시대 2〉 / 기사 보기 →</span></div></a>
-      <a class="press" href="https://biz.heraldcorp.com/article/10619394" target="_blank" rel="noopener"><div class="pth"><img src="img/chunja1.jpg" alt=""></div><div class="pin"><span class="src">헤럴드경제</span><b>노인일자리 단편극 ‘춘자의 전성시대’, 국제대회 수상·공식 초청 잇따라</b><span class="meta">〈춘자의 전성시대〉 / 기사 보기 →</span></div></a>
+      <a class="press" href="http://www.celuvmedia.com/article.php?aid=1793592679530182011" target="_blank" rel="noopener"><div class="pth"><div class="bgb" style="background-image:url(img/chunja2.jpg)"></div><img class="pos" src="img/chunja2.jpg" alt=""></div><div class="pin"><span class="src">셀럽미디어</span><b>40개국 800여 편 각축…제12회 서울국제웹페스티벌 화려한 피날레</b><span class="meta">〈춘자의 전성시대 2〉 / 기사 보기 →</span></div></a>
+      <a class="press" href="https://biz.heraldcorp.com/article/10619394" target="_blank" rel="noopener"><div class="pth"><div class="bgb" style="background-image:url(img/chunja1.jpg)"></div><img class="pos" src="img/chunja1.jpg" alt=""></div><div class="pin"><span class="src">헤럴드경제</span><b>노인일자리 단편극 ‘춘자의 전성시대’, 국제대회 수상·공식 초청 잇따라</b><span class="meta">〈춘자의 전성시대〉 / 기사 보기 →</span></div></a>
       <a class="press" href="https://www.viva100.com/article/20251119501382" target="_blank" rel="noopener"><div class="pth"><img class="lau" src="img/l_yeosu.png" alt=""></div><div class="pin"><span class="src">브릿지경제</span><b>노인인력개발원 제작 웹드라마, 국제대회 수상·초청 이어져</b><span class="meta">〈춘자의 전성시대〉 / 기사 보기 →</span></div></a>
       <a class="press" href="https://bravo.etoday.co.kr/view/atc_view/17829" target="_blank" rel="noopener"><div class="pth"><img class="lau" src="img/l_vienna.png" alt=""></div><div class="pin"><span class="src">브라보마이라이프</span><b>한국노인인력개발원 제작 단편극… 예술성·공공성 동시 인정</b><span class="meta">〈춘자의 전성시대〉 / 기사 보기 →</span></div></a>
       <a class="press" href="https://www.ohmynews.com/NWS_Web/View/at_pg.aspx?CNTN_CD=A0003131075" target="_blank" rel="noopener"><div class="pth"><img class="lau" src="img/l_melb.png" alt=""></div><div class="pin"><span class="src">오마이뉴스</span><b>단편극으로 만나는 노인일자리, ‘춘자의 전성시대’ 온라인 공개</b><span class="meta">〈춘자의 전성시대〉 / 기사 보기 →</span></div></a>
-      <a class="press" href="https://www.businesspost.co.kr/BP?command=article_view&amp;num=326536" target="_blank" rel="noopener"><div class="pth"><img src="img/sbux.jpg" alt=""></div><div class="pin"><span class="src">비즈니스포스트</span><b>스타벅스 웹드라마 〈안녕하세요 스타벅스입니다〉 제작 방식 조명</b><span class="meta">〈안녕하세요 스타벅스입니다〉 / 기사 보기 →</span></div></a>
+      <a class="press" href="https://www.businesspost.co.kr/BP?command=article_view&amp;num=326536" target="_blank" rel="noopener"><div class="pth"><div class="bgb" style="background-image:url(img/sbux.jpg)"></div><img class="pos" src="img/sbux.jpg" alt=""></div><div class="pin"><span class="src">비즈니스포스트</span><b>스타벅스 웹드라마 〈안녕하세요 스타벅스입니다〉 제작 방식 조명</b><span class="meta">〈안녕하세요 스타벅스입니다〉 / 기사 보기 →</span></div></a>
     </div>
   </div>
 </section>
