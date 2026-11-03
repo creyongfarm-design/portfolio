@@ -71,6 +71,12 @@ td b{color:var(--hl)}
 .pick input{font:inherit;font-size:13px;padding:5px 8px;border:1px solid rgba(31,27,23,.18);border-radius:8px;background:#fffdf9;color:var(--ink)}
 .day{cursor:pointer}.day.empty{cursor:default}.day:hover{outline:1px solid var(--hl2)}
 .day.sel{background:var(--hl2)}
+body.pro{--hl:#3A8A78;--hl2:#b9ddd3}
+body.pro .track{background:#e4eeea}
+.pro-only{display:none}
+body.pro .pro-only{display:grid}
+body.pro .cls-only{display:none}
+.subnote{font-size:12.5px;color:var(--mute);margin-top:10px}
 </style>
 </head>
 <body>
@@ -82,6 +88,8 @@ td b{color:var(--hl)}
     <button class="tab" data-p="class">하루 끝장 수업</button>
     <button class="tab" data-p="main">홈페이지 첫 화면</button>
     <button class="tab" data-p="ooohouse">예운옥 스튜디오</button>
+    <button class="tab" data-p="production">프로덕션 상담</button>
+    <button class="tab" data-p="film">영상제작 페이지</button>
     <button class="tab" data-p="all">전체 합계</button>
   </div>
   <div class="bar-row" id="range" style="margin-bottom:16px">
@@ -94,15 +102,21 @@ td b{color:var(--hl)}
 
   <div class="grid g4">
     <div class="card kpi"><div class="l">방문자</div><div class="v" id="k1">–</div><div class="s" id="k1s"></div></div>
-    <div class="card kpi hl"><div class="l">신청 완료</div><div class="v" id="k2">–</div><div class="s" id="k2s"></div></div>
+    <div class="card kpi hl"><div class="l" id="k2l">신청 완료</div><div class="v" id="k2">–</div><div class="s" id="k2s"></div></div>
     <div class="card kpi"><div class="l">방문 대비 신청률</div><div class="v" id="k3">–</div><div class="s">100명 오면 몇 명이 신청하나</div></div>
     <div class="card kpi"><div class="l">평균 머문 시간</div><div class="v" id="k4">–</div><div class="s" id="k4s"></div></div>
   </div>
 
   <div class="card mt"><h2>한눈에 보기 <small>숫자를 보고 자동으로 정리한 내용이에요</small></h2><ul class="insight" id="insights"></ul></div>
 
+  <div class="grid g3 mt pro-only">
+    <div class="card"><h2>원하는 영상</h2><div id="lsvc"></div></div>
+    <div class="card"><h2>예산</h2><div id="lbud"></div></div>
+    <div class="card"><h2>희망 시기</h2><div id="ltim"></div></div>
+  </div>
+
   <div class="grid g2 mt">
-    <div class="card"><h2>방문에서 신청까지 <small>단계마다 몇 명이 남았나</small></h2><div id="funnel"></div></div>
+    <div class="card"><h2>방문에서 신청까지 <small>단계마다 몇 명이 남았나</small></h2><div id="funnel"></div><div class="subnote" id="fnote"></div></div>
     <div class="card"><h2>어디까지 보고 나가나 <small>섹션을 본 비율</small></h2><div id="sections"></div></div>
   </div>
 
@@ -117,6 +131,10 @@ td b{color:var(--hl)}
     <div class="empty-msg" style="margin-top:8px">큰 숫자 = 방문자 · 아래 = 신청하기 클릭 / 신청 완료 · 검은 칸 = 릴스 업로드 같은 메모</div>
   </div>
 
+  <div class="grid mt pro-only">
+    <div class="card"><h2>월별 추이 <small>방문 수(하루 단위 합) · <b style="color:var(--hl)">상담 신청</b></small></h2><div id="months"></div></div>
+  </div>
+
   <div class="grid g2 mt">
     <div class="card"><h2>몇 시에 들어오나</h2><div class="hours" id="hours"></div><div class="hlab" id="hlab"></div></div>
     <div class="card"><h2>무슨 요일에 들어오나</h2><div id="dows"></div></div>
@@ -125,22 +143,26 @@ td b{color:var(--hl)}
   <div class="grid g3 mt">
     <div class="card"><h2>얼마나 머무나</h2><div id="stay"></div></div>
     <div class="card"><h2>폰 · 컴퓨터</h2><div id="dev"></div><h2 class="mt">처음 · 다시 온 사람</h2><div id="nr"></div></div>
-    <div class="card"><h2>많이 열어본 질문</h2><div id="faq"></div></div>
+    <div class="card"><h2 id="faqh">많이 열어본 질문</h2><div id="faq"></div></div>
   </div>
 </div>
 <script>
 var API='https://creyong-oneday.creyongfarm.workers.dev/stats';
 var PAGE='oneday', DAYS=7, FROM='', TO='', D=null, MONTH=null, CAL={};
-var TITLES={oneday:'원데이 수업 페이지',class:'하루 끝장 수업 페이지',main:'홈페이지 첫 화면',ooohouse:'예운옥 스튜디오 페이지',all:'전체 페이지 합계'};
+var TITLES={production:'프로덕션 상담 페이지',film:'영상제작 페이지',test:'테스트 기록',oneday:'원데이 수업 페이지',class:'하루 끝장 수업 페이지',main:'홈페이지 첫 화면',ooohouse:'예운옥 스튜디오 페이지',all:'전체 페이지 합계'};
 var SEC={'why-section':'갈아타야 하는 이유',workflow:'워크플로우',  'why-creyong':'왜 크레용인가',who:'이런 분을 위한',curriculum:'커리큘럼',includes:'가져가는 것',reviews:'후기',instructor:'강사 소개',venue:'장소',pricing:'수강료',faq:'자주 묻는 질문'};
 var ORDER=['why-section','workflow','why-creyong','who','curriculum','includes','reviews','instructor','venue','pricing','faq'];
 var DOW=['일','월','화','수','목','금','토'];
+/* 프로덕션 상담 페이지: 섹션 이름과 퍼널 기준 섹션 */
+var PRO={production:{works:'works',consult:'consultation',sec:{press:'언론 보도',works:'대표 작품',public:'공공기관 성과',consultation:'상담 신청 칸'},order:['press','works','public','consultation']},
+  film:{works:'portfolio',consult:'consultation',sec:{cases:'제작 사례',services:'제작 서비스',portfolio:'포트폴리오',process:'진행 과정',consultation:'상담 신청 칸'},order:['cases','services','portfolio','process','consultation']}};
+PRO.test=PRO.production;
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?'':s).replace(/[<>&]/g,'');}
 function pct(a,b){return b?Math.round(a/b*1000)/10:0;}
 function mmss(s){s=Math.round(s||0);return s<60?s+'초':Math.floor(s/60)+'분 '+(s%60)+'초';}
 function bars(el,rows,label){ var max=Math.max.apply(null,rows.map(function(r){return r.n;}).concat(1)); el.innerHTML=rows.length?rows.map(function(r){return '<div class="mini"><span>'+esc(label?label(r.k):r.k)+'</span><div class="track"><div class="fill soft" style="width:'+(r.n/max*100)+'%"></div></div><span class="n">'+r.n+'</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>'; }
-function table(el,rows){ el.innerHTML=rows.length?'<table><tr><th>이름</th><th>방문자</th><th>신청하기</th><th>신청</th><th>신청률</th></tr>'+rows.map(function(r){return '<tr><td>'+esc(r.k)+'</td><td>'+r.visitors+'</td><td>'+r.applies+'</td><td><b>'+r.leads+'</b></td><td>'+pct(r.leads,r.visitors)+'%</td></tr>';}).join('')+'</table>':'<div class="empty-msg">아직 기록이 없어요.<br>프로필 링크에 creyong.net/oneday/?utm_campaign=insta 처럼 이름을 붙이면 여기서 나눠 보여요.</div>'; }
+function table(el,rows){ var P=PRO[PAGE]; el.innerHTML=rows.length?'<table><tr><th>이름</th><th>방문자</th><th>'+(P?'상담 버튼':'신청하기')+'</th><th>신청</th><th>신청률</th></tr>'+rows.map(function(r){return '<tr><td>'+esc(r.k)+'</td><td>'+r.visitors+'</td><td>'+r.applies+'</td><td><b>'+r.leads+'</b></td><td>'+pct(r.leads,r.visitors)+'%</td></tr>';}).join('')+'</table>':'<div class="empty-msg">아직 기록이 없어요.<br>프로필 링크에 creyong.net/'+(PRO[PAGE]?(PAGE==='film'?'film':'production'):'oneday')+'/?utm_campaign=insta 처럼 이름을 붙이면 여기서 나눠 보여요.</div>'; }
 
 function insights(){
   var L=[], k=D.kpi, v=k.visitors;
@@ -160,22 +182,59 @@ function insights(){
   $('insights').innerHTML=L.map(function(t){return '<li>'+t+'</li>';}).join('')||'<li>아직 기록이 없어요.</li>';
 }
 
+/* 상담 신청 내용(영상|예산|시기) 나눠 세기 */
+function leadParts(){ var o=[{},{},{}]; D.payments.forEach(function(r){ String(r.k||'').split('|').forEach(function(v,i){ if(i<3&&v) o[i][v]=(o[i][v]||0)+r.n; }); });
+  return o.map(function(m){ return Object.keys(m).map(function(k){return {k:k,n:m[k]};}).sort(function(a,b){return b.n-a.n;}); }); }
+function proFunnel(){ var P=PRO[PAGE], sm={}, fm={}; D.sections.forEach(function(r){sm[r.k]=r.n;}); D.funnel.forEach(function(r){fm[r.key]=r.n;});
+  return [{label:'방문',n:fm.visit||0},{label:'작품까지 봄',n:sm[P.works]||0},{label:'상담 칸까지 봄',n:sm[P.consult]||0},{label:'신청서 작성 시작',n:fm.form_start||0},{label:'상담 신청 완료',n:fm.generate_lead||0}]; }
+function yo(w){ var c=String(w).charCodeAt(String(w).length-1)-44032; return esc(w)+'</b>'+(c>=0&&c<11172&&c%28?'이에요':'예요'); }
+function proInsights(f){
+  var L=[], k=D.kpi, v=k.visitors, lp=leadParts();
+  if(v<30) L.push('아직 데이터가 적어요 (방문자 <b>'+v+'명</b>). 30명이 넘으면 경향이 보이기 시작해요.');
+  var src=D.sources.filter(function(r){return r.k!=='이전 기록';});
+  if(src.length){ var tot=src.reduce(function(a,r){return a+r.visitors;},0); L.push('가장 많이 들어온 곳은 <b>'+yo(src[0].k)+' (방문자의 '+pct(src[0].visitors,tot)+'%).');
+    var best=src.filter(function(r){return r.visitors>=5&&r.leads;}).sort(function(a,b){return b.leads/b.visitors-a.leads/a.visitors;})[0];
+    if(best) L.push('상담으로 가장 잘 이어지는 곳은 <b>'+yo(best.k)+' (신청률 '+pct(best.leads,best.visitors)+'%). 여기에 홍보를 더 해보세요.'); }
+  var worst=null; for(var i=1;i<f.length;i++){ if(f[i-1].n>=5){ var r=f[i].n/f[i-1].n; if(!worst||r<worst.r) worst={r:r,a:f[i-1].label,b:f[i].label}; } }
+  if(worst) L.push('가장 많이 빠지는 구간: <b>'+worst.a+' → '+worst.b+'</b> ('+Math.round(worst.r*100)+'%만 다음 단계로 가요).');
+  var fsN=f[3].n, ldN=f[4].n; if(fsN>=3&&fsN>ldN) L.push('신청서를 쓰다 만 사람이 <b>'+(fsN-ldN)+'명</b>이에요. 필수 항목을 줄이거나 카톡·전화 같은 짧은 연락 방법을 옆에 두면 줄어들 수 있어요.');
+  var urg=0; lp[2].forEach(function(r){ if(r.k==='1개월 이내') urg=r.n; }); if(urg) L.push('희망 시기 <b>1개월 이내</b>가 '+urg+'건이에요. 바로 연락할 건이에요.');
+  if(lp[1].length&&k.leads>=3) L.push('가장 많은 예산대는 <b>'+yo(lp[1][0].k)+'. 포트폴리오·제안서를 이 예산에 맞춰 보여주세요.');
+  if(D.faq.length) L.push('가장 많이 누른 작품: <b>'+esc(D.faq[0].k)+'</b> — 첫 화면이나 제안서 앞쪽에 두면 좋아요.');
+  if(v>=10&&!D.campaigns.length) L.push('인스타·유튜브에 거는 링크 끝에 <b>?utm_campaign=이름</b>을 붙이면 어떤 게시물이 상담으로 이어졌는지 나눠 보여요.');
+  var quick=(D.stayBuckets.filter(function(r){return r.k==='10초 미만';})[0]||{}).n||0, st=D.stayBuckets.reduce(function(a,r){return a+r.n;},0); if(st>=5) L.push('<b>'+pct(quick,st)+'%</b>는 10초 안에 나가요. 첫 화면 문구·사진이 이 숫자를 좌우해요.');
+  if(v>=30&&!k.leads) L.push('아직 상담 신청이 없어요. 위의 가장 많이 빠지는 구간부터 손보세요.');
+  $('insights').innerHTML=L.map(function(t){return '<li>'+t+'</li>';}).join('')||'<li>아직 기록이 없어요.</li>';
+}
+function renderPro(){
+  var lp=leadParts();
+  $('k2s').textContent=lp[0].map(function(r){return esc(r.k)+' '+r.n;}).join(' · ')||'—';
+  bars($('lsvc'),lp[0]); bars($('lbud'),lp[1]); bars($('ltim'),lp[2]);
+  var mm={}; (CAL.daily||[]).forEach(function(r){ var m=r.day.slice(0,7); mm[m]=mm[m]||{v:0,l:0}; mm[m].v+=r.visitors||0; mm[m].l+=r.leads||0; });
+  var mk=Object.keys(mm).sort(), mx=Math.max.apply(null,[1].concat(mk.map(function(m){return mm[m].v;})));
+  $('months').innerHTML=mk.length?mk.map(function(m){return '<div class="mini"><span>'+(+m.slice(5))+'월</span><div class="track"><div class="fill soft" style="width:'+(mm[m].v/mx*100)+'%"></div></div><span class="n">'+mm[m].v+' · <b style="color:var(--hl)">'+mm[m].l+'</b></span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>';
+  var f=proFunnel(); proInsights(f); return f;
+}
 function render(){
-  var k=D.kpi;
+  var k=D.kpi, P=PRO[PAGE];
+  document.body.classList.toggle('pro',!!P);
+  $('k2l').textContent=P?'상담 신청':'신청 완료'; $('faqh').textContent=P?'많이 누른 작품':'많이 열어본 질문';
   $('k1').textContent=k.visitors; $('k1s').textContent='방문 '+k.sessions+'회';
   $('k2').textContent=k.leads; $('k2s').textContent=D.payments.map(function(p){return esc(p.k||'방법 미상')+' '+p.n;}).join(' · ')||'—';
   $('k3').textContent=pct(k.leads,k.visitors)+'%';
   $('k4').textContent=k.stayN?mmss(k.avgStay):'–'; $('k4s').textContent=k.stayN?k.stayN+'번 측정':'측정 전';
-  insights();
+  if(P) var pf=renderPro(); else insights();
   // funnel
-  var f=D.funnel, top=Math.max(f[0].n,1), h='';
+  var f=P?pf:D.funnel, top=Math.max(f[0].n,1), h='';
   f.forEach(function(s,i){ if(i>0&&f[i-1].n>0){ var lost=f[i-1].n-s.n; if(lost>0) h+='<div class="drop">↓ '+lost+'명 빠짐</div>'; }
     h+='<div class="fn"><span>'+s.label+'</span><div class="track"><div class="fill'+(i?' soft':'')+'" style="width:'+(s.n/top*100)+'%"></div></div><span class="num"><b>'+s.n+'</b> '+(i?pct(s.n,top)+'%':'')+'</span></div>'; });
   $('funnel').innerHTML=h;
+  var ac=(D.funnel.filter(function(r){return r.key==='apply_click';})[0]||{}).n||0; $('fnote').textContent=P?'상담 버튼을 누른 사람 '+ac+'명 (스크롤로 내려와 바로 쓰는 사람도 있어서 단계에서 뺐어요)':'';
   // sections
   var sm={}; D.sections.forEach(function(r){sm[r.k]=r.n;}); var base=Math.max(k.tracked||0,1);
-  var keys=ORDER.filter(function(x){return x in sm;}).concat(Object.keys(sm).filter(function(x){return ORDER.indexOf(x)<0;}));
-  $('sections').innerHTML=keys.length?keys.map(function(x){return '<div class="mini"><span>'+esc(SEC[x]||x)+'</span><div class="track"><div class="fill soft" style="width:'+Math.min(100,sm[x]/base*100)+'%"></div></div><span class="n">'+pct(sm[x],base)+'%</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>';
+  var OR=P?P.order:ORDER, SN=P?P.sec:SEC;
+  var keys=OR.filter(function(x){return x in sm;}).concat(Object.keys(sm).filter(function(x){return OR.indexOf(x)<0;}));
+  $('sections').innerHTML=keys.length?keys.map(function(x){return '<div class="mini"><span>'+esc(SN[x]||x)+'</span><div class="track"><div class="fill soft" style="width:'+Math.min(100,sm[x]/base*100)+'%"></div></div><span class="n">'+pct(sm[x],base)+'%</span></div>';}).join(''):'<div class="empty-msg">아직 기록이 없어요</div>';
   table($('sources'),D.sources); table($('campaigns'),D.campaigns);
   // hours
   var hm={}; D.hours.forEach(function(r){hm[r.k]=r.n;}); var hmax=Math.max.apply(null,[1].concat(D.hours.map(function(r){return r.n;})));
@@ -215,6 +274,7 @@ $('next').onclick=function(){MONTH.setUTCMonth(MONTH.getUTCMonth()+1);renderCal(
 function setRange(f,t){ if(!f) return; if(t&&t<f){var x=f;f=t;t=x;} FROM=f; TO=t||f; document.querySelectorAll('#range .tab').forEach(function(x){x.classList.remove('on');}); $('dfrom').value=FROM; $('dto').value=TO; load(); }
 $('cal').addEventListener('click',function(e){ var c=e.target.closest('.day[data-day]'); if(!c) return; var k=c.dataset.day; if(CAL.today&&k>CAL.today) return; setRange(k,k); window.scrollTo({top:0,behavior:'smooth'}); });
 $('dapply').addEventListener('click',function(e){ e.stopPropagation(); setRange($('dfrom').value,$('dto').value||$('dfrom').value); });
+(function(){ var p=new URLSearchParams(location.search).get('p'); if(p&&TITLES[p]){ PAGE=p; document.querySelectorAll('#pages .tab').forEach(function(x){x.classList.toggle('on',x.dataset.p===p);}); $('title').textContent=TITLES[p]+' 방문 분석'; } })();
 load();
 </script>
 </body>

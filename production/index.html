@@ -1,6 +1,55 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>try{var q=location.search;if(q.indexOf('me=on')>-1)localStorage.setItem('cy_notrack','1');if(q.indexOf('me=off')>-1)localStorage.removeItem('cy_notrack');}catch(e){}</script>
+<script>
+/* CREYONG 방문 분석 v2 (본인 제외: ?me=on) */
+(function(){
+  var ls,ss; try{ls=localStorage;ss=sessionStorage; if(ls.getItem('cy_notrack')) return;}catch(e){return;}
+  var U='https://creyong-oneday.creyongfarm.workers.dev/track';
+  var page=(location.pathname.split('/')[1]||'main').slice(0,20);
+  function rid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+  var nv=!ls.getItem('cy_vid'); var vid=ls.getItem('cy_vid')||rid(); ls.setItem('cy_vid',vid);
+  var sid=ss.getItem('cy_sid')||rid(); ss.setItem('cy_sid',sid);
+  var q=new URLSearchParams(location.search), ua=navigator.userAgent, ref=document.referrer;
+  function srcName(){
+    var u=(q.get('utm_source')||'').toLowerCase();
+    if(u){ if(/insta|ig/.test(u))return'인스타그램'; if(/you/.test(u))return'유튜브'; if(/kakao/.test(u))return'카카오톡'; if(/naver|blog/.test(u))return'네이버'; if(/thread/.test(u))return'스레드'; if(/taling/.test(u))return'탈잉'; return u.slice(0,20); }
+    if(/Instagram/i.test(ua))return'인스타그램'; if(/Barcelona|Threads/i.test(ua))return'스레드'; if(/KAKAOTALK/i.test(ua))return'카카오톡'; if(/NAVER/i.test(ua))return'네이버'; if(/FBAN|FBAV/i.test(ua))return'페이스북';
+    var h=''; try{h=new URL(ref).hostname;}catch(e){}
+    if(!h||/creyong\.net$/.test(h))return'';
+    if(/instagram/.test(h))return'인스타그램'; if(/youtu/.test(h))return'유튜브'; if(/naver/.test(h))return'네이버'; if(/google/.test(h))return'구글';
+    if(/kakao|daum/.test(h))return'카카오톡'; if(/taling/.test(h))return'탈잉'; if(/threads/.test(h))return'스레드'; if(/facebook/.test(h))return'페이스북';
+    return h.replace(/^www\./,'').slice(0,30);
+  }
+  var s=srcName(); if(s) ss.setItem('cy_src',s); else s=ss.getItem('cy_src')||'직접 접속';
+  var c=q.get('utm_campaign')||''; if(c) ss.setItem('cy_c',c); else c=ss.getItem('cy_c')||'';
+  var d=/Mobi|Android|iPhone|iPad/i.test(ua)?'모바일':'PC';
+  function send(ev,x){ try{ var b=JSON.stringify({e:ev,p:page,s:s,c:c,d:d,n:nv?1:0,v:vid,i:sid,x:x==null?'':String(x)});
+    if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
+  window.cyTrack=send;
+  if(!ss.getItem('cy_vis_'+page)){ ss.setItem('cy_vis_'+page,'1'); send('visit'); }
+  var t0=Date.now(), left=false;
+  function leave(){ if(left) return; left=true; send('leave', Math.min(3600,Math.round((Date.now()-t0)/1000))); }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') leave(); });
+  window.addEventListener('pagehide',leave);
+  document.addEventListener('DOMContentLoaded',function(){
+    if('IntersectionObserver' in window){
+      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{threshold:0.3});
+      document.querySelectorAll('section[id]').forEach(function(el){ io.observe(el); });
+    }
+    /* 상담 버튼 클릭 · 작품 클릭(통계의 '많이 연 항목' 칸을 작품 클릭 집계로 씀) */
+    document.addEventListener('click',function(e){
+      var a=e.target.closest&&e.target.closest('a[href="#consultation"],#fwBtn'); if(a){ send('apply_click',(a.className||a.id||'').split(' ')[0]); return; }
+      var w=e.target.closest&&e.target.closest('a.play,a.film,.pf-card a'); if(w){ var box=w.closest('.work,.pf-card')||w; var t=box.querySelector('h3,.pf-title,.info b'); send('faq_open',(t?t.textContent:w.href).replace(/[〈〉]/g,'').trim().slice(0,40)); }
+    });
+    var fs=false; document.addEventListener('focusin',function(e){ if(!fs&&e.target.closest&&e.target.closest('#consultForm,#fwForm')&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ fs=true; send('form_start'); } });
+  });
+  /* 상담 신청 완료: 이름·연락처는 보내지 않고 영상|예산|시기만. 이름에 '테스트'가 있으면 집계 제외 */
+  window.cyLead=function(name,x){ send(/테스트|test/i.test(name||'')?'test_lead':'generate_lead',x); };
+  window.cySrc=function(){ return s+(c?' / '+c:''); };
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>크레용프로덕션 — 브랜드 웹드라마 · 브랜드필름 제작</title>
@@ -426,9 +475,10 @@ async function handleSubmit(e){
     const res=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({access_key:'34a2ae38-ed31-44d2-98a9-aa6e2aed8ef0',
         subject:`[크레용프로덕션 · 프로덕션 랜딩] 상담 신청 — ${name} / ${service}`,
-        name,email,phone,'유입':'production 랜딩 페이지','서비스':service,'예산':budget,'시기':timing,'내용':message||'(없음)'})});
+        name,email,phone,'유입':'production 랜딩 페이지','유입 경로':(window.cySrc?cySrc():''),'서비스':service,'예산':budget,'시기':timing,'내용':message||'(없음)'})});
     const data=await res.json();
     if(!data.success) throw new Error('fail');
+    if(window.cyLead) cyLead(name,[service,budget,timing].join('|'));
     document.getElementById('consultForm').style.display='none';
     document.getElementById('successMsg').textContent=`감사합니다, ${name}님. 곧 직접 연락드리겠습니다.`;
     document.getElementById('formSuccess').style.display='block';
