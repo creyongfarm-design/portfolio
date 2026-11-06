@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- Google tag (gtag.js) — 본인 접속 제외: 주소 끝에 ?me=on 한 번 접속하면 이 브라우저는 집계 제외, ?me=off로 해제 -->
+<script>try{var q=location.search;if(q.indexOf('me=on')>-1)localStorage.setItem('cy_notrack','1');if(q.indexOf('me=off')>-1)localStorage.removeItem('cy_notrack');if(localStorage.getItem('cy_notrack'))window['ga-disable-G-L8L08Q7VPR']=true;}catch(e){}</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L8L08Q7VPR"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-L8L08Q7VPR');</script>
+<script>
+/* CREYONG 방문 분석 v2 (본인 제외: ?me=on) */
+(function(){
+  var ls,ss; try{ls=localStorage;ss=sessionStorage; if(ls.getItem('cy_notrack')) return;}catch(e){return;}
+  var U='https://creyong-oneday.creyongfarm.workers.dev/track';
+  var page=(location.pathname.split('/')[1]||'main').slice(0,20);
+  function rid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+  var nv=!ls.getItem('cy_vid'); var vid=ls.getItem('cy_vid')||rid(); ls.setItem('cy_vid',vid);
+  var sid=ss.getItem('cy_sid')||rid(); ss.setItem('cy_sid',sid);
+  var q=new URLSearchParams(location.search), ua=navigator.userAgent, ref=document.referrer;
+  function srcName(){
+    var u=(q.get('utm_source')||'').toLowerCase();
+    if(u){ if(/insta|ig/.test(u))return'인스타그램'; if(/you/.test(u))return'유튜브'; if(/kakao/.test(u))return'카카오톡'; if(/naver|blog/.test(u))return'네이버'; if(/thread/.test(u))return'스레드'; if(/taling/.test(u))return'탈잉'; return u.slice(0,20); }
+    if(/Instagram/i.test(ua))return'인스타그램'; if(/Barcelona|Threads/i.test(ua))return'스레드'; if(/KAKAOTALK/i.test(ua))return'카카오톡'; if(/NAVER/i.test(ua))return'네이버'; if(/FBAN|FBAV/i.test(ua))return'페이스북';
+    var h=''; try{h=new URL(ref).hostname;}catch(e){}
+    if(!h||/creyong\.net$/.test(h))return'';
+    if(/instagram/.test(h))return'인스타그램'; if(/youtu/.test(h))return'유튜브'; if(/naver/.test(h))return'네이버'; if(/google/.test(h))return'구글';
+    if(/kakao|daum/.test(h))return'카카오톡'; if(/taling/.test(h))return'탈잉'; if(/threads/.test(h))return'스레드'; if(/facebook/.test(h))return'페이스북';
+    return h.replace(/^www\./,'').slice(0,30);
+  }
+  var s=srcName(); if(s) ss.setItem('cy_src',s); else s=ss.getItem('cy_src')||'직접 접속';
+  var c=q.get('utm_campaign')||''; if(c) ss.setItem('cy_c',c); else c=ss.getItem('cy_c')||'';
+  var d=/Mobi|Android|iPhone|iPad/i.test(ua)?'모바일':'PC';
+  function send(ev,x){ try{ var b=JSON.stringify({e:ev,p:page,s:s,c:c,d:d,n:nv?1:0,v:vid,i:sid,x:x==null?'':String(x)});
+    if(navigator.sendBeacon) navigator.sendBeacon(U,new Blob([b],{type:'text/plain'})); else fetch(U,{method:'POST',body:b,keepalive:true}); }catch(e){} }
+  window.cyTrack=send;
+  if(!ss.getItem('cy_vis_'+page)){ ss.setItem('cy_vis_'+page,'1'); send('visit'); }
+  var t0=Date.now(), left=false;
+  function leave(){ if(left) return; left=true; send('leave', Math.min(3600,Math.round((Date.now()-t0)/1000))); }
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') leave(); });
+  window.addEventListener('pagehide',leave);
+  document.addEventListener('DOMContentLoaded',function(){
+    if('IntersectionObserver' in window){
+      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{threshold:0.3});
+      document.querySelectorAll('section[id]').forEach(function(el){ io.observe(el); });
+    }
+    document.addEventListener('click',function(e){ var f=e.target.closest('.faq-q'); if(f){ var it=f.closest('.faq-item'); setTimeout(function(){ if(!it||it.classList.contains('open')) send('faq_open',f.textContent.replace('▼','').trim().slice(0,40)); },50);} });
+    var fs=false; document.addEventListener('focusin',function(e){ if(!fs&&e.target.closest&&e.target.closest('#page-register')&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){ fs=true; send('form_start'); } });
+  });
+})();
+</script>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다모 체포조 제작 자료</title>
+<meta name="description" content="체포하겠어 다모 버전을 힉스필드 MCP로 만든 과정, 프롬프트, 연결법">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap">
+<style>
+/* 크레용팜 앰버 한 색. 폰 세로 한 칸, 영상 비교가 글을 이끈다. */
+:root{
+  color-scheme:light;
+  --paper:#FAF7F2; --ink:#2A2A28; --sub:#6F6A62; --line:#E7DFD2;
+  --amber:#E8A04A; --amber-deep:#B8721F; --amber-soft:#FBEFDD; --card:#FFFFFF;
+  --body:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --brush:"East Sea Dokdo","Pretendard",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.7 var(--body);word-break:keep-all}
+main{max-width:560px;margin:0 auto;padding:0 20px 64px;display:flex;flex-direction:column;gap:52px}
+a{color:var(--amber-deep)}
+h1,h2,h3,p,ol,ul{margin:0}
+h2{font-size:24px;line-height:1.35;font-weight:700;text-wrap:balance}
+h3{font-size:18px;line-height:1.4;font-weight:700;text-wrap:balance}
+section{display:flex;flex-direction:column;gap:16px}
+.sub{color:var(--sub);font-size:15px}
+video,img{display:block;width:100%;max-width:100%;background:#eee}
+
+.hero{display:flex;flex-direction:column;gap:18px;padding-top:24px}
+.tag{font-size:14px;font-weight:700;color:var(--amber-deep)}
+h1{font:400 58px/1.05 var(--brush);text-wrap:balance}
+.hero video{border-radius:10px;aspect-ratio:9/16;max-height:62vh;width:auto;align-self:center}
+.lead{font-size:19px;line-height:1.6;font-weight:700}
+
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--ink);font:700 14px/28px var(--body);text-align:center;margin-top:1px}
+
+.url{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px 9px 12px;font-size:14px}
+.url code{flex:1;overflow-wrap:anywhere}
+button{font:700 13px var(--body);color:var(--ink);background:var(--amber);border:0;border-radius:7px;padding:7px 12px;cursor:pointer;flex:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
+
+.talk{display:flex;flex-direction:column;gap:12px}
+.bub{align-self:flex-end;max-width:88%;background:var(--amber-soft);border-radius:14px 14px 3px 14px;padding:9px 13px;font-size:16px;line-height:1.5}
+.res{font-size:14px;color:var(--sub);margin-top:-6px;text-align:right}
+
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.cmp video{border-radius:8px;aspect-ratio:9/16;object-fit:cover}
+.cmp figcaption{font-size:13.5px;line-height:1.4;color:var(--sub)}
+.cmp figure.good figcaption{color:var(--ink);font-weight:700}
+.tip{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+
+.quick{padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.quick li{padding-left:15px;position:relative}
+.quick li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:2px;background:var(--amber-deep)}
+
+.pr{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+.pr header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pr strong{font-size:16px}
+.pr small{color:var(--sub);font-size:13px;line-height:1.45}
+.pr pre{margin:0;font:400 13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;color:#44413b}
+
+footer{display:flex;flex-direction:column;gap:6px;border-top:2px solid var(--amber);padding-top:18px;font-size:15px}
+@media (prefers-reduced-motion:reduce){.hero video{max-height:50vh}}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="tag">크레용팜 제작 자료</p>
+  <h1>체포하겠어 다모 버전</h1>
+  <video src="clips/hero.mp4" autoplay muted loop playsinline aria-label="완성 영상 마지막 장면, 다모가 호루라기를 불며 손가락으로 가리키는 컷"></video>
+  <p class="lead">힉스필드 사이트를 한 번도 열지 않고 만들었습니다. 채팅창에 말로 지시했습니다.</p>
+  <p>웹드라마 감독이 AI 영상을 어떻게 만지는지, 쓴 방법과 프롬프트를 그대로 정리했습니다. 먼저 해 본 사람이 대신 부딪혀 본 것들이니 필요한 것만 가져가세요.</p>
+</header>
+
+<section>
+  <h2>힉스필드와 클로드 연결하기</h2>
+  <p>MCP는 클로드가 다른 프로그램을 직접 다루게 이어 주는 연결선입니다. 한 번 연결해 두면 채팅창에서 그림과 영상을 뽑고, 결과를 받아서 편집까지 넘길 수 있습니다.</p>
+  <ol class="steps">
+    <li><span>클로드 앱이나 claude.ai에서 설정의 커넥터로 들어갑니다.</span></li>
+    <li><span>커스텀 커넥터 추가를 누르고 이름은 Higgsfield, 주소는 아래를 넣습니다.</span></li>
+    <li><span>연결을 누르면 힉스필드 창이 뜹니다. 로그인하고 허용하면 끝입니다.</span></li>
+  </ol>
+  <div class="url"><code id="mcp">https://mcp.higgsfield.ai/mcp</code><button type="button" data-copy="mcp">복사</button></div>
+  <p class="sub">힉스필드 유료 구독이 필요하고, API 키는 필요 없습니다. 메뉴 이름은 앱 버전에 따라 조금 다를 수 있습니다.</p>
+</section>
+
+<section>
+  <h2>만든 순서</h2>
+  <ol class="steps">
+    <li><span><b>음원 구간부터 고릅니다.</b> 곡은 건너뛰지 말고 이어지는 구간으로 잡습니다.</span></li>
+    <li><span><b>꼭 살릴 동작 3~4개를 적습니다.</b> 이번엔 첫 표정, 발구르기, 손가락 총, 휘슬이었습니다.</span></li>
+    <li><span><b>주인공 얼굴과 의상을 정합니다.</b></span></li>
+    <li><span><b>콘티를 그림으로 뽑아 음악에 얹어 봅니다.</b> 영상 만들기 전에 여기서 흐름을 확인합니다.</span></li>
+    <li><span><b>제일 어려운 컷 하나만 시험합니다.</b> 이게 되면 전체로 갑니다.</span></li>
+    <li><span><b>자막과 로고를 올리고 마지막에 업스케일합니다.</b></span></li>
+  </ol>
+  <img src="img/conti.jpg" alt="다모 체포조 15컷 그림 콘티 시트" loading="lazy">
+</section>
+
+<section>
+  <h2>제가 실제로 보낸 말</h2>
+  <p>프롬프트보다 감독 말투로 지시하는 게 더 잘 먹혔습니다. 판단은 사람이 하고, 손은 클로드가 움직이는 구조입니다.</p>
+  <div class="talk">
+    <p class="bub">한명이니까 잘하네</p>
+    <p class="res">다섯 명 군무를 접고 주인공 한 명으로 재구성</p>
+    <p class="bub">수갑 생기는게 이상해 원안무랑도 맞아야지</p>
+    <p class="res">원안무에 없는 동작 삭제</p>
+    <p class="bub">오히려 휘슬 소리 들릴때 휘슬부는게 포인트구만</p>
+    <p class="res">곡의 휘슬 소리에 맞춰 부는 컷으로 변경</p>
+    <p class="bub">곡을 건너뛰면 끊겨서 이상하지</p>
+    <p class="res">이어지는 39초 구간으로 다시 편집</p>
+  </div>
+</section>
+
+<section>
+  <h2>안무를 캐릭터에 옮기는 법</h2>
+  <ol class="steps">
+    <li><span><b>모션 전이:</b> 힉스필드 겐주츠(Genjutsu)에 캐릭터 그림과 동작 영상을 넣습니다. 동작 영상의 사람은 단색 배경에 두는 게 안정적입니다.</span></li>
+    <li><span><b>장면 다시 그리기:</b> 그 결과를 시드댄스 2.5에 넣고 배경 그림과 함께 장면 전체를 새로 그립니다. 인물과 땅, 그림자가 한 번에 나와서 자연스럽습니다.</span></li>
+  </ol>
+  <p class="sub">저는 공식 챌린지 안무를 참고했습니다. 따라 하실 때는 직접 찍은 동작이나 사용 허락을 받은 영상을 쓰세요. 실존 인물의 얼굴은 쓰지 않았습니다.</p>
+</section>
+
+<section>
+  <h2>해 보니 달랐던 것들</h2>
+
+  <div class="tip">
+    <h3>여러 명보다 한 명이 잘 나옵니다</h3>
+    <div class="cmp">
+      <figure><video src="clips/five.mp4" autoplay muted loop playsinline preload="metadata" aria-label="다섯 명 다모가 걷는 컷"></video><figcaption>다섯 명이면 동작이 경직됩니다</figcaption></figure>
+      <figure class="good"><video src="clips/one.mp4" autoplay muted loop playsinline preload="metadata" aria-label="한 명 다모가 허리 위 크기로 춤추는 컷"></video><figcaption>한 명, 허리 위 크기</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="tip">
+    <h3>사람과 배경을 합성하지 마세요</h3>
+    <div class="cmp">
+      <figure><video src="clips/comp.mp4" autoplay muted loop playsinline preload="metadata" aria-label="배경에 합성한 인물이 떠 있는 컷"></video><figcaption>합성은 크기와 그림자가 어긋납니다</figcaption></figure>
+      <figure class="good"><video src="clips/redraw.mp4" autoplay muted loop playsinline preload="metadata" aria-label="시드댄스가 장면 전체를 다시 그린 컷"></video><figcaption>시드댄스로 통째로 다시 그리기</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="tip">
+    <h3>모션 전이는 모델마다 다릅니다</h3>
+    <div class="cmp">
+      <figure><video src="clips/kling.mp4" autoplay muted loop playsinline preload="metadata" aria-label="클링 모션 컨트롤 결과"></video><figcaption>클링 모션 컨트롤은 손이 몸에서 떨어져 보이는 순간이 있습니다</figcaption></figure>
+      <figure class="good"><video src="clips/genjutsu.mp4" autoplay muted loop playsinline preload="metadata" aria-label="겐주츠 결과"></video><figcaption>겐주츠가 손과 표정을 더 잘 지켰습니다</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="tip">
+    <h3>계절은 다시 뽑지 말고 고칩니다</h3>
+    <div class="cmp">
+      <figure><video src="clips/spring.mp4" autoplay muted loop playsinline preload="metadata" aria-label="벚꽃 배경 컷"></video><figcaption>원래 벚꽃 버전</figcaption></figure>
+      <figure class="good"><video src="clips/autumn.mp4" autoplay muted loop playsinline preload="metadata" aria-label="단풍 배경 컷"></video><figcaption>시드댄스 video_edit로 단풍만 변경</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="tip">
+    <h3>짧게 네 가지 더</h3>
+    <ul class="quick">
+      <li>전체를 뽑기 전에 가장 어려운 컷 하나만 시험합니다.</li>
+      <li>검토는 480p로 하고, 업스케일은 확정한 뒤 게시 직전에 합니다.</li>
+      <li>제목과 자막은 영상에 굽지 않습니다. 업스케일 전 영상에 넣으면 흐려집니다.</li>
+      <li>시작 프레임 고정, 음원, 얼굴 유지 지시를 한꺼번에 걸면 몸이 굳습니다. 레퍼런스 이미지만 넣어 보세요.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>실제로 쓴 프롬프트</h2>
+
+  <article class="pr">
+    <header><strong>주인공 그림</strong><button type="button" data-copy="p1">복사</button></header>
+    <small>GPT Image 2.6, 9:16, 앞서 뽑은 인물을 레퍼런스로 넣음</small>
+    <pre id="p1">Photoreal cinematic film still, one single continuous frame, a fictional character. Same woman and same costume as the reference, waist-up, hands on hips. Hair changed: black hair center parted and tied in a low messy bun at the nape, two thin loose strands framing her face. Comic cute expression: one eye squeezed shut in a wink, lips pushed out in a big duck-lip pout, cheeks puffed slightly. A small brass whistle on a cord at her chest. Bright sunny Korean palace courtyard, blue sky, white clouds, scholars in white blurred behind. Fresh pastel palette, no fog.</pre>
+  </article>
+
+  <article class="pr">
+    <header><strong>장면 다시 그리기</strong><button type="button" data-copy="p2">복사</button></header>
+    <small>시드댄스 2.5 omni_reference, 동작은 겐주츠 결과, 배경은 그림 레퍼런스, 소리 생성 끔</small>
+    <pre id="p2">The woman from the reference image performs the exact same dance as the woman in the reference video, same steps, same arm movements, same timing, same framing. Her face, hair and outfit come from the reference image. The whole scene takes place in the Joseon palace exam yard from the reference image in peak Korean autumn at eye level: a stone aisle under her feet, red maple and golden ginkgo trees, fallen leaves on the stones, desks with seated examinees in white right beside her at natural human scale, the nearest seated men reaching about her waist height. Clear blue sky, natural sun shadow at her feet. No cherry blossoms. No green background. No text, no captions.</pre>
+  </article>
+
+  <article class="pr">
+    <header><strong>계절만 바꾸기</strong><button type="button" data-copy="p3">복사</button></header>
+    <small>시드댄스 2.5 video_edit, 480p, 소리 생성 끔</small>
+    <pre id="p3">Change only the season to peak Korean autumn. Replace every pink cherry blossom with vivid red maple and golden ginkgo leaves, with fallen leaves on the stones. The woman's face, expression, every movement, her outfit, the camera and the timing stay exactly unchanged. No text.</pre>
+  </article>
+</section>
+
+<section>
+  <h2>마무리</h2>
+  <ul class="quick">
+    <li>글자 없는 영상 위에 1080 투명 PNG로 만든 제목과 가사를 따로 얹습니다.</li>
+    <li>가사는 단어마다 박자에 튀어나오게 만들고, 곡 제목이 나오는 구간은 로고로 띄웠습니다.</li>
+    <li>글꼴은 화면에 직접 얹어 비교한 뒤 무료 붓글씨체 동해독도로 정했습니다.</li>
+    <li>마지막 휘슬은 곡 안의 휘슬 음을 뽑아 따로 얹었습니다.</li>
+    <li>영상만 Topaz로 1080까지 올린 뒤 교체합니다.</li>
+  </ul>
+</section>
+
+<footer>
+  <p><b>크레용팜</b> 인스타 <a href="https://www.instagram.com/creyongfarm/">@creyongfarm</a></p>
+  <p>다빈치 리졸브를 직접 배우고 싶다면 <a href="https://creyong.net/oneday">원데이 수업 안내</a></p>
+  <p class="sub">이 영상은 AI로 제작했습니다.</p>
+</footer>
+
+</main>
+<script>
+document.querySelectorAll("button[data-copy]").forEach(function(b){
+  b.addEventListener("click",function(){
+    var t=document.getElementById(b.dataset.copy).textContent,o=b.textContent;
+    function done(m){b.textContent=m;setTimeout(function(){b.textContent=o},1500)}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){done("복사됨")},function(){done("길게 눌러 복사")})}else{done("길게 눌러 복사")}
+  });
+});
+if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  document.querySelectorAll("video").forEach(function(v){v.removeAttribute("autoplay");v.pause();v.controls=true});
+}
+</script>
+</body>
+</html>
