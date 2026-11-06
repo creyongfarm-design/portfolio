@@ -40,6 +40,7 @@
     }
     /* 상담 버튼 클릭 · 작품 클릭(통계의 '많이 연 항목' 칸을 작품 클릭 집계로 씀) */
     document.addEventListener('click',function(e){
+      var tl=e.target.closest&&e.target.closest('a[href^="tel:"]'); if(tl){ send('apply_click','tel'); return; }
       var a=e.target.closest&&e.target.closest('a[href="#consultation"],#fwBtn'); if(a){ send('apply_click',(a.className||a.id||'').split(' ')[0]); return; }
       var w=e.target.closest&&e.target.closest('a.play,a.film,.pf-card a'); if(w){ var box=w.closest('.work,.pf-card')||w; var t=box.querySelector('h3,.pf-title,.info b'); send('faq_open',(t?t.textContent:w.href).replace(/[〈〉]/g,'').trim().slice(0,40)); }
     });
