@@ -35,7 +35,7 @@
   window.addEventListener('pagehide',leave);
   document.addEventListener('DOMContentLoaded',function(){
     if('IntersectionObserver' in window){
-      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{threshold:0.3});
+      var seen={}; var io=new IntersectionObserver(function(es){ es.forEach(function(e){ var id=e.target.id; if(e.isIntersecting&&!seen[id]){ seen[id]=1; send('section',id); io.unobserve(e.target);} }); },{rootMargin:'-40% 0px -40% 0px'}); /* 칸이 화면 가운데에 오면 '봄' (폰에서 긴 칸도 찍히게) */
       document.querySelectorAll('section[id]').forEach(function(el){ io.observe(el); });
     }
     /* 상담 버튼 클릭 · 작품 클릭(통계의 '많이 연 항목' 칸을 작품 클릭 집계로 씀) */
