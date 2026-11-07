@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>크레용팜 제작 자료 모음</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="크레용팜 AI 영상 제작 자료 모음">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap">
+<style>
+/* 크레용팜 앰버 한 색. 폰 세로 한 칸, 영상 비교가 글을 이끈다. */
+:root{
+  color-scheme:light;
+  --paper:#FAF7F2; --ink:#2A2A28; --sub:#6F6A62; --line:#E7DFD2;
+  --amber:#E8A04A; --amber-deep:#B8721F; --amber-soft:#FBEFDD; --card:#FFFFFF;
+  --body:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --brush:"East Sea Dokdo","Pretendard Variable",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.7 var(--body);word-break:keep-all}
+main{max-width:560px;margin:0 auto;padding:0 20px 64px;display:flex;flex-direction:column;gap:52px}
+a{color:var(--amber-deep)}
+h1,h2,h3,p,ol,ul{margin:0}
+h2{font-size:24px;line-height:1.35;font-weight:700;text-wrap:balance}
+h3{font-size:18px;line-height:1.4;font-weight:700;text-wrap:balance}
+section{display:flex;flex-direction:column;gap:16px}
+.sub{color:var(--sub);font-size:15px}
+video,img{display:block;width:100%;max-width:100%;background:#eee}
+
+.hero{display:flex;flex-direction:column;gap:18px;padding-top:24px}
+.tag{font-size:14px;font-weight:700;color:var(--amber-deep)}
+h1{font:400 58px/1.05 var(--brush);text-wrap:balance}
+.hero video{border-radius:10px;aspect-ratio:9/16;max-height:62vh;width:auto;align-self:center}
+.lead{font-size:19px;line-height:1.6;font-weight:700}
+
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--ink);font:700 14px/28px var(--body);text-align:center;margin-top:1px}
+
+.url{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px 9px 12px;font-size:14px}
+.url code{flex:1;overflow-wrap:anywhere}
+button{font:700 13px var(--body);color:var(--ink);background:var(--amber);border:0;border-radius:7px;padding:7px 12px;cursor:pointer;flex:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
+
+.talk{display:flex;flex-direction:column;gap:12px}
+.bub{align-self:flex-end;max-width:88%;background:var(--amber-soft);border-radius:14px 14px 3px 14px;padding:9px 13px;font-size:16px;line-height:1.5}
+.res{font-size:14px;color:var(--sub);margin-top:-6px;text-align:right}
+
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.cmp video{border-radius:8px;aspect-ratio:9/16;object-fit:cover}
+.cmp figcaption{font-size:13.5px;line-height:1.4;color:var(--sub)}
+.cmp figure.good figcaption{color:var(--ink);font-weight:700}
+.tip{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+
+.quick{padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.quick li{padding-left:15px;position:relative}
+.quick li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:2px;background:var(--amber-deep)}
+
+.pr{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+.pr header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pr strong{font-size:16px}
+.pr small{color:var(--sub);font-size:13px;line-height:1.45}
+.pr pre{margin:0;font:400 13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;color:#44413b}
+
+footer{display:flex;flex-direction:column;gap:6px;border-top:2px solid var(--amber);padding-top:18px;font-size:15px}
+@media (prefers-reduced-motion:reduce){.hero video{max-height:50vh}}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="tag">크레용팜</p>
+  <h1>제작 자료 모음</h1>
+  <p>릴스에서 말씀드린 연결법과 프롬프트를 여기에 모아 뒀어요.</p>
+</header>
+<section>
+  <h2><a href="jumak/">존박 랩 주문 조선 주막 버전</a></h2>
+  <p class="sub">채팅창에 말로 만드는 법, 힉스필드 연결법, 실제 프롬프트</p>
+</section>
+<section>
+  <h2><a href="damo/">체포하겠어 다모 버전</a></h2>
+  <p class="sub">안무를 캐릭터에 옮기는 법, 힉스필드 연결법, 실제 프롬프트</p>
+</section>
+<footer>
+  <p><b>크레용팜</b> 인스타 <a href="https://www.instagram.com/creyongfarm/">@creyongfarm</a> · 유튜브 <a href="https://www.youtube.com/@creyongfarm">크레용팜</a></p>
+</footer>
+</main>
+</body></html>

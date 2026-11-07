@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주막 패러디 제작 자료</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="존박 랩 주문 조선 주막 버전을 채팅창에 말로 만든 과정, 연결법, 프롬프트">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap">
+<style>
+/* 크레용팜 앰버 한 색. 폰 세로 한 칸, 영상 비교가 글을 이끈다. */
+:root{
+  color-scheme:light;
+  --paper:#FAF7F2; --ink:#2A2A28; --sub:#6F6A62; --line:#E7DFD2;
+  --amber:#E8A04A; --amber-deep:#B8721F; --amber-soft:#FBEFDD; --card:#FFFFFF;
+  --body:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  --brush:"East Sea Dokdo","Pretendard Variable",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.7 var(--body);word-break:keep-all}
+main{max-width:560px;margin:0 auto;padding:0 20px 64px;display:flex;flex-direction:column;gap:52px}
+a{color:var(--amber-deep)}
+h1,h2,h3,p,ol,ul{margin:0}
+h2{font-size:24px;line-height:1.35;font-weight:700;text-wrap:balance}
+h3{font-size:18px;line-height:1.4;font-weight:700;text-wrap:balance}
+section{display:flex;flex-direction:column;gap:16px}
+.sub{color:var(--sub);font-size:15px}
+video,img{display:block;width:100%;max-width:100%;background:#eee}
+
+.hero{display:flex;flex-direction:column;gap:18px;padding-top:24px}
+.tag{font-size:14px;font-weight:700;color:var(--amber-deep)}
+h1{font:400 58px/1.05 var(--brush);text-wrap:balance}
+.hero video{border-radius:10px;aspect-ratio:9/16;max-height:62vh;width:auto;align-self:center}
+.lead{font-size:19px;line-height:1.6;font-weight:700}
+
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px}
+.steps li::before{content:counter(s);width:28px;height:28px;border-radius:50%;background:var(--amber);color:var(--ink);font:700 14px/28px var(--body);text-align:center;margin-top:1px}
+
+.url{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px 9px 12px;font-size:14px}
+.url code{flex:1;overflow-wrap:anywhere}
+button{font:700 13px var(--body);color:var(--ink);background:var(--amber);border:0;border-radius:7px;padding:7px 12px;cursor:pointer;flex:none}
+button:focus-visible,a:focus-visible{outline:2px solid var(--amber-deep);outline-offset:2px}
+
+.talk{display:flex;flex-direction:column;gap:12px}
+.bub{align-self:flex-end;max-width:88%;background:var(--amber-soft);border-radius:14px 14px 3px 14px;padding:9px 13px;font-size:16px;line-height:1.5}
+.res{font-size:14px;color:var(--sub);margin-top:-6px;text-align:right}
+
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.cmp video{border-radius:8px;aspect-ratio:9/16;object-fit:cover}
+.cmp figcaption{font-size:13.5px;line-height:1.4;color:var(--sub)}
+.cmp figure.good figcaption{color:var(--ink);font-weight:700}
+.tip{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+
+.quick{padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.quick li{padding-left:15px;position:relative}
+.quick li::before{content:"";position:absolute;left:0;top:.72em;width:7px;height:2px;background:var(--amber-deep)}
+
+.pr{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+.pr header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pr strong{font-size:16px}
+.pr small{color:var(--sub);font-size:13px;line-height:1.45}
+.pr pre{margin:0;font:400 13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:190px;overflow:auto;color:#44413b}
+
+footer{display:flex;flex-direction:column;gap:6px;border-top:2px solid var(--amber);padding-top:18px;font-size:15px}
+@media (prefers-reduced-motion:reduce){.hero video{max-height:50vh}}
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="tag">크레용팜 제작 자료</p>
+  <h1>존박 랩 주문 조선 주막 버전</h1>
+  <p class="lead">힉스필드 사이트 한 번 안 열고, 채팅창에 말로만 만들었어요.</p>
+  <p>웹드라마 감독 크레용입니다. 이 영상을 어떻게 만들었는지 연결법부터 실제 프롬프트까지 그대로 정리했어요. 제가 먼저 해 봤으니 필요한 것만 가져가세요.</p>
+</header>
+<section>
+  <h2>힉스필드와 클로드 연결하기</h2>
+  <p>MCP는 클로드가 다른 프로그램을 직접 다루게 해 주는 연결 방식이에요. 한 번 연결해 두면 채팅창에서 바로 그림과 영상을 뽑을 수 있어요.</p>
+  <ol class="steps">
+    <li><span>클로드 앱이나 claude.ai에서 설정의 커넥터로 들어가요.</span></li>
+    <li><span>커스텀 커넥터 추가를 누르고, 이름은 Higgsfield, 주소는 아래 걸 넣어요.</span></li>
+    <li><span>연결을 누르면 힉스필드 창이 떠요. 로그인하고 허용하면 끝이에요.</span></li>
+  </ol>
+  <div class="url"><code id="mcp">https://mcp.higgsfield.ai/mcp</code><button type="button" data-copy="mcp">복사</button></div>
+  <p class="sub">힉스필드 유료 구독이 필요해요. API 키는 없어도 돼요. 메뉴 이름은 앱 버전에 따라 조금 다를 수 있어요.</p>
+</section>
+
+<section>
+  <h2>만든 순서</h2>
+  <ol class="steps">
+    <li><span><b>웃음 포인트부터 정해요.</b> 이번엔 맥도날드 알바생 리액션이 킥이었어요. 그루브 타는 심사위원 같은 느낌을 주모한테 옮겼어요.</span></li>
+    <li><span><b>원본을 컷으로 나눠요.</b> 누가 어떤 크기로 나오고 어떻게 반응하는지 컷마다 적어요.</span></li>
+    <li><span><b>인물 그림부터 뽑아요.</b> 얼굴과 소품은 여기서 정해요.</span></li>
+    <li><span><b>그림을 음원에 얹어서 흐름을 봐요.</b> 영상 뽑기 전에 여기서 확인해요.</span></li>
+    <li><span><b>고칠 컷만 다시 뽑아요.</b> 전체를 다시 만들 필요 없어요.</span></li>
+    <li><span><b>자막이랑 다빈치 타임라인도 말로 시켜요.</b></span></li>
+  </ol>
+  <img src="img/cast.jpg" alt="주막 패러디 핵심 3컷" loading="lazy">
+</section>
+
+<section>
+  <h2>제가 실제로 보낸 말</h2>
+  <p>프롬프트를 길게 쓰는 것보다 현장에서 말하듯 지시하는 게 더 잘 먹혔어요. 판단은 제가 하고, 손은 클로드가 움직여요.</p>
+  <div class="talk">
+    <p class="bub">갓을 저렇게 쓰는건 좀 불편하다. 본래의 갓 모습이 파괴되어서.</p>
+    <p class="res">갓을 전통 그대로 바르게 고침</p>
+    <p class="bub">오버하지 말고 그루브 정도 타면 되는디</p>
+    <p class="res">주모는 붓으로 받아 적으며 은근히 그루브만</p>
+    <p class="bub">차라리 쳐밀도를 한번 보여줘라. 그러고 컷이 넘어가면 튀진 않잖아.</p>
+    <p class="res">비슷한 구도가 이어지던 자리에 쳐밀도 양반 리액션 컷을 끼움</p>
+    <p class="bub">자막이 좀 심심한디? 화려하고 재밌게 가능?</p>
+    <p class="res">단어가 박자마다 튀어나오는 자막으로 교체</p>
+  </div>
+</section>
+
+<section>
+  <h2>이럴 땐 이렇게</h2>
+  <article>
+    <h3>랩이 다르게 나올 때</h3>
+    <p>참고 음원을 넣어도 시드댄스가 랩을 새로 불러서 가사가 바뀔 때가 있어요. 시드댄스로는 화면만 만들고, 소리는 편집할 때 원본으로 덮으면 돼요.</p>
+  </article>
+  <article>
+    <h3>옆 사람 입까지 움직일 때</h3>
+    <p>립싱크에 화면 전체를 넣으면 엉뚱한 사람 입이 움직이기도 해요. 말하는 얼굴만 크게 잘라서 입히고 제자리에 다시 얹으면 안전해요.</p>
+  </article>
+  <article>
+    <h3>컷이 튈 때</h3>
+    <p>비슷한 구도가 연달아 붙으면 튀어요. 사이에 다른 인물 리액션을 한 컷 끼우면 자연스럽게 넘어가요.</p>
+  </article>
+  <article>
+    <h3>얼굴이 다 비슷하게 나올 때</h3>
+    <p>둥근 얼굴, 날카로운 얼굴, 수염 난 얼굴처럼 프롬프트에 차이를 적어 주세요. 레퍼런스도 사람마다 따로 넣어야 얼굴이 안 겹쳐요.</p>
+  </article>
+</section>
+
+<section>
+  <h2>실제로 쓴 프롬프트</h2>
+  <article class="pr">
+    <header><strong>인물 소품만 고치기</strong><button type="button" data-copy="p1">복사</button></header>
+    <small>GPT Image 2.5, 9:16, 앞서 뽑은 인물을 레퍼런스로 넣음</small>
+    <pre id="p1">Keep exactly this same Korean nobleman (same face, same cream and navy dopo robe, same pose holding the small sogo hand drum on his shoulder next to his ear like a boombox, same rapping swagger, same tavern courtyard at dusk). Change only the headwear: he now wears an authentic traditional black horsehair gat hat, worn properly and level with its full round brim and chin strap, exactly as in real Joseon dress. No beanie, no knit cap. Photorealistic, cinematic film grain, 9:16.</pre>
+  </article>
+  <article class="pr">
+    <header><strong>30초 장면 한 번에 뽑기</strong><button type="button" data-copy="p2">복사</button></header>
+    <small>시드댄스 2.5 omni_reference, 인물 그림 4장과 음원을 레퍼런스로 넣음</small>
+    <pre id="p2">Photorealistic Korean historical drama (sageuk), Joseon-dynasty roadside tavern (jumak) at dusk, warm lantern light, handheld documentary-style camera like a variety show. Four clearly different people, each with a distinct face exactly as in their reference image, never the same face twice: (1) the scholar with a round cheerful face, white hanbok with a large black '20' on the back of his robe, traditional black gat worn properly; (2) his friend the nobleman with a sharp, cool face, cream and navy dopo, traditional gat worn properly, holding a small sogo hand drum on his shoulder next to his ear like a boombox the whole time, calm and dignified; (3) the middle-aged tavern hostess in hanbok, apron and headscarf behind the wooden counter with a steaming gukbap cauldron; (4) a bearded laughing bystander nobleman with a white folding fan that reads '쳐밀도' in bold black Hangul calligraphy. Use the reference audio exactly as the dialogue and rap, with accurate lip sync. Multi-shot edit with hard cuts, following this timing: [0-1s] wide establishing shot of the busy tavern. [1-4s] the scholar and his friend step up to the counter, the scholar says to the hostess very politely that he will order by rap. [4-7s] close-up of the hostess at the counter, she bows slightly and answers politely. [7-9s] the bystander nobleman waving his fan toward camera and laughing. [9-14s] medium shot of the scholar rapping his order with serious hip-hop hand gestures, his friend beside him calmly nodding to the beat with the sogo on his shoulder. [14-16s] close-up of the hostess very seriously writing the order on hanji paper with a brush, deadpan, only her head bobbing very slightly to the beat. [16-19s] the scholar keeps rapping, pointing at the cauldron. [19-21s] the hostess keeps writing, a tiny subtle groove in her shoulders, nothing exaggerated. [21-23s] the bystander covers his mouth with the fan, laughing hard. [23-26s] the scholar finishes his rap with a flourish. [26-28s] the hostess smiles politely at him. [28-30s] the scholar bows deeply; the video ends while he is still bowing, no turning back. Natural, understated comedic deadpan acting, realistic faces, cinematic film grain.</pre>
+  </article>
+</section>
+<footer>
+  <p><b>크레용팜</b> 인스타 <a href="https://www.instagram.com/creyongfarm/">@creyongfarm</a> · 유튜브 <a href="https://www.youtube.com/@creyongfarm">크레용팜</a></p>
+  <p class="sub">다른 제작 자료는 <a href="/dm/">creyong.net/dm</a>에 모아 뒀어요.</p>
+  <p class="sub">이 영상은 AI로 제작했습니다.</p>
+</footer>
+</main>
+<script>
+document.querySelectorAll("button[data-copy]").forEach(function(b){
+  b.addEventListener("click",function(){
+    var t=document.getElementById(b.dataset.copy).textContent,o=b.textContent;
+    function done(m){b.textContent=m;setTimeout(function(){b.textContent=o},1500)}
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){done("복사됨")},function(){done("길게 눌러 복사")})}else{done("길게 눌러 복사")}
+  });
+});
+if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  document.querySelectorAll("video").forEach(function(v){v.removeAttribute("autoplay");v.pause();v.controls=true});
+}
+</script>
+</body>
+</html>
