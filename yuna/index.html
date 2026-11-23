@@ -4181,7 +4181,7 @@ function switchFloor(f){
 function goFloor(f){
   if(curFloor === f || (elev && !elev.sw)) return;
   showTip(null); wfTip(null); showZonePop(null);
-  if(reduce){ switchFloor(f); redraw(); return; }
+  if(reduce || !(f in FLOORS) || !(curFloor in FLOORS)){ switchFloor(f); redraw(); return; }
   const e = elev = {t0: performance.now(), to: f, from: curFloor, sw: false};
   setTimeout(() => { if(elev === e && !e.sw){ e.sw = true; switchFloor(f); } }, 700);   // 화면이 가려져 프레임이 멈춰도 층은 바뀌게
   setTimeout(() => { if(elev === e) elev = null; }, 1400);
@@ -6344,7 +6344,7 @@ function lobbyStep(now, dt){
   if(now > lNext.cross){ lNext.cross = now + (NIGHT ? 20000 : 8000) + Math.random() * 9000; if(lGuests.filter(g => g.kind === "cross").length < (NIGHT ? 2 : 5)) lGuest("cross"); }
   if(now > lNext.cvs){ lNext.cvs = now + (NIGHT ? 30000 : 14000) + Math.random() * 14000; if(lGuests.filter(g => g.kind === "cvs").length < 2) lGuest("cvs"); }
   if(now > lNext.visit && !NIGHT){ lNext.visit = now + 45000 + Math.random() * 40000; if(!lGuests.some(g => g.kind === "visit")) lGuest("visit"); }
-  if(now > lNext.talk){ lNext.talk = now + 7000 + Math.random() * 7000; const c = pickOne(L_TALKS.filter(c => lOn(LPI[c[0]]) && lOn(LPI[c[1]]))), a = LPI[c[0]], b = LPI[c[1]]; if(!inTalk(a, now) && !inTalk(b, now)) startTalk(a, b, c[2], now + 150); }
+  if(now > lNext.talk){ lNext.talk = now + 7000 + Math.random() * 7000; const c = pickOne(L_TALKS.filter(c => LPI[c[0]] && LPI[c[1]] && lOn(LPI[c[0]]) && lOn(LPI[c[1]]))), a = LPI[c[0]], b = LPI[c[1]]; if(!inTalk(a, now) && !inTalk(b, now)) startTalk(a, b, c[2], now + 150); }
   lCars.forEach(c => lCarStep(c, now, dt));
   lGuests.forEach(g => lGuestStep(g, now, dt));
   for(let k = lCars.length - 1; k >= 0; k--) if(lCars[k].dead) lCars.splice(k, 1);
@@ -6869,7 +6869,8 @@ addEventListener("keydown", e => { if(e.key === "Escape" && T3.on) t3Close(); })
    구역 버튼 = 3D 구역 보기, PD 상태·할 일은 3초마다 db 값 그대로, '2D로' 누르면 예전 지도(이 기기에 기억) */
 var F3 = {mod:null, on:false, want:true, busy:false, timer:0, dark:null, zone:null, floor:null};
 /* 층별 3D 정의 (2026-11-22 감독님 "다른 층도 다 해야지"): 여기 있는 층만 3D. main = 엔진 안의 업무층 */
-var F3_FLOORS = {main:null, wf:"./floor3d_wf.js", lobby:"./floor3d_lobby.js", s4:"./floor3d_studio.js", roof:"./floor3d_roof.js"};
+var F3_FLOORS = {main:null, wf:"./floor3d_wf.js", lobby:"./floor3d_lobby.js", s4:"./floor3d_studio.js", roof:"./floor3d_roof.js",
+  home1:"./floor3d_home.js", home2:"./floor3d_home.js?f=2", home3:"./floor3d_home.js?f=3", home4:"./floor3d_home.js?f=4"};   /* 옆 건물 유나네 집: 3D만 (2.5D 지도 없음), 유나 모드로만 감 */
 try { F3.want = localStorage.getItem("crayon-floor-view") !== "2d"; } catch(_){}
 function f3Data(){ const status = {}, tasks = {};
   ROSTER.forEach(r => { status[r.id] = statusOf(r.id); tasks[r.id] = (state.pds[r.id]?.task || "").trim() || IDLE_LINES[r.id] || ""; });
@@ -6928,7 +6929,7 @@ async function yunaPlay(){
   setFull(true); wrap.classList.add("play"); showTip(null);
   try { const m = await import("./yuna_game.js");
     YG = m.start({eng:() => F3.mod, floor:() => curFloor, host:document.getElementById("map"), yuna:() => ({floor:yuna.floor || "main", i:yuna.i, j:yuna.j, hidden:yuna.hidden}),
-      goFloor:f => goFloor(f), exit(){ YG = null; wrap.classList.remove("play"); if(!was) setFull(false); f3Sync(); }}); }
+      goFloor:f => goFloor(f), exit(){ YG = null; wrap.classList.remove("play"); if(!was) setFull(false); if(!(curFloor in FLOORS)){ switchFloor("lobby"); redraw(); } f3Sync(); }}); }
   catch(e){ console.warn("유나 모드를 못 열었어요", e); YG = null; wrap.classList.remove("play"); }
 }
 document.getElementById("ygo").onclick = yunaPlay;

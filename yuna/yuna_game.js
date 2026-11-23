@@ -6,6 +6,7 @@
      사람들 머리 위 💬 부름(선물·골라 줘·사진·하이파이브), 의자마다 앉아서 하는 놀이, 배지
    - 엔진(tower3d_floor.js)의 play* 함수만 씀. 별 기록은 이 기기에만 (localStorage) */
 
+import { HOME } from "./floor3d_home.js";   // 옆 건물 유나네 집 4층 (2026-11-23 감독님 "옆건물에 집도 하나 만들어서 왔다갔다")
 const FL = {lobby:{n:1, name:"1층 로비·카페"}, main:{n:2, name:"2층 업무층"}, wf:{n:3, name:"3층 복지층"}, s4:{n:4, name:"4층 스튜디오"}, roof:{n:5, name:"5층 옥상"}};
 const ELEV = [13.45, 17.1], EXIT = [14.5, 17.1, Math.PI / 2];
 const POOL = {rect:[20.6, 17.7, 29, 20], walk:[20.3, 17.4, 29, 20], surf:0.39};
@@ -86,7 +87,7 @@ const TREASURE = {
   wf:[["🍭","막대사탕"],["🧃","주스"],["🪀","요요"],["🧩","퍼즐 조각"],["🌟","반짝 별",1],["🍰","케이크",1]],
   s4:[["🌈","무지개"],["☁️","구름"],["🦋","나비"],["🪞","손거울"],["👑","왕관",1],["🔮","수정 구슬",1]],
   roof:[["🐚","조개"],["🪁","연"],["🌻","해바라기"],["🛟","튜브"],["🚀","로켓",1],["🌙","달님",1]]};
-const SEED = {lobby:11, main:23, wf:37, s4:41, roof:59}, TOTAL = 30;
+const SEED = {lobby:11, main:23, wf:37, s4:41, roof:59}, TOTAL = 54;
 const AVOID = [[ELEV[0], ELEV[1], 1.9], [EXIT[0] + 0.6, EXIT[1], 1.3]];
 
 /* 💬 부름 (2026-11-23 감독님 "누가 건물주 딸한테 심부름을 시키냐"): 머리 위 💬 뜬 사람한테 가면 선물을 주거나, 골라 달라거나, 같이 사진·하이파이브 */
@@ -179,7 +180,7 @@ const BADGES = [
   ["friend10", "👋", "10명한테 말 걸기", r => cnt(r.met) >= 10],
   ["friend25", "🤝", "25명한테 말 걸기", r => cnt(r.met) >= 25],
   ["tre10", "🔍", "보물 10개 찾기", r => cnt(r.tre) >= 10],
-  ["treAll", "🏴‍☠️", "보물 30개 전부", r => cnt(r.tre) >= TOTAL],
+  ["treAll", "🏴‍☠️", "보물 54개 전부", r => cnt(r.tre) >= TOTAL],
   ["floors", "🛗", "모든 층 가 보기", r => cnt(r.vis) >= 5],
   ["ball", "⚽", "골잡이", r => r.done.ball],
   ["hide", "🙈", "숨바꼭질 달인", r => r.done.hide],
@@ -432,6 +433,32 @@ const BGM = {
   roof:{bpm:126, lead:"square", lv:0.055, ch:[[41,57,60,65],[36,60,64,67],[38,57,62,65],[46,58,62,65]],
     mel:[77,-1,77,79, -1,81,-1,77,  76,-1,72,-1, 74,-1,76,-1,  77,-1,77,79, -1,81,-1,84,  82,-1,81,-1, 79,-1,77,-1,
          81,-1,81,-1, 84,-1,81,-1,  79,-1,76,-1, 72,-1,74,76,  77,-1,74,-1, 77,-1,79,-1,  77,-1,-1,-1, -1,-1,-1,-1]}};
+/* 유나네 집 (floor3d_home.js 안내대로). FL에 n이 없어서 엘리베이터에는 안 나옴 */
+Object.entries(HOME.names).forEach(([k, name]) => FL[k] = {name});
+TREASURE.home1 = [["🔑","현관 열쇠"],["⚽","공"],["🦆","수영장 오리"],["🌷","튤립"],["🔌","충전 케이블",1],["✉️","편지",1]];
+TREASURE.home2 = [["🥩","고기"],["🥬","상추"],["📺","리모컨"],["🧦","양말"],["🍯","꿀단지",1],["🖼️","가족사진",1]];
+TREASURE.home3 = [["🧸","곰돌이"],["🎀","머리핀"],["🛁","고무 오리"],["📚","동화책"],["💍","엄마 반지",1],["🏆","아빠 트로피",1]];
+TREASURE.home4 = [["🔭","별 지도"],["🍅","방울토마토"],["🧺","빨래집게"],["🎞️","필름",1],["🪁","연"],["🌠","별똥별",1]];
+Object.assign(SEED, {home1:67, home2:71, home3:73, home4:79});
+Object.assign(SEATS, HOME.seats);
+Object.entries(HOME.sitLines).forEach(([k, l]) => SIT_YU[k] = SIT_YU[k] ? [...SIT_YU[k], ...l] : l);   // 소파·그네는 원래 대사에 더함
+BGM.home1 = {bpm:84, lead:"sine", lv:0.12, soft:true, bell:true, ch:[[41,57,60,64],[36,55,60,64],[38,57,62,65],[43,55,59,62]],
+  mel:[72,-1,74,76, -1,-1,72,-1,  69,-1,72,-1, 67,-1,-1,-1,  72,-1,74,76, 79,-1,76,-1,  74,-1,-1,72, 74,-1,-1,-1]};
+BGM.home2 = BGM.home3 = BGM.home1;
+BGM.home4 = {...BGM.home1, bpm:76};
+const isHome = f => /^home\d$/.test(f || "");
+/* 집 오가는 길: 로비 횡단보도 건너편 ↔ 집 대문, 집 계단. 들어올 때만 (스폰 자리가 바로 옆이라) */
+const WALKS = [{f:"lobby", at:[17.6, 28.6], r:0.7, to:"home1", spawn:HOME.spawnGate},
+  {f:"home1", at:HOME.gate, r:0.45, to:"lobby", spawn:[17.6, 28.2, Math.PI]},
+  ...HOME.stairs.map(t => ({...t, r:0.45}))];
+/* 다른 층 할 일이면 어디로 가야 하는지 (집에선 엘리베이터 대신 계단·대문) */
+function wayOut(f, to){
+  if(isHome(f)){ const a = +f[4], b = isHome(to) ? +to[4] : 0;
+    const w = WALKS.find(t => t.f === f && (b > a ? t.to === "home" + (a + 1) : a === 1 ? t.to === "lobby" : t.to === "home" + (a - 1)));
+    return w ? w.at : null; }
+  if(isHome(to)) return f === "lobby" ? WALKS[0].at : ELEV;
+  return ELEV;
+}
 function bgmFloor(f){ const k = BGM[f] ? f : "main"; if(AU.trk !== k){ AU.trk = k; AU.step = 0; } }
 function bgmPump(){
   const c = AU.ctx; if(!c) return; if(c.state !== "running"){ AU.next = c.currentTime + 0.1; return; }
@@ -600,8 +627,8 @@ export function start(api){
         hide.push(id, "l_" + id.slice(1)); }
       else e.playActor(k, null); });
     let mark = null;
-    if(st && !G){ const fn = needFloor(st); if(st.find){ if(fn && fn !== f) mark = {at:ELEV}; }
-      else if(st.f !== f) mark = {at:ELEV};
+    if(st && !G){ const fn = needFloor(st); if(st.find){ if(fn && fn !== f) mark = {at:wayOut(f, fn)}; }
+      else if(st.f !== f) mark = {at:wayOut(f, st.f)};
       else if(st.go) mark = {at:st.go};
       else if(st.talk && st.talk[0] === "@") mark = {actor:st.talk.slice(1)};
       else if(Array.isArray(st.talk)){ const id = st.talk.find(x => e.playWhere(x)); mark = id ? {id} : null; } }
@@ -610,7 +637,7 @@ export function start(api){
     if(Q?.id === "cat" && curStep()?.find && f === Q.catF && Q.catAtF !== f){ Q.catAt = e.playHideSpot(4) || e.playFree(EXIT[0] + 3, EXIT[1], 0.2); Q.catAtF = f; }
     refreshItems();
   }
-  function spotsFor(f){ const e = E(); if(!e) return; S.spots = e.playSpots(6, SEED[f] + rec.round * 101, AVOID, 2.6); }
+  function spotsFor(f){ const e = E(); if(!e) return; S.spots = e.playSpots(6, SEED[f] + rec.round * 101, isHome(f) ? WALKS.filter(t => t.f === f).map(t => [t.at[0], t.at[1], 1.1]) : AVOID, isHome(f) ? 2.2 : 2.6); }
   function boltFor(){ const e = E(); if(!e) return; S.bolt = e.playSpots(1, Math.random() * 1e9 | 0, [...AVOID, ...S.spots.map(p => [p[0], p[1], 1.6])], 1)[0] || null; }
   function refreshItems(){
     const e = E(); if(!e || !S.floor) return; const f = S.floor, L = [];
@@ -1054,8 +1081,10 @@ export function start(api){
   /* ---------- 엘리베이터 ---------- */
   function openElev(){
     panel.hidden = true;
-    elevP.innerHTML = ""; Object.entries(FL).sort((a, b) => b[1].n - a[1].n).forEach(([f, v]) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-current", f === S.floor);
+    elevP.innerHTML = ""; Object.entries(FL).filter(([, v]) => v.n).sort((a, b) => b[1].n - a[1].n).forEach(([f, v]) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-current", f === S.floor);
       b.innerHTML = `<b>${v.n}F</b>`; b.append(v.name.replace(/^\d층 /, "")); b.onclick = () => { closeElev(); if(f !== S.floor) ride(f); }; elevP.append(b); });
+    { const b = document.createElement("button"); b.type = "button"; b.className = "home"; b.innerHTML = "<b>🏡</b>"; b.append("유나네 집");   // 걸어서도 감 (로비 횡단보도 건너편)
+      b.onclick = () => { closeElev(); walkTo({f:S.floor, to:"home1", spawn:HOME.spawnGate}); }; elevP.append(b); }
     elevP.hidden = false;
   }
   function closeElev(){ elevP.hidden = true; }
@@ -1079,6 +1108,23 @@ export function start(api){
     setTimeout(() => { if(live && pendingFloor === f){ pendingFloor = null; fade.classList.remove("on"); E()?.playSet({freeze:false}); } }, 9000);
   }
 
+  let hot = null, hotF = null;
+  function walks(st){
+    if(pendingFloor || G) return;
+    const here = WALKS.filter(t => t.f === st.floor), now1 = new Set();
+    for(const t of here){ const key = t.f + t.at, inR = Math.hypot(st.i - t.at[0], st.j - t.at[1]) < t.r;
+      if(inR && hot && hotF === st.floor && !hot.has(key)){ walkTo(t); return; }
+      if(inR) now1.add(key); }
+    hot = now1; hotF = st.floor;
+  }
+  function walkTo(t){ const f = t.to; sfx("blip");
+    endGame(); pendingFloor = f; hot = null; fade.textContent = `${isHome(f) ? "🏡" : "🏢"} ${FL[f].name}`; fade.classList.add("on");
+    E()?.playSet({spawn:t.spawn, freeze:true});
+    if(t.f === "lobby") yuSay(pick(["집에 가자~ 🏡", "우리 집 가야지! 🏡"]), 1400); else if(f === "lobby") yuSay(pick(["아빠 회사 가자! 🏢", "타워 가야지~ 🏢"]), 1400);
+    setTimeout(() => { if(live) api.goFloor(f); }, 380);
+    setTimeout(() => { if(live && pendingFloor === f){ pendingFloor = null; fade.classList.remove("on"); E()?.playSet({freeze:false}); } }, 9000);
+  }
+
   /* ---------- 엔진 콜백 ---------- */
   const cb = {
     onFloor(fid){
@@ -1092,14 +1138,14 @@ export function start(api){
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return;
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st);
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);
         if(sp.make){ const q = Q; makeIt(sp, null, () => { if(Q !== q) return; if(sp.got) receive(sp.got); else setCarry(""); if(sp.make.done) yuSay(sp.make.done, 2400); advance(); }); }
         else { if(sp.got) receive(sp.got); else setCarry(""); advance(); } }
       // 오른쪽 버튼
-      const nearElev = Math.hypot(st.i - ELEV[0], st.j - ELEV[1]) < 1.45 && !G; S.atElev = nearElev;
+      const nearElev = !!FL[st.floor]?.n && Math.hypot(st.i - ELEV[0], st.j - ELEV[1]) < 1.45 && !G; S.atElev = nearElev;
       const n = !G || G.type === "ball" ? st.near : null;
       const retry = sp && sp.game && sp.f === st.floor && !G;
       const booth = !G && nearBooth(st);
