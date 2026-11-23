@@ -622,6 +622,11 @@ const AREA_NPC_TALK = {
   halmi:[["할머니 이거 뭐예요?", "햇감자란다~ 쪄 먹으면 꿀맛이야 🥔", "맛있겠다!"], ["할머니 이거 직접 키웠어요?", "그럼~ 할미 밭에서 왔지 😊", "우와!"]],
   tteok:[["사장님 무슨 떡이 제일 맛있어요?", "꿀떡! 톡 터진단다 🍡", "꿀떡 주세요!"], ["떡은 몇 시에 만들어요?", "새벽 네 시부터~ 😴", "엄청 일찍이다!"]],
   fishm:[["아저씨 이 물고기 이름 뭐예요?", "고등어! 등이 파랗지? 🐟", "반짝반짝해요!"], ["오징어는 다리가 몇 개예요?", "열 개! 세어 볼래? 🦑", "하나 둘 셋…"]],
+  v1:[["할머니 안녕하세요!", "아이고 예쁜 아가씨네~ 몇 학년이니? 😊", "3학년이에요!"]], v2:[["오빠 어디 가요?", "학원! 수학 학원 😩", "화이팅!"]],
+  v3:[["언니 회사 가요?", "응~ 유나 아빠 회사 옆이야 ☕", "우와 이웃이다!"]], v4:[["아저씨 우리 집 택배도 있어요?", "음… 유나네는 내일 와~ 📦", "기다릴게요!"]],
+  v5:[["강아지 이름 뭐예요?", "뭉치! 만져 봐도 돼 🐕", "털이 보들보들해!"]], v6:[["안녕? 몇 살이야?", "네 살! 언니는? 😆", "나는 언니지~"]],
+  v7:[["할아버지 운동하세요?", "그럼~ 매일 만 보! 💪", "저도 따라 할래요!"]], v8:[["언니 대학생이에요?", "응~ 영화 공부해 🎬", "우리 아빠 영화 감독인데!"]],
+  v9:[["아기 이름 뭐예요?", "콩이야~ 쉿 자고 있어 👶", "쉿~ 🤫"]], v10:[["안녕! 너 옆 반이지?", "응! 쉬는 시간에 같이 놀자 😆", "좋아!"]],
   hotteok:[["이모 호떡 하나 주세요!", "뜨거우니까 호호 불어 먹어 🥞", "네!"], ["호떡 안에 뭐 들었어요?", "흑설탕이랑 땅콩~ 꿀처럼 흘러 🍯", "침 나온다 🤤"]]};
 const AREA_GREET = {fun:["크레용랜드에 온 걸 환영해요~ 🎡", "자유이용권 손목에 잘 찼니? 🎟️", "풍선 하나 줄까? 🎈"], river:["유나 왔구나~ 강바람 시원하지? 🌊", "오리배 타러 왔니? 🦢", "교회 종소리 들었니? 🔔"],
   school:["유나야 안녕~ 오늘도 즐거운 학교! 🏫", "복도에서 뛰지 않기~ 🚶‍♀️", "샬롬~ 반가워 😊"], market:["어서 와~ 뭐 줄까? 🧺", "유나 왔네~ 덤 줄게! 😊", "시장 구경 왔구나~ 🍎"], park:["유나 안녕~ 산책 왔니? 🌳", "놀이터 사람 많다~ 🛝", "강아지 조심해~ 🐕"], town:["유나 왔구나~ 떡볶이 먹으러 왔니? 🍢", "어서 와~ 문방구 새 스티커 들어왔어 ✨", "학교 앞이라 차 조심해 🚸"]};
@@ -918,7 +923,7 @@ export function start(api){
       st.go = sp.sort((a, b) => (w ? Math.hypot(b[0] - w[0], b[1] - w[1]) - Math.hypot(a[0] - w[0], a[1] - w[1]) : 0))[0] || e.playFree(EXIT[0] + 4, EXIT[1] - 3, 0.2); }
     if(Q?.id === "friend" && S.frF !== f){ S.frF = f; S.trail = []; S.frSwim = false;
       const at = f === "lobby" && step === 0 ? e.playFree(16.4, 18.4, 0.22) : e.playFree(EXIT[0] + 0.9, EXIT[1] + 0.8, 0.22); e.playActor("fr", {at:[at[0], at[1], Math.PI], pose:"stand", to:null}); }
-    areaNpcs(f);
+    areaNpcs(f); villagers(f);
     // 아빠(2층)·엄마(4층) 배우: 원래 자리 근처에 세우고 원래 사람은 숨김
     [["dad", "main", "_dir", [32.2, 4.4]], ["mom", "s4", "_nora", [6.7, 17.9]]].forEach(([k, fl, id, def]) => {
       if(need(k) && (f === fl || G)){ if(!(S.st?.actors || {})[k] && !G){ const w0 = e.playWhere(id), w = w0 && Math.hypot(w0[0] - ELEV[0], w0[1] - ELEV[1]) > 2.4 ? w0 : null, at = e.playFree(...(w ? [w[0], w[1]] : def), 0.22); e.playActor(k, {at:[at[0], at[1], w ? w[2] : 0], pose:"stand"}); }
@@ -1404,6 +1409,31 @@ export function start(api){
         const p = e.playFree(u.at[0] + Math.sin(h) * 0.5 + Math.cos(h) * 0.95 * sd, u.at[1] + Math.cos(h) * 0.5 - Math.sin(h) * 0.95 * sd, 0.22); at = [p[0], p[1], Math.atan2(u.at[0] - p[0], u.at[1] - p[1])]; }
       e.playActor(k, {at, pose:"stand", to:null}); S.npcF[k] = f; S.kidHome = k === "kid" ? at : S.kidHome; }));
   }
+  /* 지나다니는 동네 주민 (2026-11-24 감독님 "전체적 동네 사람들… 텅텅 비었어"): 동네마다 몇 명이 놀이 자리 사이를 걸어 다님 */
+  const VIL = ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"], VIL_N = {park:9, town:9, fun:10, school:6, market:10, river:9};
+  const VIL_SAY = {v1:["아이고 날씨 좋다~ 🌤️", "운동 삼아 한 바퀴 🚶‍♀️"], v2:["학원 늦겠다! 🏃", "편의점 들렀다 가야지 🍙"], v3:["오늘 회의 몇 시더라 📱", "커피 한 잔 해야지 ☕"],
+    v4:["택배 왔어요~ 📦", "다음 집은 어디더라 🤔"], v5:["뭉치야 천천히 가~ 🐕", "산책 좋다 그치? 🐾"], v6:["엄마 저거 사 줘~ 🍭", "나 잡아 봐라~ 😆"],
+    v7:["하나 둘! 하나 둘! 💪", "오늘 만 보 걸었다 👟"], v8:["과제 언제 하지… 📚", "여기 사진 예쁘다 📸"], v9:["우리 아기 잘 잔다 👶", "장 보러 가야지 🛒"], v10:["유나야 안녕~ 👋", "숙제 했어? 😆"]};
+  const VIL_ANCH = f => [...(USE[f] || []).map(u => u.at), ...(SEATS[f] || []).map(x => x.a)].filter(Boolean);
+  const clearLine = (i0, j0, i1, j1) => { const e = E(), n = Math.max(1, Math.ceil(Math.hypot(i1 - i0, j1 - j0) / 0.25)); for(let q = 1; q <= n; q++) if(!e.playReach(i0 + (i1 - i0) * q / n, j0 + (j1 - j0) * q / n)) return false; return true; };
+  function villagers(f){ const e = E(); if(!e) return; S.vil = S.vil || {};
+    Object.keys(S.vil).forEach(k => { if(S.vil[k].f !== f){ e.playActor(k, null); delete S.vil[k]; } });
+    if(!isArea(f) || Object.keys(S.vil).length) return;
+    const an = VIL_ANCH(f); if(!an.length) return;
+    [...VIL].sort(() => Math.random() - 0.5).slice(0, VIL_N[f] || 4).forEach(k => { const a = pick(an);
+      for(let t = 0; t < 8; t++){ const p = e.playFree(a[0] + (Math.random() - 0.5) * 3, a[1] + (Math.random() - 0.5) * 3, 0.25); if(!e.playReach(p[0], p[1])) continue;
+        e.playActor(k, {at:[p[0], p[1], Math.random() * PI * 2], pose:"stand", to:null}); S.vil[k] = {f, home:p, next:now() + 800 + Math.random() * 5000}; break; } });
+  }
+  function vilTick(st){ if(!S.vil || G) return; const e = E(), t = now();
+    for(const [k, v] of Object.entries(S.vil)){ if(v.f !== st.floor || t < v.next) continue; v.next = t + 2200 + Math.random() * 4800;
+      const a = st.actors?.[k]; if(!a || a.moving || Math.hypot(st.i - a.i, st.j - a.j) < 1.8 || Math.random() < 0.18) continue;   // 유나 옆이면 멈춰서 기다림
+      const far = Math.hypot(a.i - v.home[0], a.j - v.home[1]) > 6, an = VIL_ANCH(st.floor);
+      for(let q = 0; q < 8; q++){ let ti, tj;
+        if(q < 3 && an.length && Math.random() < 0.6){ const p = pick(an); ti = p[0] + (Math.random() - 0.5) * 1.6; tj = p[1] + (Math.random() - 0.5) * 1.6; if(Math.hypot(ti - a.i, tj - a.j) > 7) continue; }
+        else { const ang = far ? Math.atan2(v.home[0] - a.i, v.home[1] - a.j) + (Math.random() - 0.5) : Math.random() * PI * 2, d = 1.2 + Math.random() * 3.5; ti = a.i + Math.sin(ang) * d; tj = a.j + Math.cos(ang) * d; }
+        if(clearLine(a.i, a.j, ti, tj)){ e.playActor(k, {to:[ti, tj], spd:0.7 + Math.random() * 0.45}); break; } }
+      if(Math.random() < 0.12 && Math.hypot(st.i - a.i, st.j - a.j) < 9) later0(700, () => npcSay("@" + k, pick(VIL_SAY[k]), 2300)); }
+  }
   function kidWander(st){   // 연재는 놀이터를 왔다 갔다
     if(st.floor !== "park" || !S.kidHome || G || (Q && curStep()?.talk === "@kid") || now() < (S.kidNext || 0)) return; S.kidNext = now() + 7000 + Math.random() * 6000;
     const e = E(), a = st.actors?.kid; if(!e || !a || Math.hypot(st.i - a.i, st.j - a.j) < 1.6) return;
@@ -1612,7 +1642,7 @@ export function start(api){
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st); kidWander(st); swingSync(st);
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st); kidWander(st); swingSync(st); vilTick(st);
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);

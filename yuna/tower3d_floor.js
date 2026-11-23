@@ -317,6 +317,7 @@ const KIT = {
   part(o, g, c, vis){ PARTS.push({o, g, c, cls:"p", vis:vis || (() => true)}); return o; },
   cutaway:m => cutaway(m),
   yuNear:(i, j, r) => !!(PL.on && R && R.pl && Math.hypot(PL.i - i, PL.j - j) < r),   // 유나가 가까이 오면 자동문 열기 (2026-11-23)
+  yuAt:() => (PL.on && R && R.pl) ? [PL.i, PL.j, (PL.act?.lift || 0) + (PL.gy || 0)] : null,   // 유나 자리 (빛 번짐이 유나를 덮지 않게, 2026-11-24)
 };
 
 /* ---------- 장면 ---------- */
@@ -1735,9 +1736,20 @@ const PLAY_LOOKS = {
   halmi:{look:{skin:"#E4BC98", hair:"#E4E0DA", style:"bob", shirt:"#8C5A9A", pants:"#3A3D42"}, b:{h:0.86, w:1.02}},   // 채소 할머니
   tteok:{look:{skin:"#E6BE9C", hair:"#3A3330", style:"short", hat:"bucket", hatC:"#FFFFFF", shirt:"#FFFFFF", pants:"#8B5A3C"}, b:{h:1.02, w:1.14}},   // 떡집 사장님
   fishm:{look:{skin:"#CFA07C", hair:"#1E1B18", style:"short", shirt:"#2F6E8C", pants:"#2A2A28"}, b:{h:1.05, w:1.22}},   // 생선가게 아저씨
-  hotteok:{look:{skin:"#F0CDB2", hair:"#8A4A2A", style:"long", shirt:"#E8A04A", pants:"#3A3D42"}, b:{h:0.95, w:0.98}}};   // 호떡 이모
+  hotteok:{look:{skin:"#F0CDB2", hair:"#8A4A2A", style:"long", shirt:"#E8A04A", pants:"#3A3D42"}, b:{h:0.95, w:0.98}},   // 호떡 이모
+  /* 지나다니는 동네 주민 (2026-11-24 감독님 "전체적 동네 사람들… 텅텅 비었어") — 얼굴·머리·옷 다 다르게 */
+  v1:{look:{skin:"#EBC9AE", hair:"#D8D3CC", style:"bob", shirt:"#C9D7A8", pants:"#6A6058"}, b:{h:0.86, w:0.98}},   // 산책 할머니
+  v2:{look:{skin:"#E6C0A0", hair:"#1E1B18", style:"short", shirt:"#2F4A6E", pants:"#2A2A28", shoe:"#F1F2F4"}, b:{h:1.0, w:0.95}},   // 중학생 오빠
+  v3:{look:{skin:"#F6D9C6", hair:"#5A3A2A", style:"long", shirt:"#F7F1EC", skirt:"#C8B4D0", skirtL:0.5, legs:"#F6D9C6", shoe:"#2A2A28"}, b:{h:0.97, w:0.88}},   // 회사원 언니
+  v4:{look:{skin:"#D9AE88", hair:"#2A221E", style:"short", hat:"bucket", hatC:"#8B5A3C", shirt:"#8B5A3C", pants:"#5A5048"}, b:{h:1.06, w:1.18}},   // 택배 아저씨
+  v5:{look:{skin:"#F2D2BA", hair:"#3A2A20", style:"bob", shirt:"#F4A7B9", pants:"#6FA8DC"}, b:{h:0.95, w:1.0}},   // 강아지 산책 아주머니
+  v6:{look:{skin:"#EFC9A8", hair:"#8A5A3C", style:"pig", ribbon:"#72C4AE", shirt:"#FFE58A", skirt:"#E8607F", skirtL:0.38, legs:"#FFFFFF"}, b:{h:0.66, w:0.88}},   // 꼬마 동생
+  v7:{look:{skin:"#E2B994", hair:"#C9C4BE", style:"short", hat:"bucket", hatC:"#4A4E58", shirt:"#A9CBEA", pants:"#3A3D42"}, b:{h:1.0, w:1.08}},   // 운동하는 할아버지
+  v8:{look:{skin:"#F4D3BE", hair:"#2A1E18", style:"long", shirt:"#72C4AE", pants:"#F7F1EC"}, b:{h:0.98, w:0.9}},   // 대학생 언니
+  v9:{look:{skin:"#DDB38E", hair:"#3A3330", style:"short", shirt:"#E8A04A", pants:"#2F4A6E"}, b:{h:1.08, w:1.12}},   // 아기 아빠
+  v10:{look:{skin:"#F0CDB2", hair:"#1E1B18", style:"bob", ribbon:"#FF8FB8", shirt:"#B9A3C4", pants:"#4A4E58"}, b:{h:0.78, w:0.9}}};   // 초등학생 형아 친구
 const ACT_KEYS = Object.keys(PLAY_LOOKS).filter(k => k !== "yu");
-const ACT_NAME = {dad:"아빠", mom:"엄마", fr:"지유", ice:"아이스크림 아저씨", kid:"연재", aunt:"분식집 이모", gran:"문방구 할머니", teach:"선생님", chef:"조리사님", coach:"체육 선생님", classmate:"서아", chaplain:"목사님", staff:"직원 언니", cotton:"솜사탕 언니", clown:"풍선 광대", pastor:"목사님", fisher:"낚시 할아버지", boatman:"오리배 아저씨", picnic:"소풍 아주머니", halmi:"채소 할머니", tteok:"떡집 사장님", fishm:"생선가게 아저씨", hotteok:"호떡 이모"};
+const ACT_NAME = {dad:"아빠", mom:"엄마", fr:"지유", ice:"아이스크림 아저씨", kid:"연재", aunt:"분식집 이모", gran:"문방구 할머니", teach:"선생님", chef:"조리사님", coach:"체육 선생님", classmate:"서아", chaplain:"목사님", staff:"직원 언니", cotton:"솜사탕 언니", clown:"풍선 광대", pastor:"목사님", fisher:"낚시 할아버지", boatman:"오리배 아저씨", picnic:"소풍 아주머니", halmi:"채소 할머니", tteok:"떡집 사장님", fishm:"생선가게 아저씨", hotteok:"호떡 이모", v1:"산책 할머니", v2:"중학생 오빠", v3:"회사원 언니", v4:"택배 아저씨", v5:"강아지 산책 아주머니", v6:"꼬마 동생", v7:"운동하는 할아버지", v8:"대학생 언니", v9:"아기 아빠", v10:"옆 반 친구"};
 /* 유나 옷 (2026-11-23 감독님 "탈의실에서 옷 예쁘게 갈아입혀 지면 재밌겠네 수영장에도 탈의실에서 수영복") */
 const YU_SKIN = "#F6D7C2", YU_B = {h:0.74, w:0.9}, yuL = o => ({look:{skin:YU_SKIN, hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", ...o}, b:YU_B, extra:o.extra});
 const YU_FITS = {

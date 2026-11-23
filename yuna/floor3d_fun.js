@@ -715,6 +715,7 @@ function buildDecor(){
 
 /* ===================================================================== 매 프레임 */
 const m4 = new THREE.Matrix4(), sc3 = new THREE.Vector3(), col3 = new THREE.Color(), ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+const _yv = new THREE.Vector3(), _yd = new THREE.Vector3(), _gd = new THREE.Vector3();
 const CSP = TAU / CR.n, FSTEP = TAU / FW.n;
 function idleSpin(S, t, step, turn, dur, rest){   // 혼자 돌기: 쉬었다가 (다음 맞는 칸까지) 돌고 또 쉼
   if(S.phase === "rest"){ S.rot = S.r0; if(t - S.ts > rest){ S.phase = "spin"; S.ts = t; S.d = Math.ceil((S.r0 + turn) / step - 1e-6) * step - S.r0; } return 0; }
@@ -755,7 +756,10 @@ function animate(tm, dt){
   if(W.bal && !red){ W.bal.g.rotation.z = Math.sin(t * 0.9) * 0.06; W.bal.g.rotation.x = Math.sin(t * 0.7 + 1) * 0.05; }
   // 빛 번짐
   const cam = K.R.camera;
-  W.glows.forEach((g, k) => { const a = g.a(tm, dk); if(!(a > 0)){ W.gm.setMatrixAt(k, ZERO); return; }
+  const ya = K.yuAt ? K.yuAt() : null, yv = ya ? _yv.set(X(ya[0]), ya[2] + 0.55, Z(ya[1])) : null, yd = yv ? cam.position.distanceTo(yv) : 0;
+  if(yv) _yd.copy(yv).sub(cam.position).normalize();
+  W.glows.forEach((g, k) => { let a = g.a(tm, dk) * Math.min(1, Math.max(0, (cam.position.distanceTo(g.p) - 1.0) / 2.2)); if(!(a > 0)){ W.gm.setMatrixAt(k, ZERO); return; }   // 카메라 코앞
+    if(yv){ _gd.copy(g.p).sub(cam.position); const gd = _gd.length(); if(gd < yd + 0.3){ const off = _gd.cross(_yd).length() / gd; a *= Math.min(1, Math.max(0.15, (off - 0.05) / 0.12)); } }   // 유나 앞을 가리는 전구는 흐리게 불빛은 지움 (유나가 하얗게 뜨는 것 막음)
     col3.copy(g.c); m4.compose(g.p, cam.quaternion, sc3.set(g.s, g.s, 1)); W.gm.setMatrixAt(k, m4); W.gm.setColorAt(k, col3.multiplyScalar(Math.min(1, a))); });
   W.gm.instanceMatrix.needsUpdate = true; if(W.gm.instanceColor) W.gm.instanceColor.needsUpdate = true;
 }
