@@ -999,7 +999,7 @@ function buildBike(){
   M.add(rodG([-0.18, 0.66, 0.19], [0.18, 0.66, 0.19], 0.016), INK); [-0.18, 0.18].forEach(x => M.add(rodG([x, 0.66, 0.19], [x * 1.05, 0.66, 0.12], 0.022), PINK));   // 핸들 · 손잡이
   M.add(new THREE.BoxGeometry(0.24, 0.15, 0.17).translate(0, 0.52, 0.38), D("#FFFFFF", "#8A847C")); M.add(new THREE.BoxGeometry(0.2, 0.02, 0.13).translate(0, 0.6, 0.38), PINK);   // 앞 바구니
   M.add(new THREE.BoxGeometry(0.22, 0.025, 0.06).translate(0, 0.25, -0.02), INK);   // 페달
-  [-1, 1].forEach(x => { const tw = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 12); tw.rotateZ(PI / 2); tw.translate(x * 0.2, 0.08, -0.33); M.add(tw, wh); });   // 보조 바퀴
+  M.add(rodG([0.03, 0.2, -0.08], [0.13, 0.0, -0.14], 0.012), INK);   // 받침대 (두발자전거, 2026-11-24 감독님)
   const m = dynMesh(M.geo()); m.position.set(X(BIKE_PARK[0]), 0, Z(BIKE_PARK[1])); m.rotation.y = BIKE_PARK[2]; return m;
 }
 function buildDyn1(){

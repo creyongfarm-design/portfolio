@@ -1090,7 +1090,7 @@ export function start(api){
     e.playSet({freeze:true, mark:null, at:[...B.park], act:{k:"bike", seat:0.47, path:{c:[10.8, 14.6], rx:3.6, ry:1.8, a0:PI / 2, turns:2, ms}, prop:(i, j, h) => B.set(i, j, h)}});
     sfx("go"); yuSay(pick(["자전거 출발~ 🚲", "따르릉 따르릉 비켜나세요~ 🚲"]), 1800);
     const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } e.playEmote?.("yu", pick(["💨", "🎶", "😆", "🌸"]), 1000); }, 1600);
-    later0(ms * 0.5, () => yuSay(pick(["보조 바퀴 떼도 될 것 같은데? 😎", "바람 시원하다~ 🍃"]), 2000));
+    later0(ms * 0.5, () => yuSay(pick(["두발자전거 이제 완전 잘 타지? 😎", "바람 시원하다~ 🍃"]), 2000));
     later0(ms + 60, () => { clearInterval(iv); B.set(...B.park); e.playSet({act:null, freeze:false, wave:1200, pos:[B.park[0], B.park[1] - 0.8, PI]}); S.busy = false; sfx("pick");
       yuSay("한 바퀴 더 탈까? 🚲", 1800); firstUse("bike", "🚲 마당에서 자전거 타기"); later0(2400, checkBadges); });
   }
