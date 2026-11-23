@@ -153,8 +153,13 @@ const USE = {wf:[{at:[25.4, 1.35], k:"arcade", n:"PIXEL"}, {at:[26.4, 1.35], k:"
     // 헬스장 · 게임방 · 식당 (2026-11-23 감독님 "요가도 하고 러닝머신도 하고 세세한거 다 해줘")
     {at:[18.3, 10.75], k:"run", h:0, r:1.4}, {at:[19.8, 15.9], k:"yoga", h:0}, {at:[21.3, 10.5], k:"lift", h:0}, {at:[22.54, 13.3], k:"pullup", h:-PI / 2, r:1.0},
     {at:[22.3, 11.0], k:"bounce", h:-PI / 2, r:1.0}, {at:[22.55, 17.2], k:"squat", h:0}, {at:[26.3, 3.1], k:"pong", r:1.0}, {at:[28.45, 2.6], k:"claw"}, {at:[8.3, 1.05], k:"drink", h:PI}, {at:[27.2, 10.1], k:"read", h:0}],
-  s4:[{at:[27.7, 16.35], k:"vod", h:0.88}]};
-const USE_LB = {arcade:["🕹️", "오락하기"], slide:["🛝", "미끄럼틀"], piano:["🎹", "피아노"], futsal:["⚽", "풋살 한 판"], pong:["🏓", "아빠랑 탁구"], claw:["🧸", "인형뽑기"]};
+  s4:[{at:[27.7, 16.35], k:"vod", h:0.88}],
+  // 유나네 집 (2026-11-24 감독님 "집에 자전거라든지 마당도 갈수있게하고 이용거리들 많이 재밌게")
+  home1:[{at:[10.8, 16.4], k:"bike", r:1.1}, {at:[18.4, 6.9], k:"splash", h:0, r:1.25}, {at:[20.0, 3.6], k:"bbq", h:PI / 2}, {at:[16.95, 8.95], k:"easel", h:0}, {at:[2.0, 16.55], k:"flower", h:0}],
+  home2:[{at:[5.9, 2.45], k:"cook2", h:PI / 2}, {at:[0.85, 1.35], k:"fridge", h:PI}, {at:[7.5, 3.4], k:"blocks", h:PI}],
+  home3:[{at:[0.77, 1.25], k:"bedjump", h:PI / 2, r:1.2}, {at:[4.45, 9.6], k:"bath", h:PI, r:1.25}, {at:[4.7, 2.97], k:"dolls", h:PI / 2}],
+  home4:[{at:[14.6, 1.6], k:"scope", h:2.36, r:1.15}, {at:[9.9, 1.6], k:"harvest", h:PI}, {at:[9.6, 7.9], k:"laundry", h:0}, {at:[6.8, 9.8], k:"horse", h:PI / 2, r:1.0}]};
+const USE_LB = {arcade:["🕹️", "오락하기"], slide:["🛝", "미끄럼틀"], piano:["🎹", "피아노"], futsal:["⚽", "풋살 한 판"], pong:["🏓", "아빠랑 탁구"], claw:["🧸", "인형뽑기"], bike:["🚲", "자전거 타기"]};
 /* 기구 쓰기: ms 동안 그 동작 (몸 모양은 tower3d_floor actPose). raw = 기구 위에 바로 올라감, count = 하나! 둘! 세기 */
 const ACTS = {
   run:{ms:8000, lb:["🏃‍♀️", "러닝머신"], raw:true, y:0.06, say:"달린다~ 🏃‍♀️", fx:["💦", "🔥", "💨"], mid:"헉헉… 5km 가자! 💦", done:"🏃‍♀️ 러닝머신 달리기", end:"땀 쫙 났다~ 💦"},
@@ -165,9 +170,25 @@ const ACTS = {
   squat:{ms:6000, lb:["🦵", "스쿼트"], say:"스쿼트 시작! 🦵", fx:["🦵"], count:true, done:"🦵 케틀벨 스쿼트", end:"다리가 후들후들~ 😵"},
   read:{ms:7000, lb:["📖", "책 읽기"], say:"이 책 재밌겠다 📖", fx:["📖", "🤓", "📚"], mid:"콘티 책이다! 아빠 책상에 있는 거랑 똑같아 📚", done:"📖 도서실에서 책 읽기", end:"쉿… 다 읽었다 🤫"},
   drink:{ms:2600, lb:["💧", "물 마시기"], say:"꿀꺽꿀꺽 💧", fx:["💧"], done:"💧 정수기 물 한 잔", end:"시원하다~ 😋"},
-  vod:{ms:7000, lb:["🎥", "VOD 찍기"], say:"안녕하세요~ 유나의 다빈치 교실입니다! 🎥", fx:["🎥", "✨", "💡"], mid:"오늘은 컷 편집을 배워 볼게요 ✂️", done:"🎥 탈잉 VOD 찍기", end:"구독 좋아요 눌러 주세요~ 😆"}};
+  vod:{ms:7000, lb:["🎥", "VOD 찍기"], say:"안녕하세요~ 유나의 다빈치 교실입니다! 🎥", fx:["🎥", "✨", "💡"], mid:"오늘은 컷 편집을 배워 볼게요 ✂️", done:"🎥 탈잉 VOD 찍기", end:"구독 좋아요 눌러 주세요~ 😆"},
+  // 유나네 집 놀이 (pose = 엔진 actPose 이름)
+  splash:{ms:6000, lb:["💦", "물놀이"], raw:true, y:0.05, say:"첨벙첨벙~ 💦", fx:["💦", "🐤", "😆"], mid:"오리야 같이 놀자 🐤", done:"💦 마당 수영장 물놀이", end:"옷 다 젖었다 😆"},
+  bbq:{ms:7000, pose:"cook", lb:["🍖", "바비큐"], say:"아빠 대신 내가 구울게! 🍖", fx:["🔥", "🍖", "😋"], mid:"지글지글~ 소시지 다 익었다 🌭", done:"🍖 마당 바비큐", end:"냠냠 맛있다 😋"},
+  easel:{ms:7000, pose:"draw", lb:["🎨", "그림 그리기"], say:"분필로 그림 그려야지 🖍️", fx:["🖍️", "🌈", "🎨"], mid:"우리 가족 다 그렸다! 👨‍👩‍👧", done:"🎨 마당 칠판 그림", end:"아빠한테 보여 줘야지 😆"},
+  flower:{ms:6000, pose:"water", lb:["🚿", "꽃 물 주기"], say:"꽃들아 물 마셔~ 🌷", fx:["💧", "🌷", "🌼"], mid:"쑥쑥 자라라~ 🌱", done:"🌷 꽃에 물 주기", end:"꽃이 웃는 것 같아 🌸"},
+  cook2:{ms:7000, pose:"cook", lb:["🍳", "요리하기"], say:"엄마 도와 요리할래요! 🍳", fx:["🍳", "🥬", "✨"], mid:"계란말이 뒤집기 성공! 🍳", done:"🍳 부엌에서 요리", end:"엄마한테 칭찬받겠다 😋"},
+  fridge:{ms:3200, pose:"drink", lb:["🧊", "냉장고 열기"], say:"냉장고에 뭐 있나~ 🧊", fx:["🍰", "🍓"], done:"🍰 냉장고 간식 찾기", end:"딸기 케이크 한 입만… 🍰", snack:true},
+  blocks:{ms:7000, pose:"play", lb:["🧱", "블록 놀이"], say:"높이높이 쌓아야지 🧱", fx:["🧱", "🏰", "😆"], mid:"와르르~ 무너졌다 😵", done:"🧱 블록 성 쌓기", end:"다시 쌓으면 돼! 💪"},
+  bedjump:{ms:5500, pose:"jump", lb:["🛏️", "침대 점프"], raw:true, y:0.48, say:"침대에서 퐁퐁~ 🛏️", fx:["😆", "⭐", "🎶"], mid:"엄마 오기 전에 그만해야지 🤫", done:"🛏️ 침대 트램펄린", end:"헉헉 재밌다 😆"},
+  bath:{ms:7000, lb:["🛁", "거품 목욕"], raw:true, y:0.08, say:"거품 목욕~ 🫧", fx:["🫧", "🐤", "🛁"], mid:"삑삑! 오리도 목욕해 🐤", done:"🛁 거품 목욕", end:"뽀송뽀송 😊"},
+  dolls:{ms:7000, pose:"play", lb:["🏠", "인형 놀이"], say:"인형집에 손님 왔어요~ 🏠", fx:["👧", "🦄", "🏠"], mid:"유니콘도 같이 놀자 🦄", done:"🏠 인형집 놀이", end:"인형들 이제 잘 시간 💤"},
+  scope:{ms:6000, lb:["🔭", "망원경"], say:"망원경으로 보자 🔭", fx:["⭐", "🌙", "🪐"], mid:"토성 고리 보인다!! 🪐", done:"🔭 옥상 망원경", end:"별 진짜 많다 ✨"},
+  harvest:{ms:6000, lb:["🍅", "텃밭"], say:"방울토마토 따야지 🍅", fx:["🍅", "🥬", "🌱"], mid:"빨갛게 잘 익었다! 🍅", done:"🍅 옥상 텃밭 수확", end:"저녁에 고기랑 먹자 😋"},
+  laundry:{ms:6000, lb:["👗", "빨래 널기"], say:"엄마 빨래 도와줄게요 👗", fx:["🧦", "👗", "☀️"], mid:"양말 짝 맞추기 🧦", done:"👗 빨래 널기", end:"햇볕에 뽀송뽀송 ☀️"},
+  horse:{ms:6000, lb:["🐴", "흔들목마"], raw:true, seat:0.4, say:"이랴~ 출발! 🐴", fx:["🐴", "🎠", "😆"], mid:"달려라 달려~ 🏇", done:"🐴 흔들목마 타기", end:"말이 지쳤대 😆"}};
 Object.entries(ACTS).forEach(([k, a]) => USE_LB[k] = a.lb);
 const GYM = ["run", "yoga", "lift", "pullup", "bounce", "squat"];
+const HOMEPLAY = ["bike", "splash", "bbq", "easel", "flower", "cook2", "fridge", "blocks", "bedjump", "bath", "dolls", "scope", "harvest", "laundry", "horse"];
 const FSC = {i0:1.4, i1:12.6, j0:1.2, j1:8.4};   // 풋살장 안
 const TWINKLE = [72, 72, 79, 79, 81, 81, 79, 0, 77, 77, 76, 76, 74, 74, 72];   // 작은 별
 const BOOTHS = {s4:[[34.2, 12.0], [35.38, 12.0]], roof:[[27.45, 16.95]]};
@@ -176,6 +197,7 @@ const FITS = [["base", "👕", "평소 옷", "역시 편한 게 최고 👕"], [
   ["director", "🎬", "꼬마 감독", "레디~ 액션! 🎬 아빠처럼"], ["spring", "🌼", "봄 원피스", "봄바람 살랑살랑 🌼"], ["swim", "🩱", "수영복", "수영하러 가자! 🩱💦"]];
 const BADGES = [
   ["first", "🌱", "첫 별 받기", r => r.stars >= 1],
+  ["home", "🏡", "우리 집 놀이 전부", r => HOMEPLAY.every(k => r.uses?.[k])],
   ["star10", "🌟", "별 10개 모으기", r => r.stars >= 10],
   ["friend10", "👋", "10명한테 말 걸기", r => cnt(r.met) >= 10],
   ["friend25", "🤝", "25명한테 말 걸기", r => cnt(r.met) >= 25],
@@ -849,6 +871,11 @@ export function start(api){
   function gameTick(st){
     advTick(st);
     if(!G){ gameHud(); return; } const e = E(), t = now();
+    // 공이 경기장 밖으로 나가면 잠깐 뒤 가운데로 (2026-11-24 감독님 "축구할때 공나가면 자동으로 들어와야지 다시")
+    if((G.type === "ball" || G.type === "futsal") && st.ball){ const b = st.ball, m = 0.15, out = b.i < FSC.i0 - m || b.i > FSC.i1 + m || b.j < FSC.j0 - m || b.j > FSC.j1 + m;
+      if(!out || G.cool || G.phase === "goal") G.outT = 0; else if(!G.outT) G.outT = t + 900;
+      else if(t > G.outT){ G.outT = 0; const c = G.type === "futsal" ? [6.6, 4.8] : BALL0; if(e.playBallAt) e.playBallAt(c[0], c[1]); else e.playSet({ball:c}); if(G.type === "futsal") G.held = null;
+        sfx("blip"); toast("⚽ 아웃!", "공이 가운데로 돌아왔어요", 1200); yuSay(pick(["공 어디 가~ 😅", "아웃! 다시 간다 ⚽"]), 1300); } }
     if(G.type === "ball" && st.ball && !G.cool){
       const b = st.ball, inL = b.i < GOAL.i0 + 0.32 && Math.abs(b.j - GOAL.gj) < GOAL.gw + 0.05, inR = b.i > GOAL.i1 - 0.32 && Math.abs(b.j - GOAL.gj) < GOAL.gw + 0.05;
       if(inL || inR){ G.n++; G.cool = true; yuSay(pick(["골~~~!! ⚽", "들어갔다!! 😆", "나 축구 천재인가? 😎"]));
@@ -1052,20 +1079,32 @@ export function start(api){
       for(let k = 0; k <= 6; k++) later0(800 + k * 110, () => { e.playEmote?.([29.9, 10.5 + k * 0.42, 1.15 - k * 0.16], k < 6 ? "😆" : "💨", 380); if(k === 0) sfx("boost"); });
       later0(1650, () => { e.playSet({cloak:false, pos:[29.9, 13.4, 0]}); e.playSet({freeze:false}); S.busy = false; yuSay(pick(["슝~~ 한 번 더! 🛝", "우와 빠르다!! 😆"]), 1600); rec.slides = (rec.slides || 0) + 1; save(); firstUse("slide", "🛝 미끄럼틀 슝"); });
       return; }
+    if(u.k === "bike"){ rideBike(); return; }
     if(u.k === "futsal") startGame("futsal");
     if(u.k === "pong" || u.k === "claw") startGame(u.k);
     if(ACTS[u.k]) doAct(u);
   }
+  /* 자전거: 앞마당을 두 바퀴 (엔진이 길 따라 움직이고, 자전거 메시도 같이) */
+  function rideBike(){
+    const e = E(), B = HOME.bike; if(!e) return; S.busy = true; const ms = 14000;
+    e.playSet({freeze:true, mark:null, at:[...B.park], act:{k:"bike", seat:0.47, path:{c:[10.8, 14.6], rx:3.6, ry:1.8, a0:PI / 2, turns:2, ms}, prop:(i, j, h) => B.set(i, j, h)}});
+    sfx("go"); yuSay(pick(["자전거 출발~ 🚲", "따르릉 따르릉 비켜나세요~ 🚲"]), 1800);
+    const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } e.playEmote?.("yu", pick(["💨", "🎶", "😆", "🌸"]), 1000); }, 1600);
+    later0(ms * 0.5, () => yuSay(pick(["보조 바퀴 떼도 될 것 같은데? 😎", "바람 시원하다~ 🍃"]), 2000));
+    later0(ms + 60, () => { clearInterval(iv); B.set(...B.park); e.playSet({act:null, freeze:false, wave:1200, pos:[B.park[0], B.park[1] - 0.8, PI]}); S.busy = false; sfx("pick");
+      yuSay("한 바퀴 더 탈까? 🚲", 1800); firstUse("bike", "🚲 마당에서 자전거 타기"); later0(2400, checkBadges); });
+  }
   function doAct(u){
     const e = E(), A = ACTS[u.k], back = S.st ? [S.st.i, S.st.j] : null; S.busy = true;
-    e.playSet({freeze:true, mark:null, act:{k:u.k, y:A.y || 0}, ...(A.raw ? {at:[u.at[0], u.at[1], u.h ?? 0]} : {pos:[u.at[0], u.at[1], u.h ?? 0]})});
+    e.playSet({freeze:true, mark:null, act:{k:A.pose || u.k, y:A.y || 0, seat:A.seat}, ...(A.raw ? {at:[u.at[0], u.at[1], u.h ?? 0]} : {pos:[u.at[0], u.at[1], u.h ?? 0]})});
     sfx("go"); yuSay(A.say, 1800); let n = 0; const NUM = ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟"];
     const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } n++;
       if(A.count){ if(n >= 2 && n <= 9) yuSay(`${NUM[n - 2]}! ${A.fx[0]}`, 600); }
       else e.playEmote?.("yu", A.fx[n % A.fx.length], 1100); }, A.count ? 650 : 1500);
     if(A.mid) later0(A.ms * 0.5, () => yuSay(A.mid, 2200));
     later0(A.ms, () => { clearInterval(iv); e.playSet({act:null, freeze:false, wave:1200, ...(A.raw && back ? {pos:[back[0], back[1]]} : {})}); S.busy = false; sfx("pick");
-      yuSay(A.end, 1800); e.playEmote?.("yu", A.fx[0], 1200); firstUse(u.k, A.done); later0(2400, checkBadges); });
+      yuSay(A.end, 1800); e.playEmote?.("yu", A.fx[0], 1200); firstUse(u.k, A.done); later0(2400, checkBadges);
+      if(A.snack && !carry) later0(600, () => { const it = pick(["🍦", "🥛", "🍬"]); setCarry(it); sfx("pick"); }); });
   }
   /* 앉아서 하는 놀이 */
   function sitPlay(s){
@@ -1108,6 +1147,27 @@ export function start(api){
     setTimeout(() => { if(live && pendingFloor === f){ pendingFloor = null; fade.classList.remove("on"); E()?.playSet({freeze:false}); } }, 9000);
   }
 
+  /* 무단횡단하면 근처 어른이 말림 (2026-11-24 감독님 "유나가 무단횡단하면 주변에서 말려줘 어른이잖아")
+     도로 j 22.5~27.2. 횡단보도 밖이거나, 보행 신호가 빨간불인데 들어서면 → 가까운 어른이 부르고 유나를 원래 보도로 */
+  const ROAD = [22.5, 27.2], JW_ADULT = ["위험해! 차 와! 횡단보도로 건너야지 🚸", "어허! 꼬마야 멈춰! 무단횡단은 안 돼 ✋", "유나야! 큰일 나! 손 잡고 건너자 🚸"],
+    JW_RED = ["빨간불이야! 초록불 될 때까지 기다리자 🚦", "잠깐! 아직 빨간불이야 🚦 같이 기다리자"], JW_YU = ["앗 죄송해요! 🙇‍♀️", "네… 횡단보도로 갈게요 😳", "깜짝이야… 조심할게요! 🙇‍♀️"];
+  function jaywalk(st){
+    if(st.floor !== "lobby" || G || S.busy || pendingFloor) return;
+    const on = st.j > ROAD[0] && st.j < ROAD[1];
+    if(!on){ S.jwSide = st.j <= ROAD[0] ? 22.1 : 27.65; S.jwIn = null; return; }
+    const sig = window.lobbySig?.(), xw = sig?.xw || {i0:16.0, i1:19.2}, inXW = st.i > xw.i0 - 0.2 && st.i < xw.i1 + 0.2;
+    if(S.jwIn == null) S.jwIn = {red:sig ? sig.ped === "r" : false};   // 들어선 순간의 신호
+    const bad = !inXW ? "jay" : S.jwIn.red ? "red" : null;
+    if(!bad || now() < (S.jwAt || 0)) return;
+    S.jwAt = now() + 4000; S.busy = true; const e = E();
+    const near = (e.playPeople?.() || []).filter(p => !/^(fr|@)/.test(p.id)).map(p => ({...p, d:Math.hypot(p.i - st.i, p.j - st.j)})).sort((a, b) => a.d - b.d)[0];
+    e.playSet({freeze:true}); sfx("bump");
+    const line = pick(bad === "red" ? JW_RED : JW_ADULT);
+    if(near && near.d < 14){ npcSay(near.id, line, 2800); e.playEmote?.(near.id, "❗", 1400); } else toast("🚸 지나가던 어른", line, 2400);
+    later0(1100, () => yuSay(pick(JW_YU), 1800));
+    later0(1500, () => { const back = S.jwSide ?? 22.1; e.playSet({pos:[Math.min(Math.max(st.i, xw.i0 + 0.3), xw.i1 - 0.3), back, back < 24 ? PI : 0], freeze:false}); S.busy = false; S.jwIn = null;
+      rec.jay = (rec.jay || 0) + 1; save(); });
+  }
   let hot = null, hotF = null;
   function walks(st){
     if(pendingFloor || G) return;
@@ -1128,6 +1188,7 @@ export function start(api){
   /* ---------- 엔진 콜백 ---------- */
   const cb = {
     onFloor(fid){
+      if(G && (G.type === "futsal" || G.type === "ball") && fid !== "roof") endGame();   // 옥상 떠나면 공놀이 끝
       S.floor = fid; S.st = null; REQ = null; S.frF = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
       if(!rec.vis[fid]){ rec.vis[fid] = 1; save(); later0(1500, checkBadges); }
       E()?.playSet({water:fid === "roof" ? [POOL] : []}); setCarry(carry); spotsFor(fid); boltFor();
@@ -1138,7 +1199,7 @@ export function start(api){
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st);
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st);
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);

@@ -269,7 +269,7 @@ function car(ci, j0, w, L, body, nose, o = {}){
    블렌더로 7천 면 · 텍스처 1024로 줄여 home/aveo.json + aveo.jpg. 아티팩트가 .glb를 못 올려서 mung3d.js처럼 JSON에 base64로 넣음)
    불러오기는 비동기라, 유나 모드 막기 상자는 W.extraBoxes에 넣어 두고 첫 tick에 엔진 상자 목록에 더함 */
 const TA = {5126:Float32Array, 5123:Uint16Array, 5125:Uint32Array, 5121:Uint8Array}, NC = {SCALAR:1, VEC2:2, VEC3:3, VEC4:4};
-function tripoCar(url, ci, cj, L, Hh, Wd, nose, cute = {}){   // cute: a·k = 가운데(|x|<a)를 k배로 줄여 바퀴는 둥근 채 짧게, top = 창문 줄 위로 키우기
+function tripoCar(url, ci, cj, L, Hh, Wd, nose, cute = {}, mat = {}){   // mat: 재질 덮어쓰기 (테슬라 실버)   // cute: a·k = 가운데(|x|<a)를 k배로 줄여 바퀴는 둥근 채 짧게, top = 창문 줄 위로 키우기
   W.extraBoxes.push([X(ci - Wd / 2), Z(cj - L / 2), X(ci + Wd / 2), Z(cj + L / 2), 0.08, Hh * 0.6]);
   const scene = K.R.scene, cut = K.cutaway;
   (async () => { try {
@@ -290,11 +290,32 @@ function tripoCar(url, ci, cj, L, Hh, Wd, nose, cute = {}){   // cute: a·k = �
       P.needsUpdate = true; g.computeBoundingBox(); g.computeVertexNormals(); }
     const bb = g.boundingBox;
     const tex = await new THREE.TextureLoader().loadAsync(new URL(j.images[0].uri, u).href); tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-    const m = new THREE.Mesh(g, cut(new THREE.MeshStandardMaterial({map:tex, roughness:0.55, metalness:0.05})));
+    const m = new THREE.Mesh(g, cut(new THREE.MeshStandardMaterial({map:tex, roughness:0.55, metalness:0.05, ...mat})));
     const sy = Hh / (bb.max.y - bb.min.y); m.scale.set(cute.a ? sy : L / (bb.max.x - bb.min.x), sy, Wd / (bb.max.z - bb.min.z));   // 귀엽게 할 땐 길이도 높이와 같은 배율 (바퀴가 둥글게)
     m.rotation.y = nose === "-j" ? PI / 2 : -PI / 2;   // 모델 +x(앞)이 -j 쪽으로
     m.position.set(X(ci), 0.02, Z(cj)); m.castShadow = true; m.receiveShadow = true; scene.add(m);
   } catch(e){ console.warn("트리포 차 못 불러옴", e); } })();
+}
+
+/* 로비 차와 같은 방식의 차 (2026-11-24 감독님 "차 2개 관두고 그냥 니가 표현하듯이 해라": 트리포·장난감 차 대신 floor3d_lobby.js carParts 모양)
+   코가 +x 인 모양을 Group에 만들고 s배로 키워 주차 칸에 맞춤. kind: "hatch"(아베오) · "suv"(테슬라 모델 Y) */
+function boxCar(ci, cj, nose, col, kind, dim){   // dim = 실제 크기 [길이, 폭, 높이] (칸. 유나 키 1칸 ≈ 1.28m)
+  const CH = 1.2, h = v => hz(v) * CH, g = new THREE.Group(), suv = kind === "suv";
+  const glass = D("#A9C3D3", "#2C3A4E"), tire = ["#1E1E1E", "#141414"], dk = ["#3A3A3C", "#2A2A2C"];
+  const L = suv ? 2.4 : 2.1, Wd = suv ? 1.14 : 1.08, bH = suv ? 9 : 8, cL = suv ? 1.62 : 1.3, cx = suv ? -0.12 : -0.3, cH = suv ? 7 : 7.5;
+  const put = (geo, c, x, y, z, cls = "s") => K.sm(geo, c, x, y, z, g, cls);
+  put(K.rbox(L, h(bH), Wd, 0.13, 2), col, 0, h(2.5) + h(bH) / 2, 0);   // 몸통
+  put(K.rbox(cL, h(cH), Wd - 0.15, 0.12, 2), glass, cx, h(2.5 + bH) + h(cH) / 2 - 0.01, 0);   // 유리 칸
+  put(K.rbox(cL - 0.12, h(1.6), Wd - 0.22, 0.06, 1), suv ? D("#3E4A5C", "#1C2230") : col, cx, h(2.5 + bH + cH) - 0.01, 0);   // 지붕 (테슬라는 유리 지붕)
+  [-1, 1].forEach(k => put(K.rbox(0.07, h(2.2), Wd - 0.06, 0.03, 1), dk, k * (L / 2 - 0.01), h(4.6), 0));   // 범퍼
+  put(K.rbox(L - 0.55, h(1.4), Wd + 0.02, 0.03, 1), ["#4A4A4C", "#2E2E30"], 0, h(3.2), 0);   // 아랫단
+  [-0.31, 0.31].forEach(k => [-1, 1].forEach(z => put(K.cyl(0.17, 0.17, 0.14, 14), tire, k * L, 0.17, z * (Wd / 2 - 0.06)).rotation.x = PI / 2));
+  [-1, 1].forEach(z => put(K.rbox(0.03, 0.06, 0.18, 0), ["#FFF3C2", "#FFF3C2"], L / 2 + 0.005, h(bH - 0.5), z * (Wd / 2 - 0.2), "glow"));   // 앞등
+  if(suv) put(K.rbox(0.03, 0.035, Wd - 0.2, 0), ["#E2403A", "#FF5A4A"], -L / 2 - 0.005, h(bH - 0.3), 0, "glow");   // 테슬라 뒤 빛줄
+  else [-1, 1].forEach(z => put(K.rbox(0.03, 0.08, 0.14, 0), ["#E2403A", "#FF5A4A"], -L / 2 - 0.005, h(bH - 0.8), z * (Wd / 2 - 0.16), "glow"));
+  const sx = dim[0] / L, sz = dim[1] / Wd, sy = dim[2] / h(2.5 + bH + cH + 1.6);
+  g.scale.set(sx, sy, sz); g.rotation.y = nose === "-j" ? PI / 2 : -PI / 2; g.position.set(X(ci), 0, Z(cj)); K.root.add(g);
+  const hl = dim[0] / 2, hw = dim[1] / 2; W.extraBoxes.push([X(ci) - hw, Z(cj) - hl, X(ci) + hw, Z(cj) + hl, 0.08, dim[2] * 0.6]);   // 유나 막기
 }
 
 /* 장난감 차 (2026-11-23 감독님 "지금꺼 너무 이상한데?" "크레딧 없이 해"): 층층이 쌓인 판 대신 둥근 몸통 + 방울 같은 지붕 하나.
@@ -337,6 +358,7 @@ function paint1(c, dark){
   [11.5, 12.3, 13.1, 13.9, 14.7, 15.5, 16.3, 17.05].forEach((j, k) => p.rr(4.35 + (k % 2) * 0.12, j - 0.26, 5.15 + (k % 2) * 0.12, j + 0.26, 0.18, v("#E8E1D6", "#55504A")));
   p.rr(5.6, 11.3, 6.45, 17.2, 0.2, v("#8A6A4C", "#3A2C22")); p.rr(-0.2, 16.9, 3.95, 17.3, 0.2, v("#8A6A4C", "#3A2C22")); p.rr(15.8, 16.9, 21.2, 17.3, 0.2, v("#8A6A4C", "#3A2C22"));
   p.rr(17.3, 13.1, 19.5, 14.9, 1.0, v("rgba(255,255,255,.18)", "rgba(0,0,0,.12)"));
+  p.rr(5.55, 13.6, 6.5, 15.2, 0.2, v("#6FB06A", "#2E4A30")); [[5.3, 14.1], [6.05, 14.6], [6.8, 14.15]].forEach(([i, j]) => p.rr(i - 0.32, j - 0.24, i + 0.32, j + 0.24, 0.18, v("#E8E1D6", "#55504A")));   // 화단 사이 디딤돌 (옆 마당 가는 길)
   // 옆 정원 데크
   p.deck(16.3, 0.55, 21.2, 4.8, "i");
   // 현관: 밝은 돌 타일 · 들어오는 곳 · 동그란 매트
@@ -366,9 +388,9 @@ function build1(){
   // 필로티 기둥 (2층을 받침)
   [[15.72, 10.72], [15.72, 5.3]].forEach(([i, j]) => { B(i, j, 0.28, 0.28, TALL, D("#F3E9E4", "#4A403C"), 0, {r:0.02}); B(i - 0.02, j - 0.02, 0.32, 0.32, 3, CAPC, TALL, {r:0}); });
   // 차 두 대: 아베오(머리를 벽 쪽) · 테슬라 모델Y(충전 중이라 뒤를 벽 쪽)
-  tripoCar("./home/aveo.json", 8.6, 3.9, 4.1, 2.45, 2.6, "-j");   // 아베오 (트리포 그대로. 2026-11-24 감독님 "다 망가뜨려놨어. 그냥 트라이포 쓰든가" → 귀엽게 찌그러뜨린 것 뺌)
+  boxCar(8.6, 3.9, "-j", D("#3D6FD6", "#2A4C96"), "hatch", [3.16, 1.36, 1.19]);   // 아베오 해치백 4.04×1.74×1.52m   // 2026-11-24 감독님 "니가 표현하듯이" → 로비 차 방식
   // 테슬라 모델 Y L (6인승, 실제 4976×1920×1668mm). 은색
-  tripoCar("./home/tesla.json", 12.75, 3.95, 5.1, 2.7, 2.85, "+j");   // 테슬라 모델 Y L (2026-11-24 감독님 "그냥 트라이포 쓰든가" → 트리포 text-to-3D 110크레딧, 외장 Tripo3DAI/결과/tripo-out/tesla-y)
+  boxCar(12.75, 3.95, "+j", D("#C3C8CE", "#7E838A"), "suv", [3.89, 1.5, 1.3]);   // 테슬라 모델 Y 4.98×1.92×1.67m   // 2026-11-24 감독님 "니가 표현하듯이" → 로비 차 방식
   // 계단 (A: 위로 갈수록 −j) + 난간 + 계단 벽 가족 그림
   flight(SA, -1); stairRail(1.36, -1);
   [[7.8, 57, "#F4C7D4"], [7.15, 77, "#A9CBEA"], [6.5, 97, "#F6E39A"]].forEach(([j, z, bg], k) => { K.faceI(0.012, j - 0.35, j + 0.35, z - 12, z + 12, WHITE, "m", 0.03);
@@ -460,7 +482,7 @@ function build1(){
   tree(20.4, 12.2, 1.0); tree(1.0, 13.4, 0.8); tree(20.6, 16.3, 0.7);
   for(let i = 0.1, k = 0; i < 3.8; i += 0.42, k++) flowerStem(i, 17.1 + (k % 2 ? 0.08 : -0.06), RB[k % RB.length], 14 + (k % 3) * 3);
   for(let i = 16.0, k = 0; i < 21.1; i += 0.42, k++) flowerStem(i, 17.1 + (k % 2 ? 0.08 : -0.06), RB[(k + 2) % RB.length], 14 + (k % 3) * 3);
-  for(let j = 11.6, k = 0; j < 17.1; j += 0.42, k++) flowerStem(6.02 + (k % 2 ? 0.1 : -0.1), j, RB[(k + 4) % RB.length], 13 + (k % 3) * 3);
+  for(let j = 11.6, k = 0; j < 17.1; j += 0.42, k++) if(j < 13.5 || j > 15.3) flowerStem(6.02 + (k % 2 ? 0.1 : -0.1), j, RB[(k + 4) % RB.length], 13 + (k % 3) * 3);   // 가운데는 비움: 대문 쪽 잔디에서 옆 마당으로 바로 (2026-11-24 감독님 "마당도 갈수있게")
   for(let i = 16.4; i < 21.2; i += 0.36) ball(i, 0.2, 9, 0.24, K.sh("plant", (i * 7 % 3) * 0.06), "m", 10);
   B(16.25, 0.02, 5.0, 0.36, 8, K.sh("plant", -0.12), 0, {r:0.08});
   shift(8.4, 2.8, () => {
@@ -478,14 +500,7 @@ function build1(){
     [-0.25, 0.25].forEach(d => rod([si + d, sj, 65], [si + d, sj, 12], 0.008, D("#E9D2B0", "#6A5A48"), "m", 5));
     B(si - 0.32, sj - 0.15, 0.64, 0.3, 2, LILAC, 10.5, {r:0.04}); }
   });
-  shift(-5.3, 3.0, () => {
-  { const bi = 7.4, bj = 12.7, fr = D("#F06BA8", "#B5607E");
-    [bi - 0.32, bi + 0.32].forEach(i => K.sm(myGeo(new THREE.TorusGeometry(0.2, 0.03, 8, 24)), INK, X(i), hz(6.6), Z(bj), null, "s"));
-    rod([bi - 0.32, bj, 6.6], [bi, bj, 12], 0.02, fr); rod([bi, bj, 12], [bi + 0.32, bj, 6.6], 0.02, fr); rod([bi - 0.05, bj, 12], [bi + 0.22, bj, 16], 0.02, fr);
-    rod([bi + 0.22, bj, 16], [bi + 0.3, bj, 20], 0.02, fr); rod([bi + 0.3, bj - 0.16, 20], [bi + 0.3, bj + 0.16, 20], 0.016, INK);
-    B(bi - 0.12, bj - 0.07, 0.2, 0.14, 1.5, INK, 15, {r:0.03}); B(bi + 0.3, bj - 0.12, 0.22, 0.24, 4, D("#FFFFFF", "#8A847C"), 17, {r:0.03});
-    [[bi - 0.4, bj - 0.24], [bi - 0.4, bj + 0.24]].forEach(([i, j]) => K.sm(K.cyl(0.06, 0.06, 0.03, 12), INK, X(i), hz(2), Z(j), null, "s").rotation.x = PI / 2); }
-  });
+  // 유나 자전거는 탈 수 있게 움직이는 것으로 (buildBike, 2026-11-24)
 }
 /* =================================================================== 2층: 부엌(거실을 보는 아일랜드 + 고기 불판 식탁) · 거실 · 게스트 화장실 */
 const GI = 6.85, GJ = 5.4;   // 불판 가운데 (아일랜드 끝에 붙인 식탁)
@@ -969,7 +984,26 @@ function bulbLine(list){   // 전구 줄 (밤에만 반짝)
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(0.035, 0.035, 0.035);
   list.forEach(([i, j, z], k) => { W.bm.setMatrixAt(k, m.compose(new THREE.Vector3(X(i), hz(z) - 0.03, Z(j)), q, s)); W.bm.setColorAt(k, new THREE.Color("#E6E1D8")); });
 }
+/* 유나 자전거 (2026-11-24 감독님 "집에 자전거라든지 … 이용거리들 많이 재밌게"): 움직이는 메시 (굳히지 않음). 앞 = +z, rotation.y = 유나 방향 h */
+const BIKE_PARK = [10.8, 16.4, -PI / 2];
+function buildBike(){
+  const M = Merge(), fr = D("#F06BA8", "#B5607E"), wh = D("#FFFFFF", "#9A949C");
+  const rodG = (a, b, r) => { const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b), d = vb.clone().sub(va), g = new THREE.CylinderGeometry(r, r, d.length(), 8);
+    g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize())); g.translate(...va.clone().add(vb).multiplyScalar(0.5).toArray()); return g; };
+  const wr = 0.2, wy = 0.21, zf = 0.33, zb = -0.33, bb = [0, 0.25, -0.02], st = [0, 0.5, -0.12], hd = [0, 0.56, 0.22];
+  [zf, zb].forEach(z => { const t = new THREE.TorusGeometry(wr, 0.032, 8, 26); t.rotateY(PI / 2); t.translate(0, wy, z); M.add(t, INK);
+    [0, PI / 3, 2 * PI / 3].forEach(a => { const sp = new THREE.BoxGeometry(0.01, wr * 2 - 0.04, 0.01); sp.rotateX(a); sp.translate(0, wy, z); M.add(sp, wh); });
+    const hub = new THREE.CylinderGeometry(0.035, 0.035, 0.07, 10); hub.rotateZ(PI / 2); hub.translate(0, wy, z); M.add(hub, wh); });
+  [[[0, wy, zb], bb], [[0, wy, zb], st], [bb, st], [bb, hd], [st, [0, 0.53, 0.2]], [[0, wy, zf], hd], [hd, [0, 0.64, 0.2]]].forEach(([a, b]) => M.add(rodG(a, b, 0.022), fr));
+  M.add(rodG([0, 0.5, -0.12], [0, 0.56, -0.14], 0.016), INK); M.add(new THREE.BoxGeometry(0.13, 0.045, 0.2).translate(0, 0.58, -0.15), D("#FFFFFF", "#8A847C"));   // 안장
+  M.add(rodG([-0.18, 0.66, 0.19], [0.18, 0.66, 0.19], 0.016), INK); [-0.18, 0.18].forEach(x => M.add(rodG([x, 0.66, 0.19], [x * 1.05, 0.66, 0.12], 0.022), PINK));   // 핸들 · 손잡이
+  M.add(new THREE.BoxGeometry(0.24, 0.15, 0.17).translate(0, 0.52, 0.38), D("#FFFFFF", "#8A847C")); M.add(new THREE.BoxGeometry(0.2, 0.02, 0.13).translate(0, 0.6, 0.38), PINK);   // 앞 바구니
+  M.add(new THREE.BoxGeometry(0.22, 0.025, 0.06).translate(0, 0.25, -0.02), INK);   // 페달
+  [-1, 1].forEach(x => { const tw = new THREE.CylinderGeometry(0.06, 0.06, 0.02, 12); tw.rotateZ(PI / 2); tw.translate(x * 0.2, 0.08, -0.33); M.add(tw, wh); });   // 보조 바퀴
+  const m = dynMesh(M.geo()); m.position.set(X(BIKE_PARK[0]), 0, Z(BIKE_PARK[1])); m.rotation.y = BIKE_PARK[2]; return m;
+}
 function buildDyn1(){
+  W.bike = buildBike();
   gl(3.72, 11.32, 50, 22, "#FFE2A8", (tm, dk) => dk ? 0.6 : 0);
   [8.6, 13.0].forEach(i => gl(i, 0.18, 70, 24, "#FFE2A8", (tm, dk) => dk ? 0.6 : 0.03));
   gl(3.4, 4.6, 84, 40, "#FFE8F4", (tm, dk) => dk ? 0.5 : 0.08);
@@ -1048,6 +1082,7 @@ function animate(tm, dt){
 /* ---------- 유나 모드에 넘길 것 (yuna_game.js SEATS 형식: a~b 선분 또는 a 한 점, h = 보는 쪽(0 = +j, PI/2 = +i, PI = −j), H = 앉는 면 높이, k = 대사 종류, f = 앞에서만) ---------- */
 const H = px => px / 31.1;
 export const HOME = {
+  bike:{park:BIKE_PARK, set(i, j, h){ if(!W || !W.bike) return; W.bike.position.set(X(i), 0, Z(j)); W.bike.rotation.y = h; }},   // 유나 모드: 자전거 타기
   floors:{home1:"./floor3d_home.js", home2:"./floor3d_home.js?f=2", home3:"./floor3d_home.js?f=3", home4:"./floor3d_home.js?f=4"},
   names:{home1:"집1층 현관·주차장·마당", home2:"집2층 거실·부엌", home3:"집3층 방", home4:"집4층 다락·옥상"},
   gate:[4.8, 17.45], spawnGate:[4.8, 16.75, PI],   // 1층 대문 (보도 쪽). 여기 닿으면 로비 횡단보도 건너편으로 · 로비에서 오면 spawnGate

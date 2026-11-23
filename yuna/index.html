@@ -6232,6 +6232,7 @@ const L_TALKS = [["l_s1","l_s2",[[0,"이 문제 풀었어? ✏️"],[1,"아니�
 let lDoorA = 0, lDoorB = 0, lFocusHot = false, lTags = [], lNext = {car:0, ped:0, guest:0, visit:0, pass:0, talk:0, cross:0, cvs:0};
 /* 횡단보도 신호등 (2026-11-23 감독님 "횡단보도 신호등 필요"): 차 초록 14초 → 노랑 2초 → 사람 초록 8초(끝 2.5초 깜빡) → 모두 빨강 1.5초 */
 const XW = {i0:16.0, i1:19.2}, SIG_T = [14000, 2000, 8000, 1500], SIG_C = SIG_T.reduce((a, b) => a + b);
+window.lobbySig = () => ({...lSig(performance.now()), xw:XW});   // 유나 모드: 무단횡단 말리기용 (2026-11-24)
 function lSig(now){ const t = now % SIG_C;
   if(t < SIG_T[0]) return {car:"g", ped:"r", left:(SIG_T[0] - t) / 1000};
   if(t < SIG_T[0] + SIG_T[1]) return {car:"y", ped:"r", left:0};

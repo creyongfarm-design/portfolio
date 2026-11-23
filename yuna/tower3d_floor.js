@@ -1767,6 +1767,7 @@ function reachMap(){
   return G.reach = M;
 }
 const reachable = (i, j) => { const M = reachMap(), n = cellIdx(i, j); return !M || (n >= 0 && M[n] === 1); };
+export function playReach(i, j){ return R ? reachable(i, j) : false; }   // 시험용: 그 칸에 걸어서 갈 수 있나
 
 /* 줍는 것들 (보물·번개 사탕·별똥별·고양이·❗): 이모지 스프라이트 (2026-11-23 감독님 "재미난 모험요소 많이") */
 const EMO = {};
@@ -1832,7 +1833,7 @@ function enterPlay(){
 function playTick(now, t, dt){
   const [ix, iy] = PL.in; let mag = PL.freeze ? 0 : Math.min(1, Math.hypot(ix, iy));
   if(PL.sit){ if(mag > 0.35){ standUp(); PL.cb?.onStand?.(); } else mag = 0; }
-  if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
+  if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt && !PL.act?.path) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
   PL.swim = PL.water.find(w => inRect(w.rect, PL.i, PL.j)) || null;
   { const cn = clock(), was = PL.swam; PL.swam = !!PL.swim;
     if(PL.swim && !was){ const sf = (PL.swim.surf ?? 0.06) + 0.012; fxRing(PL.i, PL.j, sf, true); fxDrops(PL.i, PL.j, sf + 0.05, 14, 1); PL.dunk = cn + 450; PL.cb?.onSplash?.("in"); }
@@ -2059,6 +2060,8 @@ function markPos(){
 function actPose(p, t, now){
   const A = PL.act, el = reduce ? 0 : (now - A.t0) / 1000, k = A.k; let up = A.y || 0;
   const arms2 = (sx, sz, ex) => p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(sx, 0, sg * sz); a.el.rotation.set(ex, 0, 0); });
+  if(A.path){ const P = A.path, u = Math.min(1, (now - A.t0) / P.ms), a = P.a0 + u * P.turns * Math.PI * 2;   // 정해진 길로 움직이기 (자전거)
+    PL.i = P.c[0] + P.rx * Math.cos(a); PL.j = P.c[1] + P.ry * Math.sin(a); PL.h = Math.atan2(-P.rx * Math.sin(a), P.ry * Math.cos(a)); try { A.prop?.(PL.i, PL.j, PL.h); } catch(e){} }
   if(k === "run"){ const st = el * 11, s = Math.sin(st); pose(p, "walk", t, {step:st});
     p.legs.forEach((l, n) => { const q = n ? -s : s; l.hip.rotation.x = q * 0.85; l.knee.rotation.x = Math.max(0, -q) * 1.3 + 0.25; });
     p.arms.forEach((a, n) => { const q = n ? s : -s; a.sh.rotation.x = q * 0.8; a.el.rotation.x = -1.35; });
@@ -2093,6 +2096,21 @@ function actPose(p, t, now){
   else if(k === "read"){ pose(p, "stand", t, {phone:true}); p.head.rotation.x = 0.3; if(!reduce && Math.sin(el * 1.4) > 0.92) p.arms[1].el.rotation.z += 0.4; }   // 책 넘기기
   else if(k === "drink"){ pose(p, "stand", t, {sip:true, u:Math.min(1, el * 2)}); }
   else if(k === "vod"){ pose(p, "stand", t, {talk:true, wave:Math.sin(el * 1.3) > 0.4}); }
+  /* 유나네 집 놀이 (2026-11-24 감독님 "집에 자전거라든지 … 이용거리들 많이 재밌게") */
+  else if(k === "bike" || k === "horse"){ const bk = k === "bike", pd = el * (bk ? 7 : 3.2); pose(p, "sit", t, {seatY:(A.seat || 0.5) / p.root.scale.y});
+    p.legs.forEach((l, n) => { const q = Math.sin(pd + n * Math.PI); l.hip.rotation.x = -1.05 + q * (bk ? 0.38 : 0.08); l.knee.rotation.x = 1.2 - q * (bk ? 0.5 : 0.05); });
+    arms2(-1.15, 0.16, -0.25); p.chest.rotation.x = bk ? 0.22 : 0.1 + Math.sin(pd) * 0.14; if(!bk) up += Math.sin(pd) * 0.05; }
+  else if(k === "splash"){ pose(p, "stand", t, {}); p.arms.forEach((a, n) => { const q = Math.sin(el * 9 + n * Math.PI); a.sh.rotation.set(-0.9 + q * 0.6, 0, (n ? -1 : 1) * 0.45); a.el.rotation.set(-0.3, 0, 0); }); up += Math.abs(Math.sin(el * 4.5)) * 0.08; }
+  else if(k === "water"){ pose(p, "stand", t, {}); p.arms[1].sh.rotation.set(-1.25, 0, -0.2); p.arms[1].el.rotation.set(-0.3, 0, 0); p.arms[0].sh.rotation.set(-0.3, 0, 0.2); p.head.rotation.x = 0.25; p.chest.rotation.x = 0.1 + Math.sin(el * 1.2) * 0.06; }
+  else if(k === "cook" || k === "draw"){ pose(p, "stand", t, {}); const a1 = p.arms[1], q = el * (k === "cook" ? 6 : 3.4);
+    a1.sh.rotation.set(-1.0 + Math.sin(q) * (k === "draw" ? 0.35 : 0.15), 0, -0.25 + Math.cos(q) * 0.2); a1.el.rotation.set(-0.7, 0, 0); p.arms[0].sh.rotation.set(-0.7, 0, 0.25); p.arms[0].el.rotation.set(-1.1, 0, 0); p.head.rotation.x = k === "cook" ? 0.3 : 0; }
+  else if(k === "scope"){ pose(p, "stand", t, {}); arms2(-1.45, 0.35, -1.6); p.head.rotation.x = -0.15; p.head.rotation.y = Math.sin(el * 0.8) * 0.15; }
+  else if(k === "jump"){ const q = Math.abs(Math.sin(el * 4.2)); pose(p, "stand", t, {}); arms2(-2.6 + q * 0.4, 0.4, 0); p.legs.forEach(l => { l.hip.rotation.x = -0.3 * (1 - q); l.knee.rotation.x = 0.6 * (1 - q); }); up += q * 0.38; }
+  else if(k === "bath"){ pose(p, "sit", t, {seatY:0.1 / p.root.scale.y}); p.legs.forEach(l => { l.hip.rotation.x = -1.4; l.knee.rotation.x = 0.4; }); arms2(-0.5 + Math.sin(el * 2) * 0.3, 0.6, -0.4); p.head.rotation.x = -0.1; }
+  else if(k === "play"){ pose(p, "sit", t, {}); p.hips.position.y = 0.17; p.legs.forEach((l, n) => { const sg = n ? 1 : -1; l.hip.rotation.order = "YXZ"; l.hip.rotation.set(-1.42, sg * 0.85, 0); l.knee.rotation.set(2.55, 0, 0); });
+    p.arms.forEach((a, n) => { const q = Math.sin(el * 2.6 + n * 1.7); a.sh.rotation.set(-0.8 + q * 0.25, 0, (n ? -1 : 1) * 0.3); a.el.rotation.set(-0.6, 0, 0); }); p.head.rotation.x = 0.35; }
+  else if(k === "harvest"){ const q = (1 - Math.cos(el * 2.2)) / 2; pose(p, "stand", t, {}); p.hips.position.y = 0.9 - 0.32 * q; p.legs.forEach(l => { l.hip.rotation.x = -1.2 * q; l.knee.rotation.x = 2.0 * q; }); p.chest.rotation.x = 0.5 * q; arms2(-0.9 - 0.4 * q, 0.15, -0.3); }
+  else if(k === "laundry"){ const q = (1 - Math.cos(el * 2.4)) / 2; pose(p, "stand", t, {}); arms2(-1.3 - 1.4 * q, 0.25, -0.2); p.head.rotation.x = -0.3 * q; }
   else pose(p, "stand", t, {});
   return up;
 }
