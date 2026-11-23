@@ -569,6 +569,9 @@ function buildDynamic(){
   // 시사실 화면
   dplane(520, 162, 6.8, hz(66), "i", 15.4, 0.0, hz(57), drawCinema, 0.035);
   dplane(42, 42, 0.36, 0.36, "i", 12.1, 0.0, hz(104), drawReel, 0.04);
+  { const vh = hz(64), g = new THREE.PlaneGeometry(vh * 16 / 9, vh); g.translate(X(15.4), hz(57), Z(0.0) + 0.045);
+    W.vid = new THREE.Mesh(g, K.cutaway(new THREE.MeshBasicMaterial({color:0xFFFFFF, toneMapped:false, polygonOffset:true, polygonOffsetFactor:-4})));
+    W.vid.renderOrder = 2; W.vid.visible = false; scene.add(W.vid); }
   // 게임룸 TV · PRESS START · 오락기 화면 3
   dplane(320, 134, 3.2, hz(42), "i", 22.2, 0.0, hz(55), drawTV, 0.068);
   dplane(200, 30, 1.7, hz(8), "i", 24.3, 0.0, hz(89), drawPress, 0.04);
@@ -655,6 +658,7 @@ function catMesh(sleep){
 const sx = (S) => S?.reduce;
 function drawCinema(c, w, h, S, tm){
   const ng = S?.eggOn("w_screen"), y = z => (90 - z) / 66 * h, x = i => (i - 12.0) / 6.8 * w, g = c.createLinearGradient(0, 0, 0, h);
+  if(S?.film && !ng){ c.fillStyle = "#0B0A0E"; c.fillRect(0, 0, w, h); return; }   // 고객 시사 상영 중 (영상은 W.vid 판)
   if(ng){ g.addColorStop(0, "#2A2A2E"); g.addColorStop(1, "#4A4A50"); c.fillStyle = g; c.fillRect(0, 0, w, h);
     c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#FF6B6B"; c.font = `900 ${9 / 66 * h * 1.25}px ${K.FONT}`; c.fillText("NG 모음 😂", w / 2, y(62));
     c.fillStyle = "#FFFFFF"; c.font = `600 ${3.6 / 66 * h * 1.3}px ${K.FONT}`; c.fillText("감독님 몰래 보는 중…", w / 2, y(44)); return; }
@@ -939,6 +943,8 @@ function animate(S, t, tm, dt){
     ct.ry = ct.ry == null ? ct.h : ct.ry + Math.atan2(Math.sin(ct.h - ct.ry), Math.cos(ct.h - ct.ry)) * Math.min(1, dt * 8);
     const hop = C.pose === "walk" && !red ? Math.abs(Math.sin(tm * 0.02)) * hz(1.6) : 0;
     m.position.set(x, hop, z); m.rotation.y = ct.ry; }
+  // 고객 시사 영상 (타워가 재생을 맡고 여기선 그 비디오를 판에 붙임)
+  { const F = S?.film, v = W.vid; if(F && F.el){ if(v.userData.el !== F.el){ v.material.map?.dispose(); const tx = new THREE.VideoTexture(F.el); tx.colorSpace = THREE.SRGBColorSpace; v.material.map = tx; v.material.needsUpdate = true; v.userData.el = F.el; } v.visible = true; } else v.visible = false; }
   // 2D 그림판 (초당 20번)
   if(tm - W.dLast > 50 || W.dLast < 0){ W.dLast = tm; const c = W.dctx; c.clearRect(0, 0, DW, DH);
     W.dyn.forEach(d => { c.save(); c.beginPath(); c.rect(d.r.x, d.r.y, d.r.w, d.r.h); c.clip(); c.translate(d.r.x, d.r.y); d.draw(c, d.r.w, d.r.h, S, tm); c.restore(); });

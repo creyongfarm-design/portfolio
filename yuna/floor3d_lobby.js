@@ -34,6 +34,10 @@ const SENT = {skin:"#010101", hair:"#020202", shirt:"#030303", pants:"#040404"};
 const NORA = {skin:"#F3D3BC", hair:"#4A2E24", style:"long", shirt:"#F7F1EC", pants:"#B9A3C4"};
 const YUNA = {skin:"#F6D7C2", hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", shirt:"#FF8FB8", pants:"#6FA8DC"};
 const NCAR = 10;
+/* 횡단보도 신호등 (2026-11-23 감독님 "횡단보도 신호등 필요"). 차 신호: 기둥·박스 위치, 램프 [빨·노·초] j / 보행 신호: 기둥 · 박스 */
+const SIG_CAR = [{pi:15.3, pj:27.75, bj:26.1, lj:[25.88, 26.1, 26.32]}, {pi:19.6, pj:21.95, bj:23.5, lj:[23.72, 23.5, 23.28]}];
+const SIG_PED = [[15.75, 21.95], [19.45, 27.75]];
+const SIG_COL = {off:"#2B2D31", r:"#FF3B30", y:"#FFC62E", g:"#22D36B", pr:"#FF4A3D", pg:"#2EE07A"};
 const CAR_H = 1.2;   // 차 높이만 살짝 (2.5D 차는 납작해서)
 
 let ST = null;   // 열 때마다 새로
@@ -397,6 +401,12 @@ const def = {
       for(let k = 0; k < 8; k++) sm(new THREE.CylinderGeometry(0, 1.3, hz(9), 1, 1, false, k / 8 * Math.PI * 2, Math.PI / 4), cols[k % 2], X(ti), hz(45) + hz(9) / 2, Z(tj));
       sm(sph(0.05, 8, 6), metal, X(ti), hz(54), Z(tj), null, "s"); });
 
+    /* 신호등: 기둥 · 팔 · 박스 (램프는 init에서 상태 따라 색 바뀜) */
+    { const pc = D("#3A3D42", "#7E828A"), bx = "#202226";
+      SIG_CAR.forEach(({pi, pj, bj}) => { cylAt(0.05, 0.06, 72, pc, pi, pj, 0, "s", 10); const a = Math.min(pj, bj - 0.4), b = Math.max(pj, bj + 0.4);
+        B(pi - 0.03, a, 0.06, b - a, 1.6, pc, 69, {cls:"s", r:0.01}); B(pi - 0.06, bj - 0.34, 0.12, 0.68, 7.5, bx, 62.5, {cls:"s", r:0.02});
+        B(pi - 0.07, bj - 0.36, 0.14, 0.72, 0.8, bx, 70, {cls:"s", r:0.01}); });
+      SIG_PED.forEach(([i, j]) => { cylAt(0.035, 0.04, 52, pc, i, j, 0, "s", 10); B(i - 0.11, j - 0.065, 0.22, 0.13, 14, bx, 37.5, {cls:"s", r:0.02}); }); }
     /* 바깥: 가로수 · 가로등 · 벤치 · 주차장 입구 표지 · 직원 차 */
     TREES.forEach(([i, j]) => { const s = 0.95; cylAt(0.07, 0.09, 34 * s, D("#7A5A3C", "#5A4230"), i, j, 0, "m", 8);
       [[0,-4,16],[-11,4,12],[11,5,12],[-5,-14,11],[6,-12,11],[0,6,12]].forEach(([dx, dy, r], k) => sm(sph(r * s / 31.1 * 1.12, 14, 10), k % 2 ? sh("plant", 0.18) : "plant", X(i) + dx * s / 56 * 1.2, hz(48 * s) - dy * s / 31.1, Z(j) - dx * s / 56 * 1.2)); });
@@ -440,6 +450,12 @@ const def = {
     const pt = new THREE.CanvasTexture(pc); const pg = new THREE.PlaneGeometry(1, 1); pg.rotateX(-Math.PI / 2);
     ST.pool = mk(pg, new THREE.MeshBasicMaterial({map:pt, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, clippingPlanes:clip}), NCAR); ST.pool.visible = false;
     ST.cars = Array.from({length:NCAR}, () => ({car:null, yaw:0}));
+    // 신호등 램프: 차 6 (둥근 등, 박스 앞뒤로 튀어나와 양쪽에서 보임) · 보행 4 (빨강 사람 위 · 초록 사람 아래)
+    { const lm = new THREE.MeshBasicMaterial({toneMapped:false}), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3();
+      ST.sigCar = mk(new THREE.SphereGeometry(1, 14, 10), lm, 6); ST.sigPed = mk(new THREE.BoxGeometry(1, 1, 1), lm.clone(), 4);
+      SIG_CAR.forEach(({pi, lj}, n) => lj.forEach((j, k) => { m4.compose(v.set(K.X(pi), K.hz(66.25), K.Z(j)), q, sc.setScalar(0.078)); ST.sigCar.setMatrixAt(n * 3 + k, m4); }));
+      SIG_PED.forEach(([i, j], n) => [48.2, 41.2].forEach((z, k) => { m4.compose(v.set(K.X(i), K.hz(z), K.Z(j)), q, sc.set(0.15, K.hz(5.4), 0.16)); ST.sigPed.setMatrixAt(n * 2 + k, m4); }));
+      ST.sigKey = ""; }
     ST.tmp = {M:new THREE.Matrix4(), M2:new THREE.Matrix4(), Q:new THREE.Quaternion(), V:new THREE.Vector3(), S:new THREE.Vector3(), E:new THREE.Euler(), C:new THREE.Color(), Z:new THREE.Matrix4().makeScale(0, 0, 0), up:new THREE.Vector3(0, 1, 0)};
   },
 
@@ -488,6 +504,12 @@ const def = {
     ST.steam.instanceMatrix.needsUpdate = true;
     // 차
     driveCars(K, S ? S.cars : [], dt, dark);
+    // 신호등
+    const sg = S?.sig || {car:"g", ped:"r"}, bl = sg.ped === "blink" ? (Math.floor(now / 330) % 2 ? "g" : "off") : sg.ped, key = sg.car + bl;
+    if(key !== ST.sigKey){ ST.sigKey = key;
+      for(let n = 0; n < 2; n++) ["r", "y", "g"].forEach((c, k) => ST.sigCar.setColorAt(n * 3 + k, T.C.set(sg.car === c ? SIG_COL[c] : SIG_COL.off)));
+      for(let n = 0; n < 2; n++){ ST.sigPed.setColorAt(n * 2, T.C.set(bl === "r" ? SIG_COL.pr : SIG_COL.off)); ST.sigPed.setColorAt(n * 2 + 1, T.C.set(bl === "g" ? SIG_COL.pg : SIG_COL.off)); }
+      [ST.sigCar, ST.sigPed].forEach(im => { im.instanceColor.needsUpdate = true; im.instanceMatrix.needsUpdate = true; }); }
   },
 
   theme(K, dark){

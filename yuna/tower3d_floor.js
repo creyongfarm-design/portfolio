@@ -2104,6 +2104,7 @@ export function playHideSpot(minD = 7){
   return best;
 }
 export const playOn = () => PL.on;
+export const playPos = () => PL.on && R && R.pl ? [PL.i, PL.j] : null;   // 1층 차가 유나 앞에서 멈추게 (2026-11-23)
 export const playDebug = () => ({i:PL.i, j:PL.j, jy:PL.jy, actors:JSON.parse(JSON.stringify(PL.actors)), items:PL.items.map(it => [it.id, it.e, +it.i?.toFixed(2), +it.j?.toFixed(2)]), idle:PL.idleK?.k || null, still:Math.round(clock() - PL.still), fx:PL.fx.length});
 export function playItems(list){ PL.items.forEach(dropItem); PL.items = (list || []).map(o => ({...o, ph:Math.random() * 6.28, o:null, pop:0})); }
 export function playItem(id, patch){ const it = PL.items.find(x => x.id === id); if(!it) return; if(patch === null){ dropItem(it); PL.items = PL.items.filter(x => x !== it); return; } if(patch.at) [it.i, it.j] = patch.at; }

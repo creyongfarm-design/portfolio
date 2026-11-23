@@ -223,6 +223,8 @@ const CSS = `
 .yg-run{pointer-events:auto;position:absolute;right:calc(max(18px,env(safe-area-inset-right)) + 82px);bottom:calc(max(22px,env(safe-area-inset-bottom)) + 108px);display:grid;justify-items:center;gap:4px;border:0;background:none;padding:0;--p:0}
 .yg-run span{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;font-size:24px;background:radial-gradient(closest-side,color-mix(in srgb,var(--card) 92%,transparent) 80%,transparent 82%),conic-gradient(#FFC23D calc(var(--p) * 360deg),color-mix(in srgb,var(--ink) 16%,transparent) 0);box-shadow:0 8px 20px -10px rgba(0,0,0,.45);filter:grayscale(.7);opacity:.8;transition:filter .2s,opacity .2s,transform .1s}
 .yg-run.full span{filter:none;opacity:1;animation:yg-glow 1.1s ease-in-out infinite}
+.yg-run.ban span{filter:grayscale(1);opacity:.45;animation:none}
+.yg-run.ban b::after{content:" 🚫"}
 .yg-run.go span{filter:none;opacity:1;background:radial-gradient(closest-side,#FFF3D1 80%,transparent 82%),conic-gradient(#FF6FA8 calc(var(--p) * 360deg),transparent 0)}
 .yg-run b{font-size:11px;font-weight:700;color:var(--ink-2)}
 .yg-run:active span{transform:scale(.92)}
@@ -296,15 +298,31 @@ function sfx(k, a){ const c = auInit(); if(!c || !AU.on) return; SFX[k]?.(c.curr
 const BGM_CH = [[48, 60, 64, 67], [45, 57, 60, 64], [41, 57, 60, 65], [43, 55, 59, 62]];   // C · Am · F · G
 const BGM_MEL = [76,-1,79,76, 74,-1,72,-1,  72,74,76,-1, 81,-1,79,-1,  84,-1,81,79, 77,-1,76,-1,  74,76,79,-1, 74,-1,-1,-1,
                  76,-1,79,76, 74,-1,72,-1,  72,74,76,-1, 81,-1,84,-1,  81,-1,79,77, 76,-1,74,-1,  76,74,72,-1, 72,-1,-1,-1];
+/* 층마다 배경음 (2026-11-23 감독님 "층마다 배경음 바꿀까"): 1층 카페 라운지 · 2층 지금 곡 · 3층 통통 · 4층 꿈꾸는 종소리 · 5층 여름 */
+const BGM = {
+  main:{bpm:104, ch:BGM_CH, mel:BGM_MEL, lead:"triangle", lv:0.12},
+  lobby:{bpm:90, lead:"sine", lv:0.13, soft:true, ch:[[41,57,60,64],[40,55,59,62],[38,53,57,60],[43,55,59,65]],
+    mel:[72,-1,69,-1, 67,69,-1,-1,  71,-1,67,-1, 64,-1,-1,-1,  69,-1,65,-1, 62,65,69,-1,  67,-1,-1,71, 74,-1,-1,-1,
+         72,-1,76,-1, 74,72,-1,69,  71,-1,67,-1, 64,67,-1,-1,  69,-1,72,-1, 74,-1,71,-1,  72,-1,-1,-1, -1,-1,-1,-1]},
+  wf:{bpm:116, lead:"square", lv:0.05, ch:[[43,59,62,67],[38,57,62,66],[40,59,64,67],[36,60,64,67]],
+    mel:[74,-1,71,74, 79,-1,78,-1,  76,-1,74,-1, 69,-1,-1,-1,  71,-1,74,71, 76,-1,74,-1,  72,-1,71,-1, 69,-1,67,-1,
+         74,-1,71,74, 79,-1,81,-1,  83,-1,81,-1, 78,-1,-1,-1,  79,-1,76,-1, 74,76,71,-1,  72,74,71,-1, 67,-1,-1,-1]},
+  s4:{bpm:88, lead:"sine", lv:0.11, bell:true, soft:true, ch:[[38,62,66,69],[35,62,66,71],[43,62,67,71],[45,61,64,69]],
+    mel:[81,-1,-1,78, 81,-1,85,-1,  83,-1,-1,-1, 78,-1,-1,-1,  79,-1,83,-1, 86,-1,83,-1,  81,-1,-1,-1, 76,-1,-1,-1,
+         81,-1,-1,78, 81,-1,86,-1,  85,-1,83,-1, 78,-1,-1,-1,  79,-1,81,83, 86,-1,85,-1,  86,-1,-1,-1, -1,-1,-1,-1]},
+  roof:{bpm:126, lead:"square", lv:0.055, ch:[[41,57,60,65],[36,60,64,67],[38,57,62,65],[46,58,62,65]],
+    mel:[77,-1,77,79, -1,81,-1,77,  76,-1,72,-1, 74,-1,76,-1,  77,-1,77,79, -1,81,-1,84,  82,-1,81,-1, 79,-1,77,-1,
+         81,-1,81,-1, 84,-1,81,-1,  79,-1,76,-1, 72,-1,74,76,  77,-1,74,-1, 77,-1,79,-1,  77,-1,-1,-1, -1,-1,-1,-1]}};
+function bgmFloor(f){ const k = BGM[f] ? f : "main"; if(AU.trk !== k){ AU.trk = k; AU.step = 0; } }
 function bgmPump(){
   const c = AU.ctx; if(!c) return; if(c.state !== "running"){ AU.next = c.currentTime + 0.1; return; }
-  const e8 = 60 / 104 / 2;
+  const T = BGM[AU.trk] || BGM.main, e8 = 60 / T.bpm / 2;
   while(AU.next < c.currentTime + 0.35){
-    const t = AU.next, s = AU.step % 64, ch = BGM_CH[(s >> 3) % 4], b8 = s % 8;
+    const t = AU.next, s = AU.step % 64, ch = T.ch[(s >> 3) % T.ch.length], b8 = s % 8;
     if(AU.on){
-      if(b8 === 0 || b8 === 4) tone(mtof(ch[0]), t, e8 * 1.8, {type:"triangle", vol:0.22, out:AU.bgm});
-      if(b8 % 2 === 1){ ch.slice(1).forEach(n => tone(mtof(n), t, e8 * 0.9, {vol:0.045, out:AU.bgm})); hiss(t, 0.04, {vol:0.05, f:7000, q:0.7, out:AU.bgm}); }
-      const m = BGM_MEL[s]; if(m > 0) tone(mtof(m), t, e8 * 1.6, {type:"triangle", vol:0.12, out:AU.bgm});
+      if(b8 === 0 || b8 === (T.soft ? 5 : 4)) tone(mtof(ch[0]), t, e8 * 1.8, {type:"triangle", vol:0.22, out:AU.bgm});
+      if(b8 % 2 === 1){ ch.slice(1).forEach(n => tone(mtof(n), t, e8 * (T.soft ? 1.6 : 0.9), {vol:T.soft ? 0.035 : 0.045, out:AU.bgm})); if(!T.soft) hiss(t, 0.04, {vol:0.05, f:7000, q:0.7, out:AU.bgm}); }
+      const m = T.mel[s]; if(m > 0){ tone(mtof(m), t, e8 * (T.bell ? 2.6 : 1.6), {type:T.lead, vol:T.lv, out:AU.bgm}); if(T.bell) tone(mtof(m + 12), t, e8 * 1.2, {vol:T.lv * 0.25, out:AU.bgm}); }
     }
     AU.next += e8; AU.step++;
   }
@@ -675,7 +693,7 @@ export function start(api){
   /* ---------- 엔진 콜백 ---------- */
   const cb = {
     onFloor(fid){
-      S.floor = fid; S.st = null; REQ = null; S.near = null; S.reqNext = now() + 30000;
+      S.floor = fid; S.st = null; REQ = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
       if(!rec.vis[fid]){ rec.vis[fid] = 1; save(); later0(1500, checkBadges); }
       E()?.playSet({water:fid === "roof" ? [POOL] : []}); setCarry(carry); spotsFor(fid); boltFor();
       if(Q?.cat === "follow") S.catPos = [EXIT[0] + 0.4, EXIT[1] + 0.5];
@@ -685,7 +703,7 @@ export function start(api){
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); if(st.floor !== S.floor) return;
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return;
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);
@@ -776,8 +794,23 @@ export function start(api){
     if(!(st.boost > 0) && !st.swim){ const was = S.charge; S.charge = Math.min(1, S.charge + dt / (st.moving ? 9 : 22)); if(was < 1 && S.charge >= 1){ sfx("ready"); runB.classList.add("full"); } }
     runB.style.setProperty("--p", Math.min(1, st.boost > 0 ? st.boost / 4500 : S.charge).toFixed(3)); runB.classList.toggle("go", st.boost > 0);
   }
+  /* 달리다 엄마한테 걸리면 20초 달리기 금지 (2026-11-23 감독님 "달리다가 엄마한테 걸리면 못 뛰는것도 있으면 좋겟고") */
+  function momCatch(st){
+    if(!(st.boost > 0) || G || S.runBan > now()) return;
+    const e = E(); if(!e) return;
+    const ids = ["_nora", "l_nora"], wid = ids.find(id => e.playWhere(id)), w = wid && e.playWhere(wid), am = st.actors?.mom;
+    const m = am || (w && {i:w[0], j:w[1]}), id = am ? "@mom" : wid;
+    if(!m || Math.hypot(m.i - st.i, m.j - st.j) > 2.6) return;
+    e.playSet({boost:0}); S.charge = 0; S.runBan = now() + 20000; rec.caught = (rec.caught || 0) + 1; save();
+    runB.classList.remove("full", "go"); runB.classList.add("ban"); sfx("bump");
+    npcSay(id, pick(["유나야! 안에서 뛰면 안 돼~ 😠", "어허! 다칠라, 걸어 다녀요 🙅‍♀️", "우리 유나 또 뛰었지? 😤"]), 2600); e.playEmote?.(id, "😠", 1600);
+    later0(1300, () => yuSay(pick(["히잉… 걸어 다닐게요 😢", "앗 들켰다 😅", "네에… 🥲"]), 1800));
+    toast("🚫 엄마한테 걸렸다!", "20초 동안 달리기 금지", 2400);
+    later0(20000, () => { runB.classList.remove("ban"); toast("🏃‍♀️ 다시 달릴 수 있어요", "엄마 앞에선 살살~", 1700); });
+  }
   function doRun(){
     const e = E(); if(!e || S.st?.boost > 0) return;
+    if(S.runBan > now()){ yuSay(pick(["엄마가 뛰지 말랬어… 😢", "지금은 걸어야 해 🥲"]), 1400); toast("🚫 달리기 금지 중", `${Math.ceil((S.runBan - now()) / 1000)}초 남았어요`, 1300); return; }
     if(S.st?.swim){ yuSay("물속에선 못 달려~ 🏊‍♀️", 1300); return; }
     if(HOLD[carry]?.spill){ yuSay(pick([`뛰면 ${carry} 쏟아져요~ 천천히!`, "달리면 흘려요 😅 조심조심"]), 1600); return; }
     if(S.charge < 1){ toast(`기 모으는 중… ${Math.round(S.charge * 100)}% 🏃‍♀️`, "걸어 다니면 더 빨리 차요", 1200); return; }

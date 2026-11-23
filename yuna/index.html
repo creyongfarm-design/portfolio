@@ -3326,7 +3326,7 @@ function wfFind(g){
 /* 3D 복지층(floor3d_wf.js)이 읽는 살아 있는 상태. 사람·대화·냥이·문·이스터에그는 여기 2D 시뮬레이션 그대로 (2026-11-22) */
 (window.F3_SIM ||= {}).wf = () => {
   const now = performance.now(), at = (q, i, j, r) => Math.hypot(q.i - i, q.j - j) < r;
-  return {now, night:NIGHT, reduce, people:WFP, show:WF_SHOW, showTxt:wfShowTxt(), zones:WF_Z, eggs:WF_EGGS, menu:wfMenu(), txt:wfTxt,
+  return {now, night:NIGHT, reduce, people:WFP, show:WF_SHOW, showTxt:wfShowTxt(), film:WF_FILM.on ? WF_FILM : null, zones:WF_Z, eggs:WF_EGGS, menu:wfMenu(), txt:wfTxt,
     yuna, nora, yOn:yOn("wf"), nOn:nOn("wf"), cat:cat.floor === "wf" && !cat.hidden ? cat : null,
     doors:{a:WFP.some(q => (q.route || q.show) && (q.hidden ? q.wait < 1300 && at(q, 12.98, 17.1, 0.2) : at(q, 12.98, 17.1, 1.0))) ? 1 : 0,
       b:now - arrivedAt < 2600 || now - ePing.wf < 1900 || (yuna.elevFloor === "wf" && now - (yuna.elevAt || -1e9) < 1900) ? 1 : 0},
@@ -3472,7 +3472,10 @@ function wfWalls(t){
     const top = P(15.4,0.02,90), bot = P(15.4,0.02,24), g = ctx.createLinearGradient(top[0],top[1],bot[0],bot[1]);
     if(ng){ g.addColorStop(0,"#2A2A2E"); g.addColorStop(1,"#4A4A50"); } else { g.addColorStop(0,"#F08A5D"); g.addColorStop(0.55,"#F7C873"); g.addColorStop(1,"#6A4C7A"); }
     faceJ(12.0,18.8,0.02,24,90,g);
-    if(!ng){ { const [x,y] = P(12.6 + ph * 5.6,0.025,58); wfDot(x,y,7,"#FFF3C2"); }
+    if(!ng && WF_FILM.on){ faceJ(12.0,18.8,0.022,24,90,"#0B0A0E");
+      const v = WF_FILM.el, vh = 64, vw = vh / 31.1 * 16 / 9, i0 = 15.4 - vw / 2, o = P(i0,0.026,89), pi = P(i0 + vw,0.026,89), pz = P(i0,0.026,89 - vh);
+      ctx.save(); ctx.transform((pi[0] - o[0]) / 160, (pi[1] - o[1]) / 160, (pz[0] - o[0]) / 90, (pz[1] - o[1]) / 90, o[0], o[1]); try { ctx.drawImage(v, 0, 0, 160, 90); } catch(e){} ctx.restore(); }
+    else if(!ng){ { const [x,y] = P(12.6 + ph * 5.6,0.025,58); wfDot(x,y,7,"#FFF3C2"); }
       poly([P(12.0,0.025,24),P(12.0,0.025,40),P(13.6,0.025,48),P(15.0,0.025,41),P(16.6,0.025,50),P(18.8,0.025,38),P(18.8,0.025,24)], "#3A2A4A");
       { const [x,y] = P(13.0 + ((ph * 3) % 1) * 4.6,0.03,30), w = reduce ? 0 : Math.sin(t * 0.01) * 1.5; ctx.fillStyle = "#1A1220"; ctx.beginPath(); ctx.arc(x, y - 13, 2.6, 0, Math.PI*2); ctx.fill(); ctx.fillRect(x - 2, y - 10.5, 4, 8); seg([x-1,y-2.5],[x-2.5+w,y+2],"#1A1220",1.6); seg([x+1,y-2.5],[x+2.5-w,y+2],"#1A1220",1.6); }
       planeText(wfShowTxt(), 15.4, 0.03, WF_SHOW.on ? 81 : 28.5, "i", WF_SHOW.on ? 7 : 3.3, "#FFFFFF", null, 700, FONT); }
@@ -4003,7 +4006,28 @@ const SHOW_IN = [[13.4,17.1], [11.6,11.35], [11.4,8.0], [14.85,7.4], [14.85,6.0]
 const SHOW_CAST = [["cs_pd",[12.05,1.35],0], ["cs1",[12.9,3.0],1500], ["cs2",[13.6,3.0],2800], ["cs3",[14.3,3.0],4100]];
 const SHOW_PD_END = {pose:"stand", front:true, face:1, hd:0}, SHOW_SEAT_END = {pose:"sit", front:false, face:1, hd:Math.PI};
 SHOW_CAST.forEach(([id]) => Object.assign(WFI[id], {hidden:true, wait:1e9}));
-const wfShowTxt = () => WF_SHOW.ph === "in" ? "잠시 후 고객 시사가 시작됩니다" : WF_SHOW.on ? "고객 시사 · 홍보영상 1차 편집본" : "크레용팜 새 편집본 시사 중";
+/* 고객 시사 상영작 (2026-11-23 감독님 "시사에는 시사영상 틀어버려 진짜. 최근에 끝난 영상들", "천하제일 처럼 납품또는 내 영상이지 뭐", "크레용팜" → 고른 뒤 "1,2만 올려": 영등포·Retouch4me 두 편).
+   납품작·감독님 영상·크레용팜 최근 완성본을 1분 안쪽으로 잘라 854×480 · 소리 없이 줄인 것 (cine_*.mp4, 편당 1.5~3.6MB). 시사마다 다음 편.
+   'show' 단계 3초 뒤부터 끝까지 틀고, 다 끝나면 박수. 새 영상을 넣으려면 여기에 한 줄 + 게시 files에 mp4 */
+const WF_FILMS = [
+  {src:"cine_ydp.mp4",   title:"천하제일 영등포 브랜드필름", dur:58300},   // 영등포구 납품 · 1분 줄임본
+  {src:"cine_r4m.mp4",   title:"Retouch4me 다빈치 리뷰",     dur:60000},   // 크레용팜 롱폼 앞 1분
+];
+const WF_FILM = {...WF_FILMS[0], at:3000, el:null, on:false, seen:0, wd:0};
+function wfFilm(now){
+  const F = WF_FILM, S = WF_SHOW, t = S.on && S.ph === "show" ? now - S.t1 - F.at : -1, want = t >= 0 && t < F.dur;
+  F.seen = performance.now();
+  if(want && !F.el){ const v = document.createElement("video"); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto"; v.crossOrigin = "anonymous"; F.el = v; }
+  const v = F.el; if(!v) return;
+  if(want && v.dataset.src !== F.src){ v.dataset.src = F.src; v.src = F.src; v.dataset.sync = ""; }
+  if(want){ const sk = () => { try { v.currentTime = Math.min(t / 1000, (F.dur - 200) / 1000); } catch(e){} };
+    if(v.paused){ if(v.readyState >= 1){ sk(); v.dataset.sync = "1"; } v.play().catch(() => {}); }
+    else if(!v.dataset.sync && v.readyState >= 1){ sk(); v.dataset.sync = "1"; }   // 처음 불러올 땐 길이를 안 뒤에 맞춤
+    if(!F.wd) F.wd = setInterval(() => { if(performance.now() - F.seen > 1200 && F.el && !F.el.paused) F.el.pause(); }, 1000); }   // 층을 떠나거나 탭을 숨기면 멈춤
+  else if(!v.paused) v.pause();
+  F.on = want && v.readyState >= 2;
+}
+const wfShowTxt = () => WF_SHOW.ph === "in" ? "잠시 후 고객 시사가 시작됩니다" : WF_SHOW.on ? "고객 시사 · " + WF_FILM.title : "크레용팜 새 편집본 시사 중";
 function showGo(p, pts, end){ p.sp = pts.map(q => [...q]); p.spEnd = end; p.hidden = false; p.pose = "walk"; p.front = false; p.hd = null; p.act = null; }
 function showStep(p, dt){
   if(!p.sp?.length) return true;
@@ -4014,10 +4038,12 @@ function showStep(p, dt){
 }
 function wfShowStart(now){
   const S = WF_SHOW; S.on = true; S.ph = "in"; S.t0 = now; S.k = 0; S.n++;
+  Object.assign(WF_FILM, WF_FILMS[(S.n - 1) % WF_FILMS.length]);   // 시사마다 다음 영상
   SHOW_CAST.forEach(([id, seat, delay]) => Object.assign(WFI[id], {i:M_ELEV_IN[0], j:M_ELEV_IN[1], hidden:true, wait:delay, sp:null, outPath:null, act:null, go:seat}));
 }
 function wfShow(now, dt){
   const S = WF_SHOW; if(reduce) return;
+  wfFilm(now);
   if(!S.next) S.next = now + 45000 + Math.random() * 45000;
   if(!S.on){ if(now > S.next && !NIGHT) wfShowStart(now); return; }
   const cast = SHOW_CAST.map(c => WFI[c[0]]), [pd, a, b, c] = cast, ms = Math.min(dt, 0.1) * 1000, say = (p, tx, at = 120) => startTalk(p, p, [[0, tx]], now + at);
@@ -4034,11 +4060,11 @@ function wfShow(now, dt){
   if(S.ph === "show"){
     const t = now - S.t1, cue = (k, at, fn) => { if(S.k === k && t >= at){ S.k++; fn(); } };
     cue(0, 500, () => startTalk(pd, pd, [[0, "고객 시사 시작하겠습니다 🎬"], [0, "홍보영상 1차 편집본이에요"]], now));
-    cue(1, 9500, () => say(a, "오 좋네요 👏"));
-    cue(2, 16500, () => startTalk(b, pd, [[0, "로고를 조금만 크게 할 수 있을까요?"], [1, "네, 바로 반영할게요 🙏"]], now));
-    cue(3, 25500, () => { [a, b, c].forEach((p, k) => { p.act = "clap"; startTalk(p, p, [[0, "👏👏👏"], [0, "👏👏👏"]], now + k * 300); }); say(pd, "끝까지 봐 주셔서 감사합니다 🙇", 1200); });
-    cue(4, 31500, () => { [a, b, c].forEach(p => { p.act = null; }); startTalk(c, pd, [[0, "수고 많으셨어요 😊"], [1, "조심히 들어가세요 🙇"]], now); });
-    cue(5, 37500, () => { S.ph = "out"; const back = [...SHOW_IN].reverse().slice(1);
+    cue(1, 20000, () => say(a, "오 좋네요 👏"));
+    cue(2, 38000, () => startTalk(b, pd, [[0, "로고를 조금만 크게 할 수 있을까요?"], [1, "네, 바로 반영할게요 🙏"]], now));
+    cue(3, WF_FILM.at + WF_FILM.dur + 800, () => { [a, b, c].forEach((p, k) => { p.act = "clap"; startTalk(p, p, [[0, "👏👏👏"], [0, "👏👏👏"]], now + k * 300); }); say(pd, "끝까지 봐 주셔서 감사합니다 🙇", 1200); });
+    cue(4, WF_FILM.at + WF_FILM.dur + 6800, () => { [a, b, c].forEach(p => { p.act = null; }); startTalk(c, pd, [[0, "수고 많으셨어요 😊"], [1, "조심히 들어가세요 🙇"]], now); });
+    cue(5, WF_FILM.at + WF_FILM.dur + 12800, () => { S.ph = "out"; const back = [...SHOW_IN].reverse().slice(1);
       cast.forEach((p, k) => { p.wait = k * 800; p.outPath = [...(p === pd ? [] : [[p.i, 2.35]]), [15.4, 2.35], ...back, M_ELEV_IN]; }); });
     return;
   }
@@ -6182,7 +6208,16 @@ const LOBBY_PEOPLE = [
   return {...d, npc:true, k, i:at[0], j:at[1], z:0, pose:s?.pose || d.pose || "stand", face:s?.face ?? d.face ?? 1, front:!!d.front, phase:Math.random() * 6, ri:0, wait:s ? s.dwell : 0, seg:null, hidden:false, desc0:d.desc, act0:d.act, base:at, path:[]}; });
 const LPI = Object.fromEntries(LOBBY_PEOPLE.map(p => [p.id, p]));
 const L_TALKS = [["l_s1","l_s2",[[0,"이 문제 풀었어? ✏️"],[1,"아니… 해설 같이 보자 😵"]]],["l_s3","l_s3",[[0,"오늘 목표량 끝내고 간다 💪"]]],["l_bar","l_bar",[[0,"따뜻한 거 한 잔 더 드릴까요? ☕"]]],["l_f1","l_f2",[[0,"여기 크로플 진짜 맛있다 🥐"],[1,"다음엔 테라스 앉자 ☀️"]]],["l_t1","l_t2",[[0,"날씨 좋다~ ☀️"],[1,"여기 사진 잘 나온대 📸"]]],["l_ph","l_ph",[[0,"구름 네온 너무 예쁘다 ☁️📸"]]],["l_park","l_park",[[0,"오라이~ 천천히 들어오세요 🚗"]]],["l_rec","l_rec2",[[0,"오늘 미팅 손님 세 분이에요 📋"],[1,"방문증 미리 뽑아 둘게요 🪪"]]],["l_bar","l_bar",[[0,"주문하신 라떼 나왔습니다 ☕"]]]];
-let lDoorA = 0, lDoorB = 0, lFocusHot = false, lTags = [], lNext = {car:0, ped:0, guest:0, visit:0, pass:0, talk:0};
+let lDoorA = 0, lDoorB = 0, lFocusHot = false, lTags = [], lNext = {car:0, ped:0, guest:0, visit:0, pass:0, talk:0, cross:0};
+/* 횡단보도 신호등 (2026-11-23 감독님 "횡단보도 신호등 필요"): 차 초록 14초 → 노랑 2초 → 사람 초록 8초(끝 2.5초 깜빡) → 모두 빨강 1.5초 */
+const XW = {i0:16.0, i1:19.2}, SIG_T = [14000, 2000, 8000, 1500], SIG_C = SIG_T.reduce((a, b) => a + b);
+function lSig(now){ const t = now % SIG_C;
+  if(t < SIG_T[0]) return {car:"g", ped:"r", left:(SIG_T[0] - t) / 1000};
+  if(t < SIG_T[0] + SIG_T[1]) return {car:"y", ped:"r", left:0};
+  const p = t - SIG_T[0] - SIG_T[1];
+  if(p < SIG_T[2]) return {car:"r", ped:SIG_T[2] - p < 2500 ? "blink" : "g", left:Math.ceil((SIG_T[2] - p) / 1000)};
+  return {car:"r", ped:"r", left:0}; }
+function lYunaAt(){ try { const m = F3.mod; return F3.on && curFloor === "lobby" && m?.playOn?.() ? m.playPos?.() || null : null; } catch(e){ return null; } }
 const lGuests = [], lCars = [];   // 움직이는 손님 · 차
 const lobbyPeople = () => people.filter(p => p.flr === "lobby" && !p.hide);
 const lOn = p => !NIGHT || !!p.allNight;   // 밤엔 카페(24시간) · 안내 · 수험생만
@@ -6199,6 +6234,10 @@ function lGuest(kind, car){
   if(kind === "pass"){ [g.i, g.j] = [sx, sj]; g.path = [[ex, sj]]; g.desc = pickOne(["산책 중 🚶","출근길 🏃","강아지 산책 가는 길 🐕","카페 구경만 하고 가는 중 👀"]); g.st = "leave"; }
   else if(kind === "visit"){ [g.i, g.j] = [sx, sj]; g.path = [[16.0, sj], [16.0, 19.4], [16.0, 6.15]]; g.desc = "2층 미팅 가는 중 🤝"; }
   else if(car){ [g.i, g.j] = [car.sp[0], car.sp[1] + 0.95]; g.path = [[6.6, car.sp[1] + 0.95], [7.85, car.sp[1] + 0.95], ...L_PDOOR, L_HUB, L_CNT]; g.desc = "차 세우고 커피 마시러 ☕"; g.exit = [L_HUB, ...[...L_PDOOR].reverse(), [7.85, car.sp[1] + 0.95], [6.6, car.sp[1] + 0.95], [car.sp[0] + 0.2, car.sp[1] + 0.95]]; }
+  else if(kind === "cross"){ const up = Math.random() < 0.5, ci = 16.5 + Math.random() * 2.2, fj = 28.4 + Math.random() * 0.4;   // 횡단보도 건너는 사람
+    g.name = "지나가는 사람"; g.role = "횡단보도"; g.desc = "횡단보도로 가는 중 🚶"; g.st = "curb";
+    if(up){ [g.i, g.j] = [sx, sj]; g.path = [[ci, sj], [ci, 21.95]]; g.far = [[ci, fj], [ex, fj]]; }
+    else { [g.i, g.j] = [sx, fj]; g.path = [[ci, fj], [ci, 27.8]]; g.far = [[ci, sj], [ex, sj]]; } }
   else { [g.i, g.j] = [sx, sj]; g.path = [[L_OUT[0], sj], L_OUT, L_DOOR, L_DOOR_IN, [26.3,7.6], L_HUB, L_CNT]; g.desc = "크레용 카페 가는 중 ☕"; g.exit = [L_HUB, [26.3,7.6], L_DOOR_IN, L_DOOR, L_OUT, [L_OUT[0], sj], [ex, sj]]; }
   lGuests.push(g); return g;
 }
@@ -6221,6 +6260,8 @@ function lGuestStep(g, now, dt){
     case "toElev": g.path = [[14.2, 7.6], [14.2, 17.1], M_ELEV, M_ELEV_IN]; g.st = "ride"; return;
     case "ride": g.hidden = true; ePingL = now; g.st = "up"; g.until = now + 60000 + Math.random() * 60000; return;
     case "up": g.hidden = false; ePingL = now; g.path = [M_ELEV, [14.2, 17.1], [16.0, 19.4], [16.0, g.exit[0][1]], ...g.exit]; g.desc = "미팅 끝나고 가는 중 👋"; g.st = "leave"; return;
+    case "curb": if(lSig(now).ped !== "g"){ g.desc = "신호 기다리는 중 🚦"; return; }
+      g.path = g.far; g.desc = "횡단보도 건너는 중 🚶"; g.st = "leave"; return;
     case "leave": if(g.car){ g.car.st = "out"; g.car.path = null; } g.dead = true; return;
   }
 }
@@ -6239,8 +6280,17 @@ function lCarStep(c, now, dt){
     if(c.st === "arrive"){ c.st = "wait"; c.dir = "-i"; c.guest = lGuest("cafe", c); return; }
     if(c.st === "out"){ c.dead = true; return; }
   }
-  const [ti, tj] = c.path[0], dx = ti - c.i, dy = tj - c.j, d = Math.hypot(dx, dy), v = (c.pass ? 3.4 : Math.abs(dy) > 0 && c.j > 21 ? 2.6 : 1.5) * dt;
+  const [ti, tj] = c.path[0], dx = ti - c.i, dy = tj - c.j, d = Math.hypot(dx, dy); let v = (c.pass ? 3.4 : Math.abs(dy) > 0 && c.j > 21 ? 2.6 : 1.5) * dt;
   const hd = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "+i" : "-i") : (dy > 0 ? "+j" : "-j");
+  if((hd === "+i" || hd === "-i") && c.j > 22.4 && c.j < 27.3){   // 도로 위: 신호 · 건너는 사람 · 유나 · 앞차
+    const f = hd === "+i" ? 1 : -1, stop = (f > 0 ? XW.i0 - 1.75 : XW.i1 + 1.75) - c.i, sd = stop * f, sg = lSig(now); let lim = Infinity;
+    if(sd > -0.05){
+      if(sg.car === "r" || (sg.car === "y" && sd > 1.3)) lim = Math.max(0, sd);
+      if(lGuests.some(g => g.kind === "cross" && g.st === "leave" && g.j > 22.2 && g.j < 27.6 && g.i > XW.i0 - 0.3 && g.i < XW.i1 + 0.3)) lim = Math.min(lim, Math.max(0, sd)); }
+    const yp = lYunaAt(); if(yp && yp[1] > 22.3 && yp[1] < 27.5 && Math.abs(yp[1] - c.j) < 1.1){ const yd = (yp[0] - c.i) * f - 1.9; if(yd > -1.0) lim = Math.min(lim, Math.max(0, yd)); }
+    lCars.forEach(o => { if(o === c || Math.abs(o.j - c.j) > 0.4) return; const od = (o.i - c.i) * f; if(od > 0) lim = Math.min(lim, Math.max(0, od - 2.9)); });
+    c.brake = lim < v * 0.5; v = Math.max(0, Math.min(v, lim)); if(v < 1e-4) return; }
+  else c.brake = false;
   if(c.rev && c.path.length === 3) c.dir = "-i"; else c.dir = hd;   // 주차칸에서 나올 땐 후진
   if(d <= v){ c.i = ti; c.j = tj; c.path.shift(); } else { c.i += dx / d * v; c.j += dy / d * v; }
 }
@@ -6255,6 +6305,7 @@ function lobbyStep(now, dt){
     if(free.length && lCars.filter(c => c.sp).length < 2){ const sp = pickOne(free); lCars.push({sp, i:44, j:23.5, st:"arrive", col: pickOne(L_CARCOL)}); } }
   if(now > lNext.guest){ lNext.guest = now + (NIGHT ? 25000 + Math.random() * 30000 : 9000 + Math.random() * 12000); if(lGuests.filter(g => g.kind === "cafe" && !g.car).length < (NIGHT ? 3 : 6)) lGuest("cafe"); }   // 카페는 24시간
   if(now > lNext.ped){ lNext.ped = now + 7000 + Math.random() * 9000; lGuest("pass"); }
+  if(now > lNext.cross){ lNext.cross = now + (NIGHT ? 20000 : 8000) + Math.random() * 9000; if(lGuests.filter(g => g.kind === "cross").length < (NIGHT ? 2 : 5)) lGuest("cross"); }
   if(now > lNext.visit && !NIGHT){ lNext.visit = now + 45000 + Math.random() * 40000; if(!lGuests.some(g => g.kind === "visit")) lGuest("visit"); }
   if(now > lNext.talk){ lNext.talk = now + 7000 + Math.random() * 7000; const c = pickOne(L_TALKS.filter(c => lOn(LPI[c[0]]) && lOn(LPI[c[1]]))), a = LPI[c[0]], b = LPI[c[1]]; if(!inTalk(a, now) && !inTalk(b, now)) startTalk(a, b, c[2], now + 150); }
   lCars.forEach(c => lCarStep(c, now, dt));
@@ -6282,7 +6333,7 @@ function lSeed(){   // 처음 들어왔을 때 비어 보이지 않게
   lGuests.forEach(g => add(g, "guest", {hidden:!!g.hidden}));
   lobbyPeople().forEach(p => add(p, "pd", {hex:statusColor(statusOf(p.id)), line:p.sky?.spot?.line || ""}));
   if(yOn("lobby")) add(yuna, "yuna"); if(nOn("lobby")) add(nora, "nora");
-  return {now, night:NIGHT, reduce, people:out, cars:lCars, doorA:lDoorA, doorB:lDoorB, brew:LPI.l_bar.wait > 0 && LPI.l_bar.ri === 0,
+  return {now, night:NIGHT, reduce, people:out, cars:lCars, sig:lSig(now), doorA:lDoorA, doorB:lDoorB, brew:LPI.l_bar.wait > 0 && LPI.l_bar.ri === 0,
     eggs:L_EGGS, eggOn, posters:POSTERS.map(p => p.img), plaques:PLAQUES.map(q => q.gold), egg(id){ const g = L_EGGS.find(e => e.id === id); if(g) popEgg(g); return EGG ? EGG.line : ""; }};
 };
 
