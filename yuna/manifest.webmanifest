@@ -1,0 +1,11 @@
+{
+  "name": "유나의 크레용타워",
+  "short_name": "유나 타워",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#F7F3EC",
+  "theme_color": "#F7F3EC",
+  "icons": [{"src": "../imgs/sprout/pink-touch.png", "sizes": "180x180", "type": "image/png"}]
+}
