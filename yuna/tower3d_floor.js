@@ -24,10 +24,11 @@ setDir(AZ0, EL0);
 /* 돌려서 뒷벽이 앞을 가리면 그 벽을 낮게 잘라 보임 (인형집처럼). 굳힌 재질 모두에 같은 조건 */
 const CUT = {value:new THREE.Vector4(-1e3, -1e3, 99, 99)};
 const PCUT_A = {value:new THREE.Vector4(0, 0, 0, 0)}, PCUT_B = {value:new THREE.Vector4(0, 0, 0, 0.95)};   // 유나 모드: 카메라~유나 사이 통로 자르기
+const CUT_BAYER = "float cutBayer(vec2 p){ vec2 q = mod(floor(p), 4.0); int k = int(q.x) + int(q.y) * 4; const float B[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0); return (B[k] + 0.5) / 16.0; }\n";   // 유나 모드 가림막: 4x4 바이어로 서서히 투명 (체크무늬·톱니 없앰, 2026-11-23)
 function cutaway(mat){
   mat.onBeforeCompile = sh => { sh.uniforms.uCut = CUT; sh.uniforms.uPA = PCUT_A; sh.uniforms.uPB = PCUT_B;
     sh.vertexShader = "varying vec3 vCutW;\n" + sh.vertexShader.replace("#include <project_vertex>", "#include <project_vertex>\n  vCutW = (modelMatrix * vec4(transformed, 1.0)).xyz;");
-    sh.fragmentShader = "varying vec3 vCutW;\nuniform vec4 uCut;\nuniform vec4 uPA;\nuniform vec4 uPB;\n" + sh.fragmentShader.replace("void main() {", "void main() {\n  if((vCutW.x < uCut.x && vCutW.y > uCut.z) || (vCutW.z < uCut.y && vCutW.y > uCut.w)) discard;\n  if(uPA.w > 0.5){ vec2 dd = uPB.xz - uPA.xz; vec2 ww = vCutW.xz - uPA.xz; float tt = clamp(dot(ww, dd) / max(dot(dd, dd), 1e-4), 0.0, 1.0); if(tt > 0.12 && length(ww - dd * tt) < mix(0.3, uPB.w, tt) && vCutW.y > mix(uPA.y, uPB.y, tt) - 0.05){ float hh = vCutW.y - uPA.y; if(hh > 1.35 || mod(floor(gl_FragCoord.x * 0.5) + floor(gl_FragCoord.y * 0.5), 2.0) < 1.0) discard; } }"); };
+    sh.fragmentShader = "varying vec3 vCutW;\nuniform vec4 uCut;\nuniform vec4 uPA;\nuniform vec4 uPB;\n" + CUT_BAYER + sh.fragmentShader.replace("void main() {", "void main() {\n  if((vCutW.x < uCut.x && vCutW.y > uCut.z) || (vCutW.z < uCut.y && vCutW.y > uCut.w)) discard;\n  if(uPA.w > 0.5){ vec2 dd = uPB.xz - uPA.xz; vec2 ww = vCutW.xz - uPA.xz; float tt = clamp(dot(ww, dd) / max(dot(dd, dd), 1e-4), 0.0, 1.0); float edge = mix(0.3, uPB.w, tt) + 0.18 - length(ww - dd * tt); float yb = vCutW.y - (mix(uPA.y, uPB.y, tt) - 0.05); if(tt > 0.08 && edge > 0.0 && yb > 0.0){ float hh = vCutW.y - uPA.y; float cc = smoothstep(0.0, 0.36, edge) * smoothstep(0.08, 0.22, tt) * smoothstep(0.0, 0.12, yb) * mix(0.62, 1.0, smoothstep(1.05, 1.45, hh)); if(cc > cutBayer(gl_FragCoord.xy)) discard; } }"); };
   mat.customProgramCacheKey = () => "cut"; return mat;
 }
 function updateCut(){
@@ -1709,7 +1710,8 @@ export function setTheme(dark){
 const PLAY_LOOKS = {
   yu:{look:{skin:"#F6D7C2", hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", shirt:"#FF8FB8", pants:"#6FA8DC"}, b:{h:0.74, w:0.9}},
   dad:{look:{skin:"#E8C3A2", hair:"#1E1B18", style:"bob", hat:"bucket", hatC:"#CDBB9A", shirt:"#2A2A28", pants:"#3A3D42"}, b:{h:1.06, w:1.18}},
-  mom:{look:{skin:"#F3D3BC", hair:"#4A2E24", style:"long", shirt:"#F7F1EC", pants:"#B9A3C4"}, b:{h:0.97, w:0.88}}};
+  mom:{look:{skin:"#F3D3BC", hair:"#4A2E24", style:"long", shirt:"#F7F1EC", pants:"#B9A3C4"}, b:{h:0.97, w:0.88}},
+  fr:{look:{skin:"#EBC4A4", hair:"#2A1E18", style:"bob", shirt:"#FFD84D", pants:"#4DAA97"}, b:{h:0.77, w:0.9}}};   // 놀러 온 친구 지유 (2026-11-23 감독님 "친구가 놀러오는 애피소드")
 /* 유나 옷 (2026-11-23 감독님 "탈의실에서 옷 예쁘게 갈아입혀 지면 재밌겠네 수영장에도 탈의실에서 수영복") */
 const YU_SKIN = "#F6D7C2", YU_B = {h:0.74, w:0.9}, yuL = o => ({look:{skin:YU_SKIN, hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", ...o}, b:YU_B, extra:o.extra});
 const YU_FITS = {
@@ -1719,7 +1721,7 @@ const YU_FITS = {
   director:yuL({shirt:"#2A2A28", pants:"#3A3D42", shoe:"#F1F2F4", hat:"bucket", hatC:"#CDBB9A", ribbon:null, extra:{headphones:"max", hpC:"#F4C7D3"}}),
   spring:yuL({shirt:"#FFD36B", skirt:"#FFD36B", skirtL:0.4, legs:YU_SKIN, shoe:"#FFFFFF", ribbon:"#FFFFFF"}),
   swim:yuL({shirt:"#FF6FAE", pants:"#FF6FAE", sleeve:YU_SKIN, thigh:YU_SKIN, legs:YU_SKIN, shoe:YU_SKIN, ribbon:"#FFFFFF"})};
-const PL = {on:false, fit:"base", sit:null, cloak:false, i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
+const PL = {on:false, fit:"base", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
   mark:null, actors:{}, ball:null, water:[], hide:new Set(), cb:null, spawn:null, tg:null, jy:0, jv:0, boost:0, items:[], fx:[], swam:false, wet:0, drip:0, rip:0, dunk:0, bump:null, bumpAt:0, still:0, idleK:null, idleWait:8000, emoN:0, lastPost:0, hold:null, slosh:0};
 const YU_R = 0.17, PV = new THREE.Vector3(), PV2 = new THREE.Vector3();
 const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -1804,7 +1806,7 @@ function itemsPost(now, t){
 function playMakeAvatars(){
   const mk = (k, L0) => { const L = L0 || PLAY_LOOKS[k], s = PARTS.length, p = makePerson(L.look, L.b, L.extra || {}); PARTS.slice(s).forEach(pt => pt.vis = () => p.root.visible); p.root.visible = false; return p; };
   const yus = {}; Object.keys(YU_FITS).forEach(k => yus[k] = mk("yu", YU_FITS[k]));
-  const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, dad:mk("dad"), mom:mk("mom"), bub:{}};
+  const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, dad:mk("dad"), mom:mk("mom"), fr:mk("fr"), bub:{}};
   // 공 (흰 바탕 검은 점)
   const bc = document.createElement("canvas"); bc.width = 128; bc.height = 64; { const x = bc.getContext("2d"); x.fillStyle = "#F7F5F0"; x.fillRect(0, 0, 128, 64); x.fillStyle = "#2A2A28";
     [[16,14],[48,30],[80,12],[112,30],[32,50],[96,50],[64,52],[0,34],[128,34]].forEach(([a, c]) => { x.beginPath(); for(let k = 0; k < 5; k++){ const t = k / 5 * Math.PI * 2 - Math.PI / 2; x.lineTo(a + Math.cos(t) * 7, c + Math.sin(t) * 7); } x.fill(); }); }
@@ -1814,14 +1816,14 @@ function playMakeAvatars(){
   A.mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.17), new THREE.MeshBasicMaterial({color:0xFFC23D, toneMapped:false})); A.mark.scale.set(1, 1.35, 1); A.mark.visible = false; A.mark.renderOrder = 5; R.scene.add(A.mark);
   A.ring = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.46, 40), new THREE.MeshBasicMaterial({color:0xFFC23D, transparent:true, opacity:0.75, depthWrite:false, side:THREE.DoubleSide, toneMapped:false}));
   A.ring.rotation.x = -Math.PI / 2; A.ring.visible = false; A.ring.renderOrder = 4; R.scene.add(A.ring);
-  ["yu", "dad", "mom"].forEach(k => { const bub = document.createElement("div"); bub.className = "t3-bub" + (k === "yu" ? " yu" : ""); bub.hidden = true;
+  ["yu", "dad", "mom", "fr"].forEach(k => { const bub = document.createElement("div"); bub.className = "t3-bub" + (k === "yu" ? " yu" : ""); bub.hidden = true;
     const stem = document.createElement("div"); stem.className = "t3-stem" + (k === "yu" ? " yu" : ""); stem.hidden = true; R.layer.append(stem, bub); A.bub[k] = {bub, stem, say:"", until:0}; });
 }
 function enterPlay(){
   if(!R || !R.pl) return;
   R.zone = "play"; R.anim = null; R.layer.classList.remove("far"); R.layer.classList.add("play"); touchMode(true); if(R.back) R.back.hidden = true;
   R.camera.fov = 52; R.camera.near = 0.12; R.camera.updateProjectionMatrix();
-  PL.mark = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.cloak = false;
+  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.cloak = false;
   const s = PL.spawn || [13.9, 17.1, Math.PI / 2]; PL.spawn = null;
   playGrid(); [PL.i, PL.j] = nearFree(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
   PL.tg = new THREE.Vector3(X(PL.i), PL.gy + 0.62, Z(PL.j)); PL.dd = PL.d; R.cur = {tg:PL.tg.clone(), d:PL.d}; R.az = PL.yaw; R.el = PL.el;
@@ -1830,6 +1832,7 @@ function enterPlay(){
 function playTick(now, t, dt){
   const [ix, iy] = PL.in; let mag = PL.freeze ? 0 : Math.min(1, Math.hypot(ix, iy));
   if(PL.sit){ if(mag > 0.35){ standUp(); PL.cb?.onStand?.(); } else mag = 0; }
+  if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
   PL.swim = PL.water.find(w => inRect(w.rect, PL.i, PL.j)) || null;
   { const cn = clock(), was = PL.swam; PL.swam = !!PL.swim;
     if(PL.swim && !was){ const sf = (PL.swim.surf ?? 0.06) + 0.012; fxRing(PL.i, PL.j, sf, true); fxDrops(PL.i, PL.j, sf + 0.05, 14, 1); PL.dunk = cn + 450; PL.cb?.onSplash?.("in"); }
@@ -1861,7 +1864,7 @@ function playTick(now, t, dt){
   PV.set(X(PL.i - Math.sin(PL.yaw) * la), PL.gy + (PL.swim ? 0.3 : 0.62) + PL.jy * 0.3, Z(PL.j - Math.cos(PL.yaw) * la)); PL.tg.lerp(PV, Math.min(1, dt * 9));
   // 카메라가 높은 벽·건물 뒤로 넘어가면 유나 쪽으로 당겨 옴 (GTA처럼)
   let lim = PL.d; { const G = R.pg, ch = Math.cos(PL.el), sh = Math.sin(PL.el), si = Math.sin(PL.yaw) * ch, sj = Math.cos(PL.yaw) * ch, y0 = PL.tg.y;
-    for(let s = 0.45; s < PL.d; s += 0.12){ const n = cellIdx(PL.i + si * s, PL.j + sj * s); if(n >= 0 && G.tp[n] > y0 + sh * s - 0.25){ lim = Math.max(0.9, s - 0.45); break; } } }
+    for(let s = PL.act ? 1.15 : 0.45; s < PL.d; s += 0.12){ const n = cellIdx(PL.i + si * s, PL.j + sj * s); if(n >= 0 && G.tp[n] > y0 + sh * s - 0.25){ lim = Math.max(0.9, s - 0.45); break; } } }
   PL.dd += (lim - PL.dd) * Math.min(1, dt * (lim < PL.dd ? 14 : 3));
   R.az = PL.yaw; R.el = PL.el; R.cur.tg.copy(PL.tg); R.cur.d = PL.dd;
   const fov = R.h > R.w * 1.1 ? 66 : R.h < 560 ? 58 : 52; if(R.camera.fov !== fov){ R.camera.fov = fov; R.camera.updateProjectionMatrix(); }   // 세로 폰은 옆이 좁아서 넓게
@@ -1926,7 +1929,7 @@ function headOf(id){
 function ballFree(i, j){ const r = 0.12; return !cellBlocked(i, j) && !cellBlocked(i + r, j) && !cellBlocked(i - r, j) && !cellBlocked(i, j + r) && !cellBlocked(i, j - r); }
 function ballTick(dt, mi, mj, sp){
   const b = PL.ball, dx = b.i - PL.i, dz = b.j - PL.j, d = Math.hypot(dx, dz) || 1e-3, nx = dx / d, nz = dz / d;
-  if(d < 0.36){
+  if(d < 0.36 && !(b.free > clock())){
     if(PL.moving && (mi * nx + mj * nz) > -0.2){ const k = Math.max(3.4, sp * 2.0); b.vi = (nx * 0.45 + mi * 0.55) * k; b.vj = (nz * 0.45 + mj * 0.55) * k; b.kick = clock(); }
     const ni = PL.i + nx * 0.37, nj = PL.j + nz * 0.37; if(ballFree(ni, nj)){ b.i = ni; b.j = nj; } }
   const n = 4, A = R.pl.ball;
@@ -1941,15 +1944,27 @@ function playCut(){
   PV2.copy(R.cur.tg).addScaledVector(DIR, R.cur.d);
   PCUT_A.value.set(X(PL.i), PL.gy + 0.4, Z(PL.j), 1); PCUT_B.value.set(PV2.x, PV2.y, PV2.z, 0.9);   // 카메라 → 유나 발끝 줄 위로 가리는 건 잘라 냄
 }
-function swimPose(p, t, k, moving){
+/* 영법 (2026-11-23 감독님 "수영안 평형과 자유형도 하고"): back = 배영(누워서), free = 자유형(엎드려 팔 번갈아 돌리기 + 발차기 + 옆으로 숨), breast = 평형(팔 벌려 당기고 개구리 발차기, 숨 쉴 때 머리 들림) */
+const BR_U = (t, k) => (t * 0.8 + k * 0.3) % 1;   // 평형 한 번 = 1.25초
+const BR_PULL = u => u < 0.38 ? Math.sin(u / 0.38 * Math.PI / 2) : u < 0.55 ? 1 : Math.max(0, 1 - (u - 0.55) / 0.2);
+function swimPose(p, t, k, moving, st = "back"){
   pose(p, "stand", t, {ph:k});
   if(reduce) return;
+  if(moving && st === "free"){
+    const br = Math.pow(Math.max(0, Math.sin(t * 1.7 + k)), 6); p.head.rotation.set(-0.38 + br * 0.2, br * 1.05, 0);
+    p.arms.forEach((a, n) => { const th = (t * 3.4 + n * Math.PI + k) % (Math.PI * 2); a.sh.rotation.set(th, 0, (n ? -1 : 1) * (0.16 + (th < Math.PI ? 0.22 : 0))); a.el.rotation.set(th < Math.PI ? -0.55 : -0.2, 0, 0); });
+    p.legs.forEach((l, n) => { l.hip.rotation.x = Math.sin(t * 9 + n * Math.PI) * 0.3; l.knee.rotation.x = 0.12 + Math.max(0, Math.sin(t * 9 + n * Math.PI + 0.6)) * 0.3; }); return; }
+  if(moving && st === "breast"){
+    const u = BR_U(t, k), pull = BR_PULL(u), bend = u < 0.38 ? 0 : u < 0.6 ? (u - 0.38) / 0.22 : u < 0.75 ? 1 - (u - 0.6) / 0.15 : 0;
+    p.head.rotation.set(-0.3 - pull * 0.4, 0, 0);
+    p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(-Math.PI + pull * 1.25, 0, sg * (Math.sin(Math.min(1, u / 0.38) * Math.PI) * 0.9 + 0.06)); a.el.rotation.set(-pull * 1.2, 0, 0); });
+    p.legs.forEach((l, n) => { const sg = n ? -1 : 1; l.hip.rotation.set(-bend * 0.55, 0, sg * (u > 0.55 && u < 0.8 ? Math.sin((u - 0.55) / 0.25 * Math.PI) * 0.5 : 0.02)); l.knee.rotation.x = bend * 1.55; }); return; }
   if(moving){ p.head.rotation.x = 0.3; p.arms.forEach((a, n) => { a.sh.rotation.set(-((t * 3.8 + n * Math.PI + k) % (Math.PI * 2)), 0, (n ? -1 : 1) * 0.28); a.el.rotation.set(-0.25, 0, 0); });
     p.legs.forEach((l, n) => l.hip.rotation.x = Math.sin(t * 9 + n * Math.PI) * 0.35); }
   else p.arms.forEach((a, n) => { a.sh.rotation.set(-0.6 + Math.sin(t * 5.2 + n * Math.PI + k) * 0.75, 0, (n ? -1 : 1) * 0.5); a.el.rotation.set(-0.35, 0, 0); });
 }
 const BK_E = new THREE.Euler(0, 0, 0, "YXZ");
-function placeBody(p, i, j, h, gy, swim, t, k, moving){
+function placeBody(p, i, j, h, gy, swim, t, k, moving, st = "back"){
   const r = p.root;
   if(!swim){ p.bk = 0; r.position.set(X(i), gy, Z(j)); r.rotation.set(0, h, 0); return; }
   // 서 있으면 어깨까지 물에 잠긴 채 둥둥, 움직이면 등을 대고 누워 머리 쪽으로 나아감 (배영)
@@ -1957,13 +1972,17 @@ function placeBody(p, i, j, h, gy, swim, t, k, moving){
   p.bk = (p.bk || 0) + ((moving && !reduce ? 1 : 0) - (p.bk || 0)) * Math.min(1, dt * 3.2);
   const b = p.bk * p.bk * (3 - 2 * p.bk), s = r.scale.y, sf = swim.surf ?? 0.06, bob = reduce ? 0 : Math.sin(t * 2.4 + k) * 0.015;
   const yUp = sf - 1.25 * s + bob, yLie = sf - 0.1 * s + bob * 0.6, back = (1.95 * s - 0.3) * b;   // 누우면 머리끝이 앞 0.3칸에 오게 발을 뒤로 (벽에 머리 안 박히게)
+  if(st === "free" || st === "breast"){   // 엎드려서 (머리 쪽으로 나아감). 평형은 숨 쉴 때 상체가 살짝 들림
+    const lift = st === "breast" && !reduce ? BR_PULL(BR_U(t, k)) * b : 0, roll = st === "free" && !reduce ? Math.sin(t * 1.7 + k) * 0.22 * b : 0;
+    r.position.set(X(i) - Math.sin(h) * back, yUp + (yLie - yUp) * b + lift * 0.07, Z(j) - Math.cos(h) * back);
+    r.rotation.copy(BK_E.set(Math.PI / 2 * b - lift * 0.32, h, roll)); return; }
   r.position.set(X(i) - Math.sin(h) * back, yUp + (yLie - yUp) * b, Z(j) - Math.cos(h) * back);
   r.rotation.copy(BK_E.set(-Math.PI / 2 * b, h + Math.PI * b, 0));
 }
 function playPost(){
   const A = R.pl, now = clock(), t = (now - R.t0) / 1000;
   A.yu.root.visible = PL.on && !PL.cloak;
-  if(!PL.on){ A.dad.root.visible = A.mom.root.visible = A.ball.visible = A.mark.visible = A.ring.visible = false; return; }
+  if(!PL.on){ A.dad.root.visible = A.mom.root.visible = A.fr.root.visible = A.ball.visible = A.mark.visible = A.ring.visible = false; return; }
   ["_yuna", "l_yuna", ...PL.hide].forEach(id => { const P = R.people[id]; if(P) P.p.root.visible = false; });
   const p = A.yu, talk = now < A.bub.yu.until, dt = Math.min(0.05, (now - (PL.lastPost || now)) / 1000); PL.lastPost = now;
   // 가만히 있으면 혼자 놂 (두리번 · 깡충 · 빙글 · 흥얼 춤)
@@ -1972,11 +1991,14 @@ function playPost(){
   else if(!PL.idleK && !talk && !reduce && !PL.hold && now - PL.still > PL.idleWait){ const k = ["look", "hop", "spin", "dance"][Math.random() * 4 | 0];
     PL.idleK = {k, t0:now, until:now + {look:2600, hop:1500, spin:1300, dance:3200}[k]}; PL.idleWait = 9000 + Math.random() * 7000; PL.cb?.onIdle?.(k); }
   let spin = 0, hop = 0; const IK = PL.idleK, iu = IK ? Math.min(1, (now - IK.t0) / (IK.until - IK.t0)) : 0;
-  if(PL.sit){ const s = PL.sit, pray = s.pray || s.k === "church";   // 교회 장의자: 손 모으고 기도   // 앉기 (2026-11-23 감독님 "의자에~ 예배를 드릴수가업네")
+  p.legs.forEach(l => l.hip.rotation.order = "XYZ");
+  if(PL.act) hop = actPose(p, t, now);
+  else if(PL.sit){ const s = PL.sit, pray = s.pray || s.k === "church";   // 교회 장의자: 손 모으고 기도   // 앉기 (2026-11-23 감독님 "의자에~ 예배를 드릴수가업네")
     pose(p, "sit", t, {ph:0.3, talk, seatY:(s.H - PL.gy + 0.045) / p.root.scale.y});
     if(!reduce && !pray) p.legs.forEach((l, n) => l.knee.rotation.x += Math.sin(t * 3.1 + n * Math.PI) * 0.3);   // 발 동동
-    if(pray){ p.arms.forEach((a, n) => { a.sh.rotation.set(-0.62, 0, (n ? -1 : 1) * 0.1); a.el.rotation.set(-1.6, 0, (n ? -1 : 1) * 0.75); }); p.head.rotation.x = 0.36; } }
-  else if(PL.swim) swimPose(p, t, 0, PL.moving);
+    if(pray){ p.arms.forEach((a, n) => { a.sh.rotation.set(-0.62, 0, (n ? -1 : 1) * 0.1); a.el.rotation.set(-1.6, 0, (n ? -1 : 1) * 0.75); }); p.head.rotation.x = 0.36; }
+ }
+  else if(PL.swim) swimPose(p, t, 0, PL.moving, PL.stroke);
   else if(IK && !PL.moving && PL.jy === 0){
     if(IK.k === "look") pose(p, "stand", t, {ph:0.3, talk, turn:Math.sin(iu * Math.PI * 2) * 0.95});
     else { pose(p, "stand", t, {ph:0.3});
@@ -1990,18 +2012,22 @@ function playPost(){
   if(H){ const sl = now < PL.slosh ? (PL.slosh - now) / 700 : 0;
     p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(-0.78 + (PL.moving ? Math.sin(PL.step * 2) * 0.03 : 0) - sl * 0.25, 0, sg * 0.1); a.el.rotation.set(-1.05, 0, sg * 0.62); });
     if(PL.moving){ p.chest.rotation.x = 0.06; p.head.rotation.x = 0.22; } }   // 컵 내려다보며 걷기
-  placeBody(p, PL.i, PL.j, PL.h + spin, PL.gy + PL.jy + hop + (PL.moving && !PL.jy && !PL.swim && !reduce ? Math.abs(Math.sin(PL.step)) * (H ? 0.012 : 0.035) : 0), PL.swim, t, 0, PL.moving);
+  placeBody(p, PL.i, PL.j, PL.h + spin, PL.gy + PL.jy + hop + (PL.moving && !PL.jy && !PL.swim && !reduce ? Math.abs(Math.sin(PL.step)) * (H ? 0.012 : 0.035) : 0), PL.swim, t, 0, PL.moving, PL.stroke);
+  if(PL.sit && (PL.sit.swing || PL.sit.sway) && !reduce){   // 그네·해먹: 앉은 채로 앞뒤(swing) · 옆(sway)으로 흔들 (2026-11-23 감독님 "그네 같은 물건도 이용할수있게")
+    const s = PL.sit, w = Math.sin((now - (s.t0 || (s.t0 = now))) / 1000 * (s.swing ? 2.4 : 1.3)), fw = (s.swing || 0) * w, sw = (s.sway || 0) * w, h = PL.h;
+    p.root.position.x += Math.sin(h) * fw * 0.55 + Math.cos(h) * sw * 0.35; p.root.position.z += Math.cos(h) * fw * 0.55 - Math.sin(h) * sw * 0.35;
+    p.root.position.y += (1 - Math.cos(fw)) * 0.5; }
   if(PL.swim && now < PL.dunk) p.root.position.y -= Math.sin((1 - (PL.dunk - now) / 450) * Math.PI) * 0.16;   // 첨벙 하고 살짝 잠김
-  ["dad", "mom"].forEach((k, n) => { const a = PL.actors[k], q = A[k]; q.root.visible = !!a; if(!a) return;
+  ["dad", "mom", "fr"].forEach((k, n) => { const a = PL.actors[k], q = A[k]; q.root.visible = !!a; if(!a) return;
     const sw = a.pose === "swim" ? (PL.water[0] || {surf:0.06}) : null, at = now < A.bub[k].until;
-    if(sw) swimPose(q, t, 1.3 + n, a.moving); else if(a.moving) pose(q, "walk", t, {step:a.step}); else if(a.pose === "crouch"){ pose(q, "sit", t, {ph:n, seatY:0.34}); q.chest.rotation.x = 0.35; q.head.rotation.x = 0.25; }
+    if(sw) swimPose(q, t, 1.3 + n, a.moving, a.stroke || "free"); else if(a.moving) pose(q, "walk", t, {step:a.step}); else if(a.pose === "crouch"){ pose(q, "sit", t, {ph:n, seatY:0.34}); q.chest.rotation.x = 0.35; q.head.rotation.x = 0.25; }
     else pose(q, "stand", t, {ph:n, talk:at, wave:a.wave && now < a.wave});
-    placeBody(q, a.i, a.j, a.h || 0, a.pose === "crouch" ? 0 : groundH(a.i, a.j), sw, t, 1 + n, a.moving); });
+    placeBody(q, a.i, a.j, a.h || 0, a.pose === "crouch" ? 0 : groundH(a.i, a.j), sw, t, 1 + n, a.moving, a.stroke || "free"); });
   lookYuna(dt); swimFx(now); fxTick(dt);
   itemsPost(now, t); holdPost(p, H, now, t);
   A.ball.visible = !!PL.ball; if(PL.ball) A.ball.position.set(X(PL.ball.i), 0.13 + groundH(PL.ball.i, PL.ball.j), Z(PL.ball.j));
   const m = markPos(); A.mark.visible = A.ring.visible = !!m;
-  [A.yu, A.dad, A.mom].forEach(q => { if(q.root.visible) q.root.updateMatrixWorld(true); });
+  [A.yu, A.dad, A.mom, A.fr].forEach(q => { if(q.root.visible) q.root.updateMatrixWorld(true); });
   if(m){ A.mark.position.set(m.x, m.y + 1.45 + (reduce ? 0 : Math.sin(t * 3) * 0.08), m.z); A.mark.rotation.y = t * 2.2; A.ring.position.set(m.x, m.y + 0.02, m.z); const s = 1 + (reduce ? 0 : Math.sin(t * 4) * 0.08); A.ring.scale.set(s, s, 1); }
 }
 /* 손에 든 것: 가슴 앞 두 손 사이에 이모지. 걸으면 살짝 찰랑, 흘릴 뻔하면 크게 흔들림 */
@@ -2028,11 +2054,53 @@ function markPos(){
   if(k.id){ const P = R.people[k.id]; return P && P.p.root.visible ? new THREE.Vector3(P.p.root.position.x, 0, P.p.root.position.z) : null; }
   return null;
 }
+/* 기구 쓰기 (2026-11-23 감독님 "요가도 하고 러닝머신도 하고 세세한거 다 해줘"): 러닝머신 · 요가 · 덤벨 · 철봉 · 짐볼 · 스쿼트 · 탁구 · 인형뽑기 · 물 · VOD
+   돌려주는 값 = 몸을 띄우는 높이 */
+function actPose(p, t, now){
+  const A = PL.act, el = reduce ? 0 : (now - A.t0) / 1000, k = A.k; let up = A.y || 0;
+  const arms2 = (sx, sz, ex) => p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(sx, 0, sg * sz); a.el.rotation.set(ex, 0, 0); });
+  if(k === "run"){ const st = el * 11, s = Math.sin(st); pose(p, "walk", t, {step:st});
+    p.legs.forEach((l, n) => { const q = n ? -s : s; l.hip.rotation.x = q * 0.85; l.knee.rotation.x = Math.max(0, -q) * 1.3 + 0.25; });
+    p.arms.forEach((a, n) => { const q = n ? s : -s; a.sh.rotation.x = q * 0.8; a.el.rotation.x = -1.35; });
+    p.chest.rotation.x = 0.12; up += Math.abs(Math.cos(st)) * 0.05; }
+  else if(k === "yoga"){ const ph = Math.floor(el / 3.6) % 3, u = Math.min(1, (el % 3.6) / 0.7);
+    if(ph === 0){ pose(p, "stand", t, {});   // 나무 자세
+      const L = p.legs[0]; L.hip.rotation.order = "YXZ"; L.hip.rotation.set(-1.0 * u, -1.15 * u, 0); L.knee.rotation.set(2.3 * u, 0, 0);
+      p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(0, 0, sg * (0.07 + 2.85 * u)); a.el.rotation.set(0, 0, sg * 0.55 * u); });
+      p.chest.rotation.z = reduce ? 0 : Math.sin(t * 2.2) * 0.03; }
+    else if(ph === 1){ pose(p, "stand", t, {});   // 전사 자세
+      p.hips.position.y = 0.9 - 0.14 * u; p.legs[0].hip.rotation.x = -0.8 * u; p.legs[0].knee.rotation.x = 0.95 * u; p.legs[1].hip.rotation.x = 0.55 * u; p.legs[1].knee.rotation.x = 0.05;
+      arms2(0, 0.07 + 1.5 * u, 0); p.head.rotation.y = 0.55 * u; }
+    else { pose(p, "sit", t, {});   // 명상
+      p.hips.position.y = 0.17; p.legs.forEach((l, n) => { const sg = n ? 1 : -1; l.hip.rotation.order = "YXZ"; l.hip.rotation.set(-1.42, sg * 0.85, 0); l.knee.rotation.set(2.55, 0, 0); });
+      p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(-0.45, 0, sg * 0.42); a.el.rotation.set(-0.35, 0, 0); }); p.head.rotation.x = 0.12; p.chest.rotation.x = -0.04; } }
+  else if(k === "lift"){ pose(p, "stand", t, {});   // 덤벨 컬 (양팔 번갈아)
+    p.arms.forEach((a, n) => { const u = Math.max(0, Math.sin(el * 3.2 + n * Math.PI)); a.sh.rotation.set(-0.25, 0, (n ? -1 : 1) * 0.14); a.el.rotation.set(-0.2 - 2.05 * u, 0, 0); });
+    p.head.rotation.x = 0.05; }
+  else if(k === "pullup"){ const u = (1 - Math.cos(el * 2.6)) / 2; pose(p, "stand", t, {});   // 철봉
+    arms2(-2.95 + 0.5 * u, 0.22, -1.7 * u); p.legs.forEach((l, n) => { l.hip.rotation.x = -0.25 - n * 0.1; l.knee.rotation.x = 0.8; });
+    up += 0.12 + 0.24 * u; }
+  else if(k === "bounce"){ pose(p, "sit", t, {seatY:0.62 / p.root.scale.y});   // 짐볼
+    up += Math.abs(Math.sin(el * 5)) * 0.09; arms2(-2.4 + Math.sin(el * 5) * 0.3, 0.3, -0.2); }
+  else if(k === "squat"){ const u = (1 - Math.cos(el * 2.4)) / 2; pose(p, "stand", t, {});   // 케틀벨 스쿼트
+    p.hips.position.y = 0.9 - 0.3 * u; p.legs.forEach(l => { l.hip.rotation.x = -1.15 * u; l.knee.rotation.x = 1.9 * u; }); p.chest.rotation.x = 0.38 * u; p.head.rotation.x = -0.3 * u;
+    arms2(-0.7 - 0.5 * u, 0.12, -1.6); }
+  else if(k === "pong"){ const sw = A.swing ? Math.max(0, 1 - (now - A.t0) / 380) : 0; pose(p, "stand", t, {});   // 탁구 (치면 sw)
+    p.hips.position.y = 0.84; p.legs.forEach(l => { l.hip.rotation.x = -0.25; l.knee.rotation.x = 0.45; }); p.chest.rotation.x = 0.15;
+    p.arms[1].sh.rotation.set(-0.7 - sw * 0.6, 0, -0.5 + sw * 0.9); p.arms[1].el.rotation.set(-0.9 + sw * 0.5, 0, 0); p.arms[0].sh.rotation.set(-0.45, 0, 0.2); p.arms[0].el.rotation.set(-0.6, 0, 0);
+    p.chest.rotation.y = -0.25 + sw * 0.5; up += reduce ? 0 : Math.abs(Math.sin(t * 5)) * 0.015; }
+  else if(k === "claw"){ pose(p, "stand", t, {}); arms2(-1.05, 0.12, -0.45); p.arms[1].sh.rotation.z = -0.12 + (reduce ? 0 : Math.sin(t * 4) * 0.08); p.head.rotation.x = -0.18; }
+  else if(k === "read"){ pose(p, "stand", t, {phone:true}); p.head.rotation.x = 0.3; if(!reduce && Math.sin(el * 1.4) > 0.92) p.arms[1].el.rotation.z += 0.4; }   // 책 넘기기
+  else if(k === "drink"){ pose(p, "stand", t, {sip:true, u:Math.min(1, el * 2)}); }
+  else if(k === "vod"){ pose(p, "stand", t, {talk:true, wave:Math.sin(el * 1.3) > 0.4}); }
+  else pose(p, "stand", t, {});
+  return up;
+}
 function playNear(){
   let best = null, bd = 1.7;
   Object.values(R.people).forEach(P => { if(!P.p.root.visible || PL.hide.has(P.id) || /yuna$/.test(P.id)) return; const d = Math.hypot(P.p.root.position.x + OX - PL.i, P.p.root.position.z + OZ - PL.j);
     if(d < bd){ bd = d; best = {id:P.id, name:P.info.name, role:P.info.role || P.info.roleKo || "", task:P.info.task || P.info.desc || "", d}; } });
-  Object.entries(PL.actors).forEach(([k, a]) => { const d = Math.hypot(a.i - PL.i, a.j - PL.j); if(d < bd){ bd = d; best = {id:"@" + k, name:k === "dad" ? "아빠" : "엄마", role:"", task:"", d}; } });
+  Object.entries(PL.actors).forEach(([k, a]) => { const d = Math.hypot(a.i - PL.i, a.j - PL.j); if(d < 1.7 && d - 0.9 < bd){ bd = d - 0.9; /* 아빠·엄마·지유는 옆 사람보다 먼저 */ best = {id:"@" + k, name:k === "dad" ? "아빠" : k === "mom" ? "엄마" : "지유", role:"", task:"", d}; } });
   return best;
 }
 function playState(){
@@ -2044,7 +2112,7 @@ function playState(){
 function playTags(now){
   if(!R.pl) return;
   const A = R.pl, clampv = (v, a, b) => Math.min(b, Math.max(a, v));
-  ["yu", "dad", "mom"].forEach(k => { const B = A.bub[k], p = A[k];
+  ["yu", "dad", "mom", "fr"].forEach(k => { const B = A.bub[k], p = A[k];
     if(!PL.on || !p.root.visible || now > B.until){ B.bub.hidden = B.stem.hidden = true; return; }
     if(B.bub.textContent !== B.say){ B.bub.textContent = B.say; B.w = 0; }
     B.bub.hidden = false; if(!B.w){ B.w = B.bub.offsetWidth; B.h = B.bub.offsetHeight; }
@@ -2062,7 +2130,7 @@ function playTap(mx, my){
 }
 export function playStart(cb, spawn){ PL.on = true; PL.cb = cb; PL.spawn = spawn || null; PL.in = [0, 0]; if(R && R.pl) enterPlay(); }
 export function playStop(){
-  PL.on = false; PL.cb = null; PL.in = [0, 0]; PCUT_A.value.w = 0; PL.mark = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
+  PL.on = false; PL.cb = null; PL.in = [0, 0]; PCUT_A.value.w = 0; PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
   if(!R) return; R.layer.classList.remove("play"); R.camera.fov = 22; R.camera.near = 1; R.camera.updateProjectionMatrix(); R.zone = null; setView(HOME(), true);
 }
 export function playInput(x, y){ PL.in[0] = x; PL.in[1] = y; }
@@ -2072,11 +2140,14 @@ export function playSet(o){
   if("hide" in o) PL.hide = new Set(o.hide || []);
   if("freeze" in o) PL.freeze = !!o.freeze;
   if("cloak" in o) PL.cloak = !!o.cloak;
+  if("stroke" in o) PL.stroke = o.stroke || "free";
   if("hold" in o) PL.hold = o.hold ? {e:o.hold.e, slow:o.hold.slow ?? 0.8, spill:!!o.hold.spill, col:o.hold.col, t0:PL.hold?.e === o.hold.e ? PL.hold.t0 : clock()} : null;
   if("spawn" in o) PL.spawn = o.spawn;
   if("wave" in o) PL.wave = clock() + o.wave;
   if("boost" in o) PL.boost = o.boost ? clock() + o.boost : 0;
   if("ball" in o) PL.ball = o.ball ? {i:o.ball[0], j:o.ball[1], vi:0, vj:0} : null;
+  if("act" in o){ const a = o.act; PL.act = a ? (typeof a === "string" ? {k:a} : {...a}) : null; if(PL.act){ PL.act.t0 = clock(); PL.sitYaw = (o.at?.[2] ?? o.pos?.[2] ?? PL.h) + 0.6; } }
+  if(o.at && R && R.pl){ PL.i = o.at[0]; PL.j = o.at[1]; if(o.at[2] != null){ PL.h = o.at[2]; PL.yaw = PL.h + Math.PI; } PL.tg?.set(X(PL.i), 0.62, Z(PL.j)); }   // 기구 위에 바로 (부딪힘 무시)
   if(o.pos && R && R.pl){ [PL.i, PL.j] = nearFree(o.pos[0], o.pos[1]); if(o.pos[2] != null){ PL.h = o.pos[2]; PL.yaw = PL.h + Math.PI; } PL.tg?.set(X(PL.i), 0.62, Z(PL.j)); }
 }
 export function playActor(k, a){
@@ -2107,15 +2178,17 @@ export const playOn = () => PL.on;
 export const playPos = () => PL.on && R && R.pl ? [PL.i, PL.j] : null;   // 1층 차가 유나 앞에서 멈추게 (2026-11-23)
 export const playDebug = () => ({i:PL.i, j:PL.j, jy:PL.jy, actors:JSON.parse(JSON.stringify(PL.actors)), items:PL.items.map(it => [it.id, it.e, +it.i?.toFixed(2), +it.j?.toFixed(2)]), idle:PL.idleK?.k || null, still:Math.round(clock() - PL.still), fx:PL.fx.length});
 export function playItems(list){ PL.items.forEach(dropItem); PL.items = (list || []).map(o => ({...o, ph:Math.random() * 6.28, o:null, pop:0})); }
-export function playItem(id, patch){ const it = PL.items.find(x => x.id === id); if(!it) return; if(patch === null){ dropItem(it); PL.items = PL.items.filter(x => x !== it); return; } if(patch.at) [it.i, it.j] = patch.at; }
+export function playItem(id, patch){ const it = PL.items.find(x => x.id === id); if(!it) return; if(patch === null){ dropItem(it); PL.items = PL.items.filter(x => x !== it); return; } if(patch.at) [it.i, it.j] = patch.at; if(patch.y != null) it.y = patch.y; }
 export function playEmote(on, e, ms = 1400){ if(!PL.on) return; PL.items.push({id:"emo" + (++PL.emoN), e, on, pick:false, emo:clock(), life:ms, s:0.44, glow:false, ph:0, o:null, pop:0}); }
 export function playSplash(){ if(!PL.on || !PL.swim) return false; const sf = (PL.swim.surf ?? 0.06) + 0.012; fxRing(PL.i, PL.j, sf, true); fxDrops(PL.i, PL.j, sf + 0.05, 12, 1); PL.dunk = clock() + 450; return true; }
 function standUp(){ if(!PL.sit) return; [PL.i, PL.j] = PL.sit.from; PL.h = PL.sit.h; PL.sit = null; }
+export function playKick(vi, vj){ if(!PL.ball) return false; PL.ball.vi = vi; PL.ball.vj = vj; PL.ball.kick = clock(); PL.ball.free = clock() + 350; return true; }   // 슛·패스 (2026-11-23 감독님 "슛패스 버튼")
+export function playBallAt(i, j){ if(!PL.ball) return false; PL.ball.i = i; PL.ball.j = j; PL.ball.vi = PL.ball.vj = 0; return true; }
 export function playSit(s){
   if(!PL.on || !R || !R.pl) return false;
   if(!s){ standUp(); return true; }
   if(PL.swim || PL.jy > 0 || PL.sit) return false;
-  PL.sit = {...s, from:[PL.i, PL.j]}; PL.i = s.i; PL.j = s.j; PL.h = s.h; PL.yaw = s.h + Math.PI; PL.dragAt = 0; return true;
+  PL.sit = {...s, from:[PL.i, PL.j]}; PL.i = s.i; PL.j = s.j; PL.h = s.h; PL.sitYaw = s.h + 0.6; PL.dragAt = 0; return true;   // 앉으면 카메라를 앞쪽 비스듬히 (2026-11-23 감독님 "앉으면 왜 뒷모습만 보이지?")
 }
 export function playOutfit(k){
   if(!YU_FITS[k]) return false; PL.fit = k;

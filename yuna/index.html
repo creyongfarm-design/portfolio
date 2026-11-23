@@ -1894,7 +1894,7 @@ function planYuna(now){
   y.si++;
   const dw = (Y_DWELL[k] || 10000) * (0.8 + Math.random() * 0.4);
   if(k === "elev"){ const nk = Y_PLAN.slice(y.si % Y_PLAN.length).concat(Y_PLAN).find(q => q !== "elev"); if(yFloorOf(nk) !== y.floor) k2elev(y, yFloorOf(nk)); else y.next = now + 300; return; }
-  if(k === "r:pond"){ yRoofGo(y, [R_OUT, [15.2,19.3], [22.4,19.3]], [22.4,18.45]); y.goal = {who: RNI.r_kid, lines: [[0,"같이 잉어 밥 줄래? 🐟"],[1,"응! 언니도 줘 봐 😆"],[0,"우와, 먹었다! 💕"]], line: "연못에서 꼬마랑 잉어 밥 주는 중 🐟", dwell: dw}; ySay("연못 잉어 보러 가는 중 🐟"); return; }
+  if(k === "r:pond"){ yRoofGo(y, [R_OUT, R_HUB, [14.6,1.5]], [21.85,1.5]); y.goal = {who: RNI.r_kid, lines: [[0,"같이 잉어 밥 줄래? 🐟"],[1,"응! 언니도 줘 봐 😆"],[0,"우와, 먹었다! 💕"]], line: "연못에서 꼬마랑 잉어 밥 주는 중 🐟", dwell: dw}; ySay("연못 잉어 보러 가는 중 🐟"); return; }
   if(k === "r:hsik"){ yRoofGo(y, [[27.6,13.0],[27.6,3.55]], [26.65,3.55]); y.goal = {who: RNI.h_3, lines: [[1,"유나 왔구나! 치킨 다리 줄까? 🍗"],[0,"우와, 감사합니다! 💕"],[1,"아빠한텐 비밀~ 🤫"]], line: "회식 테이블에서 치킨 얻어먹는 중 🍗", dwell: dw}; ySay("회식 테이블 구경 가는 중 🍗"); return; }
   if(k === "r:date"){ const a = RNI.d_a, on = a.ri === 0 && a.pose === "sit";
     yRoofGo(y, [[27.6,13.0],[27.6,9.8],[32.6,9.8]], [32.6,8.4]);
@@ -4015,7 +4015,10 @@ const WF_FILMS = [
 ];
 const WF_FILM = {...WF_FILMS[0], at:3000, el:null, on:false, seen:0, wd:0};
 function wfFilm(now){
-  const F = WF_FILM, S = WF_SHOW, t = S.on && S.ph === "show" ? now - S.t1 - F.at : -1, want = t >= 0 && t < F.dur;
+  const F = WF_FILM, S = WF_SHOW;
+  // 유나가 시사실 의자에 앉으면 그 자리에서 상영 (2026-11-23 감독님 "시사실에 영상은 안나오네"). 한 편 끝나면 다음 편
+  if(F.yu && !(S.on && S.ph === "show") && now - F.yu.t0 >= F.dur){ F.yu.k++; Object.assign(F, WF_FILMS[F.yu.k % WF_FILMS.length]); F.yu.t0 = now; }
+  const t = S.on && S.ph === "show" ? now - S.t1 - F.at : F.yu ? now - F.yu.t0 : -1, want = t >= 0 && t < F.dur;
   F.seen = performance.now();
   if(want && !F.el){ const v = document.createElement("video"); v.muted = true; v.defaultMuted = true; v.playsInline = true; v.setAttribute("playsinline", ""); v.preload = "auto"; v.crossOrigin = "anonymous"; F.el = v; }
   const v = F.el; if(!v) return;
@@ -4027,6 +4030,7 @@ function wfFilm(now){
   else if(!v.paused) v.pause();
   F.on = want && v.readyState >= 2;
 }
+window.yunaFilm = on => { const F = WF_FILM; if(on && !F.yu){ F.yu = {t0:performance.now(), k:WF_SHOW.n}; if(!WF_SHOW.on) Object.assign(F, WF_FILMS[F.yu.k % WF_FILMS.length]); } if(!on) F.yu = null; return F.title; };
 const wfShowTxt = () => WF_SHOW.ph === "in" ? "잠시 후 고객 시사가 시작됩니다" : WF_SHOW.on ? "고객 시사 · " + WF_FILM.title : "크레용팜 새 편집본 시사 중";
 function showGo(p, pts, end){ p.sp = pts.map(q => [...q]); p.spEnd = end; p.hidden = false; p.pose = "walk"; p.front = false; p.hd = null; p.act = null; }
 function showStep(p, dt){
@@ -4038,7 +4042,7 @@ function showStep(p, dt){
 }
 function wfShowStart(now){
   const S = WF_SHOW; S.on = true; S.ph = "in"; S.t0 = now; S.k = 0; S.n++;
-  Object.assign(WF_FILM, WF_FILMS[(S.n - 1) % WF_FILMS.length]);   // 시사마다 다음 영상
+  WF_FILM.yu = null; Object.assign(WF_FILM, WF_FILMS[(S.n - 1) % WF_FILMS.length]);   // 시사마다 다음 영상
   SHOW_CAST.forEach(([id, seat, delay]) => Object.assign(WFI[id], {i:M_ELEV_IN[0], j:M_ELEV_IN[1], hidden:true, wait:delay, sp:null, outPath:null, act:null, go:seat}));
 }
 function wfShow(now, dt){
@@ -4309,7 +4313,7 @@ function fsFence(pts, alpha = 1){
 }
 function fsPole(i, j){ box(i - 0.06, j - 0.06, 0.12, 0.12, 82, "#3A3F44"); box(i - 0.3, j - 0.12, 0.6, 0.24, 5, "#2A2E32", 82); quad(i - 0.26, j - 0.08, i + 0.26, j + 0.08, 81.8, "#FFF6D8"); }
 function fsGoal(side){
-  const i = side ? FS.i1 : FS.i0, d = side ? 0.45 : -0.45, j0 = FS.gj - FS.gw, j1 = FS.gj + FS.gw, H = 16, w = "#FFFFFF", net = "rgba(255,255,255,.45)";
+  const i = side ? FS.i1 : FS.i0, d = side ? 0.45 : -0.45, j0 = FS.gj - FS.gw, j1 = FS.gj + FS.gw, H = 30, w = "#FFFFFF", net = "rgba(255,255,255,.45)";
   for(let z = 3; z < H; z += 3) seg(P(i + d, j0, z), P(i + d, j1, z), net, 0.6); for(let j = j0; j <= j1 + 0.01; j += 0.2) seg(P(i + d, j, 0), P(i + d, j, H), net, 0.6);
   [j0, j1].forEach(j => { seg(P(i, j, 0), P(i, j, H), w, 1.8); seg(P(i, j, H), P(i + d, j, H * 0.8), w, 1); seg(P(i + d, j, 0), P(i + d, j, H * 0.8), w, 1); });
   seg(P(i, j0, H), P(i, j1, H), w, 1.8);
@@ -4337,20 +4341,21 @@ function futsalGlow(S, ph){
 
 /* ---------- 냇가 · 연못 · 바베큐 파티 · 늘 노는 사람들 (2026-11-12 감독님: "너무 횡해 옥상이. 사람도 없고", "냇가도 있고 연못이나", "바베큐 파티도 하고", "즐기는 사람도 있고")
    냇가: 오른쪽 잔디 위 바위 샘(29.3, 0.8)에서 흘러 연못으로. 징검다리 j 3.4 · 9.8
-   연못: 앞 정원 (25.5, 16.6), 잉어 5 · 연잎 · 갈대
+   연못: 회식 테이블 뒤 잔디 (24.3, 1.6), 잉어 5 · 연잎 · 갈대 (2026-11-23 수영장 옆에서 옮김)
    바베큐: 앞 정원 왼쪽 평상(i 15.8~19.8 · j 15.2~18.4) + 낮은 상 + 드럼 그릴 + 아이스박스 + 가랜드
    ROOF_NPC = PD가 아닌 손님·직원 (db 없음, 늘 그 자리). 누르면 한 줄 소개 ---------- */
-const STREAM = [[29.3,1.0],[28.9,3.2],[29.4,5.0],[28.9,7.0],[29.3,9.0],[28.8,11.0],[28.5,12.6],[28.1,13.8],[27.1,15.3]];
-const STREAM_STONES = [[28.65,3.4],[29.25,3.45],[28.8,9.8],[29.4,9.85]];
-const POND = {ci:26.6, cj:15.3, ri:1.4, rj:0.95};   // 인피니티 풀 들이면서 작게 옮김 (2026-11-22)
+const STREAM = [[29.3,1.0],[28.9,3.2],[29.4,5.0],[28.9,7.0],[29.3,9.0],[28.8,11.0],[28.5,12.6],[28.1,13.8]];   // 연못을 옮겨서 냇가는 길 건너 돌무더기에서 끝남 (2026-11-23)
+const STREAM_STONES = [[28.65,3.4],[29.25,3.45],[28.8,9.8],[29.4,9.85],[27.8,14.15],[28.35,14.35]];
+const POND = {ci:24.3, cj:1.6, ri:1.45, rj:0.62};   // 수영장 옆이 불편해서 회식 테이블 뒤 잔디로 옮김 (2026-11-23 감독님 "회식하는 쪽이 어울리지 않나")
 const BQ = {i0:15.8, j0:15.2, i1:19.8, j1:18.4};
 const ROOF_NPC = [
   {id:"r_g", name:"바베큐 담당", role:"프로덕션 조명팀", at:[20.9,14.3], act:"tongs", apron:"#C0504A", look:WL("#E5BC98","#1E1A17","short","#3A3633","#2B2D30"), desc:"삼겹살 굽는 중 🥓 연기 조심!"},
   {id:"r_b1", name:"예운옥 스태프", role:"바베큐 파티", at:[16.7,15.75], z:7, pose:"sit", front:true, act:"eat", look:WL("#F3D3BC","#5A3A2C","long","#E8B5C8","#45404A"), desc:"상추쌈 크게 싸는 중 🥬🥓"},
   {id:"r_b2", name:"촬영감독", role:"바베큐 파티", at:[18.8,15.75], z:7, pose:"sit", front:true, act:"cup", look:WL("#D7A985","#241C18","short","#7FA7D9","#3A3D42"), desc:"사이다로 건배 🥤"},
   {id:"r_b3", name:"디자인 인턴", role:"바베큐 파티", at:[20.4,17.3], act:"cup", look:WL("#F0CDB2","#7A4A30","bob","#FFE066","#2E2F33"), desc:"고기 익기만 기다리는 중 🤤"},
-  {id:"r_kid", name:"꼬마 손님", role:"연못", kid:true, at:[25.45,16.4], act:"feed", look:WL("#F6D7C2","#3A261C","short","#7FB7C9","#E8A04A"), desc:"잉어 밥 주는 중 🐟"},
-  {id:"r_mom", name:"예운옥 손님", role:"연못", at:[26.5,16.75], look:WL("#EFCBB0","#2E241E","bun","#C8B4D0","#45404A"), desc:"아이랑 연못 구경 🌷"},
+  {id:"r_ck", name:"포차 사장님", role:"치킨·맥주 포차", at:[25.9,13.95], act:"tongs", apron:"#E8A04A", look:WL("#E2B793","#2A1E18","short","#FFFFFF","#3A3633"), desc:"치킨 튀기는 중 🍗 맥주 한잔? 🍺"},
+  {id:"r_kid", name:"꼬마 손님", role:"연못", kid:true, at:[22.45,1.75], act:"feed", look:WL("#F6D7C2","#3A261C","short","#7FB7C9","#E8A04A"), desc:"잉어 밥 주는 중 🐟"},
+  {id:"r_mom", name:"예운옥 손님", role:"연못", at:[22.2,2.3], look:WL("#EFCBB0","#2E241E","bun","#C8B4D0","#45404A"), desc:"아이랑 연못 구경 🌷"},
   {id:"r_feet", name:"편집팀", role:"냇가", at:[30.05,7.6], pose:"sit", front:true, seat:"rock", look:WL("#E8C3A4","#3A2A22","cap","#4DAA97","#34322F"), desc:"냇가에 발 담그고 멍 💧"},
   {id:"r_gt", name:"작곡가 손님", role:"모닥불", at:[24.6,9.7], z:1.8, pose:"sit", front:true, seat:"stool", act:"guitar", look:WL("#F2D2BA","#2A1E18","long","#8B5A3C","#34322F"), desc:"모닥불 옆에서 기타 치는 중 🎸"},
   {id:"r_read", name:"필름스쿨 수강생", role:"잔디밭", at:[33.5,12.85], pose:"sit", front:true, seat:"bag", act:"book", book:"#C0504A", look:WL("#EFCBB0","#2E241E","bob","#FFFFFF","#5A6A8A"), desc:"나무 그늘에서 책 읽는 중 📖"},
@@ -4365,7 +4370,7 @@ const ROOF_NPC = [
   {id:"d_a", name:"사내 커플", role:"촬영팀 · 데이트 중 💕", at:[33.6,7.85], z:-8, legs:"cross", pose:"sit", front:true, look:WL("#E5BC98","#2A1E18","short","#5B8DB8","#2B2D30"), desc:"돗자리 피크닉 데이트 🧺💕", route:[
     {p:[33.6,7.85], z:-8, pose:"sit", front:true, dwell:45000, pair:[0.75,0], desc:"돗자리 피크닉 데이트 🧺💕", talk:true},
     {p:[33.6,9.7]}, {p:[28.2,9.8]}, {p:[27.6,9.8]}, {p:[27.6,13.0]}, {p:[25.6,13.0]},
-    {p:[25.6,14.05], front:true, dwell:20000, pair:[0.7,0], desc:"연못 보면서 데이트 🐟💕", talk:true},
+    {p:[25.6,15.95], dwell:20000, pair:[0.7,0], desc:"포차에서 치킨 데이트 🍗💕", talk:true},
     {p:[25.6,13.0]}, {p:[27.6,13.0]}, {p:[27.6,4.4]},
     {p:[27.3,4.4], face:-1, dwell:10000, pair:[0,0.6], desc:"회식 자리에 인사하다 들킴 😳", tease:true},
     {p:[27.6,5.0]}, {p:[27.6,9.8]}, {p:[33.3,9.8]}, {p:[33.6,9.7]}]},
@@ -4423,7 +4428,7 @@ const pondPt = (a, s = 1, z = 0.3) => P(POND.ci + Math.cos(a) * POND.ri * s * (1
 function roofPond(t){
   const ring = (s, z) => { const pts = []; for(let k = 0; k < 44; k++) pts.push(pondPt(k / 44 * Math.PI * 2, s, z)); return pts; };
   poly(ring(1.12, 0.3), "#A99E8C"); poly(ring(1.0, 0.35), "#3F86A8"); poly(ring(0.78, 0.36), "#5498BA"); poly(ring(0.5, 0.37), "#66AACA");
-  if(!reduce) [[26.0,15.0],[27.2,15.5],[26.5,15.85]].forEach(([ci, cj], k) => { const u = (t * 0.00035 + k / 3) % 1, [x, y] = P(ci, cj, 0.4), r = 3 + u * 10;
+  if(!reduce) [[23.68,1.4],[24.92,1.73],[24.2,1.96]].forEach(([ci, cj], k) => { const u = (t * 0.00035 + k / 3) % 1, [x, y] = P(ci, cj, 0.4), r = 3 + u * 10;
     ctx.strokeStyle = `rgba(255,255,255,${0.55 * (1 - u)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(x, y, r, r * 0.5, 0, 0, Math.PI*2); ctx.stroke(); });
   for(let k = 0; k < 5; k++){   // 잉어
     const dir = k % 2 ? 1 : -1, a = (reduce ? 0 : t * 0.00025 * dir * (1 + k * 0.15)) + k * 1.3, s = 0.32 + (k % 3) * 0.17;
@@ -4431,7 +4436,7 @@ function roofPond(t){
     ctx.save(); ctx.translate(...p0); ctx.rotate(ang); ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2, 0, 0, Math.PI*2); ctx.fill();
     ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(-8, -2.4 + wag); ctx.lineTo(-8, 2.4 + wag); ctx.closePath(); ctx.fill();
     if(c === "#FFFFFF"){ ctx.fillStyle = "#FF6A3A"; ctx.beginPath(); ctx.arc(1.5, -0.5, 1.4, 0, Math.PI*2); ctx.fill(); } ctx.restore(); }
-  [[25.9,14.9,1],[27.3,15.0,0],[26.8,15.8,1],[25.8,15.6,0]].forEach(([i, j, f]) => { const [x, y] = P(i, j, 0.45);
+  [[23.58,1.34,1],[25.02,1.4,0],[24.5,1.93,1],[23.47,1.8,0]].forEach(([i, j, f]) => { const [x, y] = P(i, j, 0.45);
     ctx.fillStyle = "#5E9B5A"; ctx.beginPath(); ctx.moveTo(x, y); ctx.ellipse(x, y, 7, 3.4, 0, 0.35, Math.PI * 2 - 0.1); ctx.closePath(); ctx.fill(); ctx.strokeStyle = "#4A7E48"; ctx.lineWidth = 0.6; ctx.stroke();
     if(f){ wfDot(x - 1, y - 2.5, 2.8, "#F4A7B9"); wfDot(x - 1, y - 3.6, 1.5, "#FFFFFF"); } });
   for(let k = 0; k < 30; k++){ const a = k / 30 * Math.PI * 2, [x, y] = pondPt(a, 1.06, 0.5), h = rHash(k, 3, 9);
@@ -4474,6 +4479,17 @@ function roofGardenItems(add, t){
   });
   add(20.9 + 15.0 + 0.1, () => bbqGrill(t));
   add(21.0 + 15.95, () => { box(20.65, 15.7, 0.7, 0.5, 6, "#4A90C8"); box(20.63, 15.68, 0.74, 0.54, 1.4, "#FFFFFF", 6); });   // 아이스박스
+  add(25.9 + 14.9, () => {   // 치킨·맥주 포차 (2026-11-23)
+    const i0 = 25.0, j0 = 14.15, w = 1.8, d = 0.6;
+    box(i0, j0, w, d, 30, "#B07A4A"); box(i0 - 0.05, j0 + d - 0.02, w + 0.1, 0.22, 1.6, "#F4EEE2", 30);
+    [[i0 + 0.04, j0 + 0.04], [i0 + w - 0.1, j0 + 0.04]].forEach(([i, j]) => box(i, j, 0.06, 0.06, 44, "#84593A", 30));
+    for(let k = 0; k < 8; k++) box(i0 - 0.1 + k * (w + 0.2) / 8, j0 - 0.05, (w + 0.2) / 8, d + 0.5, 1.2, k % 2 ? "#FFFFFF" : "#E8A04A", 74);
+    const [x, y] = P(i0 + w / 2, j0 + 0.1, 64); ctx.fillStyle = "#2A2A28"; ctx.beginPath(); ctx.roundRect(x - 22, y - 6, 44, 12, 3); ctx.fill();
+    ctx.fillStyle = "#FFD27A"; ctx.font = "800 7px 'IBM Plex Sans KR', sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("치킨 · 맥주", x, y + 0.5);
+    [[0.35, "#C9763A"], [0.62, "#B8642E"], [0.9, "#D18A44"]].forEach(([o, c]) => { const [bx, by] = P(i0 + o, j0 + d - 0.05, 34); wfDot(bx, by, 2.6, c); });
+    [1.25, 1.45].forEach(o => box(i0 + o - 0.05, j0 + d - 0.07, 0.1, 0.1, 5.8, "#F2B33D", 31.6));
+  });
+  [[25.35, 15.45], [26.45, 15.45]].forEach(([i, j]) => add(i + j, () => { box(i - 0.03, j - 0.03, 0.06, 0.06, 12, "#2A2A28"); box(i - 0.2, j - 0.2, 0.4, 0.4, 2, "#E8A04A", 12); }));   // 포차 스툴
   add(15.5 + 14.8, () => {   // 가랜드 깃발 줄
     const A = [15.5, 14.8], B = [20.2, 14.8], post = "#8B6B4E"; [A, B].forEach(([i, j]) => box(i - 0.05, j - 0.05, 0.1, 0.1, 44, post));
     const at = u => P(A[0] + (B[0] - A[0]) * u, A[1], 43 - Math.sin(Math.PI * u) * 7); ctx.strokeStyle = "rgba(60,50,40,.6)"; ctx.lineWidth = 0.7; ctx.beginPath();
@@ -4488,7 +4504,7 @@ function roofGardenItems(add, t){
     if(!NIGHT) add(p.i + p.j + (p.pose === "sit" ? 0.1 : 0.05), () => roofNpcDraw(p, t));
   });
   roofPlusItems(add, t);   /* 회식 테이블 · 돗자리 · 커플 하트 */
-  [[25.55,14.05],[27.75,16.45],[28.25,14.6]].forEach(([i, j], q) => add(i + j, () => {   // 갈대
+  [[23.21,0.78],[25.49,2.35],[25.99,1.15]].forEach(([i, j], q) => add(i + j, () => {   // 갈대
     for(let k = 0; k < 6; k++){ const di = (rHash(q, k, 1) - 0.5) * 0.5, dj = (rHash(q, k, 2) - 0.5) * 0.4, h = 14 + rHash(q, k, 3) * 10, sw = reduce ? 0 : Math.sin(t * 0.0015 + k + q) * 1.4, [x0, y0] = P(i + di, j + dj, 0), [x1, y1] = P(i + di, j + dj, h);
       seg([x0, y0], [x1 + sw, y1], "#6E9B4A", 1); if(k % 2) { ctx.fillStyle = "#8B5A3C"; ctx.beginPath(); ctx.ellipse(x1 + sw, y1 + 2, 1.3, 3.2, 0, 0, Math.PI*2); ctx.fill(); } } }));
   add(29.3 + 0.8, () => {   // 바위 샘 (냇가 시작)
@@ -4806,10 +4822,10 @@ const ROOF_SPOTS = [
   {at:[13.75,1.6], pose:"stand", face:-1, via:[[14.6,1.6]], line:"펜스 밖에서 풋살 구경 ⚽"},
   {at:[31.4,9.0], pose:"sit", front:true, via:[[27.6,13.0],[27.6,9.8],[31.4,9.8]], line:"그네 벤치에서 흔들흔들 🌿", deck:true},
   {at:[32.4,9.0], pose:"sit", front:true, via:[[27.6,13.0],[27.6,9.8],[32.4,9.8]], line:"그네 타며 구름 구경 ☁️", deck:true},
-  {at:[24.6,14.5], pose:"stand", via:[[24.6,13.0]], line:"연못 보면서 물멍 🐟"},
+  {at:[26.3,1.45], pose:"stand", via:[[27.6,13.0],[27.6,1.45]], line:"연못 보면서 물멍 🐟"},
   {at:[22.15,16.95], pose:"sit", front:true, z:6, pool:true, via:[[21.75,13.0],[21.75,16.95]], line:"선베드에 누워 쉬는 중 😎"},   // 인피니티 풀 선베드 (2026-11-22)
   {at:[24.35,16.95], pose:"sit", front:true, z:6, pool:true, via:[[24.8,13.0],[24.8,16.95]], line:"수영장 보면서 물멍 🌊"},
-  {at:[28.35,16.1], pose:"stand", face:-1, via:[[27.4,13.0],[28.35,14.4]], line:"잉어 몇 마리인지 세는 중 🐟"},
+  {at:[26.55,2.3], pose:"stand", via:[[27.6,13.0],[27.6,2.3]], line:"잉어 몇 마리인지 세는 중 🐟"},
   {at:[3.0,6.0], pose:"stand", futsal:true, team:0, via:FS_VIA, line:"FC랑 한 판 뛰는 중 ⚽"},
   {at:[11.0,3.4], pose:"stand", futsal:true, team:1, via:FS_VIA, line:"풋살장에서 땀 빼는 중 🏃"},
   {at:[22.05,3.5], pose:"sit", front:true, via:[[27.6,13.0],[27.6,5.0],[22.05,5.0]], line:"회식 자리 합류! 치킨 먹는 중 🍗", hsik:true},
@@ -5582,7 +5598,7 @@ function s4MemberStep(c, m, now, dt){
   }
   if(s4Walk(m, dt)){
     const e = m.leg.end;
-    if(e.hide){ m.hidden = true; m.on = false; ePing.s4 = now; return; }
+    if(e.hide){ m.hidden = true; m.on = false; ePing.s4 = now; if(c.st === "leave" && !NIGHT && S4_OUT.length < 8) S4_OUT.push({at:now + 4200 + Math.random() * 2500, look:m.look, name:m.name, kpop:!!c.type?.kpop}); return; }   // 4층에서 엘베 타면 1층으로 내려와 나감 (2026-11-23 감독님 "어디로 가는겨? 없어져뿌네")
     m.pose = e.pose; m.face = e.face; m.front = !!e.front; m.act = e.act;
     if(e.line) m.desc = e.line;
     if(e.pick) m.pickLight = true;
@@ -6170,6 +6186,11 @@ const L_ORDER = ["l_park","l_lobby","l_cafe"];
 const L_DI = 9.4;                                   // 복지층 카페(i 11.2~19.6) → 1층 (i 20.6~29)
 const L_HUB = [23.7,7.6], L_CNT = [23.7,3.0], L_DOOR_IN = [26.3,16.6], L_DOOR = [26.3,18.9], L_OUT = [26.3,21.0];
 const L_PDOOR = [[7.85,11.8],[10.4,11.8],[11.6,11.8],[14.2,11.8],[14.2,7.6]];   // 주차장 → 로비 문 → 카페 길
+/* 편의점 CREYONG 24 (2026-11-23 감독님 "1층에 카페가 좀 커. 편의점도 하나 있으면 좋을듯"): 카페 오른쪽 뒤 i 29.6~36 · j 0~7, 문은 j 7 i 31.9~33.3 */
+const CVS = {i0:29.6, j1:7.0, d0:31.9, d1:33.3, pay:[31.1,6.5], door:[32.6,6.6]};
+const CVS_BROWSE = [{path:[[32.2,6.6],[32.2,1.45],[33.9,1.45]], face:-1, desc:"음료 고르는 중 🥤"}, {path:[[32.2,6.6],[32.2,3.3],[33.9,3.3]], face:-1, desc:"과자 고르는 중 🍪"},
+  {path:[[32.6,5.0],[33.6,5.0]], face:-1, desc:"라면 고르는 중 🍜"}, {path:[[32.6,5.0],[34.8,4.95]], face:1, desc:"아이스크림 고르는 중 🍦"}];
+const CVS_TALK = [[[0,"이거 계산해 주세요 🍙"],[1,"봉투 필요하세요? 🛍️"]],[[0,"삼각김밥이랑 바나나우유요 🍌"],[1,"2+1이라 하나 더 가져오세요!"]],[[0,"아이스크림 하나요 🍦"],[1,"카드 꽂아 주세요~ 💳"]],[[0,"컵라면 물 어디서 받아요? 🍜"],[1,"오른쪽 온수기요 😊"]]];
 const L_SPACES = [[2.8,1.65],[2.8,4.15],[2.8,6.65],[2.8,9.15],[2.8,11.65],[2.8,14.15]];
 const L_CARCOL = ["#E9E6DF","#2A2A28","#B8BEC4","#3A8A78","#C0504A","#7FA7D9","#E8A04A","#5A5D63"];
 const L_LOOKS = [["#F2D2BA","#3A2A22","long","#F4A7B9","#45404A"],["#E5BC98","#1E1A17","short","#7FA7D9","#2B2D30"],["#EFCBB0","#2E241E","bob","#FFE066","#3A3D42"],["#D7A985","#241C18","cap","#4DAA97","#34322F"],["#F3D3BC","#5A3A2C","bun","#C8B4D0","#5A4A3E"],["#E8C3A4","#141414","short","#E8A04A","#2B2D30"],["#F0CDB2","#7A4A30","long","#FFFFFF","#5A6A8A"],["#DDB08C","#3B2B22","short","#8B5A3C","#3A3936"]];
@@ -6180,7 +6201,6 @@ const L_SEATS = [];
 [[22.3,4.4],[25.0,5.1],[27.6,3.6]].forEach(([ti,tj]) => { L_SEATS.push({at:[ti,tj-0.55], front:true, path:[[ti+0.75,7.6],[ti+0.75,tj-0.55],[ti,tj-0.55]]}, {at:[ti,tj+0.55], path:[[ti,7.6],[ti,tj+0.55]]}); });
 [22.3,25.0,27.6].forEach(ti => { L_SEATS.push({at:[ti,8.95], front:true, path:[[ti,7.6],[ti,8.95]]}, {at:[ti,10.05], path:[[ti+0.75,7.6],[ti+0.75,10.05],[ti,10.05]]},
   {at:[ti,12.25], front:true, path:[[ti+0.75,7.6],[ti+0.75,12.25],[ti,12.25]]}, {at:[ti,13.35], path:[[ti+0.75,7.6],[ti+0.75,13.35],[ti,13.35]]}); });
-[31.0,32.2,33.4].forEach(si => { L_SEATS.push({at:[si,5.55], stool:true, path:[[si,7.6],[si,5.55]]}, {at:[si,3.45], front:true, stool:true, path:[[29.6,7.6],[29.6,3.45],[si,3.45]]}); });
 [30.4,33.2].forEach(ti => { L_SEATS.push({at:[ti,10.25], front:true, path:[[31.8,7.6],[31.8,10.25],[ti,10.25]]}, {at:[ti,11.35], path:[[31.8,7.6],[31.8,11.35],[ti,11.35]]}); });
 [21.5,22.5,23.5,24.5].forEach(si => L_SEATS.push({at:[si,18.45], front:true, stool:true, path:[[26.3,7.6],L_DOOR_IN,[si,16.6],[si,18.45]]}));
 [[31.0,17.2],[33.8,17.2]].forEach(([ti,tj]) => { L_SEATS.push({at:[ti,tj-0.55], front:true, terr:true, path:[[31.8,7.6],[31.8,15.6],[ti+0.75,15.6],[ti+0.75,tj-0.55],[ti,tj-0.55]]}, {at:[ti,tj+0.55], terr:true, path:[[31.8,7.6],[31.8,15.6],[ti+0.75,15.6],[ti+0.75,tj+0.55],[ti,tj+0.55]]}); });
@@ -6196,7 +6216,8 @@ const LOBBY_PEOPLE = [
   {id:"l_f2", name:"동네 손님", role:"크레용 카페", at:[22.3,13.35], pose:"sit", act:"eat", look:WL("#DDB08C","#141414","cap","#5C6B8A","#2B2D30"), desc:"크로플 먹는 중 🥐"},
   {id:"l_t1", name:"테라스 손님", role:"테라스", at:[33.8,16.65], pose:"sit", front:true, act:"cup", look:WL("#F0CDB2","#7A4A30","long","#C8B4D0","#45404A"), desc:"테라스에서 햇볕 쬐는 중 ☀️"},
   {id:"l_t2", name:"테라스 손님", role:"테라스", at:[33.8,17.75], pose:"sit", act:"cup", look:WL("#E5BC98","#1E1A17","short","#4DAA97","#2B2D30"), desc:"아이스 라떼 🧊"},
-  {id:"l_ph", name:"사진 찍는 손님", role:"크레용 카페", at:[32.4,1.4], face:-1, act:"pad", look:WL("#F6D7C2","#3A261C","long","#FFFFFF","#E8A04A"), desc:"무지개 구름 앞에서 인증샷 📸"},
+  {id:"l_cvs", name:"편의점 알바", tag:true, role:"CREYONG 24 · 24시간", allNight:true, apron:"#3A8A78", look:WL("#EFCBB0","#2A1E18","short","#F2EDE5","#2B2D30"), desc:"어서 오세요~ CREYONG 24입니다 🏪", route:[
+    {p:[30.9,4.75], face:1, dwell:9000, desc:"계산대 지키는 중 🧾"}, {p:[30.4,1.45], face:-1, dwell:4200, desc:"냉장고에 음료 채우는 중 🥤"}, {p:[30.9,4.75], face:1, dwell:7000, desc:"1+1 행사 스티커 붙이는 중 🏷️"}]},
   {id:"l_sofa", name:"미팅 기다리는 손님", role:"로비", at:[18.0,12.55], pose:"sit", front:true, act:"book", book:"#3A8A78", look:WL("#D7A985","#241C18","short","#2A2A28","#3A3D42"), desc:"2층 미팅 기다리는 중 📄"},
   // 수험생 (2026-11-22 감독님 "카페도 24시간이라 수험생들 공부하기 좋음"): 밤새 자리 지킴
   {id:"l_s1", name:"수험생", role:"크레용 카페 · 24시간", allNight:true, at:[27.6,8.95], pose:"sit", front:true, act:"book", book:"#E8A04A", look:WL("#F2D2BA","#2A221E","long","#E9E4DA","#45404A"), desc:"수능 문제집 푸는 중 ✏️"},
@@ -6207,8 +6228,8 @@ const LOBBY_PEOPLE = [
 ].map((d, k) => { const s = d.route?.[0], at = d.at || s.p;
   return {...d, npc:true, k, i:at[0], j:at[1], z:0, pose:s?.pose || d.pose || "stand", face:s?.face ?? d.face ?? 1, front:!!d.front, phase:Math.random() * 6, ri:0, wait:s ? s.dwell : 0, seg:null, hidden:false, desc0:d.desc, act0:d.act, base:at, path:[]}; });
 const LPI = Object.fromEntries(LOBBY_PEOPLE.map(p => [p.id, p]));
-const L_TALKS = [["l_s1","l_s2",[[0,"이 문제 풀었어? ✏️"],[1,"아니… 해설 같이 보자 😵"]]],["l_s3","l_s3",[[0,"오늘 목표량 끝내고 간다 💪"]]],["l_bar","l_bar",[[0,"따뜻한 거 한 잔 더 드릴까요? ☕"]]],["l_f1","l_f2",[[0,"여기 크로플 진짜 맛있다 🥐"],[1,"다음엔 테라스 앉자 ☀️"]]],["l_t1","l_t2",[[0,"날씨 좋다~ ☀️"],[1,"여기 사진 잘 나온대 📸"]]],["l_ph","l_ph",[[0,"구름 네온 너무 예쁘다 ☁️📸"]]],["l_park","l_park",[[0,"오라이~ 천천히 들어오세요 🚗"]]],["l_rec","l_rec2",[[0,"오늘 미팅 손님 세 분이에요 📋"],[1,"방문증 미리 뽑아 둘게요 🪪"]]],["l_bar","l_bar",[[0,"주문하신 라떼 나왔습니다 ☕"]]]];
-let lDoorA = 0, lDoorB = 0, lFocusHot = false, lTags = [], lNext = {car:0, ped:0, guest:0, visit:0, pass:0, talk:0, cross:0};
+const L_TALKS = [["l_s1","l_s2",[[0,"이 문제 풀었어? ✏️"],[1,"아니… 해설 같이 보자 😵"]]],["l_s3","l_s3",[[0,"오늘 목표량 끝내고 간다 💪"]]],["l_bar","l_bar",[[0,"따뜻한 거 한 잔 더 드릴까요? ☕"]]],["l_cvs","l_cvs",[[0,"어서 오세요~ 1+1 행사 중이에요 🥤"]]],["l_f1","l_f2",[[0,"여기 크로플 진짜 맛있다 🥐"],[1,"다음엔 테라스 앉자 ☀️"]]],["l_t1","l_t2",[[0,"날씨 좋다~ ☀️"],[1,"여기 사진 잘 나온대 📸"]]],["l_ph","l_ph",[[0,"구름 네온 너무 예쁘다 ☁️📸"]]],["l_park","l_park",[[0,"오라이~ 천천히 들어오세요 🚗"]]],["l_rec","l_rec2",[[0,"오늘 미팅 손님 세 분이에요 📋"],[1,"방문증 미리 뽑아 둘게요 🪪"]]],["l_bar","l_bar",[[0,"주문하신 라떼 나왔습니다 ☕"]]]];
+let lDoorA = 0, lDoorB = 0, lFocusHot = false, lTags = [], lNext = {car:0, ped:0, guest:0, visit:0, pass:0, talk:0, cross:0, cvs:0};
 /* 횡단보도 신호등 (2026-11-23 감독님 "횡단보도 신호등 필요"): 차 초록 14초 → 노랑 2초 → 사람 초록 8초(끝 2.5초 깜빡) → 모두 빨강 1.5초 */
 const XW = {i0:16.0, i1:19.2}, SIG_T = [14000, 2000, 8000, 1500], SIG_C = SIG_T.reduce((a, b) => a + b);
 function lSig(now){ const t = now % SIG_C;
@@ -6219,6 +6240,7 @@ function lSig(now){ const t = now % SIG_C;
   return {car:"r", ped:"r", left:0}; }
 function lYunaAt(){ try { const m = F3.mod; return F3.on && curFloor === "lobby" && m?.playOn?.() ? m.playPos?.() || null : null; } catch(e){ return null; } }
 const lGuests = [], lCars = [];   // 움직이는 손님 · 차
+const S4_OUT = [];   // 4층 예운옥에서 엘베 탄 촬영 팀 → 잠깐 뒤 1층 엘베에서 나와 밖으로
 const lobbyPeople = () => people.filter(p => p.flr === "lobby" && !p.hide);
 const lOn = p => !NIGHT || !!p.allNight;   // 밤엔 카페(24시간) · 안내 · 수험생만
 const L_ALL = () => [...LOBBY_PEOPLE.filter(lOn), ...lGuests.filter(g => !g.hidden)];
@@ -6226,11 +6248,16 @@ function lLook(){ const l = pickOne(L_LOOKS); return WL(...l); }
 function lSeatFree(){ const used = new Set([...lGuests.map(g => g.seat), ...people.filter(q => q.sky?.spot.seat).map(q => q.sky.spot.seat)]);
   return L_SEATS.filter(s => !used.has(s) && !LOBBY_PEOPLE.some(p => Math.hypot(p.base[0] - s.at[0], p.base[1] - s.at[1]) < 0.3)); }
 /* 손님 하나: 단계별 경로 → 대사 → 머무름 */
-function lGuest(kind, car){
+function lGuest(kind, car, o = {}){
   const g = {npc:true, guest:true, name: kind === "visit" ? "방문 손님" : kind === "pass" ? "지나가는 사람" : "카페 손님", role: kind === "visit" ? "로비" : kind === "pass" ? "보도" : "크레용 카페",
     look: lLook(), i:0, j:0, z:0, pose:"walk", face:1, front:false, phase:Math.random() * 6, path:[], kind, car, st:"in", until:0, speed: 0.95 + Math.random() * 0.25};
   const fromL = Math.random() < 0.5, sx = fromL ? -4 : 39, sj = 20.5 + Math.random() * 0.5, ex = fromL ? 39 : -4;
   g.exit = [[ex, sj]];
+  if(kind === "s4out"){ g.name = o.name || "예운옥 손님"; g.role = "예운옥 촬영 끝"; if(o.look) g.look = o.look; [g.i, g.j] = M_ELEV_IN; g.path = [M_ELEV, [14.2, 17.1], [16.0, 19.4], [16.0, sj], [ex, sj]];
+    g.desc = pickOne(o.kpop ? ["예운옥 촬영 끝! 숙소 가는 중 🚐", "오늘 안무 영상 잘 나왔다 💃"] : ["예운옥 촬영 끝나고 가는 중 📸", "사진 잘 나왔다~ 집에 가는 중 👋", "구름 세트 최고였어 ☁️"]); g.st = "leave"; ePingL = performance.now(); lGuests.push(g); return g; }
+  if(kind === "cvs"){ const b = pickOne(CVS_BROWSE); g.name = "편의점 손님"; g.role = "CREYONG 24"; [g.i, g.j] = [sx, sj]; g.browse = b;
+    g.path = [[L_OUT[0], sj], L_OUT, L_DOOR, L_DOOR_IN, [26.3,7.6], [32.6,7.6], CVS.door, ...b.path]; g.desc = "편의점 가는 중 🏪"; g.st = "browse";
+    g.exit = [CVS.door, [32.6,7.6], [26.3,7.6], L_DOOR_IN, L_DOOR, L_OUT, [L_OUT[0], sj], [ex, sj]]; lGuests.push(g); return g; }
   if(kind === "pass"){ [g.i, g.j] = [sx, sj]; g.path = [[ex, sj]]; g.desc = pickOne(["산책 중 🚶","출근길 🏃","강아지 산책 가는 길 🐕","카페 구경만 하고 가는 중 👀"]); g.st = "leave"; }
   else if(kind === "visit"){ [g.i, g.j] = [sx, sj]; g.path = [[16.0, sj], [16.0, 19.4], [16.0, 6.15]]; g.desc = "2층 미팅 가는 중 🤝"; }
   else if(car){ [g.i, g.j] = [car.sp[0], car.sp[1] + 0.95]; g.path = [[6.6, car.sp[1] + 0.95], [7.85, car.sp[1] + 0.95], ...L_PDOOR, L_HUB, L_CNT]; g.desc = "차 세우고 커피 마시러 ☕"; g.exit = [L_HUB, ...[...L_PDOOR].reverse(), [7.85, car.sp[1] + 0.95], [6.6, car.sp[1] + 0.95], [car.sp[0] + 0.2, car.sp[1] + 0.95]]; }
@@ -6262,6 +6289,10 @@ function lGuestStep(g, now, dt){
     case "up": g.hidden = false; ePingL = now; g.path = [M_ELEV, [14.2, 17.1], [16.0, 19.4], [16.0, g.exit[0][1]], ...g.exit]; g.desc = "미팅 끝나고 가는 중 👋"; g.st = "leave"; return;
     case "curb": if(lSig(now).ped !== "g"){ g.desc = "신호 기다리는 중 🚦"; return; }
       g.path = g.far; g.desc = "횡단보도 건너는 중 🚶"; g.st = "leave"; return;
+    case "browse": g.face = g.browse.face; g.desc = g.browse.desc; g.st = "picked"; g.until = now + 5000 + Math.random() * 6000; return;
+    case "picked": g.path = [...[...g.browse.path].reverse().slice(1), CVS.door, CVS.pay]; g.desc = "계산하러 가는 중 🧾"; g.st = "pay"; return;
+    case "pay": g.face = -1; startTalk(g, LPI.l_cvs, pickOne(CVS_TALK), now + 200); g.st = "paid"; g.until = now + 600; return;
+    case "paid": g.desc = "편의점 봉지 들고 가는 중 🛍️"; g.path = [...g.exit]; g.st = "leave"; return;
     case "leave": if(g.car){ g.car.st = "out"; g.car.path = null; } g.dead = true; return;
   }
 }
@@ -6286,8 +6317,12 @@ function lCarStep(c, now, dt){
     const f = hd === "+i" ? 1 : -1, stop = (f > 0 ? XW.i0 - 1.75 : XW.i1 + 1.75) - c.i, sd = stop * f, sg = lSig(now); let lim = Infinity;
     if(sd > -0.05){
       if(sg.car === "r" || (sg.car === "y" && sd > 1.3)) lim = Math.max(0, sd);
-      if(lGuests.some(g => g.kind === "cross" && g.st === "leave" && g.j > 22.2 && g.j < 27.6 && g.i > XW.i0 - 0.3 && g.i < XW.i1 + 0.3)) lim = Math.min(lim, Math.max(0, sd)); }
-    const yp = lYunaAt(); if(yp && yp[1] > 22.3 && yp[1] < 27.5 && Math.abs(yp[1] - c.j) < 1.1){ const yd = (yp[0] - c.i) * f - 1.9; if(yd > -1.0) lim = Math.min(lim, Math.max(0, yd)); }
+    }
+    // 도로 위 사람(건너는 사람·유나): 횡단보도 위에 있으면 양쪽 차 모두 정지선에서 기다리고, 차 앞 차선에 있으면 그 앞에서 멈춤 (2026-11-23 감독님 "차는 횡단보도 무시하고 가네? 무섭네")
+    const yp = lYunaAt(), walkers = lGuests.filter(g => !g.hidden && g.j > 22.0 && g.j < 27.7).map(g => [g.i, g.j]); if(yp && yp[1] > 22.0 && yp[1] < 27.7) walkers.push(yp);
+    walkers.forEach(([pi, pj]) => {
+      if(sd > -0.05 && pi > XW.i0 - 0.6 && pi < XW.i1 + 0.6) lim = Math.min(lim, Math.max(0, sd));
+      if(Math.abs(pj - c.j) < 1.6){ const ahead = (pi - c.i) * f; if(ahead > -0.6 && ahead < 7) lim = Math.min(lim, Math.max(0, ahead - 2.2)); } });
     lCars.forEach(o => { if(o === c || Math.abs(o.j - c.j) > 0.4) return; const od = (o.i - c.i) * f; if(od > 0) lim = Math.min(lim, Math.max(0, od - 2.9)); });
     c.brake = lim < v * 0.5; v = Math.max(0, Math.min(v, lim)); if(v < 1e-4) return; }
   else c.brake = false;
@@ -6305,7 +6340,9 @@ function lobbyStep(now, dt){
     if(free.length && lCars.filter(c => c.sp).length < 2){ const sp = pickOne(free); lCars.push({sp, i:44, j:23.5, st:"arrive", col: pickOne(L_CARCOL)}); } }
   if(now > lNext.guest){ lNext.guest = now + (NIGHT ? 25000 + Math.random() * 30000 : 9000 + Math.random() * 12000); if(lGuests.filter(g => g.kind === "cafe" && !g.car).length < (NIGHT ? 3 : 6)) lGuest("cafe"); }   // 카페는 24시간
   if(now > lNext.ped){ lNext.ped = now + 7000 + Math.random() * 9000; lGuest("pass"); }
+  while(S4_OUT.length && S4_OUT[0].at <= now){ const q = S4_OUT.shift(); if(now - q.at < 25000) lGuest("s4out", null, q); }   // 오래 묵은 건(1층 안 볼 때) 버림
   if(now > lNext.cross){ lNext.cross = now + (NIGHT ? 20000 : 8000) + Math.random() * 9000; if(lGuests.filter(g => g.kind === "cross").length < (NIGHT ? 2 : 5)) lGuest("cross"); }
+  if(now > lNext.cvs){ lNext.cvs = now + (NIGHT ? 30000 : 14000) + Math.random() * 14000; if(lGuests.filter(g => g.kind === "cvs").length < 2) lGuest("cvs"); }
   if(now > lNext.visit && !NIGHT){ lNext.visit = now + 45000 + Math.random() * 40000; if(!lGuests.some(g => g.kind === "visit")) lGuest("visit"); }
   if(now > lNext.talk){ lNext.talk = now + 7000 + Math.random() * 7000; const c = pickOne(L_TALKS.filter(c => lOn(LPI[c[0]]) && lOn(LPI[c[1]]))), a = LPI[c[0]], b = LPI[c[1]]; if(!inTalk(a, now) && !inTalk(b, now)) startTalk(a, b, c[2], now + 150); }
   lCars.forEach(c => lCarStep(c, now, dt));
@@ -6388,6 +6425,10 @@ function lobbyFloor(t){
   const hb = dk("#D6B087","#4A3727"); poly([P(20.6,0,0.02),P(WI,0,0.02),P(WI,CH,0.02),P(GI,CH,0.02),P(GI,GJ,0.02),P(20.6,GJ,0.02)], hb);
   ctx.strokeStyle = dk("rgba(120,80,40,.2)","rgba(0,0,0,.24)"); ctx.lineWidth = 0.8;
   for(let j = 0; j < GJ; j += 0.5){ const iEnd = j < CH ? WI : GI; ctx.beginPath(); for(let k = 0; 20.6 + k * 0.35 <= iEnd; k++){ const [x, y] = P(20.6 + k * 0.35, j + (k % 2) * 0.5); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); }
+  // 편의점 바닥: 밝은 타일
+  quad(CVS.i0, 0, WI, CVS.j1, 0.025, dk("#F1F2EE","#3A3C3B"));
+  for(let i = CVS.i0 + 0.6; i < WI; i += 0.6) seg(P(i, 0, 0.03), P(i, CVS.j1, 0.03), dk("rgba(0,0,0,.06)","rgba(0,0,0,.22)"), 0.6);
+  for(let j = 0.6; j < CVS.j1; j += 0.6) seg(P(CVS.i0, j, 0.03), P(WI, j, 0.03), dk("rgba(0,0,0,.06)","rgba(0,0,0,.22)"), 0.6);
   // 테라스 데크
   const dkc = dk("#C99A66","#6B4E34"); box(GI + 0.2, CH + 0.3, WI - GI - 0.4, GJ - CH - 0.5, 1.4, dkc, 0);
   ctx.globalAlpha = 0.4; for(let i = GI + 0.6; i < WI - 0.2; i += 0.45) seg(P(i, CH + 0.3, 1.45), P(i, GJ - 0.2, 1.45), shade(dkc, -0.25), 0.6); ctx.globalAlpha = 1;
@@ -6396,7 +6437,7 @@ function lobbyFloor(t){
 }
 /* 벽: 뒤 벽(j 0) · 왼벽(i 0) + 간판 */
 function lobbyWalls(t){
-  faceJ(0, 10.4, 0, 0, WALL, dk("#B9BCC0","#3A3C40")); faceJ(10.4, 20.6, 0, 0, WALL, dk("#F2EEE7","#3A3631")); faceJ(20.6, 29.0, 0, 0, WALL, dk("#C98D69","#4A3226")); faceJ(29.0, WI, 0, 0, WALL, dk("#F4E8EE","#3E3440"));
+  faceJ(0, 10.4, 0, 0, WALL, dk("#B9BCC0","#3A3C40")); faceJ(10.4, 20.6, 0, 0, WALL, dk("#F2EEE7","#3A3631")); faceJ(20.6, CVS.i0, 0, 0, WALL, dk("#C98D69","#4A3226")); faceJ(CVS.i0, WI, 0, 0, WALL, dk("#EEF0EC","#34383A"));
   faceI(0, 0, GJ, 0, WALL, dk("#C4C7CB","#34363A"));
   faceJ(0, WI, 0.01, 0, 4, shade(C["wall-top"], -0.1)); faceI(0.01, 0, GJ, 0, 4, shade(C["wall-top"], -0.1));
   poly([P(-0.25,-0.25,WALL),P(WI,-0.25,WALL),P(WI,0,WALL),P(0,0,WALL),P(0,GJ,WALL),P(-0.25,GJ,WALL)], C["wall-top"]);
@@ -6415,16 +6456,10 @@ function lobbyWalls(t){
   planeText("어서 오세요 😊", 15.5, 0.03, 36, "i", 3.6, "#9EE3D3", null, 700, FONT);
   // 카페: 벽돌 · 네온 · 선반 · 메뉴판 (복지층에서 그대로)
   ctx.save(); const [ox, oy] = P(L_DI, 0); ctx.translate(ox, oy); cafeWallArt(t); ctx.restore();
-  // 카페 오른쪽 벽: 무지개 구름 네온 포토존
-  // 벽면 위 반원 무지개: 띠 간격을 i·z 같은 비율로 → 고른 두께, 양 끝은 구름이 받침 (2026-11-12 감독님 "무지개구름 모양이상해")
-  const RB = ["#E8484A","#F28C38","#F2C14E","#5FB36A","#4A90C8","#8E7BEF"], RC = 32.5, RZ = 34, R0 = 2.15, RK = 22;
-  ctx.lineCap = "round";
-  RB.forEach((c, k) => { const r = R0 - k * 0.13; ctx.strokeStyle = c; ctx.lineWidth = 3.4; ctx.shadowColor = c; ctx.shadowBlur = 6 * cam.s * dpr; ctx.beginPath();
-    for(let a = 0; a <= 32; a++){ const u = a / 32 * Math.PI, [x, y] = P(RC - Math.cos(u) * r, 0.03, RZ + Math.sin(u) * r * RK); a ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); });
-  ctx.shadowBlur = 0; ctx.lineCap = "butt";
-  [-1, 1].forEach(sd => { const [x, y] = P(RC + sd * (R0 - 0.33), 0.03, RZ + 2); wfPuff(x, y, 0.8); });
-  planeText("CREYONG CAFÉ ☁", RC, 0.03, 98, "i", 7, "#FFF1F6", "#F4A7B9", 800);
-  planeText("누구나 환영 · OPEN 08:00–21:00", RC, 0.03, 22, "i", 3.2, dk("#8B5A3C","#E9D2B0"), null, 700, FONT);
+  // 편의점 뒤 벽: 간판
+  faceJ(30.4, 35.4, 0.02, 84, 100, "#3A8A78");
+  planeText("CREYONG 24", 32.9, 0.03, 92, "i", 8, "#FFFFFF", null, 900);
+  planeText("편의점 · 24시간 · 1+1 행사 중", 32.9, 0.03, 76, "i", 3.2, dk("#3A8A78","#9EE3D3"), null, 700, FONT);
 }
 /* 복지층 카페에서 옮겨 온 벽 그림 (좌표는 복지층 기준, 그릴 때 i +9.4) */
 function cafeWallArt(t){
@@ -6561,8 +6596,6 @@ function lobbyFurniture(t){
     if(backSide === "front") add(i + j + 0.45, () => box(i-0.22,j+0.18,0.44,0.07,20,shade(c,0.1),12)); };
   [22.3,25.0,27.6].forEach(ti => [9.5,12.8].forEach(tj => { round(ti, tj, 0.42, 15, [[0.12,-0.1]]); chair(ti, tj - 0.55, "back"); chair(ti, tj + 0.55, "front"); }));
   [30.4,33.2].forEach(ti => { round(ti, 10.8, 0.42, 15, [[0,0]]); chair(ti, 10.25, "back"); chair(ti, 11.35, "front"); });
-  add(32.5 + 4.5, () => { const wd = dk("#8B5A3C","#5A3E2C"); [30.5,34.4].forEach(i => box(i, 4.3, 0.12, 0.4, 16, metal)); box(30.3, 4.0, 4.4, 1.0, 1.6, wd, 16); [[31.0,4.5],[32.6,4.3],[33.8,4.6]].forEach(([i, j]) => box(i - 0.05, j - 0.05, 0.1, 0.1, 3, "#FFFFFF", 17.6)); });
-  [31.0,32.2,33.4].forEach(si => [3.45,5.55].forEach(sj => add(si + sj - 0.1, () => { box(si - 0.03, sj - 0.03, 0.06, 0.06, 13, metal); wfDisc(si, sj, 0.2, 13, "#E8A04A"); })));
   add(23.1 + 19.2, () => { [21.1,25.0].forEach(i => box(i, 19.0, 0.1, 0.3, 18, metal)); box(20.9, 18.95, 4.4, 0.45, 1.4, dk("#8B5A3C","#5A3E2C"), 18); });   // 창가 바
   [21.5,22.5,23.5,24.5].forEach(si => add(si + 18.45 - 0.1, () => { box(si - 0.03, 18.42, 0.06, 0.06, 13, metal); wfDisc(si, 18.45, 0.2, 13, "#3A8A78"); }));
   [[31.0,17.2],[33.8,17.2]].forEach(([ti, tj], q) => { round(ti, tj, 0.42, 16.4, [[0,0]]); chair(ti, tj - 0.55, "back", "#FFFFFF"); chair(ti, tj + 0.55, "front", "#FFFFFF");
@@ -6571,7 +6604,7 @@ function lobbyFurniture(t){
   // 카페 소파 부스 (오른쪽 벽)
   [8.4,12.6].forEach(j => add(35.6 + j, () => { const sc = dk("#C0504A","#7A3430"); box(35.0, j - 0.9, 0.9, 1.8, 7, sc); box(35.6, j - 0.9, 0.3, 1.8, 18, shade(sc, -0.1), 7); box(34.0, j - 0.35, 0.7, 0.7, 1.4, dk("#8B5A3C","#5A3E2C"), 14); box(34.3, j - 0.05, 0.1, 0.1, 14, metal); }));
   // 카페 화분
-  [[20.9,15.6],[28.6,7.2],[35.6,1.0],[29.4,14.0]].forEach(([i, j]) => add(i + j, () => plant(i, j, true)));
+  [[20.9,15.6],[28.6,7.2],[29.4,14.0]].forEach(([i, j]) => add(i + j, () => plant(i, j, true)));
   // 로비: 안내 데스크 · 소파 · 화분 · 보안 게이트
   add(16.2 + 5.0, () => { const dc = dk("#FFFFFF","#4A4642"); box(14.2, 4.6, 4.0, 0.8, 22, dc); faceJ(14.2, 18.2, 5.41, 6, 16, "#3A8A78"); planeText("INFORMATION · 안내", 16.2, 5.42, 11, "i", 3.0, "#FFFFFF", null, 800, FONT);
     box(14.6, 4.7, 0.5, 0.35, 6, "#2A2A2E", 22); box(17.2, 4.75, 0.3, 0.3, 4, "#E8A04A", 22); });
@@ -6594,6 +6627,7 @@ function lobbyFurniture(t){
   const gwall = (a0, a1, j, gaps) => { for(let a = a0; a < a1 - 0.01; a += 1.5){ const a2 = Math.min(a1, a + 1.5); if(gaps.some(([g0, g1]) => a < g1 && a2 > g0)){ gaps.forEach(([g0, g1]) => { if(a < g0 && a2 > a) gpane(a, Math.min(a2, g0), j); if(a2 > g1 && a < a2) gpane(Math.max(a, g1), a2, j); }); continue; } gpane(a, a2, j); } };
   const gpane = (a, b, j) => { if(b - a < 0.05) return; add(a + j + 0.6, () => { faceJ(a, b, j, 0, 48, glass); seg(P(a, j, 0), P(a, j, 48), frame, 1); seg(P(b, j, 0), P(b, j, 48), frame, 1); seg(P(a, j, 48), P(b, j, 48), frame, 1.4); box(a, j - 0.05, b - a, 0.1, 3, frame); }); };
   gwall(10.4, GI, GJ, [[14.3,17.7],[25.6,27.0]]);
+  lobbyCvs(add, t, gwall);
   for(let b = 0.3; b < CH - 0.01; b += 1.5){ const b2 = Math.min(CH, b + 1.5); add(WI + b + 0.6, () => { faceI(WI, b, b2, 0, 48, glass); seg(P(WI, b, 0), P(WI, b, 48), frame, 1); seg(P(WI, b, 48), P(WI, b2, 48), frame, 1.4); }); }
   for(let a = GI; a < WI - 0.01; a += 1.5){ const a2 = Math.min(WI, a + 1.5); if(a < 32.6 && a2 > 31.0){ if(a < 31.0) gpane(a, 31.0, CH); if(a2 > 32.6) gpane(32.6, a2, CH); continue; } gpane(a, a2, CH); }
   for(let b = CH; b < GJ - 0.01; b += 1.5){ const b2 = Math.min(GJ, b + 1.5); add(GI + b + 0.6, () => { faceI(GI, b, b2, 0, 48, glass); seg(P(GI, b, 48), P(GI, b2, 48), frame, 1.4); }); }
@@ -6624,6 +6658,40 @@ function lobbyFurniture(t){
   if(yOn("lobby")) add(yuna.i + yuna.j + 0.05, () => drawKid(yuna, t));
   if(nOn("lobby")) add(nora.i + nora.j + 0.05, () => { drawPerson(nora, t); ctx.lineCap = "butt"; });
   return items;
+}
+/* 편의점 CREYONG 24: 냉장고 · 진열대 2 · 아이스크림 냉동고 · 계산대 · 유리 칸막이 */
+function lobbyCvs(add, t, gwall){
+  const metal = C.metal, teal = "#3A8A78", glass = dk("rgba(190,215,230,.28)","rgba(120,150,180,.15)"), frame = dk("#5A5D63","#8A8E94");
+  const PROD = ["#E8484A","#F2C14E","#4A90C8","#FF8FB8","#5FB36A","#F28C38","#8E7BEF","#FFFFFF"];
+  // 왼쪽 칸막이 (카페 쪽): 낮은 벽 + 유리
+  for(let b = 0; b < CVS.j1 - 0.01; b += 1.4){ const b2 = Math.min(CVS.j1, b + 1.4);
+    add(CVS.i0 + b + 0.8, () => { box(CVS.i0 - 0.05, b, 0.1, b2 - b, 10, dk("#BDB5A9","#4A4642")); faceI(CVS.i0, b, b2, 10, 46, glass); seg(P(CVS.i0, b, 46), P(CVS.i0, b2, 46), metal, 1); seg(P(CVS.i0, b, 10), P(CVS.i0, b, 46), metal, 0.8); }); }
+  // 뒤 벽 음료 냉장고 4칸 (밤엔 환하게)
+  const fw = (35.8 - 29.9) / 4;
+  for(let k = 0; k < 4; k++){ const a = 29.9 + k * fw;
+    add(a + fw / 2 + 0.4, () => { box(a, 0.02, fw, 0.73, 62, dk("#D9DDE0","#3A3E42")); faceJ(a + 0.07, a + fw - 0.07, 0.751, 4, 57, dk("#E9F6FF","#BFE6FF"));
+      [10, 24, 38].forEach((z, r) => { seg(P(a + 0.07, 0.752, z - 1), P(a + fw - 0.07, 0.752, z - 1), dk("#B8BEC4","#8AA0B0"), 1);
+        for(let bi = a + 0.14, n = 0; bi < a + fw - 0.18; bi += 0.17, n++) faceJ(bi, bi + 0.11, 0.753, z, z + (r === 2 ? 8 : 10), PROD[(n * 3 + r * 2 + k) % PROD.length]); });
+      faceJ(a, a + fw, 0.752, 57, 62, teal); seg(P(a + fw / 2, 0.753, 4), P(a + fw / 2, 0.753, 57), frame, 0.8); }); }
+  // 진열대 2줄 (양면)
+  [2.1, 3.9].forEach((j0, q) => add(33.9 + j0 + 0.3, () => {
+    box(32.5, j0, 2.8, 0.6, 3, dk("#5A5D63","#2A2C2F")); box(32.55, j0 + 0.05, 2.7, 0.5, 25, dk("#EEF0EC","#4A4E52"), 3);
+    [6, 13, 20].forEach((z, r) => { for(let bi = 32.62, n = 0; bi < 35.15; bi += 0.2, n++) faceJ(bi, bi + 0.16, j0 + 0.551, z, z + 5.5, PROD[(n + r * 3 + q * 5) % PROD.length]); seg(P(32.55, j0 + 0.552, z - 0.6), P(35.25, j0 + 0.552, z - 0.6), teal, 1); });
+    box(32.5, j0, 2.8, 0.6, 1.2, teal, 28); faceI(35.301, j0 + 0.08, j0 + 0.52, 6, 24, q ? "#E8A04A" : "#FF8FB8");
+    planeText(q ? "1+1" : "2+1", 35.31, j0 + 0.3, 15, "j", 3.4, "#FFFFFF", null, 900); }));
+  // 아이스크림 냉동고
+  add(34.8 + 5.85 + 0.2, () => { box(34.0, 5.4, 1.6, 0.85, 13, dk("#FFFFFF","#7E848A")); faceJ(34.05, 35.55, 6.251, 4, 10, "#4A90C8"); planeText("ICE", 34.8, 6.252, 7, "i", 2.6, "#FFFFFF", null, 900);
+    [[34.3,5.65],[34.7,5.9],[35.1,5.6],[35.35,5.95],[34.5,6.05],[34.95,5.8]].forEach(([i, j], n) => { const [x, y] = P(i, j, 13.2); wfDot(x, y, 2.2, PROD[(n * 2 + 1) % PROD.length]); });
+    quad(34.05, 5.45, 35.55, 6.2, 13.4, dk("rgba(200,230,250,.45)","rgba(150,190,220,.3)")); });
+  // 계산대 + 포스 + 핫바 온장고
+  add(30.9 + 5.6 + 0.3, () => { box(29.9, 5.3, 2.0, 0.65, 22, dk("#3A8A78","#2A5F54")); box(29.85, 5.25, 2.1, 0.75, 1.5, dk("#F4F4F0","#BDB5A9"), 22);
+    planeText("CREYONG 24", 30.9, 5.96, 12, "i", 3.0, "#FFFFFF", null, 800);
+    box(30.2, 5.4, 0.4, 0.35, 5, "#2A2A2E", 23.5); faceJ(30.24, 30.56, 5.751, 24, 28, "#5FD3E8");
+    box(31.1, 5.35, 0.6, 0.45, 9, dk("rgba(230,240,250,.6)","rgba(150,180,210,.35)"), 23.5); [31.2, 31.35, 31.5].forEach(i => box(i, 5.5, 0.08, 0.2, 2, "#C0504A", 24)); });
+  // 앞 유리 (문 31.9~33.3) + 간판 띠
+  gwall(CVS.i0, WI, CVS.j1, [[CVS.d0, CVS.d1]]);
+  add(32.6 + CVS.j1 + 0.7, () => { faceJ(CVS.i0, WI, CVS.j1, 48, 56, teal); planeText("CREYONG 24 · 편의점", 32.6, CVS.j1 + 0.01, 52, "i", 3.4, "#FFFFFF", null, 800, FONT);
+    [CVS.d0, CVS.d1].forEach(i => seg(P(i, CVS.j1, 0), P(i, CVS.j1, 48), frame, 1.4)); });
 }
 function lElev(t){
   const i0 = 12.0, i1 = 12.92, j0 = 16.35, j1 = 19.05, H = 84, f = i1 + 0.004, stone = dk("#D8D0C4","#3A3631");
@@ -6713,7 +6781,7 @@ function renderLobbyZonebar(el){
   el.querySelectorAll("[data-z]").forEach(b => b.onclick = () => { showTip(null); wfTip(null); setView(b.dataset.z); });
 }
 
-const L_PD_SPOTS = [[10,"1층 카페에서 라떼 한 잔 ☕"],[11,"크로플 먹으며 쉬는 중 🥐"],[28,"창가 바에서 바깥 구경 👀"],[29,"창가에서 아아 한 잔 🧊"],[32,"테라스에서 햇볕 쬐는 중 ☀️"],[33,"테라스에서 바람 쐬는 중 🌿"]].map(([k, line]) => { const st = L_SEATS[k], pre = st.path.slice(0, -1);
+const L_PD_SPOTS = [[10,"1층 카페에서 라떼 한 잔 ☕"],[11,"크로플 먹으며 쉬는 중 🥐"],[22,"창가 바에서 바깥 구경 👀"],[23,"창가에서 아아 한 잔 🧊"],[26,"테라스에서 햇볕 쬐는 중 ☀️"],[27,"테라스에서 바람 쐬는 중 🌿"]].map(([k, line]) => { const st = L_SEATS[k], pre = st.path.slice(0, -1);
   return {floor:"lobby", cafe:true, seat:st, at:st.at, pose:"sit", front:!!st.front, via:[[14.2,17.1],[14.2,7.6],L_HUB,L_CNT,L_HUB,...pre], back:[...[...pre].reverse(), L_HUB, [14.2,7.6], [14.2,17.1]], line}; });
 
 function setMung(on){

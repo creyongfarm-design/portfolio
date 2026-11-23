@@ -24,9 +24,9 @@ const NB = [
 ];
 const ROOF_GRASS = [[0.3,9.45,13.9,12.4],[15.3,0.3,27.0,2.45],[27.0,0.3,35.7,14.2],[15.3,13.6,28.7,19.7],[5.4,13.6,10.3,15.4]];
 const ROOF_PATHS = [[14.0,0.3,15.2,17.7],[0.3,12.45,28.7,13.55],[27.0,3.0,28.2,13.55],[28.2,3.0,32.0,3.8],[28.2,9.4,33.0,10.2]];
-const STREAM = [[29.3,1.0],[28.9,3.2],[29.4,5.0],[28.9,7.0],[29.3,9.0],[28.8,11.0],[28.5,12.6],[28.1,13.8],[27.1,15.3]];
-const STREAM_STONES = [[28.65,3.4],[29.25,3.45],[28.8,9.8],[29.4,9.85]];
-const POND = {ci:26.6, cj:15.3, ri:1.4, rj:0.95};   // 인피니티 풀 들이면서 작게 옮김 (2026-11-22)
+const STREAM = [[29.3,1.0],[28.9,3.2],[29.4,5.0],[28.9,7.0],[29.3,9.0],[28.8,11.0],[28.5,12.6],[28.1,13.8]];   // 연못을 옮겨서 냇가는 길 건너 돌무더기에서 끝남 (2026-11-23)
+const STREAM_STONES = [[28.65,3.4],[29.25,3.45],[28.8,9.8],[29.4,9.85],[27.8,14.15],[28.35,14.35]];
+const POND = {ci:24.3, cj:1.6, ri:1.45, rj:0.62};   // 수영장 옆이 불편해서 회식 테이블 뒤 잔디로 옮김 (2026-11-23 감독님 "회식하는 쪽이 어울리지 않나")
 const POOL = {i0:20.4, j0:17.5, wi:20.6, wj:17.7, z:12};
 const SUNBEDS = [[22.15,"#3A8A78"],[23.25,"#E8A04A"],[24.35,"#F4A7B9"]], PARASOLS = [[22.7,16.05,"#3A8A78"],[24.95,16.1,"#E8A04A"]];
 const POOL_LIGHTS = [21.6, 23.4, 25.2, 27.0, 28.5], SPLASH = [24.8, 18.9];
@@ -41,6 +41,7 @@ const FLY = [[24.5,16.2],[6.5,10.4],[31.5,6.5],[29.6,8.2],[18.0,1.4],[33.0,12.5]
 const CHAIRS = [[21.5,5.15,"-j","#E8A04A"],[23.25,6.85,"+i","#3A8A78"],[21.5,8.55,"+j","#C8B4D0"],[19.75,6.85,"-i","#8B5A3C"]];
 const POSTS = [[16.3,2.8],[26.7,2.8],[26.7,10.7],[16.3,10.7]];
 const FIRE = [21.5, 6.85], GRILL = [20.9, 15.0], TABLE_BQ = [17.85, 16.85];
+const CHICK = [25.0, 14.15, 1.8, 0.6], CHICK_STOOLS = [[25.35, 15.45], [26.45, 15.45]];   // 치킨·맥주 포차 (i0, j0, 너비, 깊이)
 const BULB_C = ["#FFE6A8","#FFD27A","#FFF3D6"], FLOWER = ["#F4A7B9","#FFE066","#FF8C69","#C8B4D0","#FFFFFF","#E8607F"];
 const DECK = [16, 2.5, 27, 11];
 const pondPt = (a, s = 1) => [POND.ci + Math.cos(a) * POND.ri * s * (1 + 0.07 * Math.sin(3 * a)), POND.cj + Math.sin(a) * POND.rj * s * (1 + 0.06 * Math.cos(2 * a + 1))];
@@ -165,10 +166,10 @@ function buildStatic(){
   // 조명탑
   FS_POLES.forEach(([i, j]) => { B(i - 0.06, j - 0.06, 0.12, 0.12, 82, "#3A3F44", 0, {cls:"s"}); B(i - 0.3, j - 0.12, 0.6, 0.24, 5, "#2A2E32", 82, {cls:"s"});
     box(X(i), hz(81.8), Z(j), 0.52, 0.015, 0.16, "#FFF6D8", "glow", 0); });
-  // 골대 (흰 파이프)
-  [[FS.i0, -0.45], [FS.i1, 0.45]].forEach(([gi, d]) => { const H = 16, a = FS.gj - FS.gw, b = FS.gj + FS.gw, W = "#FFFFFF";
-    [a, b].forEach(j => { rod(P3(gi, j, 0), P3(gi, j, H), 0.03, W, "s", 8); rod(P3(gi, j, H), P3(gi + d, j, 12.8), 0.016, W, "s", 6); rod(P3(gi + d, j, 0), P3(gi + d, j, 12.8), 0.016, W, "s", 6); });
-    rod(P3(gi, a, H), P3(gi, b, H), 0.03, W, "s", 8); rod(P3(gi + d, a, 12.8), P3(gi + d, b, 12.8), 0.014, W, "s", 6); rod(P3(gi + d, a, 0.5), P3(gi + d, b, 0.5), 0.014, W, "s", 6); });
+  // 골대 (흰 파이프) — 2026-11-23 감독님 "골대가 너무 낮네" → 높이 16 → 30
+  [[FS.i0, -0.45], [FS.i1, 0.45]].forEach(([gi, d]) => { const H = 30, HB = 24, a = FS.gj - FS.gw, b = FS.gj + FS.gw, W = "#FFFFFF";
+    [a, b].forEach(j => { rod(P3(gi, j, 0), P3(gi, j, H), 0.03, W, "s", 8); rod(P3(gi, j, H), P3(gi + d, j, HB), 0.016, W, "s", 6); rod(P3(gi + d, j, 0), P3(gi + d, j, HB), 0.016, W, "s", 6); });
+    rod(P3(gi, a, H), P3(gi, b, H), 0.03, W, "s", 8); rod(P3(gi + d, a, HB), P3(gi + d, b, HB), 0.014, W, "s", 6); rod(P3(gi + d, a, 0.5), P3(gi + d, b, 0.5), 0.014, W, "s", 6); });
 
   /* ── 텃밭 ── */
   [1.2, 5.2].forEach((i0, k) => { B(i0, 9.8, 3.6, 1.5, 9, "#B98B55", 0, {r:0.04}); B(i0 + 0.1, 9.9, 3.4, 1.3, 0.5, "#6E5A44", 8.7, {r:0});
@@ -313,6 +314,19 @@ function buildStatic(){
   for(let o = -0.27; o <= 0.28; o += 0.09) rod(P3(GRILL[0] + o, GRILL[1] - Math.sqrt(0.36 * 0.36 - o * o) + 0.02, 18.6), P3(GRILL[0] + o, GRILL[1] + Math.sqrt(0.36 * 0.36 - o * o) - 0.02, 18.6), 0.005, "#A8A8A8", "s", 4);
   [[-0.16, -0.08], [0.02, -0.12], [0.18, -0.02], [-0.1, 0.12], [0.1, 0.13]].forEach(([a, b], n) => { const m = box(X(GRILL[0] + a), hz(19.2), Z(GRILL[1] + b), 0.2, 0.014, 0.07, n % 2 ? "#B8654A" : "#C9765A", "m", 0); m.rotation.y = 0.5 + n * 0.3; });
   B(20.65, 15.7, 0.7, 0.5, 6, "#4A90C8", 0, {r:0.04}); B(20.63, 15.68, 0.74, 0.54, 1.4, "#FFFFFF", 6, {r:0.03});
+  /* 치킨·맥주 포차 (2026-11-23 감독님 "간단하게 치킨과 음료도 거기서 팔아야할듯 맥주한잔") — 옛 연못 자리, 수영장 보고 장사 */
+  { const [i0, j0, w, d] = CHICK, wood = "#B07A4A", rim = sh(wood, -0.25);
+    B(i0, j0, w, d, 30, wood, 0, {r:0.03}); B(i0 - 0.05, j0 + d - 0.02, w + 0.1, 0.22, 1.6, "#F4EEE2", 30, {r:0.02});   // 몸통 · 상판(앞으로 살짝)
+    for(let k = 0; k < 6; k++) B(i0 + 0.06 + k * (w - 0.12) / 6, j0 + d, (w - 0.12) / 6 - 0.04, 0.012, 26, k % 2 ? "#E8A04A" : "#F6D08A", 2, {r:0});   // 앞판 줄무늬
+    [[i0 + 0.04, j0 + 0.04], [i0 + w - 0.1, j0 + 0.04]].forEach(([i, j]) => B(i, j, 0.06, 0.06, 44, rim, 30));   // 뒤 기둥
+    for(let k = 0; k < 8; k++){ const g = B(i0 - 0.1 + k * (w + 0.2) / 8, j0 - 0.05, (w + 0.2) / 8, d + 0.55, 1.2, k % 2 ? "#FFFFFF" : "#E8A04A", 74, {r:0}); g.rotation.x = -0.14; }   // 차양
+    B(i0 + 0.25, j0 + 0.05, w - 0.5, 0.06, 13, "#2A2A28", 58, {r:0.02});   // 간판
+    K.wtext("치킨 · 맥주", i0 + w / 2, j0 + 0.12, 64.5, "i", 4.2, "#FFD27A", null, 800);
+    [[0.35, "#C9763A"], [0.62, "#B8642E"], [0.9, "#D18A44"]].forEach(([o, c]) => ball(i0 + o, j0 + d - 0.05, 33.2, 0.075, c, "m", 0.72, 10));   // 치킨 바구니
+    cyl(i0 + 0.62, j0 + d - 0.05, 0.2, 1.2, "#C9A36A", 31.6, "m", 16);
+    [[1.25, "#F2B33D"], [1.45, "#F2B33D"]].forEach(([o, c]) => { cyl(i0 + o, j0 + d - 0.02, 0.055, 4.6, c, 31.6, "s", 10); cyl(i0 + o, j0 + d - 0.02, 0.058, 1.2, "#FFFFFF", 36.2, "s", 10); });   // 맥주잔(거품)
+    cyl(i0 + w - 0.2, j0 + 0.25, 0.12, 1, "#3A3A3A", 30, "s", 12); rod(P3(i0 + w - 0.2, j0 + 0.25, 31), P3(i0 + w - 0.2, j0 + 0.25, 44), 0.02, "#C0C4C8", "s", 6);   // 생맥주 탭
+    CHICK_STOOLS.forEach(([i, j]) => { cyl(i, j, 0.03, 13, "#2A2A28", 0, "s", 8); cyl(i, j, 0.17, 0.8, "#2A2A28", 0, "s", 14); cyl(i, j, 0.2, 2, "#E8A04A", 12, "m", 18); }); }
   // 가랜드
   [[15.5, 14.8], [20.2, 14.8]].forEach(([i, j]) => B(i - 0.05, j - 0.05, 0.1, 0.1, 44, "#8B6B4E"));
   { const pt = u => P3(15.5 + 4.7 * u, 14.8, 43 - Math.sin(Math.PI * u) * 7);
@@ -325,10 +339,10 @@ function buildStatic(){
   // 연못 둘레 돌 · 연잎 · 갈대
   for(let k = 0; k < 30; k++){ const a = k / 30 * Math.PI * 2, [i, j] = pondPt(a, 1.06), h = rHash(k, 3, 9);
     ball(i, j, 1.0, (6 + h * 3) / 39.6, h > 0.5 ? "#9A948A" : "#B5AEA2", "m", 0.48, 10); }
-  [[25.9, 14.9, 1], [27.3, 15.0, 0], [26.8, 15.8, 1], [25.8, 15.6, 0]].forEach(([i, j, f], n) => {
+  [[23.58, 1.34, 1], [25.02, 1.4, 0], [24.5, 1.93, 1], [23.47, 1.8, 0]].forEach(([i, j, f], n) => {
     const g = new T.CylinderGeometry(0.15, 0.15, 0.008, 18, 1, false, 0.35 + n, Math.PI * 2 - 0.5); sm(g, "#5E9B5A", X(i), 0.018, Z(j), "m");
     if(f){ ball(i, j, 1.6, 0.055, "#F4A7B9", "m", 0.8, 10); ball(i, j, 2.6, 0.026, "#FFFFFF", "m", 1, 6); } });
-  [[25.55, 14.05], [27.75, 16.45], [28.25, 14.6]].forEach(([ci, cj], q) => { for(let k = 0; k < 6; k++){
+  [[23.21, 0.78], [25.49, 2.35], [25.99, 1.15]].forEach(([ci, cj], q) => { for(let k = 0; k < 6; k++){
     const di = (rHash(q, k, 1) - 0.5) * 0.5, dj = (rHash(q, k, 2) - 0.5) * 0.4, h = 14 + rHash(q, k, 3) * 10, lean = (rHash(q, k, 4) - 0.5) * 0.12;
     rod(P3(ci + di, cj + dj, 0), P3(ci + di + lean, cj + dj - lean, h), 0.009, "#6E9B4A", "m", 4);
     if(k % 2) { const o = sm(K.cyl(0.026, 0.026, 0.11, 8), "#8B5A3C", X(ci + di + lean), hz(h) - 0.06, Z(cj + dj - lean), "m"); } } });
@@ -429,9 +443,9 @@ function buildNets(){
   fence(FSF.i0, FSF.j0, FSF.i1, FSF.j0, 0.75); fence(FSF.i0, FSF.j0, FSF.i0, FSF.j1, 0.75); fence(FSF.i0, FSF.j1, FSF.i1, FSF.j1, 0.45);
   fence(FSF.i1, FSF.j0, FSF.i1, FSF.d0, 0.45); fence(FSF.i1, FSF.d1, FSF.i1, FSF.j1, 0.45);
   [[FS.i0, -0.45], [FS.i1, 0.45]].forEach(([gi, d]) => { const a = FS.gj - FS.gw, b = FS.gj + FS.gw, w = [1, 1, 1, 0.62];
-    panel(V(gi + d, a, 0), V(gi + d, b, 0), V(gi + d, b, 12.8), V(gi + d, a, 12.8), 0.1, w);
-    panel(V(gi, a, 16), V(gi, b, 16), V(gi + d, b, 12.8), V(gi + d, a, 12.8), 0.1, w);
-    [a, b].forEach(j => { panel(V(gi, j, 0), V(gi + d, j, 0), V(gi + d, j, 12.8), V(gi, j, 16), 0.1, w); }); });
+    panel(V(gi + d, a, 0), V(gi + d, b, 0), V(gi + d, b, 24), V(gi + d, a, 24), 0.1, w);
+    panel(V(gi, a, 30), V(gi, b, 30), V(gi + d, b, 24), V(gi + d, a, 24), 0.1, w);
+    [a, b].forEach(j => { panel(V(gi, j, 0), V(gi + d, j, 0), V(gi + d, j, 24), V(gi, j, 30), 0.1, w); }); });
   const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
   g.setAttribute("color", new T.Float32BufferAttribute(col, 4)); g.userData.base = col.slice();
   const m = new T.Mesh(g, new T.MeshBasicMaterial({map:tex, vertexColors:true, transparent:true, depthWrite:false, side:T.DoubleSide, toneMapped:false})); m.renderOrder = 3; K.R.scene.add(m);
@@ -591,12 +605,12 @@ function applyPhase(ph){
 /* ---------- 사람 ---------- */
 const Q = Math.PI / 4;
 const at2 = (i, j, ti, tj) => Math.atan2(ti - i, tj - j);
-const NPC_HEAD = {r_g:0, r_b3:Q, r_feet:-0.95, r_gt:-0.45, r_read:Q, r_gd:Math.PI, h_1:0, h_2:0, h_3:0, h_4:Math.PI, h_5:Math.PI, h_6:Math.PI};
+const NPC_HEAD = {r_ck:0, r_g:0, r_b3:Q, r_feet:-0.95, r_gt:-0.45, r_read:Q, r_gd:Math.PI, h_1:0, h_2:0, h_3:0, h_4:Math.PI, h_5:Math.PI, h_6:Math.PI};
 const NPC_SEAT = {r_b1:"bq", r_b2:"bq", r_feet:"rock", r_gt:"gstool", r_read:"bag", h_1:"stool", h_2:"stool", h_3:"stool", h_4:"stool", h_5:"stool", h_6:"stool", d_a:"mat", d_b:"mat"};
 const SEATS = {chair:{top:hz(8)}, stool:{top:hz(10.6)}, gstool:{top:hz(8.3)}, swing:{top:hz(9.6)}, rock:{top:0.19}, bag:{top:0.26}, bq:{cross:hz(8.7)}, mat:{cross:0.012}, ground:{cross:0}, lounger:{top:hz(7.4)}};
 const onDeck = (i, j) => inR(i, j, DECK[0], DECK[1], DECK[2], DECK[3]);
 const spotKey = s => s.at[0] + "," + s.at[1];
-const SPOT_HEAD = {"5,12.35":Math.PI, "29.95,4.2":-0.5, "13.75,1.6":-Math.PI / 2, "24.6,14.5":at2(24.6, 14.5, POND.ci, POND.cj), "28.35,16.1":at2(28.35, 16.1, POND.ci, POND.cj), "22.05,3.5":Math.PI / 2, "31.4,9":0, "32.4,9":0};
+const SPOT_HEAD = {"5,12.35":Math.PI, "29.95,4.2":-0.5, "13.75,1.6":-Math.PI / 2, "26.3,1.45":at2(26.3, 1.45, POND.ci, POND.cj), "26.55,2.3":at2(26.55, 2.3, POND.ci, POND.cj), "22.05,3.5":Math.PI / 2, "31.4,9":0, "32.4,9":0};
 function spotSeat(s){
   if(s.pool) return "lounger"; if(s.fire) return "chair"; if(s.hsik) return "stool"; if(s.z) return "bq";
   if(s.deck && s.at[1] === 9.0) return "swing"; if(s.pose === "sit") return "ground"; return null;
@@ -776,7 +790,7 @@ function updWorld(sim, now, t, dt){
     setI(BX, 34 + k, X(i) - Math.sin(h) * 0.12, 0.016, Z(j) - Math.cos(h) * 0.12, 0, h + wig, 0, 0.09, 0.008, 0.06); }
   S.koi.instanceMatrix.needsUpdate = true;
   const rc = new T.Color();
-  [[26.0, 15.0], [27.2, 15.5], [26.5, 15.85]].forEach(([i, j], k) => { const u = rd ? (t * 0.4 + k * 0.33) % 1 : 0.5, r = 0.08 + u * 0.26;
+  [[23.68, 1.4], [24.92, 1.73], [24.2, 1.96]].forEach(([i, j], k) => { const u = rd ? (t * 0.4 + k * 0.33) % 1 : 0.5, r = 0.08 + u * 0.26;
     setI(S.rip, k, X(i), 0.02, Z(j), 0, 0, 0, r, 1, r); S.rip.setColorAt(k, rc.setScalar((1 - u) * 0.35)); });
   { const su = sim ? (sim.now - sim.splash) / 1600 : 9; for(let k = 0; k < 3; k++){ const v = su - k * 0.18;
     if(v <= 0 || v >= 1){ S.rip.setMatrixAt(3 + k, ZM); continue; } const r = 0.12 + v * 0.9; setI(S.rip, 3 + k, X(SPLASH[0]), hz(POOL.z) + 0.02, Z(SPLASH[1]), 0, 0, 0, r, 1, r); S.rip.setColorAt(3 + k, rc.setScalar((1 - v) * 0.8)); } }

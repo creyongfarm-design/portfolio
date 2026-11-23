@@ -19,7 +19,7 @@ const RES = [
   {id:"l_f2", name:"동네 손님", role:"크레용 카페", at:[22.3,13.35], pose:"sit", act:"eat", look:WL("#DDB08C","#141414","cap","#5C6B8A","#2B2D30"), desc:"크로플 먹는 중 🥐"},
   {id:"l_t1", name:"테라스 손님", role:"테라스", at:[33.8,16.65], pose:"sit", front:true, act:"cup", look:WL("#F0CDB2","#7A4A30","long","#C8B4D0","#45404A"), desc:"테라스에서 햇볕 쬐는 중 ☀️"},
   {id:"l_t2", name:"테라스 손님", role:"테라스", at:[33.8,17.75], pose:"sit", act:"cup", look:WL("#E5BC98","#1E1A17","short","#4DAA97","#2B2D30"), desc:"아이스 라떼 🧊"},
-  {id:"l_ph", name:"사진 찍는 손님", role:"크레용 카페", at:[32.4,1.4], face:-1, act:"pad", look:WL("#F6D7C2","#3A261C","long","#FFFFFF","#E8A04A"), desc:"무지개 구름 앞에서 인증샷 📸"},
+  {id:"l_cvs", name:"편의점 알바", tag:true, role:"CREYONG 24 · 24시간", apron:"#3A8A78", at:[30.9,4.75], face:1, look:WL("#EFCBB0","#2A1E18","short","#F2EDE5","#2B2D30"), desc:"어서 오세요~ CREYONG 24입니다 🏪"},
   {id:"l_sofa", name:"미팅 기다리는 손님", role:"로비", at:[18.0,12.55], pose:"sit", front:true, act:"book", book:"#3A8A78", look:WL("#D7A985","#241C18","short","#2A2A28","#3A3D42"), desc:"2층 미팅 기다리는 중 📄"},
   {id:"l_s1", name:"수험생", role:"크레용 카페 · 24시간", at:[27.6,8.95], pose:"sit", front:true, act:"book", book:"#E8A04A", look:WL("#F2D2BA","#2A221E","long","#E9E4DA","#45404A"), desc:"수능 문제집 푸는 중 ✏️"},
   {id:"l_s2", name:"수험생", role:"크레용 카페 · 24시간", at:[27.6,10.05], pose:"sit", act:"book", book:"#7FA7D9", look:WL("#E5BC98","#141414","short","#5C6B8A","#2B2D30"), desc:"인강 들으며 필기 중 🎧"},
@@ -34,6 +34,8 @@ const SENT = {skin:"#010101", hair:"#020202", shirt:"#030303", pants:"#040404"};
 const NORA = {skin:"#F3D3BC", hair:"#4A2E24", style:"long", shirt:"#F7F1EC", pants:"#B9A3C4"};
 const YUNA = {skin:"#F6D7C2", hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", shirt:"#FF8FB8", pants:"#6FA8DC"};
 const NCAR = 10;
+/* 편의점 CREYONG 24 (2026-11-23 감독님 "1층에 카페가 좀 커. 편의점도 하나 있으면 좋을듯") — 2.5D lobbyCvs 그대로 */
+const CVS = {i0:29.6, j1:7.0, d0:31.9, d1:33.3};
 /* 횡단보도 신호등 (2026-11-23 감독님 "횡단보도 신호등 필요"). 차 신호: 기둥·박스 위치, 램프 [빨·노·초] j / 보행 신호: 기둥 · 박스 */
 const SIG_CAR = [{pi:15.3, pj:27.75, bj:26.1, lj:[25.88, 26.1, 26.32]}, {pi:19.6, pj:21.95, bj:23.5, lj:[23.72, 23.5, 23.28]}];
 const SIG_PED = [[15.75, 21.95], [19.45, 27.75]];
@@ -148,6 +150,9 @@ const def = {
     poly([[20.6,0],[WI,0],[WI,CH],[GI,CH],[GI,GJ],[20.6,GJ]], dd("#D6B087", "#4A3727"));
     c.strokeStyle = dd("rgba(120,80,40,.2)", "rgba(0,0,0,.24)"); c.lineWidth = 0.02;
     for(let j = 0; j < GJ; j += 0.5){ const iEnd = j < CH ? WI : GI; c.beginPath(); for(let k = 0; 20.6 + k * 0.35 <= iEnd; k++){ const i = 20.6 + k * 0.35, jj = j + (k % 2) * 0.5; k ? c.lineTo(i, jj) : c.moveTo(i, jj); } c.stroke(); }
+    // 편의점 바닥: 밝은 타일
+    rect(CVS.i0, 0, WI, CVS.j1, dd("#F1F2EE", "#3A3C3B"));
+    c.globalAlpha = dark ? 0.22 : 0.07; for(let i = CVS.i0 + 0.6; i < WI; i += 0.6) line(i, 0, i, CVS.j1, "#000000", 0.012); for(let j = 0.6; j < CVS.j1; j += 0.6) line(CVS.i0, j, WI, j, "#000000", 0.012); c.globalAlpha = 1;
     // 건물 앞 턱 (2.5D 슬래브 앞면 띠)
     rect(0, GJ - 0.06, GI, GJ, sh(dd("#D9D3C8", "#55504A"), -0.05));
     // 가로등 빛 웅덩이 (다크)
@@ -175,7 +180,7 @@ const def = {
 
     /* 벽: 뒤 벽 4색 · 왼벽 · 윗면 띠 · 걸레받이 · 끝 단면 */
     const t = 0.25;
-    [[0,10.4,D("#B9BCC0","#3A3C40")],[10.4,20.6,D("#F2EEE7","#3A3631")],[20.6,29.0,D("#C98D69","#4A3226")],[29.0,WI,D("#F4E8EE","#3E3440")]].forEach(([a, b, col]) => B(a, -t, b - a, t, WALL, col, 0, {r:0}));
+    [[0,10.4,D("#B9BCC0","#3A3C40")],[10.4,20.6,D("#F2EEE7","#3A3631")],[20.6,CVS.i0,D("#C98D69","#4A3226")],[CVS.i0,WI,D("#EEF0EC","#34383A")]].forEach(([a, b, col]) => B(a, -t, b - a, t, WALL, col, 0, {r:0}));
     B(-t, 0, t, GJ, WALL, D("#C4C7CB", "#34363A"), 0, {r:0}); B(-t, -t, t, t, WALL, D("#B9BCC0", "#3A3C40"), 0, {r:0});
     B(-t - 0.02, -t - 0.02, WI + t + 0.02, t + 0.04, 3, wallTop, WALL, {r:0}); B(-t - 0.02, -t, t + 0.04, GJ + t, 3, wallTop, WALL, {r:0});
     B(WI, -t, 0.02, t, WALL, sh(wallTop, -0.2), 0, {r:0}); B(-t, GJ, t, 0.02, WALL, sh(wallTop, -0.1), 0, {r:0});
@@ -307,18 +312,10 @@ const def = {
     [["아메리카노",70],["카페라떼",64.5],["콜드브루",59]].forEach(([n, z]) => wtext(n, 26.6, 0.04, z, "i", 3.8, "#F4E9D6", null, 600, FONT));
     wtext("오늘의 디저트 · 크로플", 26.6, 0.04, 52.5, "i", 3.2, "#E8A04A", null, 700, FONT);
     wtext("누구나 환영!", 26.6, 0.04, 46.5, "i", 3.6, "#9EE3D3", null, 800, FONT);
-    /* 분홍 벽: 무지개 구름 네온 포토존 */
-    const RB = ["#E8484A","#F28C38","#F2C14E","#5FB36A","#4A90C8","#8E7BEF"], RC = 32.5, RZ = 34, R0 = 2.15, RK = 22;
-    K.decal(5.6 * 64, 2.2 * 64, (cx, W, H, dark) => { const s = W / 5.6, cxp = i => (i - (RC - 2.8)) * s, zp = z => H - (z - (RZ - 6)) / 31.1 * s;
-      cx.lineCap = "round"; RB.forEach((col, k) => { const r = R0 - k * 0.13; cx.strokeStyle = col; cx.globalAlpha = dark ? 0.55 : 0.32; cx.lineWidth = s * 0.16; cx.shadowColor = col; cx.shadowBlur = s * (dark ? 0.5 : 0.3);
-        cx.beginPath(); for(let a = 0; a <= 32; a++){ const u = a / 32 * Math.PI, x = cxp(RC - Math.cos(u) * r), y = zp(RZ + Math.sin(u) * r * RK); a ? cx.lineTo(x, y) : cx.moveTo(x, y); } cx.stroke(); }); cx.globalAlpha = 1; },
-      5.6, 2.2, "i", RC, -0.016, hz(RZ - 6) + 1.1);
-    RB.forEach((col, k) => { const r = R0 - k * 0.13, o = sm(new THREE.TorusGeometry(r, 0.032, 6, 40, Math.PI), col, X(RC), hz(RZ), Z(0) + 0.05, null, "glow"); o.scale.set(1, RK / 31.1, 0.8); });
-    [-1, 1].forEach(sd => { const ci = RC + sd * (R0 - 0.33);
-      [[-1.1,0.25,0.75],[0,-0.25,1],[1.1,0.15,0.8],[0.5,0.45,0.7],[-0.5,0.5,0.7]].forEach(([dx, dy, rr], k) => { const s = 13 * 0.8 / 31.1;
-        sm(sph(rr * s * 1.05, 14, 10), k < 3 ? "#FFFFFF" : D("#F5EEF8", "#E9DDF0"), X(ci) + dx * s * 0.9, hz(RZ + 2) - dy * s * 0.9, Z(0) + 0.1).scale.set(1, 1, 0.55); }); });
-    wtext("CREYONG CAFÉ ☁", RC, 0.02, 98, "i", 7, "#FFF1F6", "#F4A7B9", 800);
-    wtext("누구나 환영 · OPEN 08:00–21:00", RC, 0.02, 22, "i", 3.2, D("#8B5A3C", "#E9D2B0"), null, 700, FONT);
+    /* 편의점 뒤 벽 간판 */
+    faceJ(30.4, 35.4, 0.0, 84, 100, "#3A8A78", "m", 0.04);
+    wtext("CREYONG 24", 32.9, 0.03, 92, "i", 8, "#FFFFFF", null, 900);
+    wtext("편의점 · 24시간 · 1+1 행사 중", 32.9, 0.03, 76, "i", 3.2, D("#3A8A78", "#9EE3D3"), null, 700, FONT);
 
     /* 카페 바: 뒤 작업대(머신) · 앞 카운터 (복지층에서 그대로, i +9.4) */
     const cw = D("#5B4636", "#3A2E24"), marble = D("#F2EDE5", "#BDB5A9");
@@ -354,10 +351,6 @@ const def = {
     round(27.6, 3.6, 15, [[0,0]]); chair(27.6, 3.05, "back"); chair(27.6, 4.15, "front");
     [22.3, 25.0, 27.6].forEach(ti => [9.5, 12.8].forEach(tj => { round(ti, tj, 15, [[0.12,-0.1]]); chair(ti, tj - 0.55, "back"); chair(ti, tj + 0.55, "front"); }));
     [30.4, 33.2].forEach(ti => { round(ti, 10.8, 15, [[0,0]]); chair(ti, 10.25, "back"); chair(ti, 11.35, "front"); });
-    // 긴 하이 테이블 + 주황 스툴
-    [30.5, 34.4].forEach(i => B(i, 4.3, 0.12, 0.4, 16, metal, 0, {cls:"s", r:0.02})); B(30.3, 4.0, 4.4, 1.0, 1.6, WD, 16, {r:0.03});
-    [[31.0,4.5],[32.6,4.3],[33.8,4.6]].forEach(([i, j]) => cylAt(0.05, 0.042, 3.2, "#FFFFFF", i, j, 17.6, "s", 10));
-    [31.0, 32.2, 33.4].forEach(si => [3.45, 5.55].forEach(sj => stool(si, sj, "#E8A04A")));
     // 창가 바 + 틸 스툴
     [21.1, 25.0].forEach(i => B(i, 19.0, 0.1, 0.3, 18, metal, 0, {cls:"s", r:0.02})); B(20.9, 18.95, 4.4, 0.45, 1.4, WD, 18, {r:0.03});
     [21.5, 22.5, 23.5, 24.5].forEach(si => stool(si, 18.45, "#3A8A78"));
@@ -365,7 +358,7 @@ const def = {
     const bc = D("#C0504A", "#7A3430");
     [8.4, 12.6].forEach(j => { B(35.0, j - 0.9, 0.9, 1.8, 7, bc, 0, {r:0.09, seg:2}); B(35.6, j - 0.9, 0.3, 1.8, 18, sh(bc, -0.1), 7, {r:0.08, seg:2});
       B(34.0, j - 0.35, 0.7, 0.7, 1.4, WD, 14, {r:0.03}); B(34.3, j - 0.05, 0.1, 0.1, 14, metal, 0, {cls:"s", r:0}); cylAt(0.16, 0.16, 0.8, metal, 34.35, j, 0, "s", 12); });
-    [[20.9,15.6],[28.6,7.2],[35.6,1.0],[29.4,14.0]].forEach(([i, j]) => plant(i, j, true));
+    [[20.9,15.6],[28.6,7.2],[29.4,14.0]].forEach(([i, j]) => plant(i, j, true));
 
     /* 유리 외벽 */
     const posts = new Set(), postJ = (a, j) => { const k = "J" + a.toFixed(2) + j; if(posts.has(k)) return; posts.add(k); B(a - 0.025, j - 0.03, 0.05, 0.06, 48, FRAME, 0, {cls:"s", r:0}); };
@@ -376,6 +369,32 @@ const def = {
     gridSegs(0.3, CH, 1.5).forEach(([b, b2]) => gpaneI(WI, b, b2));
     gridSegs(GI, WI, 1.5, [[31.0,32.6]]).forEach(([a, b]) => gpane(a, b, CH));
     gridSegs(CH, GJ, 1.5).forEach(([b, b2]) => gpaneI(GI, b, b2));
+
+    /* 편의점 CREYONG 24: 칸막이 · 냉장고 · 진열대 · 냉동고 · 계산대 · 앞 유리 + 간판 */
+    { const teal = "#3A8A78", PROD = ["#E8484A","#F2C14E","#4A90C8","#FF8FB8","#5FB36A","#F28C38","#8E7BEF","#FFFFFF"];
+      gridSegs(0, CVS.j1, 1.4).forEach(([b, b2]) => { B(CVS.i0 - 0.05, b, 0.1, b2 - b, 10, D("#BDB5A9", "#4A4642"), 0, {r:0}); faceI(CVS.i0 - 0.01, b, b2, 10, 46, GLASS, "glass", 0.02);
+        B(CVS.i0 - 0.03, b, 0.06, b2 - b, 1.2, metal, 45.4, {cls:"s", r:0}); B(CVS.i0 - 0.03, b - 0.02, 0.06, 0.04, 36, metal, 10, {cls:"s", r:0}); });
+      const fw = (35.8 - 29.9) / 4;
+      for(let k = 0; k < 4; k++){ const a = 29.9 + k * fw;
+        B(a, 0.02, fw, 0.73, 62, D("#D9DDE0", "#3A3E42"), 0, {r:0.02}); faceJ(a + 0.07, a + fw - 0.07, 0.75, 4, 57, D("#E9F6FF", "#BFE6FF"), "glow", 0.008);
+        [10, 24, 38].forEach((z, r) => { B(a + 0.07, 0.6, fw - 0.14, 0.17, 0.8, D("#B8BEC4", "#8AA0B0"), z - 1.2, {cls:"s", r:0});
+          for(let bi = a + 0.14, n = 0; bi < a + fw - 0.18; bi += 0.17, n++) faceJ(bi, bi + 0.11, 0.758, z, z + (r === 2 ? 8 : 10), PROD[(n * 3 + r * 2 + k) % PROD.length], "glow", 0.006); });
+        faceJ(a, a + fw, 0.75, 57, 62, teal, "m", 0.012); B(a + fw / 2 - 0.012, 0.75, 0.024, 0.02, 53, D("#5A5D63", "#8A8E94"), 4, {cls:"s", r:0}); }
+      [2.1, 3.9].forEach((j0, q) => { B(32.5, j0, 2.8, 0.6, 3, D("#5A5D63", "#2A2C2F"), 0, {r:0.02}); B(32.55, j0 + 0.05, 2.7, 0.5, 25, D("#EEF0EC", "#4A4E52"), 3, {r:0.01});
+        [6, 13, 20].forEach((z, r) => { for(let bi = 32.62, n = 0; bi < 35.15; bi += 0.2, n++){ const col = PROD[(n + r * 3 + q * 5) % PROD.length]; B(bi, j0 - 0.02, 0.16, 0.64, 5.5, col, z, {cls:"s", r:0.01}); }
+          B(32.55, j0 - 0.03, 2.7, 0.66, 0.6, teal, z - 0.6, {cls:"s", r:0}); });
+        B(32.5, j0, 2.8, 0.6, 1.2, teal, 28, {r:0.02}); faceI(35.3, j0 + 0.08, j0 + 0.52, 6, 24, q ? "#E8A04A" : "#FF8FB8", "m", 0.012);
+        wtext(q ? "1+1" : "2+1", 35.32, j0 + 0.3, 15, "j", 3.4, "#FFFFFF", null, 900); });
+      B(34.0, 5.4, 1.6, 0.85, 13, D("#FFFFFF", "#7E848A"), 0, {r:0.04}); faceJ(34.05, 35.55, 6.25, 4, 10, "#4A90C8", "m", 0.01); wtext("ICE", 34.8, 6.27, 7, "i", 2.6, "#FFFFFF", null, 900);
+      [[34.3,5.65],[34.7,5.9],[35.1,5.6],[35.35,5.95],[34.5,6.05],[34.95,5.8]].forEach(([i, j], n) => sm(sph(0.07, 10, 8), PROD[(n * 2 + 1) % PROD.length], X(i), hz(12.6), Z(j)));
+      B(34.05, 5.45, 1.5, 0.75, 0.4, D("#DCEFFA", "#96B4D2"), 13, {cls:"glass", r:0});
+      B(29.9, 5.3, 2.0, 0.65, 22, D("#3A8A78", "#2A5F54"), 0, {r:0.03}); B(29.85, 5.25, 2.1, 0.75, 1.5, D("#F4F4F0", "#BDB5A9"), 22, {cls:"s", r:0.02});
+      wtext("CREYONG 24", 30.9, 5.95, 12, "i", 3.0, "#FFFFFF", null, 800);
+      B(30.2, 5.4, 0.4, 0.35, 5, "#2A2A2E", 23.5, {cls:"s", r:0.02}); { const o = B(30.24, 5.66, 0.32, 0.02, 4.5, "#5FD3E8", 28.5, {cls:"glow", r:0}); o.rotation.x = -0.35; }
+      B(31.1, 5.35, 0.6, 0.45, 9, D("#E6F0FA", "#96B4D2"), 23.5, {cls:"glass", r:0.02}); [31.2, 31.35, 31.5].forEach(i => B(i, 5.5, 0.08, 0.2, 2, "#C0504A", 24, {cls:"s", r:0.02}));
+      gridSegs(CVS.i0, WI, 1.5, [[CVS.d0, CVS.d1]]).forEach(([a, b]) => gpane(a, b, CVS.j1));
+      [CVS.d0, CVS.d1].forEach(i => postJ(i, CVS.j1)); B(CVS.d0, CVS.j1 - 0.04, CVS.d1 - CVS.d0, 0.08, 1.4, FRAME, 46.6, {cls:"s", r:0});
+      faceJ(CVS.i0, WI, CVS.j1, 48, 56, teal, "m", 0.03); wtext("CREYONG 24 · 편의점", 32.6, CVS.j1 + 0.035, 52, "i", 3.4, "#FFFFFF", null, 800, FONT); }
     // 정문: 머리틀 · 기둥 (자동문 문짝은 init) · 캐노피 · 간판
     B(14.3, GJ - 0.04, 3.4, 0.08, 4, FRAME, 48, {cls:"s", r:0}); [14.3, 17.7].forEach(i => postJ(i, GJ));
     B(13.6, GJ, 4.8, 1.8, 3, D("#2A2A28", "#1E1D1B"), 58, {r:0.03}); faceJ(13.6, 18.4, GJ + 1.8, 52, 58, "#3A8A78", "m", 0.025);
