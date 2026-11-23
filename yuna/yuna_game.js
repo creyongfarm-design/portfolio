@@ -12,6 +12,7 @@ const ELEV = [13.45, 17.1], EXIT = [14.5, 17.1, Math.PI / 2];
 const POOL = {rect:[20.6, 17.7, 29, 20], walk:[20.3, 17.4, 29, 20], surf:0.39};
 const GOAL = {i0:1.2, i1:12.8, gj:4.8, gw:0.9}, BALL0 = [7.0, 4.8];
 const FARM_PDS = ["plan", "edit", "short", "deal"];
+const COL = new Set(["stars", "bubble"]);   // 줍는 게임 (별똥별 · 비눗방울)
 
 /* 이야기 모드 (2026-11-23 감독님 "미션 다 달성했을때 뭐가 나타나고 다음으로 이어지고 스토리가 있어야", "고기도 같이 먹을수있고~ 다양한 액티비티 예상치 못한것들~")
    엄마 아빠 몰래 깜짝 파티: 장마다 제목 카드. ch = 장 시작(여기서부터 이어 하기), sneak = 엄마 근처 가면 들킴(🤫 비밀 하트 -1) */
@@ -87,7 +88,7 @@ const TREASURE = {
   wf:[["🍭","막대사탕"],["🧃","주스"],["🪀","요요"],["🧩","퍼즐 조각"],["🌟","반짝 별",1],["🍰","케이크",1]],
   s4:[["🌈","무지개"],["☁️","구름"],["🦋","나비"],["🪞","손거울"],["👑","왕관",1],["🔮","수정 구슬",1]],
   roof:[["🐚","조개"],["🪁","연"],["🌻","해바라기"],["🛟","튜브"],["🚀","로켓",1],["🌙","달님",1]]};
-const SEED = {lobby:11, main:23, wf:37, s4:41, roof:59}, TOTAL = 54;
+const SEED = {lobby:11, main:23, wf:37, s4:41, roof:59}, TOTAL = 90;
 const AVOID = [[ELEV[0], ELEV[1], 1.9], [EXIT[0] + 0.6, EXIT[1], 1.3]];
 
 /* 💬 부름 (2026-11-23 감독님 "누가 건물주 딸한테 심부름을 시키냐"): 머리 위 💬 뜬 사람한테 가면 선물을 주거나, 골라 달라거나, 같이 사진·하이파이브 */
@@ -202,7 +203,7 @@ const BADGES = [
   ["friend10", "👋", "10명한테 말 걸기", r => cnt(r.met) >= 10],
   ["friend25", "🤝", "25명한테 말 걸기", r => cnt(r.met) >= 25],
   ["tre10", "🔍", "보물 10개 찾기", r => cnt(r.tre) >= 10],
-  ["treAll", "🏴‍☠️", "보물 54개 전부", r => cnt(r.tre) >= TOTAL],
+  ["treAll", "🏴‍☠️", "보물 90개 전부", r => cnt(r.tre) >= TOTAL],
   ["floors", "🛗", "모든 층 가 보기", r => cnt(r.vis) >= 5],
   ["ball", "⚽", "골잡이", r => r.done.ball],
   ["hide", "🙈", "숨바꼭질 달인", r => r.done.hide],
@@ -336,6 +337,24 @@ const CSS = `
 .yg-run:active span{transform:scale(.92)}
 @keyframes yg-glow{50%{box-shadow:0 0 0 7px rgba(255,194,61,.35),0 8px 20px -10px rgba(0,0,0,.45)}}
 .yg-snd + .yg-x{margin-left:8px}
+.yg-mapb{margin-right:0}
+.yg-mapb + .yg-snd{margin-left:8px}
+.yg-map{pointer-events:auto;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100% - 24px));background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px 14px 12px;box-shadow:0 24px 60px -20px rgba(40,20,30,.55)}
+.yg-map h3{margin:2px 4px 10px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:6px}
+.yg-map h3 small{font-weight:600;font-size:12px;color:var(--muted,#8A847C);margin-left:auto}
+.yg-map .m{position:relative;aspect-ratio:16/10;border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 30% 20%,#EAF6EE 0%,#DCEFE3 55%,#CFE7D9 100%)}
+.yg-map .m svg{position:absolute;inset:0;width:100%;height:100%}
+.yg-map .t{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:2px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:#2A2A28}
+.yg-map .t i{font-style:normal;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:#FFF;font-size:24px;box-shadow:0 6px 14px -6px rgba(40,30,20,.45);border:2px solid #FFF;transition:transform .15s}
+.yg-map .t:hover i{transform:scale(1.08)}
+.yg-map .t span{font-size:11px;font-weight:700;background:rgba(255,255,255,.85);border-radius:8px;padding:1px 6px;white-space:nowrap}
+.yg-map .t.on i{border-color:#FF6FA8;box-shadow:0 0 0 4px rgba(255,111,168,.25),0 6px 14px -6px rgba(40,30,20,.45)}
+.yg-map .t.on::before{content:"📍";position:absolute;top:-20px;font-size:18px;animation:ygpin 1s ease-in-out infinite alternate}
+.yg-map .t.off{opacity:.45;pointer-events:none}
+@keyframes ygpin{to{transform:translateY(-4px)}}
+.yg-map .x{margin:10px auto 0;display:block;border:0;border-radius:12px;background:#2A2A28;color:#FFF;font:inherit;font-weight:700;padding:8px 18px;cursor:pointer}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .yg-map .m{background:radial-gradient(120% 90% at 30% 20%,#2E3B36 0%,#26322E 60%,#1F2926 100%)}}
+:root[data-theme="dark"] .yg-map .m{background:radial-gradient(120% 90% at 30% 20%,#2E3B36 0%,#26322E 60%,#1F2926 100%)}
 @media (orientation:landscape) and (pointer:coarse){.yg-joy{bottom:calc(max(18px,env(safe-area-inset-bottom)) + 72px);left:calc(max(18px,env(safe-area-inset-left)) + 12px)}}
 .yg-jump:active span{transform:scale(.92)}
 .yg-tabs{display:flex;gap:6px;margin:0 2px 4px}
@@ -462,6 +481,227 @@ TREASURE.home2 = [["🥩","고기"],["🥬","상추"],["📺","리모컨"],["�
 TREASURE.home3 = [["🧸","곰돌이"],["🎀","머리핀"],["🛁","고무 오리"],["📚","동화책"],["💍","엄마 반지",1],["🏆","아빠 트로피",1]];
 TREASURE.home4 = [["🔭","별 지도"],["🍅","방울토마토"],["🧺","빨래집게"],["🎞️","필름",1],["🪁","연"],["🌠","별똥별",1]];
 Object.assign(SEED, {home1:67, home2:71, home3:73, home4:79});
+/* 동네 (2026-11-24 감독님 "세계관 팍팍 늘려봐, 지역도 늘리고"): 로비 앞 건너편 보도 서쪽 끝 → 동네 공원, 동쪽 끝 → 학교 앞 골목 */
+const AREA = {park:{name:"동네 공원·놀이터", e:"🌳", gate:[15, 21.3], spawn:[15, 20.5, Math.PI], lobbyAt:[-4.6, 28.6], back:[-3.5, 28.3, Math.PI / 2]},
+  town:{name:"학교 앞 골목", e:"🍢", gate:[14, 19.3], spawn:[14, 18.5, Math.PI], lobbyAt:[42.6, 28.6], back:[41.5, 28.3, -Math.PI / 2]},
+  fun:{name:"크레용랜드 놀이공원", e:"🎡", gate:[17, 25.3], spawn:[17, 24.5, Math.PI], via:"town"},
+  school:{name:"크레용초등학교", e:"🏫", gate:[16, 23.3], spawn:[16, 22.5, Math.PI], via:"town"},
+  market:{name:"크레용 전통시장", e:"🧺", gate:[15, 21.3], spawn:[15, 20.5, Math.PI], lobbyAt:null, via:"town", side:[0.7, 11], spawnSide:[1.5, 11, Math.PI / 2]},
+  river:{name:"강변 공원·동네 교회", e:"⛪", gate:[17, 23.3], spawn:[17, 22.5, Math.PI], via:"park", side:[33.3, 12], spawnSide:[32.5, 12, -Math.PI / 2]}};
+/* 동네끼리 걸어서 (2026-11-24): 서 → 동 강변 — 공원 — 타워 로비 — 골목 — 시장 · 골목 학교 현관 → 학교 · 골목 버스 정류장 → 놀이공원 */
+const LINKS = [
+  {f:"park", at:[0.45, 16.5], r:0.6, to:"river", spawn:[32.5, 12, -Math.PI / 2]}, {f:"river", at:[33.3, 12], r:0.75, to:"park", spawn:[1.3, 16.5, Math.PI / 2]},
+  {f:"river", at:[17, 23.3], r:0.55, to:"park", spawn:[1.3, 16.5, Math.PI / 2]},
+  {f:"town", at:[28.0, 17.3], r:0.6, to:"market", spawn:[1.5, 11, Math.PI / 2]}, {f:"market", at:[0.7, 11], r:0.8, to:"town", spawn:[26.9, 17.3, -Math.PI / 2]},
+  {f:"market", at:[15, 21.3], r:0.55, to:"town", spawn:[26.9, 17.3, -Math.PI / 2]},
+  {f:"town", at:[4.2, 3.1], r:0.5, to:"school", spawn:[16, 22.5, Math.PI]}, {f:"school", at:[16, 23.3], r:0.55, to:"town", spawn:[4.2, 3.9, 0]},
+  {f:"fun", at:[17, 25.3], r:0.55, to:"town", spawn:[21.0, 14.4, 0]}];
+const BUS = {f:"town", at:[21.0, 14.4], to:"fun"};   // 골목 버스 정류장에서 버튼으로 타고 감   // 2026-11-24 감독님 "학교도 만들든가 사립초" · 골목 학교 정문으로 들어감   // 놀이공원은 골목 버스 정류장에서 버스로 (나갈 때도 버스로 골목)
+const AREA_S = {park:"공원", town:"골목", fun:"놀이공원", school:"학교", market:"시장", river:"강변"};
+Object.entries(AREA).forEach(([k, a]) => FL[k] = {name:a.name, s:AREA_S[k]});
+const flS = f => FL[f].s || FL[f].name.split(" ")[0];
+TREASURE.park = [["🦆","꽥꽥 오리"],["🍂","단풍잎"],["🫧","비눗방울"],["🐿️","다람쥐",1],["🪺","새 둥지",1],["🌰","도토리"]];
+TREASURE.town = [["✏️","연필"],["🍢","어묵"],["🎫","뽑기 쿠폰"],["🚌","버스 카드"],["⭐","반짝 스티커",1],["🔔","학교 종",1]];
+Object.assign(SEED, {park:83, town:89, fun:97, school:101, market:103, river:107});
+TREASURE.fun = [["🎈","풍선"],["🎟️","자유이용권"],["🍿","팝콘"],["🧸","인형 경품"],["🎠","목마 열쇠고리",1],["🎆","불꽃 티켓",1]];
+TREASURE.school = [["✏️","몽당연필"],["📒","받아쓰기 공책"],["🍎","선생님 사과"],["🎵","리코더"],["📖","어린이 성경",1],["🏅","칭찬 메달",1]];
+TREASURE.market = [["🍎","사과"],["🐟","고등어"],["🥞","호떡"],["🌼","국화"],["🪙","엽전",1],["🧧","복주머니",1]];
+TREASURE.river = [["🦆","오리"],["🪨","납작 돌"],["🌸","벚꽃잎"],["🐟","물고기"],["🔔","작은 종",1],["🪁","연 꼬리",1]];
+const isArea = f => f in AREA;
+/* 공원 · 골목 모듈은 따로 불러옴 (없거나 늦어도 게임은 돌아감). 물건 쓰기 키는 앞에 pk_ / tw_ */
+const AREA_MOD = {}, PFX = {park:"pk_", town:"tw_", fun:"fn_", school:"sc_", market:"mk_", river:"rv_"};
+Promise.all([import("./floor3d_market.js").then(m => AREA_MOD.market = m.MARKET).catch(() => {}), import("./floor3d_river.js").then(m => AREA_MOD.river = m.RIVER).catch(() => {}), import("./floor3d_school.js").then(m => AREA_MOD.school = m.SCHOOL).catch(() => {}), import("./floor3d_fun.js").then(m => AREA_MOD.fun = m.FUN).catch(() => {}), import("./floor3d_park.js").then(m => AREA_MOD.park = m.PARK).catch(() => {}), import("./floor3d_town.js").then(m => AREA_MOD.town = m.TOWN).catch(() => {})]).then(() => {
+  Object.entries(AREA_MOD).forEach(([f, M]) => { if(!M) return;
+    try {
+      SEATS[f] = (M.seats || []).map(x => x.k === "swing" ? {...x, swing:0.42} : x);
+      Object.entries(M.sitLines || {}).forEach(([k, l]) => SIT_YU[k] = SIT_YU[k] ? [...SIT_YU[k], ...l] : l);
+      USE[f] = (M.use || []).filter(u => ACTS[PFX[f] + u.k] || AREA_SPECIAL.has(PFX[f] + u.k)).map(u => ({...u, k:PFX[f] + u.k}));
+      if(f === "town") USE[f].push({at:BUS.at, k:"tw_bus", h:PI, r:0.6});
+    } catch(e){ console.warn("동네 연결", f, e); } });
+});
+/* 동네 놀이 (ACTS 형식. give = 끝나면 손에 듦, anim = 도는 동안 소품 움직임) */
+const AREA_SPECIAL = new Set(["pk_slide", "pk_merry", "tw_gacha", "tw_bell", "tw_bus", "rv_boat", "fn_carousel", "fn_wheel", "fn_coaster", "fn_bumper", "fn_viking"]);
+const AREA_PLAY = ["pk_slide", "pk_merry", "pk_seesaw", "pk_sand", "pk_fountain", "pk_duck", "pk_icecream", "tw_gacha", "tw_slime", "tw_tteok", "tw_fishcake", "tw_bungeo", "tw_store", "tw_bell"];
+const GACHA = [["🦖", "공룡 피규어"], ["🦄", "유니콘 키링"], ["🐰", "토끼 지우개"], ["💍", "반짝 반지"], ["🚀", "로켓 팽이"], ["🧸", "곰돌이 자석"], ["🌈", "무지개 스티커"], ["👑", "황금 왕관 캡슐", 1]];
+const QUIZ = [["사과는 영어로?", ["🍎 애플", "🍌 바나나", "🍇 그레이프"], 0], ["3 + 4 = ?", ["6", "7", "8"], 1], ["무지개는 몇 가지 색?", ["5가지", "6가지", "7가지"], 2],
+  ["거미 다리는 몇 개?", ["6개", "8개", "10개"], 1], ["우리나라 수도는?", ["부산", "서울", "제주"], 1], ["펭귄이 사는 곳은?", ["🧊 남극", "🏜️ 사막", "🌴 정글"], 0],
+  ["5 × 2 = ?", ["7", "10", "12"], 1], ["올챙이가 크면?", ["🐸 개구리", "🐟 물고기", "🐢 거북이"], 0], ["일주일은 며칠?", ["5일", "7일", "10일"], 1],
+  ["해는 어느 쪽에서 떠요?", ["동쪽", "서쪽", "북쪽"], 0], ["한글을 만든 분은?", ["세종대왕", "이순신", "단군"], 0], ["10 - 3 = ?", ["6", "7", "8"], 1],
+  ["얼음이 녹으면?", ["💧 물", "🔥 불", "🌪️ 바람"], 0], ["사계절이 아닌 것은?", ["봄", "장마", "겨울"], 1], ["영화 찍을 때 감독님이 외치는 말은?", ["🎬 액션!", "🍜 라면!", "😴 잘자!"], 0]];
+Object.assign(ACTS, {
+  pk_seesaw:{ms:6500, lb:["⚖️", "시소"], raw:true, seat:0.42, pose:"horse", say:"연재야 시소 타자! ⚖️", fx:["⬆️", "⬇️", "😆"], mid:"쿵! 엉덩이 아파 😆", done:"⚖️ 놀이터 시소", end:"내가 더 무거운가? 😳",
+    anim:t => AREA_MOD.park?.seesaw?.set?.(Math.sin(t * 2.6) * 0.22), npc:["@kid", "올라간다~ 꺅! 😆"]},
+  pk_sand:{ms:7500, pose:"play", lb:["🏰", "모래놀이"], say:"모래성 만들어야지 🏰", fx:["🏖️", "🏰", "🐚"], mid:"성 완성! 깃발 꽂자 🚩", done:"🏰 모래성 쌓기", end:"손에 모래 잔뜩 😆"},
+  pk_fountain:{ms:5200, go:() => AREA_MOD.park?.fountain?.boost?.(5000), pose:"water", lb:["🪙", "소원 빌기"], say:"동전 던지고 소원 빌어야지 🪙", fx:["🪙", "✨", "💦"], mid:"아빠 영화 대박 나게 해 주세요 🙏", done:"⛲ 분수에 소원 빌기", end:"소원 꼭 이루어져라~ ✨"},
+  pk_duck:{ms:6000, go:() => AREA_MOD.park?.duck?.feed?.(8000), pose:"water", lb:["🦆", "오리 밥 주기"], say:"오리야 이리 와~ 🦆", fx:["🦆", "🍞", "💦"], mid:"꽥꽥! 아기 오리도 왔다 🐥", done:"🦆 연못 오리 밥 주기", end:"오리들 배부르겠다 😊"},
+  pk_icecream:{ms:3600, go:() => AREA_MOD.park?.truck?.jingle?.(3600), pose:"drink", lb:["🍦", "아이스크림"], say:"아저씨 딸기맛 주세요! 🍓", fx:["🍦", "🍓", "🍫"], done:"🍦 트럭 아이스크림", end:"차가워서 머리 띵~ 🥶", give:["🍦"], npc:["@ice", "자 여기 제일 큰 걸로! 🍦"]},
+  pk_jungle:{ms:4800, pose:"pullup", lb:["🧗", "정글짐"], say:"영차영차 🧗‍♀️", fx:["🧗‍♀️", "💪", "🚩"], mid:"꼭대기 도착! 🚩", done:"🧗 정글짐 꼭대기", end:"내려가는 게 더 무섭다 😳"},
+  pk_hop:{ms:5000, pose:"jump", lb:["🦘", "사방치기"], say:"하나, 둘, 셋~ 🦘", fx:["1️⃣", "2️⃣", "3️⃣", "🦘"], mid:"하늘 칸 도착! ☁️", done:"🦘 사방치기", end:"한 발로 서기 힘들다 😆"},
+  pk_spring:{ms:5000, raw:true, seat:0.59, pose:"horse", lb:["🐥", "스프링 오리"], say:"이랴이랴~ 🐥", fx:["🐥", "🎶", "😆"], mid:"꽥꽥 오리 타기! 🦆", done:"🐥 스프링 오리 타기", end:"오리야 고마워~ 😊"},
+  pk_bubble:{ms:4200, go:u => { AREA_MOD.park?.bubble?.blow?.(u.at[0], u.at[1], u.h ?? PI); }, pose:"play", lb:["🫧", "비눗방울"], say:"후~~ 🫧", fx:["🫧", "✨", "🫧"], mid:"제일 큰 방울! 😆", done:"🫧 비눗방울 불기", end:"하늘까지 날아가라~ 🫧"},
+  pk_dog:{ms:3000, pose:"play", lb:["🐶", "멍멍이 동상"], say:"착하다 멍멍아 🐶", fx:["🐶", "💕"], done:"🐶 멍멍이 동상 쓰다듬기", end:"코가 반질반질해 😆"},
+  pk_flower:{ms:3200, pose:"stand", lb:["🌷", "꽃 냄새"], say:"음~ 꽃향기 🌷", fx:["🌷", "🌻", "🦋"], mid:"나비다! 🦋", done:"🌷 공원 꽃밭 구경", end:"엄마 주고 싶다 💐"},
+  pk_bridge:{ms:3400, pose:"scope", lb:["🌉", "다리 위"], say:"물고기 보인다 🐟", fx:["🐟", "💧", "🐸"], done:"🌉 구름다리 연못 구경", end:"다리 위는 시원해 🍃"},
+  pk_picnic:{ms:3800, pose:"drink", lb:["🍙", "도시락"], say:"엄마가 싸 준 도시락~ 🍙", fx:["🍙", "🥪", "🍓"], done:"🧺 돗자리 도시락", end:"배부르다~ 😋", give:["🍙", "🍓"]},
+  tw_candy:{ms:3000, pose:"play", lb:["🍬", "불량식품"], say:"쫀드기 하나랑 아폴로! 🍬", fx:["🍬", "🍭"], done:"🍬 문방구 불량식품", end:"엄마한텐 비밀 🤫", give:["🍬", "🍭"]},
+  tw_arcade:{ms:4500, pose:"claw", lb:["🕹️", "오락기"], say:"100원 넣고 한 판! 🕹️", fx:["🕹️", "👾", "💥"], mid:"보스 나왔다!! 😱", done:"🕹️ 문방구 앞 오락기", end:"아깝다 한 판만 더… 😭"},
+  tw_fridge:{ms:2500, pose:"drink", lb:["🍌", "바나나우유"], say:"바나나우유 하나! 🍌", fx:["🍌", "🥛"], done:"🍌 편의점 바나나우유", end:"쪽쪽 다 마셨다 😋", give:["🥛"]},
+  tw_icecream:{ms:3000, pose:"drink", lb:["🍦", "아이스크림"], say:"치즈야 비켜 줘~ 🐱🍦", fx:["🐱", "🍦"], done:"🍦 편의점 아이스크림", end:"치즈도 한 입 줄까? 😆", give:["🍦"]},
+  tw_pullup:{ms:4500, pose:"pullup", lb:["💪", "철봉"], say:"매달리기 시작! 💪", fx:["💪", "😤"], count:true, done:"💪 운동장 철봉 매달리기", end:"팔 떨린다~ 😵"},
+  tw_goal:{ms:2600, pose:"run", lb:["⚽", "슛!"], say:"슛~ ⚽", fx:["⚽", "🥅", "🎉"], mid:"골인!! 🎉", done:"⚽ 운동장 골대 슛", end:"손흥민 같았지? 😎"},
+  tw_podium:{ms:3200, pose:"stand", lb:["🎤", "구령대"], say:"교장 선생님 말씀이 있겠습니다~ 🎤", fx:["🎤", "📢"], mid:"모두 줄 똑바로~ 😆", done:"🎤 구령대 연설", end:"이상입니다! 짝짝짝 👏"},
+  tw_hopscotch:{ms:3600, pose:"jump", lb:["🦘", "사방치기"], say:"깽깽이 간다~ 🦘", fx:["1️⃣", "2️⃣", "3️⃣"], mid:"깽깽이 성공! ✨", done:"🦘 골목 사방치기", end:"한 판 더! 😆"},
+  rv_pray:{ms:3600, pose:"pray", lb:["🙏", "기도하기"], say:"하나님 감사합니다 🙏", fx:["🙏", "✨", "💛"], mid:"우리 가족 건강하게 지켜 주세요 🙏", done:"🙏 동네 교회 기도", end:"아멘! 😊", go:(u, r) => { r.pray = (r.pray || 0) + 1; }},
+  rv_bell:{ms:3200, pose:"pullup", lb:["🔔", "교회 종"], say:"땡그랑~ 🔔", fx:["🔔", "🎶"], mid:"예배 시간이에요! ⛪", done:"🔔 교회 종 치기", end:"소리 멀리까지 간다~ 🎶", go:() => setTimeout(() => AREA_MOD.river?.bell?.ring?.(3200), 1300)},
+  rv_fish:{ms:5200, pose:"water", lb:["🎣", "낚시 구경"], say:"할아버지 뭐 잡혀요? 🎣", fx:["🎣", "💧", "🐟"], mid:"할아버지 찌가 움직여요! 😲", done:"🎣 강변 낚시 구경", end:"와 붕어다 🐟", go:() => setTimeout(() => AREA_MOD.river?.fish?.bite?.(2500), 2400), npc:["@fisher", "쉿~ 물고기 도망간다 😄"]},
+  rv_kite:{ms:7000, pose:"water", lb:["🪁", "연날리기"], say:"바람아 불어라~ 🪁", fx:["🪁", "🌬️", "☁️"], mid:"제일 높이 날아라! 🪁", done:"🪁 강변 연날리기", end:"연이 구름까지 갔어 😆", anim:t => AREA_MOD.river?.kite?.set?.(Math.min(1, t / 2.5))},
+  rv_picnic:{ms:3400, pose:"drink", lb:["🍙", "김밥"], say:"김밥 냠냠 🍙", fx:["🍙", "🍓"], done:"🧺 강변 소풍 김밥", end:"딸기도 먹어야지 🍓", give:["🍙", "🍓"], npc:["@picnic", "많이 먹어~ 😊"]},
+  rv_rent:{ms:2600, pose:"stand", lb:["🚲", "자전거 대여"], say:"핑크 자전거 빌려 주세요 🚲", fx:["🚲", "⛑️"], done:"🚲 강변 자전거 대여소", end:"헬멧 꼭 쓰기! ⛑️"},
+  rv_ramen:{ms:3800, pose:"drink", lb:["🍜", "강변 라면"], say:"라면 하나요! 🍜", fx:["🍜", "♨️"], mid:"후~ 후~ 🥵", done:"🍜 강변 라면", end:"강변 라면 최고 😋"},
+  rv_duck:{ms:5000, pose:"water", lb:["🦆", "오리 밥 주기"], say:"꽥꽥 이리 와~ 🦆", fx:["🦆", "🍞"], done:"🦆 강변 오리 연못", end:"오리 가족이다 🐥", go:() => AREA_MOD.river?.duck?.feed?.(9000)},
+  rv_stones:{ms:3000, pose:"water", lb:["🪨", "물수제비"], say:"납작한 돌 찾았다! 🪨", fx:["🪨", "💦"], mid:"통통통! 다섯 번 😆", done:"🪨 강물 물수제비", end:"아빠보다 잘했지? 😎", go:() => setTimeout(() => AREA_MOD.river?.stones?.skip?.(), 900)},
+  rv_piano:{ms:4000, pose:"play", lb:["🎹", "교회 피아노"], say:"도레미파솔~ 🎹", fx:["🎵", "🎶"], done:"🎹 교회 피아노", end:"찬양 반주 연습! 🎶"},
+  fn_cotton:{ms:3600, pose:"drink", lb:["☁️", "솜사탕"], say:"솜사탕 분홍색 주세요! ☁️", fx:["☁️", "🍭", "💗"], done:"☁️ 놀이공원 솜사탕", end:"입에서 사르르 녹아 😋", give:["🍭"], npc:["@cotton", "자 구름 하나~ ☁️"]},
+  fn_churros:{ms:3400, pose:"drink", lb:["🥖", "츄러스"], say:"츄러스 설탕 많이요! ✨", fx:["🥖", "✨"], done:"🥖 놀이공원 츄러스", end:"바삭바삭 달달해 😋", give:["🥖"]},
+  fn_balloon:{ms:3500, pose:"stand", lb:["🎈", "풍선"], say:"분홍 풍선 주세요 🎈", fx:["🎈", "💗"], done:"🎈 광대 아저씨 풍선", end:"하늘까지 갈 것 같아 🎈", give:["🎈"], npc:["@clown", "날아가지 않게 꼭 잡아~ 🤡"]},
+  fn_ringtoss:{ms:5000, pose:"water", lb:["⭕", "고리 던지기"], say:"고리 세 개 다 넣을 거야 ⭕", fx:["⭕", "🎯"], mid:"들어갔다!! 🎉", done:"⭕ 고리 던지기", end:"곰돌이 받았다 🧸", give:["🧸"]},
+  fn_photo:{ms:3200, pose:"stand", lb:["📸", "사진 찍기"], say:"여기서 사진 찍자 📸", fx:["✌️", "💖"], mid:"하나 둘 셋, 김치~ ✌️", done:"📸 크레용랜드 사진", end:"예쁘게 나왔다 💖", go:() => setTimeout(() => window.__ygFlash?.(), 1500)},
+  mk_tteokjip:{ms:3400, pose:"drink", lb:["🍡", "떡집"], say:"무지개떡 하나 주세요! 🌈", fx:["🍡", "🌈"], done:"🍡 시장 떡집", end:"쫀득쫀득 😋", give:["🍡"], npc:["@tteok", "말랑할 때 먹어~ 😊"]},
+  mk_fruit:{ms:3000, pose:"harvest", lb:["🍎", "과일 가게"], say:"사과 빨갛다 🍎", fx:["🍎", "🍊", "🍓"], done:"🍎 시장 과일 가게", end:"아줌마가 덤으로 귤 주셨어 🍊", give:["🍎", "🍊"]},
+  mk_fish:{ms:3200, pose:"stand", lb:["🐟", "생선 구경"], say:"생선 눈이 나 봐 🐟", fx:["🐟", "🦑", "🐙"], done:"🐟 시장 생선 가게", end:"문어가 손 흔들었어! 🐙", npc:["@fishm", "오늘 고등어 싱싱해~ 🐟"]},
+  mk_hotteok:{ms:3600, pose:"drink", lb:["🥞", "호떡"], say:"호떡 하나요! 🥞", fx:["🥞", "♨️", "🍯"], done:"🥞 시장 호떡", end:"꿀이 주르륵 🍯", give:["🥞"], npc:["@hotteok", "뜨거우니까 호호 불어~ 😊"]},
+  mk_veggie:{ms:3500, pose:"squat", lb:["🥬", "채소 할머니"], say:"할머니 이거 뭐예요? 🥬", fx:["🥬", "🥕", "🥔"], done:"🥬 채소 할머니 돗자리", end:"할머니 감사합니다! 🙇‍♀️", give:["🥕"], npc:["@halmi", "애호박이여, 하나 가져가~ 😊"]},
+  mk_flower:{ms:3200, pose:"stand", lb:["🌷", "꽃집"], say:"엄마 드릴 꽃 살래 🌷", fx:["🌷", "🌸", "💐"], done:"🌷 시장 꽃집", end:"향기 좋다~ 🌸", give:["🌷"]},
+  mk_ppeong:{ms:5200, pose:"stand", lb:["🍘", "뻥튀기"], say:"뻥튀기 아저씨 언제 터져요? 👂", fx:["👂", "😬", "🍘"], mid:"뻥!!! 😱", done:"🍘 뻥튀기 기계", end:"고소하다~ 🍘", give:["🍘"], anim:t => AREA_MOD.market?.ppeong?.set?.(t)},
+  mk_toys:{ms:3200, pose:"play", lb:["🌀", "장난감 좌판"], say:"바람개비 돈다~ 🌀", fx:["🌀", "🪀", "🎈"], done:"🌀 시장 장난감 좌판", end:"풍선도 갖고 싶다… 🎈", give:["🌀", "🪀"]},
+  mk_mandu:{ms:3000, pose:"drink", lb:["🥟", "찐만두"], say:"만두 김 모락모락 🥟", fx:["🥟", "♨️"], done:"🥟 시장 찐만두", end:"호호 뜨거워 😋", give:["🥟"]},
+  mk_jeon:{ms:3000, pose:"drink", lb:["🍳", "전집"], say:"전 부치는 소리 지글지글 🍳", fx:["🍳", "♨️"], done:"🍳 시장 전집", end:"바삭바삭 😋"},
+  mk_donut:{ms:2800, pose:"drink", lb:["🍩", "꽈배기"], say:"꽈배기 설탕 듬뿍! 🍩", fx:["🍩", "✨"], done:"🍩 시장 꽈배기", end:"입에 설탕 묻었다 😆", give:["🍩"]},
+  mk_sesame:{ms:2800, pose:"stand", lb:["🫙", "방앗간"], say:"참기름 냄새 고소해~ 🫙", fx:["🫙", "♨️"], done:"🫙 시장 방앗간", end:"엄마 참기름 사 가야지 😊"},
+  mk_goguma:{ms:3200, pose:"drink", lb:["🍠", "군고구마"], say:"군고구마 하나요! 🍠", fx:["🍠", "🔥"], done:"🍠 시장 군고구마", end:"호호 뜨거워 😋", give:["🍠"]},
+  mk_banchan:{ms:2600, pose:"stand", lb:["🥢", "반찬 가게"], say:"반찬 냄새 좋다~ 🥢", fx:["🥢", "🥒"], done:"🥢 시장 반찬 가게", end:"멸치볶음 맛있겠다 😋"},
+  mk_grain:{ms:2600, pose:"stand", lb:["🫘", "곡물 가게"], say:"콩이 알록달록해 🫘", fx:["🫘", "🌾"], done:"🫘 시장 곡물 가게", end:"손 넣어 보고 싶다 😆"},
+  sc_board:{ms:4500, pose:"draw", lb:["🖍️", "칠판"], say:"칠판에 그림 그려야지 🖍️", fx:["🖍️", "🌈", "⭐"], mid:"무지개 완성! 🌈", done:"🖍️ 교실 칠판 그림", end:"선생님한테 칭찬받았다 ⭐", go:(u, r) => AREA_MOD.school?.board?.set?.(r.uses?.sc_board ? 2 : 1), npc:["@teach", "우와 유나 그림 잘 그린다! 👏"]},
+  sc_piano:{ms:5000, pose:"play", lb:["🎹", "음악실 피아노"], say:"도레미파솔~ 🎹", fx:["🎵", "🎶", "⭐"], mid:"작은 별 쳐야지 ⭐", done:"🎹 음악실 피아노", end:"손가락 아파 😆"},
+  sc_xylophone:{ms:4000, pose:"play", lb:["🎶", "실로폰"], say:"딩동댕동~ 🎶", fx:["🎵", "🎶"], done:"🎶 무지개 실로폰", end:"실로폰 소리 예쁘다 😊"},
+  sc_drum:{ms:3500, pose:"play", lb:["🥁", "드럼"], say:"쿵짝쿵짝! 🥁", fx:["🥁", "💥", "🎶"], done:"🥁 음악실 드럼", end:"나 밴드 할까? 😎"},
+  sc_science:{ms:5000, pose:"cook", lb:["🧪", "과학 실험"], say:"실험 시작! 🧪", fx:["🧪", "🫧", "🔬"], mid:"보글보글 거품 났다! 🫧", done:"🧪 과학실 실험", end:"나 과학자 같지? 🔬", go:() => AREA_MOD.school?.science?.bubble?.(5000)},
+  sc_library:{ms:4500, pose:"read", lb:["📚", "도서관"], say:"무슨 책 읽을까~ 📚", fx:["📚", "📖", "✨"], mid:"이거 재밌겠다! 😆", done:"📚 학교 도서관", end:"다 읽고 또 빌려야지 📖"},
+  sc_lunch:{ms:3500, pose:"drink", lb:["🍱", "급식"], say:"이모 치킨 마요 많이 주세요! 🍗", fx:["🍱", "🍗", "🥛"], done:"🍱 맛있는 급식", end:"잘 먹겠습니다 🙏", give:["🍱"], npc:["@chef", "유나야 많이 먹어~ 🍗"]},
+  sc_track:{ms:8500, pose:"run", lb:["🏃‍♀️", "트랙 달리기"], say:"준비~ 땅! 🏁", fx:["💨", "🏃‍♀️"], mid:"바람 가르는 중! 💨", done:"🏃‍♀️ 운동장 한 바퀴", end:"1등! 🥇", npc:["@coach", "유나 빠르다! 계주 선수다 🏁"], fn:sec => { const p = AREA_MOD.school?.track?.at?.(Math.min(1, sec / 8.3)); return p && [p[0], p[1], 0.4, p[2]]; }},
+  sc_bar:{ms:4000, pose:"pullup", lb:["💪", "철봉"], say:"매달리기 10초 도전! 💪", fx:["💪", "😤"], count:true, done:"💪 운동장 철봉", end:"팔이 덜덜 😆"},
+  sc_monkey:{ms:4500, pose:"pullup", lb:["🌈", "구름사다리"], say:"구름사다리 건너기! 🌈", fx:["🌈", "💪"], done:"🌈 구름사다리", end:"끝까지 갔다! 😆"},
+  sc_ball:{ms:3000, pose:"run", lb:["⚽", "골대 슛"], say:"슛~! ⚽", fx:["⚽", "🥅", "🎉"], mid:"골인!! 🥅", done:"⚽ 운동장 골인", end:"나 축구 선수 할까? 😎",
+    anim:t => { const B = AREA_MOD.school?.ball; if(!B) return; if(t === 0){ B.reset?.(); return; } const f = Math.min(1, Math.max(0, (t - 0.7) / 0.6)); B.set?.(21.0 + 1.6 * f, 16.6 - 0.2 * f, 0.12 + Math.sin(f * PI) * 0.35); }},
+  sc_flag:{ms:4500, pose:"stand", lb:["🇰🇷", "국기 게양"], say:"국기에 대하여 경례! 🫡", fx:["🇰🇷", "🫡"], done:"🇰🇷 국기 게양", end:"태극기 펄럭펄럭 🇰🇷", anim:t => AREA_MOD.school?.flag?.set?.(t === 0 ? 1 : Math.min(1, t / 4))},
+  sc_fishbowl:{ms:3500, pose:"play", lb:["🐟", "금붕어 밥"], say:"금붕어야 밥 먹자 🐟", fx:["🐟", "🫧"], done:"🐟 교실 금붕어 밥 주기", end:"뻐끔뻐끔 귀여워 😆", go:() => AREA_MOD.school?.fish?.feed?.(4000)},
+  sc_chapel:{ms:5000, pose:"pray", lb:["🙏", "채플 기도"], say:"하나님 오늘도 감사합니다 🙏", fx:["🙏", "✨", "💛"], mid:"우리 가족 건강하게 지켜 주세요 💕", done:"🙏 학교 채플 기도", end:"아멘! 😊", go:(u, r) => { r.pray = (r.pray || 0) + 1; }, npc:["@chaplain", "유나 기도 예쁘다~ 😊"]},
+  tw_slime:{ms:6500, pose:"play", lb:["🫧", "슬라임"], say:"말랑말랑 슬라임 🫧", fx:["🟢", "🫧", "💜"], mid:"쭈욱~ 늘어난다! 😆", done:"🫧 문방구 슬라임", end:"손이 끈적끈적 😝"},
+  tw_tteok:{ms:4200, pose:"drink", lb:["🍢", "떡볶이"], say:"이모 떡볶이 1인분이요! 🍢", fx:["🌶️", "🍢", "🔥"], mid:"후~ 맵다 맵다 🥵", done:"🍢 분식집 떡볶이", end:"물! 물 주세요 😵", npc:["@aunt", "덜 맵게 줄게~ 😊"]},
+  tw_fishcake:{ms:3600, pose:"drink", lb:["🍥", "어묵 국물"], say:"어묵 하나 먹어야지 🍥", fx:["♨️", "🍥"], done:"🍥 어묵 국물 후루룩", end:"국물이 진국이다~ 😋"},
+  tw_bungeo:{ms:3400, pose:"drink", lb:["🐟", "붕어빵"], say:"붕어빵 3개요! 팥으로요 🐟", fx:["🐟", "♨️"], done:"🐟 붕어빵 사 먹기", end:"따끈따끈 🐟", give:["🐟"]},
+  tw_store:{ms:3000, pose:"drink", lb:["🏪", "편의점"], say:"뭐 먹지~ 🤔", fx:["🍙", "🥛", "🍫"], done:"🏪 골목 편의점 간식", end:"아빠한텐 비밀 😋", give:["🍙", "🥛", "🍫", "🍬"]}});
+Object.assign(USE_LB, {pk_slide:["🛝", "미끄럼틀"], pk_merry:["🎠", "뺑뺑이"], tw_gacha:["🎰", "캡슐 뽑기"], tw_bell:["🔔", "학교 종"], rv_boat:["🦢", "오리배"], tw_bus:["🚌", "놀이공원 버스"], fn_carousel:["🎠", "회전목마"], fn_wheel:["🎡", "대관람차"], fn_coaster:["🐛", "애벌레 기차"], fn_bumper:["🚗", "범퍼카"], fn_viking:["🏴‍☠️", "바이킹"]});
+const AREA_NPC_TALK = {
+  ice:[["아저씨 무슨 맛 있어요?", "딸기, 초코, 바닐라~ 오늘은 메론맛도 있어 🍈", "메론맛 궁금하다!"], ["아저씨 트럭 어디로 가요?", "해 지면 강가 공원으로 가지 🚚", "나도 데려가 주세요 😆"]],
+  kid:[["연재야 뭐 해?", "개미 구경! 이거 봐 🐜", "우와 줄 서서 간다!"], ["같이 그네 탈래?", "좋아! 누가 더 높이 가나 시합 😎", "내가 이길걸?"], ["너 숙제 했어?", "아… 아직 😱", "나도 😅"]],
+  aunt:[["이모 오늘 뭐 맛있어요?", "오늘은 치즈 떡볶이! 🧀", "우와 그거 주세요!"], ["이모 학생들 언제 와요?", "3시 되면 우르르 몰려와 😆", "그때 엄청 바쁘겠다!"]],
+  gran:[["할머니 새로 들어온 거 있어요?", "반짝이 스티커 새로 왔단다 ✨", "우와 보여 주세요!"], ["할머니 이거 얼마예요?", "500원~ 유나는 단골이니까 덤 하나 😊", "할머니 최고!"]],
+  teach:[["선생님 방학 언제예요?", "유나는 방학만 기다리는구나? 😆", "헤헤 😅"], ["선생님 저 그림 잘 그렸어요!", "다음 미술 시간에 꼭 보여 줘 🎨", "네!"]],
+  staff:[["언니 회전목마 몇 번 타도 돼요?", "줄만 다시 서면 계속~ 😆", "열 번 탈래요!"], ["제일 무서운 거 뭐예요?", "바이킹 맨 끝자리! 🏴‍☠️", "으… 도전해 볼까 😳"]],
+  cotton:[["솜사탕은 어떻게 만들어요?", "설탕이 구름이 되는 마법이지 ☁️", "우와 신기해!"], ["무지개 솜사탕도 있어요?", "비밀 메뉴야~ 쉿 🌈", "헤헤 비밀!"]],
+  clown:[["아저씨 코 진짜예요?", "빨간 코는 웃음 버튼이야~ 빵! 🤡", "꺄하하 😆"], ["풍선으로 강아지 만들어 줘요!", "뽀득뽀득~ 짜잔 멍멍이 🐩", "우와 귀여워!"]],
+  pastor:[["목사님 안녕하세요!", "유나 왔구나~ 오늘도 하나님이 유나를 사랑하신단다 😊", "저도 하나님 사랑해요!"], ["주일에 성가대 해도 돼요?", "그럼~ 유나 목소리 예뻐서 대환영이야 🎶", "와 신난다!"]],
+  fisher:[["할아버지 오늘 몇 마리 잡았어요?", "아직 한 마리… 쉿, 물고기 듣는다 🎣", "쉿~ 🤫"], ["낚시 재밌어요?", "기다리는 게 재미지 허허 😊", "저는 기다리는 거 어려운데 😅"]],
+  boatman:[["오리배는 몇 명 타요?", "엄마 아빠랑 셋이 딱이야 🦢", "다음엔 같이 와야지!"], ["강에 물고기 많아요?", "잉어가 이만~ 하게 커 🐟", "우와 상어만 해요?"]],
+  picnic:[["뭐 드세요?", "엄마표 김밥이야~ 하나 먹어 볼래? 🍙", "감사합니다!"], ["여기 자주 오세요?", "날 좋으면 매주 와~ 바람이 좋거든 🍃", "저도 좋아요!"]],
+  chef:[["오늘 점심 뭐예요?", "유나가 좋아하는 카레야 🍛", "야호!"], ["반찬 남기면 안 돼요?", "한 입만 먹어 보자~ 😊", "네… 노력할게요 😅"]],
+  coach:[["선생님 저 달리기 빨라요?", "운동회 계주 선수 해야겠다! 🏃‍♀️", "진짜요? 😆"], ["피구 언제 해요?", "금요일 체육 시간에! ⚽", "기대된다!"]],
+  classmate:[["서아야 뭐 해?", "공기놀이! 같이 할래? 😊", "좋아!"], ["숙제 다 했어?", "응! 너는? 😏", "어… 이따 할 거야 😅"]],
+  chaplain:[["목사님 기도는 어떻게 해요?", "하나님께 편지 쓰듯 말하면 돼 🙏", "아 그렇구나!"], ["예배 때 무슨 노래 불러요?", "'예수 사랑하심은'~ 같이 부를래? 🎶", "네!"]],
+  halmi:[["할머니 이거 뭐예요?", "햇감자란다~ 쪄 먹으면 꿀맛이야 🥔", "맛있겠다!"], ["할머니 이거 직접 키웠어요?", "그럼~ 할미 밭에서 왔지 😊", "우와!"]],
+  tteok:[["사장님 무슨 떡이 제일 맛있어요?", "꿀떡! 톡 터진단다 🍡", "꿀떡 주세요!"], ["떡은 몇 시에 만들어요?", "새벽 네 시부터~ 😴", "엄청 일찍이다!"]],
+  fishm:[["아저씨 이 물고기 이름 뭐예요?", "고등어! 등이 파랗지? 🐟", "반짝반짝해요!"], ["오징어는 다리가 몇 개예요?", "열 개! 세어 볼래? 🦑", "하나 둘 셋…"]],
+  hotteok:[["이모 호떡 하나 주세요!", "뜨거우니까 호호 불어 먹어 🥞", "네!"], ["호떡 안에 뭐 들었어요?", "흑설탕이랑 땅콩~ 꿀처럼 흘러 🍯", "침 나온다 🤤"]]};
+const AREA_GREET = {fun:["크레용랜드에 온 걸 환영해요~ 🎡", "자유이용권 손목에 잘 찼니? 🎟️", "풍선 하나 줄까? 🎈"], river:["유나 왔구나~ 강바람 시원하지? 🌊", "오리배 타러 왔니? 🦢", "교회 종소리 들었니? 🔔"],
+  school:["유나야 안녕~ 오늘도 즐거운 학교! 🏫", "복도에서 뛰지 않기~ 🚶‍♀️", "샬롬~ 반가워 😊"], market:["어서 와~ 뭐 줄까? 🧺", "유나 왔네~ 덤 줄게! 😊", "시장 구경 왔구나~ 🍎"], park:["유나 안녕~ 산책 왔니? 🌳", "놀이터 사람 많다~ 🛝", "강아지 조심해~ 🐕"], town:["유나 왔구나~ 떡볶이 먹으러 왔니? 🍢", "어서 와~ 문방구 새 스티커 들어왔어 ✨", "학교 앞이라 차 조심해 🚸"]};
+Object.assign(GREET, AREA_GREET);
+Object.assign(FR_TALK, {fun:["놀이공원이다!!! 🎡", "회전목마 같이 타자 🎠"], river:["오리배 타고 싶다 🦢", "연 날리자! 🪁"], school:["우리 교실 가 볼래? 🏫", "급식 냄새 난다 😋"], market:["호떡 냄새 좋다~ 🥞", "떡 사 먹자! 🍡"], park:["놀이터다!! 미끄럼틀 타자 🛝", "아이스크림 트럭 있어! 🍦"], town:["문방구 뽑기 하고 싶다 🎰", "떡볶이 냄새 좋다~ 🍢"]});
+CHATS.fun = [["관람차 꼭대기 무서워요?", "하나도 안 무서워~ 동네가 다 보여 🎡", "타 봐야지!"], ["퍼레이드 몇 시예요?", "저녁 7시에 불꽃놀이도 해 🎆", "우와 보고 갈래요!"]];
+CHATS.river = [["강물은 어디로 가요?", "바다까지 간단다 🌊", "멀리 가네~"], ["교회는 언제 가요?", "주일 아침 11시~ 🔔", "저도 갈래요!"]];
+CHATS.school = [["몇 학년이에요?", "6학년! 유나는? 😊", "저는 아직 꼬마예요 😆"], ["오늘 예배 시간에 뭐 했어요?", "다윗과 골리앗 이야기 들었어 🙏", "우와 용감하다!"]];
+CHATS.market = [["시장 몇 시까지 해요?", "해 질 때까지~ 🌅", "알겠어요!"], ["뭐가 제일 싸요?", "오늘은 딸기! 한 바구니 덤 🍓", "엄마한테 말해야지!"]];
+CHATS.park = [["여기 오리 이름 있어요?", "꽥꽥이랑 뒤뚱이야 🦆", "귀엽다~"], ["분수 언제 나와요?", "매시 정각에 춤추듯 나와 ⛲", "우와 보고 싶다!"]];
+CHATS.town = [["학교 끝나면 뭐 해요?", "떡볶이 먹고 문방구 가야지 🍢", "나도요! 😆"], ["버스 언제 와요?", "곧 와~ 줄 서자 🚌", "넵!"]];
+BGM.park = {bpm:100, lead:"triangle", lv:0.1, soft:true, ch:[[43,59,62,67],[40,55,60,64],[36,55,60,64],[38,57,62,66]],
+  mel:[79,-1,76,-1, 74,76,79,-1,  81,-1,79,-1, 76,-1,-1,-1,  72,-1,74,76, 79,-1,81,-1,  79,-1,76,74, 76,-1,-1,-1,
+       79,-1,83,-1, 81,79,76,-1,  74,-1,76,-1, 79,-1,-1,-1,  81,-1,79,76, 74,-1,72,-1,  74,-1,76,-1, 72,-1,-1,-1]};
+BGM.town = {bpm:112, lead:"square", lv:0.05, ch:[[41,57,60,65],[43,59,62,67],[40,55,60,64],[45,57,60,64]],
+  mel:[72,74,76,-1, 77,-1,76,-1,  74,-1,72,-1, 69,-1,-1,-1,  72,74,76,-1, 79,-1,77,-1,  76,-1,74,-1, 72,-1,-1,-1,
+       77,-1,77,79, 81,-1,79,-1,  77,-1,76,-1, 74,-1,-1,-1,  76,-1,77,-1, 79,-1,76,-1,  74,-1,72,74, 72,-1,-1,-1]};
+BGM.fun = {bpm:132, lead:"square", lv:0.05, ch:[[48,60,64,67],[45,60,64,69],[41,60,65,69],[43,59,62,67]],
+  mel:[72,76,79,-1, 84,-1,79,-1,  81,-1,77,-1, 79,-1,-1,-1,  76,77,79,-1, 72,-1,76,-1,  74,-1,71,-1, 72,-1,-1,-1,
+       79,-1,81,79, 77,-1,76,-1,  77,-1,79,77, 76,-1,74,-1,  72,76,79,84, 83,-1,81,-1,  79,-1,74,76, 72,-1,-1,-1]};
+BGM.river = {bpm:80, lead:"sine", lv:0.12, soft:true, bell:true, ch:[[43,59,62,67],[40,55,59,64],[36,55,60,64],[38,57,62,66]],
+  mel:[74,-1,-1,71, 74,-1,79,-1,  76,-1,-1,-1, 74,-1,-1,-1,  72,-1,71,-1, 69,-1,67,-1,  69,-1,-1,-1, -1,-1,-1,-1,
+       74,-1,-1,71, 74,-1,79,-1,  81,-1,79,-1, 76,-1,-1,-1,  74,-1,72,-1, 71,-1,69,-1,  67,-1,-1,-1, -1,-1,-1,-1]};
+BGM.school = {bpm:108, lead:"triangle", lv:0.1, ch:[[48,60,64,67],[41,57,60,65],[43,55,59,62],[48,55,60,64]],
+  mel:[67,-1,67,69, 67,-1,64,-1,  67,-1,67,69, 67,-1,64,-1,  67,-1,64,-1, 62,-1,64,-1,  60,-1,-1,-1, -1,-1,-1,-1,
+       67,-1,67,69, 67,-1,64,-1,  67,-1,64,-1, 62,-1,64,-1,  60,-1,62,-1, 64,-1,62,-1,  60,-1,-1,-1, -1,-1,-1,-1]};
+BGM.market = {bpm:100, lead:"triangle", lv:0.1, ch:[[45,57,60,64],[43,55,59,62],[41,57,60,65],[40,55,59,64]],
+  mel:[69,-1,72,-1, 74,-1,76,-1,  74,72,69,-1, 67,-1,69,-1,  72,-1,74,-1, 76,-1,79,76,  74,-1,-1,-1, -1,-1,-1,-1,
+       76,-1,79,-1, 81,-1,79,76,  74,-1,72,74, 76,-1,-1,-1,  72,-1,69,-1, 67,-1,64,-1,  69,-1,-1,-1, -1,-1,-1,-1]};
+QUESTS.push(
+  {id:"funday", e:"🎡", t:"놀이공원 하루", steps:[
+    {f:"fun", use:"fn_carousel", lb:"회전목마", hint:"크레용랜드 회전목마 타기"},
+    {f:"fun", use:"fn_cotton", lb:"솜사탕", hint:"솜사탕 수레에서 하나 받기"},
+    {f:"fun", use:"fn_wheel", lb:"대관람차", hint:"대관람차 꼭대기에서 동네 보기"}]},
+  {id:"schoolday", e:"🏫", t:"학교 가는 날", steps:[
+    {f:"school", talk:"@teach", lb:"선생님께 인사", hint:"크레용초등학교 3학년 1반 선생님께", yu:"선생님 안녕하세요! 🙇‍♀️", re:"유나 왔구나~ 오늘은 칠판에 그림 그려 볼까? 🖍️"},
+    {f:"school", use:"sc_board", lb:"칠판 그림", hint:"교실 칠판에 그림 그리기"},
+    {f:"school", use:"sc_lunch", lb:"급식 먹기", hint:"급식실에서 점심 받기"},
+    {f:"school", use:"sc_chapel", lb:"채플 기도", hint:"채플실 강대상 앞에서 기도"}]},
+  {id:"errand", e:"🧺", t:"엄마 시장 심부름", steps:[
+    {f:"s4", talk:"@mom", lb:"엄마한테", hint:"4층 엄마한테 가기", yu:"엄마 저 심부름 갈래요! 🧺", re:"그럼 시장 가서 떡이랑 사과 좀 사 올래? 🍎"},
+    {f:"market", use:"mk_tteokjip", lb:"떡 사기", hint:"시장 떡집에서 떡 사기"},
+    {f:"market", use:"mk_fruit", lb:"사과 사기", hint:"과일 가게에서 사과 사기"},
+    {f:"s4", talk:"@mom", lb:"엄마한테 드리기", hint:"엄마한테 갖다드리기", yu:"엄마 다녀왔어요! 🍎🍡", re:"우와 우리 유나 다 컸네~ 같이 먹자 😊"}]},
+  {id:"sunday", e:"⛪", t:"주일 아침", steps:[
+    {f:"river", talk:"@pastor", lb:"목사님께 인사", hint:"강변 동네 교회 목사님께", yu:"목사님 안녕하세요! 🙏", re:"유나 왔구나~ 오늘 예배 같이 드리자 😊"},
+    {f:"river", use:"rv_bell", lb:"종 치기", hint:"교회 종탑 줄 당기기"},
+    {f:"river", use:"rv_pray", lb:"기도하기", hint:"강대상 앞에서 기도"}]},
+  {id:"icecream", e:"🍦", t:"아이스크림 트럭", steps:[
+    {f:"park", talk:"@ice", lb:"아이스크림 사기", hint:"동네 공원 아이스크림 트럭으로", yu:"아저씨 딸기맛 두 개 주세요! 🍓", re:"자 여기~ 녹기 전에 먹어 🍦", got:"🍦",
+      make:{ms:3200, wait:"잠깐만~ 제일 큰 걸로 줄게 😊", txt:"아이스크림 담는 중", fx:["🍦", "🍓", "🍫", "✨"]}},
+    {f:"park", talk:"@kid", lb:"연재랑 나눠 먹기", hint:"놀이터 연재한테 하나 주기", yu:"연재야 하나 먹어! 🍦", re:"우와 고마워! 대신 내가 그네 밀어 줄게 😆"}]},
+  {id:"tteok", e:"🍢", t:"아빠 간식 떡볶이 포장", steps:[
+    {f:"town", talk:"@aunt", lb:"떡볶이 포장", hint:"학교 앞 골목 분식집 이모한테", yu:"이모 떡볶이 포장이요! 아빠 거예요 🍢", re:"순대도 서비스로 넣었어 😉", got:"🍢",
+      make:{ms:3600, wait:"아빠 회사 간다고? 따끈하게 싸 줄게~", txt:"떡볶이 포장 중", fx:["🍢", "🌶️", "♨️", "🥡"]}},
+    {f:"main", talk:"@dad", lb:"아빠한테 배달", hint:"2층 대표실 아빠한테 갖다드리기", yu:"아빠! 떡볶이 배달 왔어요 🍢", re:"우와 학교 앞 그 집 떡볶이? 우리 딸 센스 최고 😆"}]},
+  {id:"supply", e:"📄", t:"선생님 심부름", steps:[
+    {f:"town", talk:"@teach", lb:"선생님한테", hint:"학교 앞 골목 선생님한테", yu:"선생님 안녕하세요! 🙇‍♀️", re:"유나야 마침 잘 왔다~ 문방구에서 색종이 좀 사다 줄래? 📄"},
+    {f:"town", talk:"@gran", lb:"색종이 사기", hint:"문방구 할머니한테 색종이", yu:"할머니 색종이 주세요! 선생님 심부름이에요 📄", re:"착하기도 하지~ 사탕 하나는 덤 🍬", got:"📄",
+      make:{ms:2800, wait:"어디 보자~ 무지개 색종이가…", txt:"색종이 찾는 중", fx:["📄", "🌈", "✂️"]}},
+    {f:"town", talk:"@teach", lb:"갖다드리기", hint:"선생님한테 색종이 드리기", yu:"선생님 색종이 사 왔어요! 📄", re:"고마워 유나야! 칭찬 스티커 하나 ⭐"}]},
+  {id:"bubble", e:"🫧", t:"공원 비눗방울 터뜨리기", steps:[
+    {f:"park", game:"bubble", lb:"비눗방울", hint:"떠다니는 비눗방울 다 터뜨리기 · 높은 건 점프!"}]},
+  {id:"quiz", e:"📝", t:"선생님 깜짝 퀴즈", steps:[
+    {f:"town", talk:"@teach", lb:"선생님한테", hint:"학교 앞 골목 선생님한테", yu:"선생님! 퀴즈 내 주세요 📝", re:"좋아~ 5문제! 다 맞히면 선생님이 칭찬해 줄게 😊"},
+    {f:"town", game:"quiz", lb:"퀴즈 풀기", hint:"5문제 맞히기"}]},
+  {id:"bday", e:"🎂", t:"연재 생일 몰래 축하", steps:[
+    {f:"park", talk:"@kid", lb:"연재한테", hint:"동네 공원 놀이터 연재한테", yu:"연재야 왜 시무룩해? 😮", re:"오늘 내 생일인데… 다들 까먹었나 봐 😢"},
+    {f:"town", talk:"@gran", lb:"생일 카드", hint:"학교 앞 골목 문방구에서 카드 사기", yu:"할머니 생일 카드 주세요! 제일 반짝이는 걸로요 💌", re:"친구 생일이구나? 리본도 달아 줄게 🎀", got:"💌",
+      make:{ms:3000, wait:"반짝이 카드가 어디 있더라~", txt:"카드 고르는 중", fx:["💌", "🎀", "✨"]}},
+    {f:"town", talk:"@aunt", lb:"생일 떡볶이", hint:"분식집 이모한테 떡볶이 케이크", yu:"이모! 떡볶이로 케이크 만들어 주실 수 있어요? 🎂", re:"떡볶이 케이크 완성! 초는 서비스 🕯️", got:"🎂",
+      make:{ms:3800, wait:"그런 건 처음인데… 이모가 해 볼게! 😆", txt:"떡볶이 케이크 만드는 중", fx:["🍢", "🎂", "🕯️", "✨"]}},
+    {f:"park", talk:"@kid", lb:"생일 축하!", hint:"공원으로 가서 연재 깜짝 축하", yu:"연재야~ 생일 축하해!! 🎂🎉", re:"우와… 떡볶이 케이크?! 최고의 생일이야 유나야 🥹"}]});
+BADGES.push(["town", "🏘️", "동네 놀이 전부", r => AREA_PLAY.every(k => r.uses?.[k])], ["gacha", "🎰", "뽑기 도감 완성", r => cnt(r.gacha || {}) >= GACHA.length],
+  ["quiz", "📝", "퀴즈 다 맞히기", r => (r.quizBest || 0) >= 5], ["bday", "🎂", "연재 생일 축하", r => r.done.bday],
+  ["rides", "🎢", "놀이기구 다 타기", r => ["fn_carousel", "fn_wheel", "fn_coaster", "fn_bumper", "fn_viking"].every(k => r.uses?.[k])],
+  ["market", "🧺", "시장 먹거리 다섯 가지", r => ["mk_tteokjip", "mk_hotteok", "mk_mandu", "mk_donut", "mk_goguma", "mk_fruit", "mk_ppeong"].filter(k => r.uses?.[k]).length >= 5],
+  ["school", "🏫", "학교 구석구석", r => Object.keys(r.uses || {}).filter(k => k.startsWith("sc_")).length >= 8],
+  ["village", "🗺️", "마을 여섯 곳 다 가 보기", r => ["park", "town", "fun", "school", "market", "river"].every(k => r.vis?.[k])],
+  ["boat", "🦢", "강변 오리배", r => r.uses?.rv_boat]);
 Object.assign(SEATS, HOME.seats);
 Object.entries(HOME.sitLines).forEach(([k, l]) => SIT_YU[k] = SIT_YU[k] ? [...SIT_YU[k], ...l] : l);   // 소파·그네는 원래 대사에 더함
 BGM.home1 = {bpm:84, lead:"sine", lv:0.12, soft:true, bell:true, ch:[[41,57,60,64],[36,55,60,64],[38,57,62,65],[43,55,59,62]],
@@ -470,15 +710,26 @@ BGM.home2 = BGM.home3 = BGM.home1;
 BGM.home4 = {...BGM.home1, bpm:76};
 const isHome = f => /^home\d$/.test(f || "");
 /* 집 오가는 길: 로비 횡단보도 건너편 ↔ 집 대문, 집 계단. 들어올 때만 (스폰 자리가 바로 옆이라) */
+const AREA_GO = {park:["놀이터 가자~ 🛝", "공원 산책 가야지 🌳"], town:["문방구 구경 가자~ ✏️", "떡볶이 먹으러 가자! 🍢"], fun:["놀이공원이다!!! 🎡", "회전목마 타러 가자~ 🎠"],
+  school:["학교 가자~ 🏫", "우리 교실 보여 줄게! ✏️"], market:["시장 구경 가자~ 🧺", "호떡 먹으러 가자! 🥞"], river:["강가 산책 가자~ 🌊", "연 날리러 가자! 🪁"]};
 const WALKS = [{f:"lobby", at:[17.6, 28.6], r:0.7, to:"home1", spawn:HOME.spawnGate},
   {f:"home1", at:HOME.gate, r:0.45, to:"lobby", spawn:[17.6, 28.2, Math.PI]},
-  ...HOME.stairs.map(t => ({...t, r:0.45}))];
+  ...HOME.stairs.map(t => ({...t, r:0.45})),
+  ...Object.entries(AREA).flatMap(([k, a]) => a.lobbyAt ? [{f:"lobby", at:a.lobbyAt, r:0.7, to:k, spawn:a.spawn}, {f:k, at:a.gate, r:0.55, to:"lobby", spawn:a.back}] : []), ...LINKS];
 /* 다른 층 할 일이면 어디로 가야 하는지 (집에선 엘리베이터 대신 계단·대문) */
 function wayOut(f, to){
   if(isHome(f)){ const a = +f[4], b = isHome(to) ? +to[4] : 0;
     const w = WALKS.find(t => t.f === f && (b > a ? t.to === "home" + (a + 1) : a === 1 ? t.to === "lobby" : t.to === "home" + (a - 1)));
     return w ? w.at : null; }
-  if(isHome(to)) return f === "lobby" ? WALKS[0].at : ELEV;
+  if(isArea(f) || isArea(to) || (isHome(to) && f === "lobby")){   // 걸어서 이어진 길을 따라 첫 걸음 (없으면 엘리베이터)
+    const tower = x => !isHome(x) && !isArea(x), node = x => tower(x) && x !== "lobby" ? "tower" : x, goal = node(isHome(to) ? "home1" : to);
+    const seen = new Set([node(f)]), q = [[node(f), null]];
+    while(q.length){ const [n, first] = q.shift(); if(n === goal) return first || ELEV;
+      const out = WALKS.filter(w => node(w.f) === n && !isHome(w.f) || (isHome(n) && w.f === "home1" && n === "home1")).map(w => [node(w.to), w.at]);
+      if(n === "tower") out.push(["lobby", ELEV]); if(n === "lobby") out.push(["tower", ELEV]);
+      for(const [m, at] of out) if(!seen.has(m)){ seen.add(m); q.push([m, first || at]); } }
+    return isArea(f) ? AREA[f].gate : ELEV; }
+  if(isHome(to)) return ELEV;
   return ELEV;
 }
 function bgmFloor(f){ const k = BGM[f] ? f : "main"; if(AU.trk !== k){ AU.trk = k; AU.step = 0; } }
@@ -501,7 +752,8 @@ export function start(api){
   const root = document.createElement("div"); root.className = "yg";
   root.innerHTML = `
     <div class="yg-top"><button class="yg-card" type="button" aria-label="할 일 고르기"><span class="yg-star">⭐ 0</span><span class="yg-bag" hidden title="들고 있는 것"></span><span class="yg-ct"><b>할 일 고르기</b><span>눌러서 할 일·놀이 고르기</span><span class="yg-steps" hidden></span></span></button>
-      <button class="yg-x yg-snd" type="button" aria-label="소리 켜기·끄기">🔊</button><button class="yg-x" type="button" aria-label="유나 모드 끝내기">✕</button></div>
+      <button class="yg-x yg-mapb" type="button" aria-label="마을 지도">🗺️</button><button class="yg-x yg-snd" type="button" aria-label="소리 켜기·끄기">🔊</button><button class="yg-x" type="button" aria-label="유나 모드 끝내기">✕</button></div>
+    <div class="yg-map" hidden></div>
     <div class="yg-hud" hidden></div>
     <div class="yg-make" hidden><span class="e"></span><b></b><span class="bar"><i></i></span></div>
     <div class="yg-arrow" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
@@ -525,6 +777,29 @@ export function start(api){
   const $ = s => root.querySelector(s);
   const runB = $(".yg-run"), sndB = $(".yg-snd"); sndB.textContent = AU.on ? "🔊" : "🔇";
   sndB.onclick = ev => { ev.stopPropagation(); auSet(!AU.on); auInit(); sndB.textContent = AU.on ? "🔊" : "🔇"; };
+  /* 마을 지도 (2026-11-24 감독님 "큰 마을이면 좋겠네"): 어디 있는지 보이고, 누르면 그쪽으로 걸어감 */
+  const mapEl = $(".yg-map"), mapB = $(".yg-mapb");
+  const TOWER_F = ["lobby", "main", "wf", "s4", "roof"];
+  const MAP_T = [["river", 10, 50], ["park", 29, 50], ["tower", 50, 46], ["town", 70, 50], ["market", 90, 50], ["school", 66, 16], ["fun", 90, 16], ["home", 50, 84]];
+  const MAP_R = [["river", "park"], ["park", "tower"], ["tower", "town"], ["town", "market"], ["town", "school"], ["tower", "home"]];
+  const mapKey = f => TOWER_F.includes(f) ? "tower" : isHome(f) ? "home" : f;
+  const mapName = k => k === "tower" ? ["🏢", "크레용 타워"] : k === "home" ? ["🏡", "유나네 집"] : [AREA[k].e, AREA[k].name.replace("·동네 교회", "·교회").replace("·놀이터", "")];
+  function openMap(){
+    panel.hidden = true; const here = mapKey(S.floor), P = Object.fromEntries(MAP_T.map(([k, x, y]) => [k, [x, y]]));
+    const ln = ([a, b], dash) => `<line x1="${P[a][0]}" y1="${P[a][1] * 0.625}" x2="${P[b][0]}" y2="${P[b][1] * 0.625}" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" ${dash ? 'stroke-dasharray="0.1 3" opacity=".95"' : ""}/><line x1="${P[a][0]}" y1="${P[a][1] * 0.625}" x2="${P[b][0]}" y2="${P[b][1] * 0.625}" stroke="#E8DCC8" stroke-width="1.1" stroke-linecap="round" ${dash ? 'stroke-dasharray="0.1 3"' : ""}/>`;
+    mapEl.innerHTML = `<h3>🗺️ 크레용 마을<small>누르면 걸어가요</small></h3><div class="m"><svg viewBox="0 0 100 62.5" preserveAspectRatio="none">
+      <path d="M0 22 C6 26 4 40 10 46 S6 58 2 62.5 L0 62.5Z" fill="#A9CBEA" opacity=".85"/><path d="M0 24 C5 28 3 40 8 46 S4 58 1 62.5" fill="none" stroke="#FFFFFF" stroke-width=".5" opacity=".7"/>
+      <circle cx="29" cy="24" r="9" fill="#BFE3C9" opacity=".8"/><circle cx="90" cy="9" r="8" fill="#F6E1EA" opacity=".9"/><circle cx="70" cy="8" r="7" fill="#F4ECD8" opacity=".9"/>
+      ${MAP_R.map(r => ln(r)).join("")}${ln(["town", "fun"], true)}<text x="83.5" y="22" font-size="2.6" fill="#8A847C" text-anchor="middle">🚌 버스</text></svg>
+      ${MAP_T.map(([k, x, y]) => { const [e, n] = mapName(k), ok = k === "tower" || k === "home" || AREA_MOD[k]; return `<button type="button" class="t${k === here ? " on" : ""}${ok ? "" : " off"}" data-k="${k}" style="left:${x}%;top:${y}%"><i>${e}</i><span>${n}</span></button>`; }).join("")}</div><button type="button" class="x">닫기</button>`;
+    mapEl.querySelectorAll(".t").forEach(b => b.onclick = ev => { ev.stopPropagation(); const k = b.dataset.k; mapEl.hidden = true; if(k === here) return;
+      if(k === "tower") walkTo({f:S.floor, to:"lobby", spawn:AREA[S.floor]?.back || [17.6, 28.2, PI]});
+      else if(k === "home") walkTo({f:S.floor, to:"home1", spawn:HOME.spawnGate});
+      else walkTo({f:S.floor, to:k, spawn:AREA[k].spawn}); });
+    mapEl.querySelector(".x").onclick = ev => { ev.stopPropagation(); mapEl.hidden = true; };
+    mapEl.hidden = false; sfx("blip");
+  }
+  mapB.onclick = ev => { ev.stopPropagation(); if(mapEl.hidden) openMap(); else mapEl.hidden = true; };
   const nightEl = $(".yg-night"), grillEl = $(".yg-grill"), credEl = $(".yg-cred"), lbEl = $(".yg-lb"), chapEl = $(".yg-chap");
   const card = $(".yg-card"), hud = $(".yg-hud"), arrow = $(".yg-arrow"), joy = $(".yg-joy"), knob = joy.querySelector("i"), act = $(".yg-act"), jumpB = $(".yg-jump"), elevP = $(".yg-elev:not(.yg-fit)"), fitP = $(".yg-fit"), toastEl = $(".yg-toast"), panel = $(".yg-panel"), fade = $(".yg-fade"), help = $(".yg-help"), bagEl = $(".yg-bag"), stepsEl = $(".yg-steps"), makeEl = $(".yg-make");
 
@@ -580,7 +855,7 @@ export function start(api){
     if(stepsEl.dataset.k !== sk){ stepsEl.dataset.k = sk; stepsEl.innerHTML = ""; stepsEl.hidden = !Q || Q.steps.length < 2;
       if(Q) Q.steps.forEach((x, k) => { if(k){ const u = document.createElement("u"); u.textContent = "›"; stepsEl.append(u); }
         const i = document.createElement("i"); i.className = k < step ? "ok" : k === step ? "now" : ""; i.textContent = (k < step ? "✓ " : "") + (x.lb || x.hint || ""); stepsEl.append(i); }); }
-    if(!Q){ b.textContent = "할 일 고르기"; const h = S.floor ? `${FL[S.floor].name.split(" ")[0]} 보물 ${floorFound(S.floor)}/6 · 눌러서 할 일·놀이` : "눌러서 할 일·놀이 고르기"; if(s.textContent !== h) s.textContent = h; return; }
+    if(!Q){ b.textContent = "할 일 고르기"; const h = S.floor ? `${flS(S.floor)} 보물 ${floorFound(S.floor)}/6 · 눌러서 할 일·놀이` : "눌러서 할 일·놀이 고르기"; if(s.textContent !== h) s.textContent = h; return; }
     b.textContent = `${Q.e} ${Q.t}`;
     const fNeed = needFloor(st);
     let h = (Q.story ? `🤫${"❤️".repeat(S.secret ?? 3)}${"🤍".repeat(3 - (S.secret ?? 3))} · ` : "") + (carry ? carry + (carry === "🐈" ? " 데리고 · " : " 들고 · ") : "") + (fNeed && fNeed !== S.floor ? `🛗 엘리베이터 타고 ${ro(FL[fNeed].name)}` : st.find && S.floor === Q.catF ? "🐈 이 층 어딘가에서 야옹 소리가…" : st.hint || "");
@@ -595,7 +870,7 @@ export function start(api){
     if(tab === "t"){
       Object.keys(FL).forEach(f => { const r = document.createElement("div"); r.className = "yg-trow"; const n = floorFound(f);
         r.innerHTML = `<b></b><span class="yg-tset"></span><small class="${n >= 6 ? "all" : ""}">${n >= 6 ? "다 찾음" : n + "/6"}</small>`;
-        r.querySelector("b").textContent = FL[f].name.split(" ")[0];
+        r.querySelector("b").textContent = flS(f);
         TREASURE[f].forEach(([e, nm], k) => { const sp = document.createElement("span"); sp.textContent = e; sp.title = nm; if(!rec.tre[`${f}:${k}`]) sp.className = "no"; r.querySelector(".yg-tset").append(sp); });
         panel.append(r); });
       const note = document.createElement("p"); note.className = "yg-note"; note.textContent = "반짝이는 걸 찾아 걸어가면 주워요. 높이 떠 있는 건 점프! 근처에 가면 위쪽에 ✨ 알림이 떠요."; panel.append(note);
@@ -643,6 +918,7 @@ export function start(api){
       st.go = sp.sort((a, b) => (w ? Math.hypot(b[0] - w[0], b[1] - w[1]) - Math.hypot(a[0] - w[0], a[1] - w[1]) : 0))[0] || e.playFree(EXIT[0] + 4, EXIT[1] - 3, 0.2); }
     if(Q?.id === "friend" && S.frF !== f){ S.frF = f; S.trail = []; S.frSwim = false;
       const at = f === "lobby" && step === 0 ? e.playFree(16.4, 18.4, 0.22) : e.playFree(EXIT[0] + 0.9, EXIT[1] + 0.8, 0.22); e.playActor("fr", {at:[at[0], at[1], Math.PI], pose:"stand", to:null}); }
+    areaNpcs(f);
     // 아빠(2층)·엄마(4층) 배우: 원래 자리 근처에 세우고 원래 사람은 숨김
     [["dad", "main", "_dir", [32.2, 4.4]], ["mom", "s4", "_nora", [6.7, 17.9]]].forEach(([k, fl, id, def]) => {
       if(need(k) && (f === fl || G)){ if(!(S.st?.actors || {})[k] && !G){ const w0 = e.playWhere(id), w = w0 && Math.hypot(w0[0] - ELEV[0], w0[1] - ELEV[1]) > 2.4 ? w0 : null, at = e.playFree(...(w ? [w[0], w[1]] : def), 0.22); e.playActor(k, {at:[at[0], at[1], w ? w[2] : 0], pose:"stand"}); }
@@ -652,6 +928,7 @@ export function start(api){
     if(st && !G){ const fn = needFloor(st); if(st.find){ if(fn && fn !== f) mark = {at:wayOut(f, fn)}; }
       else if(st.f !== f) mark = {at:wayOut(f, st.f)};
       else if(st.go) mark = {at:st.go};
+      else if(st.use){ const u = (USE[f] || []).find(x => x.k === st.use); mark = u ? {at:u.at} : null; }
       else if(st.talk && st.talk[0] === "@") mark = {actor:st.talk.slice(1)};
       else if(Array.isArray(st.talk)){ const id = st.talk.find(x => e.playWhere(x)); mark = id ? {id} : null; } }
     if(G?.type === "swim") mark = {at:[28.35, 18.45]};
@@ -659,11 +936,11 @@ export function start(api){
     if(Q?.id === "cat" && curStep()?.find && f === Q.catF && Q.catAtF !== f){ Q.catAt = e.playHideSpot(4) || e.playFree(EXIT[0] + 3, EXIT[1], 0.2); Q.catAtF = f; }
     refreshItems();
   }
-  function spotsFor(f){ const e = E(); if(!e) return; S.spots = e.playSpots(6, SEED[f] + rec.round * 101, isHome(f) ? WALKS.filter(t => t.f === f).map(t => [t.at[0], t.at[1], 1.1]) : AVOID, isHome(f) ? 2.2 : 2.6); }
+  function spotsFor(f){ const e = E(); if(!e) return; S.spots = e.playSpots(6, SEED[f] + rec.round * 101, isHome(f) || isArea(f) ? WALKS.filter(t => t.f === f).map(t => [t.at[0], t.at[1], 1.1]) : AVOID, isHome(f) ? 2.2 : 2.6); }
   function boltFor(){ const e = E(); if(!e) return; S.bolt = e.playSpots(1, Math.random() * 1e9 | 0, [...AVOID, ...S.spots.map(p => [p[0], p[1], 1.6])], 1)[0] || null; }
   function refreshItems(){
     const e = E(); if(!e || !S.floor) return; const f = S.floor, L = [];
-    if(G?.type === "stars") G.items.forEach(it => { if(!it.got) L.push(it); });
+    if(COL.has(G?.type)) G.items.forEach(it => { if(!it.got) L.push(it); });
     else { S.spots.forEach((p, k) => { const tr = TREASURE[f][k]; if(tr && !rec.tre[`${f}:${k}`]) L.push({id:"t" + k, e:tr[0], i:p[0], j:p[1], y:tr[2] ? 1.12 : 0.42, high:!!tr[2], s:0.62}); });
       if(S.bolt) L.push({id:"bolt", e:"⚡", i:S.bolt[0], j:S.bolt[1], y:0.42, s:0.6}); }
     if(Q?.id === "cat"){ const pos = Q.cat === "follow" ? S.catPos : curStep()?.find && f === Q.catF ? Q.catAt : null; if(pos) L.push({id:"cat", e:"🐈", i:pos[0], j:pos[1], y:0.27, s:0.62, pick:false, glow:false, bob:false}); }
@@ -679,20 +956,20 @@ export function start(api){
     const e = E(), f = S.floor;
     if(id[0] === "t" && TREASURE[f]){ const k = +id.slice(1), tr = TREASURE[f][k]; if(!tr) return; rec.tre[`${f}:${k}`] = 1; save(); sfx("pick");
       const n = floorFound(f); e?.playEmote?.("yu", tr[0], 1600); yuSay(pick(["보물이다!! ✨", "우와 이거 내 거! 😆", "반짝반짝 ✨", "찾았다~! 🎉"]), 1800);
-      toast(`${tr[0]} ${tr[1]} 찾았다!`, `${FL[f].name.split(" ")[0]} 보물 ${n}/6`);
+      toast(`${tr[0]} ${tr[1]} 찾았다!`, `${flS(f)} 보물 ${n}/6`);
       if(n >= 6){ rec.stars++; save(); sfx("star"); toast("🏴‍☠️ 이 층 보물 다 찾았다!", "⭐ +1", 2600, true); }
       checkBadges(); renderCard(); return; }
     if(id === "bolt"){ e?.playSet({boost:10000}); sfx("boost"); rec.boosts++; save(); S.bolt = null; yuSay("우와 빨라졌다!! ⚡", 1800); toast("⚡ 번개 사탕!", "10초 동안 쌩쌩 달려요"); checkBadges();
-      const fl = f; later0(40000, () => { if(S.floor === fl && !S.bolt && !(G?.type === "stars")){ boltFor(); refreshItems(); } }); return; }
-    if(id[0] === "s" && G?.type === "stars"){ const it = G.items.find(x => x.id === id); if(it) it.got = true; G.n++;
-      if(G.n >= G.total){ G.phase = "end"; yuSay("별똥별 다 모았다!! 🌠"); toast("🌠 별똥별 다 모았다!", "", 1800); later(1500, () => { endGame(); advance(); }); }
+      const fl = f; later0(40000, () => { if(S.floor === fl && !S.bolt && !COL.has(G?.type)){ boltFor(); refreshItems(); } }); return; }
+    if(id[0] === "s" && COL.has(G?.type)){ const it = G.items.find(x => x.id === id); if(it) it.got = true; G.n++; if(G.type === "bubble"){ sfx("blip"); E()?.playEmote?.([it.i, it.j, it.y + 0.2], "💥", 500); }
+      if(G.n >= G.total){ G.phase = "end"; yuSay(G.type === "bubble" ? "비눗방울 다 터뜨렸다!! 🫧" : "별똥별 다 모았다!! 🌠"); toast(G.type === "bubble" ? "🫧 비눗방울 다 터뜨렸다!" : "🌠 별똥별 다 모았다!", "", 1800); later(1500, () => { endGame(); advance(); }); }
       else if(G.n % 4 === 0) yuSay(pick(["반짝반짝! 🌟", "하나 더~!", "얼마 안 남았다! 😆"]), 1400); }
   }
 
   /* ---------- 미니게임 ---------- */
   function endGame(){ if(!G) return; const was = G.type; clearInterval(G.iv); G.tm?.forEach(clearTimeout); const e = E(); if(e){ e.playSet({ball:null, freeze:false, act:null}); } G = null; hud.hidden = true; grillEl.hidden = true; grillEl.classList.remove("claw"); grillEl.querySelector(".bar em").style.left = ""; pickEl.hidden = true;
     if(was === "ending"){ nightEl.classList.remove("on"); lbOn(false); credEl.hidden = true; fade.classList.remove("on"); }
-    if(was === "stars" || was === "catmeat") refreshItems(); }
+    if(COL.has(was) || was === "catmeat") refreshItems(); }
   /* 이야기 연출: 위아래 검은 띠 + 장 제목 */
   const lbOn = on => lbEl.classList.toggle("on", !!on);
   function chapter([no, title], sub){ lbOn(true); chapEl.querySelector("small").textContent = no.replace(/(\d)장/, "CHAPTER $1"); chapEl.querySelector("b").textContent = title; chapEl.classList.add("on"); sfx("ding");
@@ -788,6 +1065,19 @@ export function start(api){
       refreshItems(); sfx("bump"); toast("😱 고양이가 고기를 물고 도망갔다!", "크레파스 잡기 · 50초", 2400); yuSay("앗 크레파스!! 그거 파티 고기야!! 😱", 2400);
       later(1100, () => { G.phase = "run"; G.t1 = now(); G.until = now() + 50000; G.lt = now(); });
     }
+    if(type === "quiz"){   // 학교 앞 선생님 깜짝 퀴즈 5문제 (2026-11-24)
+      e.playSet({freeze:true, mark:null}); G.phase = "pick"; G.ok = 0; const qs = QUIZ.slice().sort(() => Math.random() - 0.5).slice(0, 5);
+      const ask = k => { if(G?.type !== "quiz") return;
+        if(k >= qs.length){ const w = G.ok; G.phase = "end"; rec.quizBest = Math.max(rec.quizBest || 0, w); if(w >= 3){ rec.stars++; } save(); renderCard();
+          sfx(w >= 3 ? "star" : "ding"); toast(`📝 ${w} / 5 맞혔다!`, w >= 5 ? "만점! ⭐ +1" : w >= 3 ? "⭐ +1" : "다음엔 더 잘할 수 있어 💪", 2600, w >= 3);
+          npcSay("@teach", w >= 5 ? "만점이네! 유나 천재 아니야? 💯" : w >= 3 ? "잘했어 유나야~ 👏" : "괜찮아, 틀리면서 배우는 거야 😊", 3000); checkBadges();
+          later(2600, () => { endGame(); advance(); }); return; }
+        const [q, o, a] = qs[k]; choose(`📝 퀴즈 ${k + 1}/5`, q, o.map((x, n) => { const t = x.split(" "), em = t.length > 1 && /\p{Extended_Pictographic}/u.test(t[0]); return [em ? t[0] : ["①", "②", "③"][n], em ? t.slice(1).join(" ") : x, n]; })).then(c => { if(G?.type !== "quiz") return;
+          const good = c[2] === a; if(good){ G.ok++; sfx("pick"); yuSay(pick(["정답!! 😆", "맞았다~ ✌️", "역시 나야 😎"]), 1300); E()?.playEmote?.("yu", "⭕", 1100); }
+          else { sfx("ding"); yuSay("땡… 😢", 1200); npcSay("@teach", `정답은 ${o[a]}!`, 1800); E()?.playEmote?.("yu", "❌", 1100); }
+          later(1700, () => ask(k + 1)); }); };
+      toast("📝 선생님 깜짝 퀴즈", "5문제 · 3개 넘게 맞히면 ⭐", 1800); later(1400, () => ask(0));
+    }
     if(type === "edit"){   // 색보정실에서 몰래 축하 영상 편집
       e.playSet({freeze:true, mark:null}); G.phase = "pick"; G.picks = [];
       const ask = k => { if(G?.type !== "edit") return;
@@ -829,15 +1119,16 @@ export function start(api){
       later(20200, () => { credEl.innerHTML = `<div class="in"><small>THE END</small><h2>엄마 아빠 몰래 깜짝 파티</h2><small>CREDITS</small><p>감독 · 각본 · 편집 · 고기 굽기 — 유나</p><p>주연 — 엄마 · 아빠</p><p>케이크 — 1층 카페 언니</p><p>특별출연 — 크레파스 🐈</p><button type="button">⭐ +3 받기</button></div>`;
         credEl.hidden = false; sfx("star"); credEl.querySelector("button").onclick = ev => { ev.stopPropagation(); credEl.hidden = true; rec.stars += 2; save(); endGame(); advance(); }; });
     }
-    if(type === "stars"){
-      const sp = e.playSpots(10, Math.random() * 1e9 | 0, AVOID, 1.9);
-      G.items = sp.map((p, k) => ({id:"s" + k, e:"🌟", i:p[0], j:p[1], y:k % 3 === 2 ? 1.12 : 0.4, high:k % 3 === 2, s:0.6}));
+    if(COL.has(type)){
+      const bb = type === "bubble", sp = e.playSpots(bb ? 12 : 10, Math.random() * 1e9 | 0, bb ? [[AREA.park.gate[0], AREA.park.gate[1], 1.6]] : AVOID, bb ? 1.7 : 1.9);
+      G.items = sp.map((p, k) => ({id:"s" + k, e:bb ? "🫧" : "🌟", i:p[0], j:p[1], y:k % 3 === 2 ? 1.12 : 0.4, high:k % 3 === 2, s:0.6}));
       // 제한 시간: 가까운 별부터 도는 길이 ÷ 걷는 속도 × 1.7 + 여유 (별이 멀리 흩어져도 공평하게)
       let ci = S.st?.i ?? EXIT[0], cj = S.st?.j ?? EXIT[1], len = 0; const left = sp.slice();
       while(left.length){ let bk = 0, bd = 1e9; left.forEach((p, k) => { const d = Math.hypot(p[0] - ci, p[1] - cj); if(d < bd){ bd = d; bk = k; } }); len += bd; [ci, cj] = left.splice(bk, 1)[0]; }
       const sec = Math.max(35, Math.ceil((len / 2.35 * 1.7 + 12) / 5) * 5);
       G.total = G.items.length; G.until = now() + sec * 1000; refreshItems();
-      toast("🌠 별똥별 줍기!", `${G.total}개 · 높은 건 점프 · ${sec}초`, 2200); yuSay("별이 떨어졌다! 다 주워야지 🌟");
+      if(bb){ toast("🫧 비눗방울 터뜨리기!", `${G.total}개 · 높은 건 점프 · ${sec}초`, 2200); yuSay("비눗방울이다~ 다 터뜨려야지 🫧"); }
+      else { toast("🌠 별똥별 줍기!", `${G.total}개 · 높은 건 점프 · ${sec}초`, 2200); yuSay("별이 떨어졌다! 다 주워야지 🌟"); }
     }
     hud.hidden = false; gameHud();
   }
@@ -851,7 +1142,7 @@ export function start(api){
     if(G.type === "hide") h = G.phase === "seek" ? `${G.hint || "🔎 찾는 중"} ${tm}` : "🙈 아빠 숨는 중";
     if(G.type === "swim") h = G.phase === "race" ? `🏊‍♀️ 끝까지 먼저! ${tm}` : "🏊‍♀️ 준비…";
     if(G.type === "tag") h = G.phase === "run" ? `🏃 아빠 잡기! ${tm}` : "🏃 준비…";
-    if(G.type === "stars") h = `🌟 ${G.n} / ${G.total} ${tm}`;
+    if(COL.has(G.type)) h = `${G.type === "bubble" ? "🫧" : "🌟"} ${G.n} / ${G.total} ${tm}`;
     if(G.type === "arcade") h = G.phase === "go" ? `🕹️ ${G.n * 100}점 ${tm}` : "🕹️ 준비…";
     if(G.type === "futsal") h = `⚽ ${G.goals} 골 ${tm}`;
     if(G.type === "freeze") h = G.phase === "look" ? `🧊 얼음! 움직이지 마 ${tm}` : "😱 아빠다!";
@@ -960,13 +1251,13 @@ export function start(api){
       const lb = `남은 기회 ${G.tries} · 뽑은 인형 ${G.got.join("") || "없음"}`; if(grillEl.querySelector("b").textContent !== lb) grillEl.querySelector("b").textContent = lb; }
     if(G?.type === "grill" && G.phase === "cook"){ const p = Math.max(0, (t - G.t0) / 2600); grillEl.querySelector(".bar i").style.left = (Math.min(1, p) * 100).toFixed(1) + "%";
       const lb = `${G.n + 1}번째 고기 · 완벽 ${G.perfect}`; if(grillEl.querySelector("b").textContent !== lb) grillEl.querySelector("b").textContent = lb; if(p >= 1) flipMeat(true); }
-    if(G?.type === "stars" && G.phase !== "end" && t > G.until){ G.phase = "end"; yuSay("아깝다~ 조금만 더 빨리! 😢"); toast(`시간 끝! 🌟 ${G.n}/${G.total}`, "🔁 버튼으로 다시 해 봐요", 2400); later(1200, () => { endGame(); setup(); renderCard(); }); }
+    if(COL.has(G?.type) && G.phase !== "end" && t > G.until){ G.phase = "end"; yuSay("아깝다~ 조금만 더 빨리! 😢"); toast(`시간 끝! ${G.type === "bubble" ? "🫧" : "🌟"} ${G.n}/${G.total}`, "🔁 버튼으로 다시 해 봐요", 2400); later(1200, () => { endGame(); setup(); renderCard(); }); }
     gameHud();
   }
   /* 모험: 보물 레이더 · 고양이 · 💬 부름 */
   function advTick(st){
     const e = E(); if(!e) return; const t = now();
-    if((S.n || 0) % 6 === 0){ let bd = null, bh = false; if(!G || G.type !== "stars") S.spots.forEach((p, k) => { if(rec.tre[`${S.floor}:${k}`]) return; const d = Math.hypot(p[0] - st.i, p[1] - st.j); if(bd == null || d < bd){ bd = d; bh = !!TREASURE[S.floor][k]?.[2]; } }); S.near = bd; S.nearHigh = bh; }
+    if((S.n || 0) % 6 === 0){ let bd = null, bh = false; if(!G || !COL.has(G.type)) S.spots.forEach((p, k) => { if(rec.tre[`${S.floor}:${k}`]) return; const d = Math.hypot(p[0] - st.i, p[1] - st.j); if(bd == null || d < bd){ bd = d; bh = !!TREASURE[S.floor][k]?.[2]; } }); S.near = bd; S.nearHigh = bh; }
     if(Q?.id === "cat"){ const sp = curStep();
       if(sp?.find && S.floor === Q.catF && Q.catAt){ const d = Math.hypot(Q.catAt[0] - st.i, Q.catAt[1] - st.j);
         S.catHint = d < 2.2 ? "🔥🔥 야옹! 바로 옆이에요" : d < 4.5 ? "🔥 야옹~ 소리가 커져요" : d < 8 ? "🙂 어디선가 야옹…" : "🧊 조용해요…";
@@ -1013,6 +1304,13 @@ export function start(api){
     const st = curStep(), e = E();
     if(!rec.met[n.id]){ rec.met[n.id] = 1; save(); later0(2600, checkBadges); }
     if(REQ && !Q && !G && n.id === REQ.id){ const r = REQ; REQ = null; refreshItems(); yuSay("저 부르셨어요? 😊"); talkAt = now() + 5200; later0(1100, () => callRun(n, r)); return; }
+    { const k = n.id[0] === "@" ? n.id.slice(1) : "";   // 동네 사람 (2026-11-24): 퀘스트가 아니면 이야기 · 가끔 선물
+      const hit0 = st && st.talk === n.id && st.f === S.floor;
+      if(AREA_NPC_TALK[k] && !hit0 && !G){ talkAt = now() + 4300;
+        const GIFT = {ice:["🍦", "아이스크림 하나 맛보기~ 쉿 비밀 😉"], aunt:["🍢", "떡 하나 먹어 봐~ 서비스 😊"], gran:["⭐", "스티커 하나 줄게~ 공부 열심히 해 😊"]};
+        if(GIFT[k] && !carry && !Q && Math.random() < 0.45){ yuSay(pick(["안녕하세요! 😊", "저 왔어요~ 👋"]), 1500);
+          later0(1200, () => { npcSay(n.id, GIFT[k][1], 2600); setCarry(GIFT[k][0]); sfx("pick"); E()?.playEmote?.(n.id, "😊", 1200); later0(14000, () => { if(carry === GIFT[k][0] && !Q){ setCarry(""); } }); }); return; }
+        const c = pick(AREA_NPC_TALK[k]); yuSay(c[0]); later0(1100, () => { npcSay(n.id, c[1], 2800); E()?.playEmote?.(n.id, pick(["😊", "✨", "😆"]), 1300); later0(1900, () => yuSay(c[2], 2000)); }); return; } }
     if(n.id === "l_cvs" && !G && !carry){   // 편의점 간식 (2026-11-23 감독님 "세세한거 다")
       yuSay(pick(["삼각김밥 하나 주세요! 🍙", "초코우유 있어요? 🥛", "젤리 주세요~ 🍬", "아이스크림 주세요! 🍦"]), 1800); talkAt = now() + 3800;
       later0(1300, () => { const it = pick(["🍙", "🥛", "🍬", "🍦"]); npcSay(n.id, `여기요~ ${it} 오늘 1+1이라 하나 더 드릴게요 😊`, 2600); setCarry(it); sfx("pick"); firstUse("cvs", "🏪 편의점 간식");
@@ -1044,7 +1342,7 @@ export function start(api){
     opts.forEach(o => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b>"; b.querySelector("span").textContent = o[0]; b.querySelector("b").textContent = o[1];
       b.onclick = ev => { ev.stopPropagation(); pickEl.hidden = true; sfx("blip"); ok(o); }; pickEl.querySelector("div").append(b); });
     panel.hidden = true; pickEl.hidden = false; }); }
-  function flash(){ flashEl.classList.remove("on"); void flashEl.offsetWidth; flashEl.classList.add("on"); }
+  function flash(){ flashEl.classList.remove("on"); void flashEl.offsetWidth; flashEl.classList.add("on"); } window.__ygFlash = () => { if(live){ flash(); sfx("ding"); } };
   function callDone(t, sub){ rec.req = (rec.req || 0) + 1; rec.stars++; save(); renderCard(); sfx("star"); toast(t, sub || `⭐ +1 · 별 ${rec.stars}개`, 2400, true); later0(2600, checkBadges); }
   function callRun(n, r){
     const k = r.kind; npcSay(n.id, CALL_HI[k], 2600);
@@ -1067,7 +1365,8 @@ export function start(api){
   /* 물건 쓰기 */
   const nearUse = st => !st || st.swim || st.sit ? null : (USE[st.floor] || []).find(u => Math.hypot(st.i - u.at[0], st.j - u.at[1]) < (u.r || 0.9)) || null;
   const inCourt = st => st && st.floor === "roof" && !st.swim && st.i > FSC.i0 && st.i < FSC.i1 && st.j > FSC.j0 && st.j < FSC.j1;
-  function firstUse(k, t){ rec.uses = rec.uses || {}; if(rec.uses[k]) return; rec.uses[k] = 1; rec.stars++; save(); renderCard(); later0(1500, () => { sfx("star"); toast(t, "처음 해 봤어요 · ⭐ +1", 2200, true); checkBadges(); }); }
+  function firstUse(k, t){ { const sp = curStep(); if(Q && sp?.use === k && sp.f === S.floor){ const q = Q; later0(1400, () => { if(Q === q && curStep() === sp) advance(); }); } }
+    rec.uses = rec.uses || {}; if(rec.uses[k]) return; rec.uses[k] = 1; rec.stars++; save(); renderCard(); later0(1500, () => { sfx("star"); toast(t, "처음 해 봤어요 · ⭐ +1", 2200, true); checkBadges(); }); }
   function useIt(u){
     const e = E(); if(!e || S.busy) return;
     if(u.k === "arcade"){ e.playSet({pos:[u.at[0], u.at[1], PI]}); startGame("arcade"); G.arc = u; return; }
@@ -1080,9 +1379,116 @@ export function start(api){
       later0(1650, () => { e.playSet({cloak:false, pos:[29.9, 13.4, 0]}); e.playSet({freeze:false}); S.busy = false; yuSay(pick(["슝~~ 한 번 더! 🛝", "우와 빠르다!! 😆"]), 1600); rec.slides = (rec.slides || 0) + 1; save(); firstUse("slide", "🛝 미끄럼틀 슝"); });
       return; }
     if(u.k === "bike"){ rideBike(); return; }
+    if(u.k === "pk_slide"){ areaSlide(u); return; }
+    if(u.k === "pk_merry"){ rideMerry(u); return; }
+    if(u.k === "tw_gacha"){ gacha(u); return; }
+    if(u.k === "tw_bell"){ ringBell(u); return; }
+    if(u.k === "rv_boat"){ rideBoat(u); return; }
+    if(u.k === "tw_bus"){ yuSay("크레용랜드행 버스 탄다~ 🚌", 1400); sfx("ding"); walkTo({f:"town", to:"fun", spawn:AREA.fun.spawn}); fade.textContent = "🚌 크레용랜드행 버스"; firstUse("tw_bus", "🚌 버스 타고 놀이공원"); return; }
+    if(FUN_RIDE[u.k]){ funRide(u); return; }
     if(u.k === "futsal") startGame("futsal");
     if(u.k === "pong" || u.k === "claw") startGame(u.k);
     if(ACTS[u.k]) doAct(u);
+  }
+  /* ---------- 동네 (공원 · 골목) 사람과 놀이 (2026-11-24) ---------- */
+  const NPC_AT = {park:{ice:"pk_icecream", kid:"pk_sand"}, town:{aunt:"tw_tteok", gran:"tw_gacha", teach:"tw_bell"},
+    fun:{staff:"fn_carousel", cotton:"fn_cotton", clown:"fn_balloon"}, river:{pastor:"rv_pray", fisher:"rv_fish", boatman:"rv_boat", picnic:"rv_picnic"},
+    school:{teach:"sc_board", chef:"sc_lunch", coach:"sc_track", classmate:"sc_board", chaplain:"sc_chapel"}, market:{halmi:"mk_veggie", tteok:"mk_tteokjip", fishm:"mk_fish", hotteok:"mk_hotteok"}};
+  function areaNpcs(f){ const e = E(); if(!e) return; S.npcF = S.npcF || {};
+    Object.entries(NPC_AT).forEach(([af, m]) => Object.entries(m).forEach(([k, uk]) => {
+      if(af !== f){ if(S.npcF[k] === af){ e.playActor(k, null); S.npcF[k] = null; } return; }
+      if(S.npcF[k] === f) return;
+      const M = AREA_MOD[af], fix = M?.npc?.[k]; let at = null;
+      if(fix) at = fix;
+      else { const u = (USE[af] || []).find(x => x.k === uk); if(!u) return; const h = u.h ?? 0, sd = k === "kid" ? -1 : 1;
+        const p = e.playFree(u.at[0] + Math.sin(h) * 0.5 + Math.cos(h) * 0.95 * sd, u.at[1] + Math.cos(h) * 0.5 - Math.sin(h) * 0.95 * sd, 0.22); at = [p[0], p[1], Math.atan2(u.at[0] - p[0], u.at[1] - p[1])]; }
+      e.playActor(k, {at, pose:"stand", to:null}); S.npcF[k] = f; S.kidHome = k === "kid" ? at : S.kidHome; }));
+  }
+  function kidWander(st){   // 연재는 놀이터를 왔다 갔다
+    if(st.floor !== "park" || !S.kidHome || G || (Q && curStep()?.talk === "@kid") || now() < (S.kidNext || 0)) return; S.kidNext = now() + 7000 + Math.random() * 6000;
+    const e = E(), a = st.actors?.kid; if(!e || !a || Math.hypot(st.i - a.i, st.j - a.j) < 1.6) return;
+    const pts = (USE.park || []).filter(u => /slide|sand|seesaw|swing|merry/.test(u.k)).map(u => u.at); if(!pts.length) return;
+    const t = pick(pts), p = e.playFree(t[0] + (Math.random() - 0.5) * 1.6, t[1] + (Math.random() - 0.5) * 1.6, 0.22);
+    if(Math.hypot(p[0] - S.kidHome[0], p[1] - S.kidHome[1]) < 6) e.playActor("kid", {to:p, spd:1.1});
+    if(Math.random() < 0.35) later0(900, () => npcSay("@kid", pick(["유나야 같이 놀자~ 😆", "나 미끄럼틀 열 번 탔다! 🛝", "개미다! 🐜", "그네 누가 더 높이 가나 내기! 😎"]), 2400));
+  }
+  function swingSync(st){   // 공원 그네: 앉으면 그네 의자도 같이 흔들
+    const P = AREA_MOD.park; if(st.floor !== "park" || !P?.swing?.set) return;
+    if(st.sit && S.seatK === "swing"){ if(!S.swT0) S.swT0 = now(); P.swing.set(0.42 * Math.sin((now() - S.swT0) / 1000 * 2.4)); }
+    else if(S.swT0){ S.swT0 = 0; P.swing.set(0); }
+  }
+  // 길 따라 움직이기: pts = [[i, j, 높이, 걸리는 ms], ...] → fn(초) (보는 쪽은 가는 방향)
+  const tracer = pts => { const T = []; let acc = 0; pts.forEach(p => { acc += p[3] || 0; T.push(acc); });
+    return sec => { const ms = sec * 1000; let k = T.findIndex(x => x >= ms); if(k < 0) k = pts.length - 1; if(k === 0) return [pts[0][0], pts[0][1], pts[0][2], pts[1] ? Math.atan2(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]) : 0];
+      const A = pts[k - 1], B = pts[k], f = Math.min(1, (ms - T[k - 1]) / Math.max(1, T[k] - T[k - 1])), h = Math.hypot(B[0] - A[0], B[1] - A[1]) > 0.02 ? Math.atan2(B[0] - A[0], B[1] - A[1]) : (A[4] ?? 0);
+      return [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f, B[4] ?? h]; }; };
+  function areaSlide(u){   // 공원 미끄럼틀: 사다리 올라가서 슝 (모듈 slide 경로 그대로)
+    const e = E(), sl = AREA_MOD.park?.slide; if(!e || !sl) return; S.busy = true;
+    const pts = [[sl.bottom[0], sl.bottom[1], 0.4, 0, PI], ...sl.climb.map(c => [c[0], c[1], c[2] + 0.38, 260, PI]), [sl.top[0], sl.top[1], sl.top[2] + 0.36, 320, sl.face], [sl.top[0], sl.top[1], sl.top[2] + 0.36, 250, sl.face],
+      ...sl.path.map(c => [c[0], c[1], c[2] + 0.06, 130, sl.face]), [sl.end[0], sl.end[1], 0.4, 160, sl.end[2]]];
+    const ms = pts.reduce((a, p) => a + (p[3] || 0), 0), go = tracer(pts);
+    e.playSet({freeze:true, mark:null, act:{k:"ride", fn:go}}); sfx("jump"); yuSay("올라간다~ 🧗‍♀️", 1200);
+    later0(ms - sl.path.length * 130 - 160, () => { sfx("boost"); e.playSet({act:{k:"ride", cheer:true, fn:sec => go(sec + (ms - sl.path.length * 130 - 160) / 1000)}}); yuSay("슝~~~ 😆", 1000); });
+    later0(ms + 60, () => { e.playSet({act:null, freeze:false, pos:[sl.end[0], sl.end[1], sl.end[2]]}); S.busy = false;
+      yuSay(pick(["한 번 더! 🛝", "우와 빠르다!! 😆"]), 1600); firstUse("pk_slide", "🛝 놀이터 미끄럼틀"); later0(2400, checkBadges); });
+  }
+  function rideMerry(u){   // 뺑뺑이: 방석에 앉아 두 바퀴 반 (모듈 spin.set·rideAt 각도 그대로)
+    const e = E(), P = AREA_MOD.park?.spin, ms = 9000; if(!e || !P) return; S.busy = true;
+    const a0 = Math.atan2(u.at[1] - P.center[1], u.at[0] - P.center[0]);
+    e.playSet({freeze:true, mark:null, act:{k:"ride", fn:sec => { const f = Math.min(1, sec * 1000 / ms), a = a0 + PI * 5 * (f - Math.sin(2 * PI * f) / (2 * PI)); P.set(a); const r = P.rideAt(a); return [r[0], r[1], r[2] + 0.36, r[3]]; }}});
+    sfx("go"); yuSay("빙글빙글~ 돌려라! 🎠", 1600); npcSay("@kid", "내가 밀어 줄게~ 영차! 💪", 2200);
+    const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } e.playEmote?.("yu", pick(["😵‍💫", "🎶", "😆", "💫"]), 900); }, 1400);
+    later0(ms + 60, () => { clearInterval(iv); const p = e.playFree(u.at[0], u.at[1], 0.2); e.playSet({act:null, freeze:false, wave:1200, pos:[p[0], p[1], u.h ?? 0]}); S.busy = false; sfx("pick");
+      yuSay("어지러워~ 세상이 빙글빙글 😵‍💫", 1800); firstUse("pk_merry", "🎠 뺑뺑이 빙글빙글"); later0(2400, checkBadges); });
+  }
+  function gacha(u){   // 문방구 캡슐 뽑기: 8가지 도감 (황금 왕관은 드묾)
+    const e = E(), T = AREA_MOD.town; if(!e) return; S.busy = true; e.playSet({freeze:true, mark:null, pos:[u.at[0], u.at[1], u.h ?? 0]});
+    sfx("go"); yuSay(pick(["동전 넣고~ 드르륵 🎰", "제발 왕관 나와라 🙏"]), 1600); let n = 0;
+    try { T?.gacha?.spin?.(); } catch(_){} later0(1400, () => { try { T?.gacha?.pop?.(); } catch(_){} });
+    const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } n++; if(n % 4 === 0) sfx("blip"); }, 90);
+    later0(1900, () => { clearInterval(iv); const pool = GACHA.flatMap((g, k) => Array(g[2] ? 1 : 3).fill(k)), k = pick(pool), g = GACHA[k];
+      rec.gacha = rec.gacha || {}; const fresh = !rec.gacha[k]; rec.gacha[k] = 1; save();
+      e.playEmote?.("yu", g[0], 1800); sfx(fresh ? "star" : "pick"); setCarry(g[0]); later0(12000, () => { if(carry === g[0] && !Q) setCarry(""); });
+      toast(`${g[0]} ${g[1]}!`, `뽑기 도감 ${cnt(rec.gacha)}/${GACHA.length}${fresh ? " · 새 거!" : ""}`, 2200, g[2]);
+      yuSay(g[2] ? "황금 왕관이다!!! 😱👑" : fresh ? pick(["우와 새 거다! 😆", "이거 갖고 싶었어 💕"]) : pick(["또 이거네… 😅", "이거 두 개다 😆"]), 1800);
+      e.playSet({freeze:false}); S.busy = false; firstUse("tw_gacha", "🎰 문방구 캡슐 뽑기");
+      if(fresh && cnt(rec.gacha) >= GACHA.length){ rec.stars += 2; save(); later0(2400, () => { sfx("star"); toast("🎰 뽑기 도감 완성!", "⭐ +2", 2600, true); }); }
+      renderCard(); later0(2600, checkBadges); });
+  }
+  /* 놀이공원 탈것: 모듈 훅이 주는 자리를 따라 유나도 같이 (엔진 act.fn) */
+  const FUN_RIDE = {
+    fn_carousel:{ms:9000, cam:0.42, say:"말 타러 가자~ 🎠", mid:"꺄~ 빙글빙글! 😆", end:"어지러워 😵‍💫", done:"🎠 크레용랜드 회전목마", fx:["🎠", "🎶", "✨"], npc:["@staff", "출발합니다~ 손잡이 꼭 잡아요! 😊"],
+      fn:(H, u) => { const a = PI * 5 * (u - Math.sin(2 * PI * u) / (2 * PI)); H.set?.(a); return H.horse?.(a); }, off:H => H.set?.(null)},
+    fn_wheel:{ms:24000, say:"관람차 타자 🎡", mid:"꼭대기다! 우리 동네 다 보여 ☁️", end:"또 타고 싶다~ 🎡", done:"🎡 대관람차 꼭대기", fx:["🎡", "☁️", "🌈"],
+      fn:(H, u) => { const a = PI * 2 * u; H.set?.(a); return H.seat?.(a); }, off:H => H.set?.(null)},
+    fn_coaster:{ms:24000, cheer:true, say:"애벌레 기차 출발~ 🐛", mid:"으아아 언덕이다!! 😱", end:"한 번 더! 😆", done:"🐛 애벌레 롤러코스터", fx:["😱", "🐛", "💨", "🎉"],
+      fn:(H, u) => { const v = (u * 2) % 1; H.set?.(v); const p = H.path?.(v); return p && [p[0], p[1], p[2], p[3], 0]; }, off:H => H.set?.(null)},
+    fn_bumper:{ms:20000, say:"범퍼카 운전할래! 🚗", mid:"쿵! 미안해요~ 😆", end:"내가 일등 운전사 😎", done:"🚗 범퍼카 운전", fx:["🚗", "💥", "😆"],
+      fn:(H, u) => { const r = H.rect || [23.4, 10.4, 32.6, 17], cx = (r[0] + r[2]) / 2, cy = (r[1] + r[3]) / 2, rx = (r[2] - r[0]) / 2 - 1, ry = (r[3] - r[1]) / 2 - 1, a = u * PI * 4, s2 = Math.sin(a * 2);
+        const i = cx + rx * Math.sin(a), j = cy + ry * s2 * 0.9, h = Math.atan2(rx * Math.cos(a), ry * 0.9 * 2 * Math.cos(a * 2)); H.set?.(0, i, j, h); return [i, j, H.seat ?? 0.3, h]; }, off:H => H.set?.(0, null)},
+    fn_viking:{ms:15000, cheer:true, say:"바이킹 무서운데… 탈래! 🏴‍☠️", mid:"엉덩이 붕 뜬다!! 😱", end:"다리 후들후들 🫠", done:"🏴‍☠️ 바이킹", fx:["😱", "🏴‍☠️", "🌊"],
+      fn:(H, u) => { const t = u * 15, env = Math.min(1, t / 3, (15 - t) / 3), a = (H.amp ?? 0.95) * Math.sin(2 * PI * t / (H.period ?? 4.4)) * env; H.set?.(a); return H.seat?.(a); }, off:H => H.set?.(null)}};
+  function funRide(u){
+    const e = E(), H = AREA_MOD.fun?.[u.k.slice(3)], R = FUN_RIDE[u.k]; if(!e || !H) return; S.busy = true; const back = [u.at[0], u.at[1], u.h ?? 0];
+    e.playSet({freeze:true, mark:null, act:{k:"ride", cheer:R.cheer, cam:R.cam, fn:sec => R.fn(H, Math.min(1, sec * 1000 / R.ms))}}); sfx("go"); yuSay(R.say, 1800);
+    if(R.npc) later0(900, () => npcSay(R.npc[0], R.npc[1], 2400));
+    const fx = setInterval(() => { if(!live){ clearInterval(fx); return; } e.playEmote?.("yu", pick(R.fx), 1100); }, 2200);
+    later0(R.ms * 0.5, () => yuSay(R.mid, 2400));
+    later0(R.ms + 80, () => { clearInterval(fx); try { R.off(H); } catch(_){} e.playSet({act:null, freeze:false, wave:1200, pos:back}); S.busy = false; sfx("pick");
+      yuSay(R.end, 1800); firstUse(u.k, R.done); rec.rides = rec.rides || {}; rec.rides[u.k] = 1; save(); later0(2400, checkBadges); });
+  }
+  function rideBoat(u){   // 강변 오리배: 강을 한 바퀴 (모듈 boat.path(u) 따라 유나도 같이)
+    const e = E(), B = AREA_MOD.river?.boat; if(!e || !B?.path) return; S.busy = true; const ms = 18000, t0 = now();
+    e.playSet({freeze:true, mark:null, act:{k:"ride", fn:sec => { const p = B.path(Math.min(1, sec * 1000 / ms)); try { B.set(...p); } catch(_){} return [p[0], p[1], B.seatH ?? 0.41, p[2]]; }}}); sfx("go"); yuSay("오리배 출발! 🦢", 1800); npcSay("@boatman", "구명조끼 꼭 입고~ 천천히 다녀와 😊", 2400);
+    const fx = setInterval(() => { if(!live){ clearInterval(fx); return; } e.playEmote?.("yu", pick(["🦢", "🌊", "🎶", "😆", "🐟"]), 1100); }, 2200);
+    later0(ms * 0.5, () => yuSay(pick(["발 굴리기 힘들다~ 😆", "물고기 보인다! 🐟", "교회 십자가 보여요 ⛪"]), 2200));
+    later0(ms + 80, () => { clearInterval(fx); try { B.set(null); } catch(_){} const d = B.dock || u.at; e.playSet({act:null, freeze:false, wave:1200, pos:[d[0], d[1], d[2] ?? PI]}); S.busy = false; sfx("pick");
+      yuSay("재밌었다! 또 타고 싶어 🦢", 1800); firstUse("rv_boat", "🦢 강변 오리배"); later0(2400, checkBadges); });
+  }
+  function ringBell(u){   // 학교 종: 땡땡땡
+    const e = E(), c = auInit(); if(!e) return; S.busy = true; e.playSet({freeze:true, pos:[u.at[0], u.at[1], u.h ?? 0], act:{k:"water"}}); yuSay("땡땡땡~ 학교 종이 땡땡땡 🔔", 2000); try { AREA_MOD.town?.bell?.ring?.(); later0(1300, () => AREA_MOD.town?.bell?.ring?.()); } catch(_){}
+    [0, 1, 2, 4, 5, 6].forEach((k, n) => later0(400 + k * 380, () => { if(c && AU.on) tone(mtof([79, 79, 81, 79, 79, 76][n]), c.currentTime + 0.01, 0.7, {type:"sine", vol:0.18}); e.playEmote?.("yu", n % 2 ? "🔔" : "🎶", 700); }));
+    later0(3200, () => { e.playSet({act:null, freeze:false}); S.busy = false; npcSay("@teach", pick(["유나야~ 지금 쉬는 시간 아니야 😆", "종 치니까 진짜 수업 시작하는 줄 알았네 😂"]), 2800); firstUse("tw_bell", "🔔 학교 종 치기"); later0(2400, checkBadges); });
   }
   /* 자전거: 앞마당을 두 바퀴 (엔진이 길 따라 움직이고, 자전거 메시도 같이) */
   function rideBike(){
@@ -1096,13 +1502,17 @@ export function start(api){
   }
   function doAct(u){
     const e = E(), A = ACTS[u.k], back = S.st ? [S.st.i, S.st.j] : null; S.busy = true;
-    e.playSet({freeze:true, mark:null, act:{k:A.pose || u.k, y:A.y || 0, seat:A.seat}, ...(A.raw ? {at:[u.at[0], u.at[1], u.h ?? 0]} : {pos:[u.at[0], u.at[1], u.h ?? 0]})});
+    e.playSet({freeze:true, mark:null, act:{k:A.pose || u.k, y:A.y || 0, seat:A.seat, fn:A.fn}, ...(A.raw ? {at:[u.at[0], u.at[1], u.h ?? 0]} : {pos:[u.at[0], u.at[1], u.h ?? 0]})});
+    if(A.go) try { A.go(u, rec); save(); } catch(e){ console.warn("놀이", u.k, e); }
     sfx("go"); yuSay(A.say, 1800); let n = 0; const NUM = ["하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟"];
     const iv = setInterval(() => { if(!live){ clearInterval(iv); return; } n++;
       if(A.count){ if(n >= 2 && n <= 9) yuSay(`${NUM[n - 2]}! ${A.fx[0]}`, 600); }
       else e.playEmote?.("yu", A.fx[n % A.fx.length], 1100); }, A.count ? 650 : 1500);
     if(A.mid) later0(A.ms * 0.5, () => yuSay(A.mid, 2200));
-    later0(A.ms, () => { clearInterval(iv); e.playSet({act:null, freeze:false, wave:1200, ...(A.raw && back ? {pos:[back[0], back[1]]} : {})}); S.busy = false; sfx("pick");
+    if(A.npc) later0(1300, () => npcSay(A.npc[0], A.npc[1], 2400));
+    const t0 = now(), av = A.anim ? setInterval(() => { if(!live){ clearInterval(av); return; } try { A.anim((now() - t0) / 1000); } catch(_){} }, 40) : 0;
+    later0(A.ms, () => { clearInterval(iv); if(av){ clearInterval(av); try { A.anim(0); } catch(_){} }
+      if(A.give) later0(500, () => { const it = pick(A.give); setCarry(it); sfx("pick"); later0(16000, () => { if(carry === it && !Q){ setCarry(""); yuSay("냠냠 다 먹었다 😋", 1500); } }); }); e.playSet({act:null, freeze:false, wave:1200, ...(A.raw && back ? {pos:[back[0], back[1]]} : {})}); S.busy = false; sfx("pick");
       yuSay(A.end, 1800); e.playEmote?.("yu", A.fx[0], 1200); firstUse(u.k, A.done); later0(2400, checkBadges);
       if(A.snack && !carry) later0(600, () => { const it = pick(["🍦", "🥛", "🍬"]); setCarry(it); sfx("pick"); }); });
   }
@@ -1124,6 +1534,8 @@ export function start(api){
       b.innerHTML = `<b>${v.n}F</b>`; b.append(v.name.replace(/^\d층 /, "")); b.onclick = () => { closeElev(); if(f !== S.floor) ride(f); }; elevP.append(b); });
     { const b = document.createElement("button"); b.type = "button"; b.className = "home"; b.innerHTML = "<b>🏡</b>"; b.append("유나네 집");   // 걸어서도 감 (로비 횡단보도 건너편)
       b.onclick = () => { closeElev(); walkTo({f:S.floor, to:"home1", spawn:HOME.spawnGate}); }; elevP.append(b); }
+    Object.entries(AREA).forEach(([k, a]) => { const b = document.createElement("button"); b.type = "button"; b.className = "home"; b.setAttribute("aria-current", k === S.floor); b.innerHTML = `<b>${a.e}</b>`; b.append(a.name);
+      b.onclick = () => { closeElev(); if(k !== S.floor) walkTo({f:S.floor, to:k, spawn:a.spawn}); }; elevP.append(b); });
     elevP.hidden = false;
   }
   function closeElev(){ elevP.hidden = true; }
@@ -1178,9 +1590,10 @@ export function start(api){
     hot = now1; hotF = st.floor;
   }
   function walkTo(t){ const f = t.to; sfx("blip");
-    endGame(); pendingFloor = f; hot = null; fade.textContent = `${isHome(f) ? "🏡" : "🏢"} ${FL[f].name}`; fade.classList.add("on");
+    endGame(); pendingFloor = f; hot = null; fade.textContent = `${isHome(f) ? "🏡" : isArea(f) ? AREA[f].e : "🏢"} ${FL[f].name}`; fade.classList.add("on");
     E()?.playSet({spawn:t.spawn, freeze:true});
-    if(t.f === "lobby") yuSay(pick(["집에 가자~ 🏡", "우리 집 가야지! 🏡"]), 1400); else if(f === "lobby") yuSay(pick(["아빠 회사 가자! 🏢", "타워 가야지~ 🏢"]), 1400);
+    if(isArea(f)) yuSay(pick(AREA_GO[f] || ["가 보자~ 😆"]), 1400);
+    else if(t.f === "lobby") yuSay(pick(["집에 가자~ 🏡", "우리 집 가야지! 🏡"]), 1400); else if(f === "lobby") yuSay(pick(["아빠 회사 가자! 🏢", "타워 가야지~ 🏢"]), 1400);
     setTimeout(() => { if(live) api.goFloor(f); }, 380);
     setTimeout(() => { if(live && pendingFloor === f){ pendingFloor = null; fade.classList.remove("on"); E()?.playSet({freeze:false}); } }, 9000);
   }
@@ -1189,7 +1602,7 @@ export function start(api){
   const cb = {
     onFloor(fid){
       if(G && (G.type === "futsal" || G.type === "ball") && fid !== "roof") endGame();   // 옥상 떠나면 공놀이 끝
-      S.floor = fid; S.st = null; REQ = null; S.frF = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
+      S.floor = fid; S.st = null; REQ = null; S.npcF = S.npcF || {}; S.frF = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
       if(!rec.vis[fid]){ rec.vis[fid] = 1; save(); later0(1500, checkBadges); }
       E()?.playSet({water:fid === "roof" ? [POOL] : []}); setCarry(carry); spotsFor(fid); boltFor();
       if(Q?.cat === "follow") S.catPos = [EXIT[0] + 0.4, EXIT[1] + 0.5];
@@ -1199,7 +1612,7 @@ export function start(api){
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st);
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st); kidWander(st); swingSync(st);
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);
@@ -1224,7 +1637,7 @@ export function start(api){
         if(mode === "shoot"){ act.querySelector("span").textContent = "⚽"; act.querySelector("b").textContent = "슛"; }
         if(mode === "hit"){ act.querySelector("span").textContent = "🏓"; act.querySelector("b").textContent = "치기!"; }
         if(mode === "grab"){ act.querySelector("span").textContent = "🪝"; act.querySelector("b").textContent = "뽑기!"; }
-        if(use && mode.startsWith("use:")){ const L = USE_LB[use.k]; act.querySelector("span").textContent = L[0]; act.querySelector("b").textContent = L[1]; }
+        if(use && mode.startsWith("use:")){ const L = USE_LB[use.k] || ACTS[use.k]?.lb || ["✨", "놀기"]; act.querySelector("span").textContent = L[0]; act.querySelector("b").textContent = L[1]; }
         if(mode !== "elev") closeElev(); if(mode !== "dress") fitP.hidden = true; }
       act.onclick = () => { if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "talk") talk(n); };
       // 목표 화살표 (화면 밖일 때만)
@@ -1280,7 +1693,7 @@ export function start(api){
   joy.addEventListener("pointermove", jmove);
   const jend = e => { if(e.pointerId !== jid) return; jid = null; jOn = false; jx = jy = 0; joy.classList.remove("on"); knob.style.transform = ""; push(); };
   joy.addEventListener("pointerup", jend); joy.addEventListener("pointercancel", jend);
-  $(".yg-x:not(.yg-snd)").onclick = () => stop();   // (소리 버튼도 yg-x라 첫 번째로 잡히던 것 고침)
+  $(".yg-x:not(.yg-snd):not(.yg-mapb)").onclick = () => stop();   // (소리 버튼도 yg-x라 첫 번째로 잡히던 것 고침)
   function doJump(){ const e = E(); if(!e) return;
     if(G?.type === "grill"){ flipMeat(); return; }
     if(G?.type === "arcade"){ mash(); return; }
@@ -1289,9 +1702,9 @@ export function start(api){
     if(G?.type === "claw"){ grab(); return; }
     if(S.st?.sit){ e.playSit?.(null); sfx("blip"); return; }
     { const s = !G && nearSeat(S.st);
-      if(s && s.k !== "church" && (e.playPeople?.() || []).some(q => Math.hypot(q.i - s.i, q.j - s.j) < 0.35)){ yuSay("앗 누가 앉아 있네 😅", 1400); return; }
-      if(s && e.playSit?.(s)){ sfx("blip"); const L = SIT_YU[s.k]; sitPlay(s);
-        if(s.k === "church"){ rec.pray = (rec.pray || 0) + 1; save(); checkBadges(); later0(700, () => { yuSay(pick(L), 3200); e.playEmote?.("yu", "🙏", 1800); }); }
+      if(s && s.k !== "church" && s.k !== "pew" && (e.playPeople?.() || []).some(q => Math.hypot(q.i - s.i, q.j - s.j) < 0.35)){ yuSay("앗 누가 앉아 있네 😅", 1400); return; }
+      if(s && e.playSit?.(s)){ sfx("blip"); S.seatK = s.k; const L = SIT_YU[s.k]; sitPlay(s);
+        if(s.k === "church" || s.k === "pew"){ rec.pray = (rec.pray || 0) + 1; save(); checkBadges(); later0(700, () => { yuSay(pick(L), 3200); e.playEmote?.("yu", "🙏", 1800); }); }
         else if(L && Math.random() < 0.7) later0(600, () => yuSay(pick(L), 2200));
         return; } }
     if(HOLD[carry]?.spill && !S.st?.swim){ spill(); return; }   // 음료 들고는 점프 대신 찰랑

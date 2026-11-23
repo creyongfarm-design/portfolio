@@ -202,8 +202,8 @@ function decal(A, wpx, hpx, draw, worldW, worldH, axis, i, j, zc){
   const r = A.alloc(wpx, hpx); A.items.push({r, draw});
   const g = new THREE.PlaneGeometry(worldW, worldH), uv = g.attributes.uv;
   for(let k = 0; k < uv.count; k++){ const u = uv.getX(k), v = uv.getY(k); uv.setXY(k, (r.x + u * r.w) / A.W, 1 - (r.y + (1 - v) * r.h) / A.H); }
-  if(axis === "j") g.rotateY(Math.PI / 2); else if(axis === "f") g.rotateX(-Math.PI / 2);
-  const p = axis === "i" ? [X(i), zc, Z(j) + 0.026] : axis === "j" ? [X(i) + 0.026, zc, Z(j)] : [X(i), zc + 0.01, Z(j)];
+  if(axis === "j") g.rotateY(Math.PI / 2); else if(axis === "-j") g.rotateY(-Math.PI / 2); else if(axis === "-i") g.rotateY(Math.PI); else if(axis === "f") g.rotateX(-Math.PI / 2);   // -j · -i = 반대쪽을 보는 글씨 (2026-11-24 동네 길 안내판)
+  const p = axis === "i" ? [X(i), zc, Z(j) + 0.026] : axis === "j" ? [X(i) + 0.026, zc, Z(j)] : axis === "-j" ? [X(i) - 0.026, zc, Z(j)] : axis === "-i" ? [X(i), zc, Z(j) - 0.026] : [X(i), zc + 0.01, Z(j)];
   g.translate(...p); R.decals.push(g); return g;
 }
 /* 2.5D planeText 그대로 (size = 2.5D px) */
@@ -1598,7 +1598,7 @@ function tick(now){
   setDir(R.az, R.el); updateCut(); playCut();
   applyCam(R.cur.tg, R.cur.d);
   // 쇼릴
-  const sc = Math.floor(t / 5.2) % 3, ph = (t / 5.2) % 1, rk = Math.floor(t * 4);
+  const sc = ((Math.floor(t / 5.2) % 3) + 3) % 3, ph = ((t / 5.2) % 1 + 1) % 1, rk = Math.floor(t * 4);
   if(R.reel && rk !== R.reel.last){ R.reel.last = rk; const x = R.reel.cv.getContext("2d"), W = 256, H = 128, S = [["#2E5D55","#D7A15B"],["#4B3A5E","#E9C9A8"],["#1F3C52","#9CC9C0"]][sc];
     const g = x.createLinearGradient(0, H, W, 0); g.addColorStop(0, S[0]); g.addColorStop(1, S[1]); x.fillStyle = g; x.fillRect(0, 0, W, H);
     x.fillStyle = "rgba(0,0,0,.5)"; x.fillRect(0, 0, W, 18); x.fillRect(0, H - 18, W, 18); x.fillStyle = "#3A8A78"; x.fillRect(0, H - 4, W * ph, 4); R.reel.tex.needsUpdate = true; }
@@ -1711,7 +1711,33 @@ const PLAY_LOOKS = {
   yu:{look:{skin:"#F6D7C2", hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", shirt:"#FF8FB8", pants:"#6FA8DC"}, b:{h:0.74, w:0.9}},
   dad:{look:{skin:"#E8C3A2", hair:"#1E1B18", style:"bob", hat:"bucket", hatC:"#CDBB9A", shirt:"#2A2A28", pants:"#3A3D42"}, b:{h:1.06, w:1.18}},
   mom:{look:{skin:"#F3D3BC", hair:"#4A2E24", style:"long", shirt:"#F7F1EC", pants:"#B9A3C4"}, b:{h:0.97, w:0.88}},
-  fr:{look:{skin:"#EBC4A4", hair:"#2A1E18", style:"bob", shirt:"#FFD84D", pants:"#4DAA97"}, b:{h:0.77, w:0.9}}};   // 놀러 온 친구 지유 (2026-11-23 감독님 "친구가 놀러오는 애피소드")
+  fr:{look:{skin:"#EBC4A4", hair:"#2A1E18", style:"bob", shirt:"#FFD84D", pants:"#4DAA97"}, b:{h:0.77, w:0.9}},   // 놀러 온 친구 지유 (2026-11-23 감독님 "친구가 놀러오는 애피소드")
+  /* 동네 사람들 (2026-11-24 감독님 "세계관 팍팍 늘려봐"): 공원 · 학교 앞 골목에 서 있음 */
+  ice:{look:{skin:"#E2B994", hair:"#2A221E", style:"short", hat:"bucket", hatC:"#FFFFFF", shirt:"#FFFFFF", pants:"#6FA8DC"}, b:{h:1.04, w:1.12}},   // 아이스크림 트럭 아저씨
+  kid:{look:{skin:"#EFC9A8", hair:"#1E1B18", style:"short", shirt:"#6FA8DC", pants:"#3A3D42"}, b:{h:0.76, w:0.92}},   // 놀이터 친구 연재
+  aunt:{look:{skin:"#EDC6A6", hair:"#3A2A20", style:"bob", shirt:"#E8607F", pants:"#3A3D42"}, b:{h:0.95, w:1.02}},   // 분식집 이모
+  gran:{look:{skin:"#EBC9AE", hair:"#C9C4BE", style:"bob", shirt:"#C8B4D0", pants:"#6A5E70"}, b:{h:0.88, w:0.98}},   // 문방구 할머니
+  teach:{look:{skin:"#F2D2BA", hair:"#2A221E", style:"long", shirt:"#72C4AE", pants:"#F7F1EC"}, b:{h:0.98, w:0.9}},   // 담임 선생님
+  /* 크레용초등학교 (기독교 사립초) · 크레용랜드 놀이공원 사람들 */
+  chef:{look:{skin:"#EDC6A6", hair:"#3A2A20", style:"bob", hat:"bucket", hatC:"#FFFFFF", shirt:"#FFFFFF", pants:"#C8B4D0"}, b:{h:0.96, w:1.05}},   // 급식 조리사님
+  coach:{look:{skin:"#E2B994", hair:"#1E1B18", style:"short", shirt:"#3A8A78", pants:"#2A2A28"}, b:{h:1.06, w:1.15}},   // 체육 선생님
+  classmate:{look:{skin:"#F4D3BE", hair:"#4A2E24", style:"long", ribbon:"#FFD84D", shirt:"#F7F1EC", skirt:"#2F4A6E", skirtL:0.42, legs:"#FFFFFF", shoe:"#2A2A28"}, b:{h:0.75, w:0.88}},   // 같은 반 친구 서아 (교복)
+  chaplain:{look:{skin:"#E8C3A2", hair:"#5A5550", style:"short", shirt:"#2A2A28", pants:"#2A2A28"}, b:{h:1.04, w:1.1}},   // 교목 목사님
+  staff:{look:{skin:"#EBC4A4", hair:"#2A1E18", style:"short", hat:"bucket", hatC:"#E05A7A", shirt:"#E05A7A", pants:"#2A2A28"}, b:{h:1.0, w:1.05}},   // 놀이기구 직원
+  cotton:{look:{skin:"#F2D2BA", hair:"#8A5A3C", style:"bob", shirt:"#F4A7B9", pants:"#FFFFFF"}, b:{h:0.97, w:0.95}},   // 솜사탕 언니
+  clown:{look:{skin:"#FFF1E6", hair:"#E8604A", style:"pig", ribbon:"#4DAA97", shirt:"#F6E39A", pants:"#A9CBEA"}, b:{h:1.0, w:1.1}},   // 풍선 광대
+  /* 강변 공원·동네 교회 */
+  pastor:{look:{skin:"#EAC5A4", hair:"#2A221E", style:"short", shirt:"#F7F1EC", pants:"#4A4E58"}, b:{h:1.05, w:1.08}},   // 동네 교회 목사님
+  fisher:{look:{skin:"#D9AE88", hair:"#D8D3CC", style:"short", hat:"bucket", hatC:"#7A8A5A", shirt:"#8FA06A", pants:"#5A5048"}, b:{h:0.98, w:1.12}},   // 낚시 할아버지
+  boatman:{look:{skin:"#D6A884", hair:"#1E1B18", style:"short", hat:"bucket", hatC:"#2F4A6E", shirt:"#F2C14E", pants:"#2F4A6E"}, b:{h:1.07, w:1.2}},   // 오리배 아저씨
+  picnic:{look:{skin:"#F4D6C2", hair:"#6A4030", style:"long", shirt:"#F6E39A", pants:"#72C4AE"}, b:{h:0.95, w:0.92}},   // 소풍 온 아주머니
+  /* 크레용 전통시장 */
+  halmi:{look:{skin:"#E4BC98", hair:"#E4E0DA", style:"bob", shirt:"#8C5A9A", pants:"#3A3D42"}, b:{h:0.86, w:1.02}},   // 채소 할머니
+  tteok:{look:{skin:"#E6BE9C", hair:"#3A3330", style:"short", hat:"bucket", hatC:"#FFFFFF", shirt:"#FFFFFF", pants:"#8B5A3C"}, b:{h:1.02, w:1.14}},   // 떡집 사장님
+  fishm:{look:{skin:"#CFA07C", hair:"#1E1B18", style:"short", shirt:"#2F6E8C", pants:"#2A2A28"}, b:{h:1.05, w:1.22}},   // 생선가게 아저씨
+  hotteok:{look:{skin:"#F0CDB2", hair:"#8A4A2A", style:"long", shirt:"#E8A04A", pants:"#3A3D42"}, b:{h:0.95, w:0.98}}};   // 호떡 이모
+const ACT_KEYS = Object.keys(PLAY_LOOKS).filter(k => k !== "yu");
+const ACT_NAME = {dad:"아빠", mom:"엄마", fr:"지유", ice:"아이스크림 아저씨", kid:"연재", aunt:"분식집 이모", gran:"문방구 할머니", teach:"선생님", chef:"조리사님", coach:"체육 선생님", classmate:"서아", chaplain:"목사님", staff:"직원 언니", cotton:"솜사탕 언니", clown:"풍선 광대", pastor:"목사님", fisher:"낚시 할아버지", boatman:"오리배 아저씨", picnic:"소풍 아주머니", halmi:"채소 할머니", tteok:"떡집 사장님", fishm:"생선가게 아저씨", hotteok:"호떡 이모"};
 /* 유나 옷 (2026-11-23 감독님 "탈의실에서 옷 예쁘게 갈아입혀 지면 재밌겠네 수영장에도 탈의실에서 수영복") */
 const YU_SKIN = "#F6D7C2", YU_B = {h:0.74, w:0.9}, yuL = o => ({look:{skin:YU_SKIN, hair:"#3A261C", style:"pig", ribbon:"#FF5FA8", ...o}, b:YU_B, extra:o.extra});
 const YU_FITS = {
@@ -1807,7 +1833,7 @@ function itemsPost(now, t){
 function playMakeAvatars(){
   const mk = (k, L0) => { const L = L0 || PLAY_LOOKS[k], s = PARTS.length, p = makePerson(L.look, L.b, L.extra || {}); PARTS.slice(s).forEach(pt => pt.vis = () => p.root.visible); p.root.visible = false; return p; };
   const yus = {}; Object.keys(YU_FITS).forEach(k => yus[k] = mk("yu", YU_FITS[k]));
-  const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, dad:mk("dad"), mom:mk("mom"), fr:mk("fr"), bub:{}};
+  const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, bub:{}}; ACT_KEYS.forEach(k => A[k] = mk(k));
   // 공 (흰 바탕 검은 점)
   const bc = document.createElement("canvas"); bc.width = 128; bc.height = 64; { const x = bc.getContext("2d"); x.fillStyle = "#F7F5F0"; x.fillRect(0, 0, 128, 64); x.fillStyle = "#2A2A28";
     [[16,14],[48,30],[80,12],[112,30],[32,50],[96,50],[64,52],[0,34],[128,34]].forEach(([a, c]) => { x.beginPath(); for(let k = 0; k < 5; k++){ const t = k / 5 * Math.PI * 2 - Math.PI / 2; x.lineTo(a + Math.cos(t) * 7, c + Math.sin(t) * 7); } x.fill(); }); }
@@ -1817,7 +1843,7 @@ function playMakeAvatars(){
   A.mark = new THREE.Mesh(new THREE.OctahedronGeometry(0.17), new THREE.MeshBasicMaterial({color:0xFFC23D, toneMapped:false})); A.mark.scale.set(1, 1.35, 1); A.mark.visible = false; A.mark.renderOrder = 5; R.scene.add(A.mark);
   A.ring = new THREE.Mesh(new THREE.RingGeometry(0.34, 0.46, 40), new THREE.MeshBasicMaterial({color:0xFFC23D, transparent:true, opacity:0.75, depthWrite:false, side:THREE.DoubleSide, toneMapped:false}));
   A.ring.rotation.x = -Math.PI / 2; A.ring.visible = false; A.ring.renderOrder = 4; R.scene.add(A.ring);
-  ["yu", "dad", "mom", "fr"].forEach(k => { const bub = document.createElement("div"); bub.className = "t3-bub" + (k === "yu" ? " yu" : ""); bub.hidden = true;
+  ["yu", ...ACT_KEYS].forEach(k => { const bub = document.createElement("div"); bub.className = "t3-bub" + (k === "yu" ? " yu" : ""); bub.hidden = true;
     const stem = document.createElement("div"); stem.className = "t3-stem" + (k === "yu" ? " yu" : ""); stem.hidden = true; R.layer.append(stem, bub); A.bub[k] = {bub, stem, say:"", until:0}; });
 }
 function enterPlay(){
@@ -1852,7 +1878,7 @@ function playTick(now, t, dt){
     if(now - PL.dragAt > 1400 && iy > -0.35) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 1.15 * mag);   // 걸어가면 카메라가 천천히 등 뒤로
   }
   PL.moving = mag > 0.06; PL.spd = sp;
-  PL.gy += ((PL.swim ? 0 : PL.sit ? groundH(...PL.sit.from) : groundH(PL.i, PL.j)) - PL.gy) * Math.min(1, dt * 14);
+  PL.gy += ((PL.swim || PL.act?.fn ? 0 : PL.sit ? groundH(...PL.sit.from) : groundH(PL.i, PL.j)) - PL.gy) * Math.min(1, dt * 14);   // 놀이기구 탈 땐 땅 기준
   if(PL.jv || PL.jy > 0){ PL.jv -= 11 * dt; PL.jy = Math.max(0, PL.jy + PL.jv * dt); if(PL.jy === 0) PL.jv = 0; }
   { const cn = clock(); for(const it of PL.items){ if(it.pick === false || it.pop || it.on) continue;
       if(Math.hypot(it.i - PL.i, it.j - PL.j) < (it.r || 0.5) && (!it.high || PL.jy > 0.24)){ it.pop = cn; PL.cb?.onPick?.(it.id); } } }
@@ -1862,9 +1888,9 @@ function playTick(now, t, dt){
     if(d < 0.04){ a.i = a.to[0]; a.j = a.to[1]; a.to = null; a.moving = false; return; }
     const st = Math.min(d, (a.spd || 1.2) * dt); a.i += dx / d * st; a.j += dz / d * st; a.h += wrapA(Math.atan2(dx, dz) - a.h) * Math.min(1, dt * 10); a.step = (a.step || 0) + dt * (a.spd || 1.2) * 6.4; a.moving = true; });
   const la = R.h < 560 && R.w > R.h * 1.25 ? 0.95 : 0;   // 가로 폰은 위가 잘려서 앞쪽을 더 보여 줌 (2026-11-23 감독님 "위가 좀 잘리네")
-  PV.set(X(PL.i - Math.sin(PL.yaw) * la), PL.gy + (PL.swim ? 0.3 : 0.62) + PL.jy * 0.3, Z(PL.j - Math.cos(PL.yaw) * la)); PL.tg.lerp(PV, Math.min(1, dt * 9));
+  PV.set(X(PL.i - Math.sin(PL.yaw) * la), PL.gy + (PL.swim ? 0.3 : 0.62) + PL.jy * 0.3 + (PL.act?.lift || 0), Z(PL.j - Math.cos(PL.yaw) * la)); PL.tg.lerp(PV, Math.min(1, dt * 9));
   // 카메라가 높은 벽·건물 뒤로 넘어가면 유나 쪽으로 당겨 옴 (GTA처럼)
-  let lim = PL.d; { const G = R.pg, ch = Math.cos(PL.el), sh = Math.sin(PL.el), si = Math.sin(PL.yaw) * ch, sj = Math.cos(PL.yaw) * ch, y0 = PL.tg.y;
+  let lim = PL.act?.fn ? PL.d * (PL.act.cam ?? 1.35) : PL.d; if(!PL.act?.fn){ const G = R.pg, ch = Math.cos(PL.el), sh = Math.sin(PL.el), si = Math.sin(PL.yaw) * ch, sj = Math.cos(PL.yaw) * ch, y0 = PL.tg.y;
     for(let s = PL.act ? 1.15 : 0.45; s < PL.d; s += 0.12){ const n = cellIdx(PL.i + si * s, PL.j + sj * s); if(n >= 0 && G.tp[n] > y0 + sh * s - 0.25){ lim = Math.max(0.9, s - 0.45); break; } } }
   PL.dd += (lim - PL.dd) * Math.min(1, dt * (lim < PL.dd ? 14 : 3));
   R.az = PL.yaw; R.el = PL.el; R.cur.tg.copy(PL.tg); R.cur.d = PL.dd;
@@ -1983,7 +2009,7 @@ function placeBody(p, i, j, h, gy, swim, t, k, moving, st = "back"){
 function playPost(){
   const A = R.pl, now = clock(), t = (now - R.t0) / 1000;
   A.yu.root.visible = PL.on && !PL.cloak;
-  if(!PL.on){ A.dad.root.visible = A.mom.root.visible = A.fr.root.visible = A.ball.visible = A.mark.visible = A.ring.visible = false; return; }
+  if(!PL.on){ ACT_KEYS.forEach(k => A[k].root.visible = false); A.ball.visible = A.mark.visible = A.ring.visible = false; return; }
   ["_yuna", "l_yuna", ...PL.hide].forEach(id => { const P = R.people[id]; if(P) P.p.root.visible = false; });
   const p = A.yu, talk = now < A.bub.yu.until, dt = Math.min(0.05, (now - (PL.lastPost || now)) / 1000); PL.lastPost = now;
   // 가만히 있으면 혼자 놂 (두리번 · 깡충 · 빙글 · 흥얼 춤)
@@ -1994,7 +2020,7 @@ function playPost(){
   let spin = 0, hop = 0; const IK = PL.idleK, iu = IK ? Math.min(1, (now - IK.t0) / (IK.until - IK.t0)) : 0;
   p.legs.forEach(l => l.hip.rotation.order = "XYZ");
   if(PL.act) hop = actPose(p, t, now);
-  else if(PL.sit){ const s = PL.sit, pray = s.pray || s.k === "church";   // 교회 장의자: 손 모으고 기도   // 앉기 (2026-11-23 감독님 "의자에~ 예배를 드릴수가업네")
+  else if(PL.sit){ const s = PL.sit, pray = s.pray || s.k === "church" || s.k === "pew";   // 교회 장의자: 손 모으고 기도   // 앉기 (2026-11-23 감독님 "의자에~ 예배를 드릴수가업네")
     pose(p, "sit", t, {ph:0.3, talk, seatY:(s.H - PL.gy + 0.045) / p.root.scale.y});
     if(!reduce && !pray) p.legs.forEach((l, n) => l.knee.rotation.x += Math.sin(t * 3.1 + n * Math.PI) * 0.3);   // 발 동동
     if(pray){ p.arms.forEach((a, n) => { a.sh.rotation.set(-0.62, 0, (n ? -1 : 1) * 0.1); a.el.rotation.set(-1.6, 0, (n ? -1 : 1) * 0.75); }); p.head.rotation.x = 0.36; }
@@ -2019,7 +2045,7 @@ function playPost(){
     p.root.position.x += Math.sin(h) * fw * 0.55 + Math.cos(h) * sw * 0.35; p.root.position.z += Math.cos(h) * fw * 0.55 - Math.sin(h) * sw * 0.35;
     p.root.position.y += (1 - Math.cos(fw)) * 0.5; }
   if(PL.swim && now < PL.dunk) p.root.position.y -= Math.sin((1 - (PL.dunk - now) / 450) * Math.PI) * 0.16;   // 첨벙 하고 살짝 잠김
-  ["dad", "mom", "fr"].forEach((k, n) => { const a = PL.actors[k], q = A[k]; q.root.visible = !!a; if(!a) return;
+  ACT_KEYS.forEach((k, n) => { const a = PL.actors[k], q = A[k]; q.root.visible = !!a; if(!a) return;
     const sw = a.pose === "swim" ? (PL.water[0] || {surf:0.06}) : null, at = now < A.bub[k].until;
     if(sw) swimPose(q, t, 1.3 + n, a.moving, a.stroke || "free"); else if(a.moving) pose(q, "walk", t, {step:a.step}); else if(a.pose === "crouch"){ pose(q, "sit", t, {ph:n, seatY:0.34}); q.chest.rotation.x = 0.35; q.head.rotation.x = 0.25; }
     else pose(q, "stand", t, {ph:n, talk:at, wave:a.wave && now < a.wave});
@@ -2028,7 +2054,7 @@ function playPost(){
   itemsPost(now, t); holdPost(p, H, now, t);
   A.ball.visible = !!PL.ball; if(PL.ball) A.ball.position.set(X(PL.ball.i), 0.13 + groundH(PL.ball.i, PL.ball.j), Z(PL.ball.j));
   const m = markPos(); A.mark.visible = A.ring.visible = !!m;
-  [A.yu, A.dad, A.mom, A.fr].forEach(q => { if(q.root.visible) q.root.updateMatrixWorld(true); });
+  [A.yu, ...ACT_KEYS.map(k => A[k])].forEach(q => { if(q.root.visible) q.root.updateMatrixWorld(true); });
   if(m){ A.mark.position.set(m.x, m.y + 1.45 + (reduce ? 0 : Math.sin(t * 3) * 0.08), m.z); A.mark.rotation.y = t * 2.2; A.ring.position.set(m.x, m.y + 0.02, m.z); const s = 1 + (reduce ? 0 : Math.sin(t * 4) * 0.08); A.ring.scale.set(s, s, 1); }
 }
 /* 손에 든 것: 가슴 앞 두 손 사이에 이모지. 걸으면 살짝 찰랑, 흘릴 뻔하면 크게 흔들림 */
@@ -2062,6 +2088,8 @@ function actPose(p, t, now){
   const arms2 = (sx, sz, ex) => p.arms.forEach((a, n) => { const sg = n ? -1 : 1; a.sh.rotation.set(sx, 0, sg * sz); a.el.rotation.set(ex, 0, 0); });
   if(A.path){ const P = A.path, u = Math.min(1, (now - A.t0) / P.ms), a = P.a0 + u * P.turns * Math.PI * 2;   // 정해진 길로 움직이기 (자전거)
     PL.i = P.c[0] + P.rx * Math.cos(a); PL.j = P.c[1] + P.ry * Math.sin(a); PL.h = Math.atan2(-P.rx * Math.sin(a), P.ry * Math.cos(a)); try { A.prop?.(PL.i, PL.j, PL.h); } catch(e){} }
+  if(A.fn){ let r = null; try { r = A.fn(el); } catch(e){}   // 놀이기구 (2026-11-24): fn(초) → [i, j, 앉는 높이, 보는 쪽, 몸 기울기]
+    if(r){ PL.i = r[0]; PL.j = r[1]; if(r[3] != null) PL.h = r[3]; A.lift = Math.max(0, (r[2] ?? 0.4) - 0.4); A.tilt = r[4] || 0; } }
   if(k === "run"){ const st = el * 11, s = Math.sin(st); pose(p, "walk", t, {step:st});
     p.legs.forEach((l, n) => { const q = n ? -s : s; l.hip.rotation.x = q * 0.85; l.knee.rotation.x = Math.max(0, -q) * 1.3 + 0.25; });
     p.arms.forEach((a, n) => { const q = n ? s : -s; a.sh.rotation.x = q * 0.8; a.el.rotation.x = -1.35; });
@@ -2111,6 +2139,10 @@ function actPose(p, t, now){
     p.arms.forEach((a, n) => { const q = Math.sin(el * 2.6 + n * 1.7); a.sh.rotation.set(-0.8 + q * 0.25, 0, (n ? -1 : 1) * 0.3); a.el.rotation.set(-0.6, 0, 0); }); p.head.rotation.x = 0.35; }
   else if(k === "harvest"){ const q = (1 - Math.cos(el * 2.2)) / 2; pose(p, "stand", t, {}); p.hips.position.y = 0.9 - 0.32 * q; p.legs.forEach(l => { l.hip.rotation.x = -1.2 * q; l.knee.rotation.x = 2.0 * q; }); p.chest.rotation.x = 0.5 * q; arms2(-0.9 - 0.4 * q, 0.15, -0.3); }
   else if(k === "laundry"){ const q = (1 - Math.cos(el * 2.4)) / 2; pose(p, "stand", t, {}); arms2(-1.3 - 1.4 * q, 0.25, -0.2); p.head.rotation.x = -0.3 * q; }
+  else if(k === "pray"){ pose(p, "stand", t, {}); p.arms.forEach((a, n) => { a.sh.rotation.set(-0.62, 0, (n ? -1 : 1) * 0.1); a.el.rotation.set(-1.6, 0, (n ? -1 : 1) * 0.75); }); p.head.rotation.x = 0.36; }   // 손 모으고 기도
+  else if(k === "ride"){ pose(p, "sit", t, {seatY:0.4 / p.root.scale.y}); up += A.lift || 0; p.chest.rotation.z = (A.tilt || 0) * 0.6;   // 놀이기구 타기: 손 번쩍
+    if(A.cheer && !reduce){ const w = Math.sin(el * 5) * 0.25; p.arms.forEach((a, n) => { a.sh.rotation.set(-2.7 + w, 0, (n ? -1 : 1) * 0.35); a.el.rotation.set(-0.15, 0, 0); }); }
+    else arms2(-0.7, 0.25, -0.9); }
   else pose(p, "stand", t, {});
   return up;
 }
@@ -2118,7 +2150,7 @@ function playNear(){
   let best = null, bd = 1.7;
   Object.values(R.people).forEach(P => { if(!P.p.root.visible || PL.hide.has(P.id) || /yuna$/.test(P.id)) return; const d = Math.hypot(P.p.root.position.x + OX - PL.i, P.p.root.position.z + OZ - PL.j);
     if(d < bd){ bd = d; best = {id:P.id, name:P.info.name, role:P.info.role || P.info.roleKo || "", task:P.info.task || P.info.desc || "", d}; } });
-  Object.entries(PL.actors).forEach(([k, a]) => { const d = Math.hypot(a.i - PL.i, a.j - PL.j); if(d < 1.7 && d - 0.9 < bd){ bd = d - 0.9; /* 아빠·엄마·지유는 옆 사람보다 먼저 */ best = {id:"@" + k, name:k === "dad" ? "아빠" : k === "mom" ? "엄마" : "지유", role:"", task:"", d}; } });
+  Object.entries(PL.actors).forEach(([k, a]) => { const d = Math.hypot(a.i - PL.i, a.j - PL.j); if(d < 1.7 && d - 0.9 < bd){ bd = d - 0.9; /* 아빠·엄마·지유는 옆 사람보다 먼저 */ best = {id:"@" + k, name:ACT_NAME[k] || k, role:"", task:"", d}; } });
   return best;
 }
 function playState(){
@@ -2130,7 +2162,7 @@ function playState(){
 function playTags(now){
   if(!R.pl) return;
   const A = R.pl, clampv = (v, a, b) => Math.min(b, Math.max(a, v));
-  ["yu", "dad", "mom", "fr"].forEach(k => { const B = A.bub[k], p = A[k];
+  ["yu", ...ACT_KEYS].forEach(k => { const B = A.bub[k], p = A[k];
     if(!PL.on || !p.root.visible || now > B.until){ B.bub.hidden = B.stem.hidden = true; return; }
     if(B.bub.textContent !== B.say){ B.bub.textContent = B.say; B.w = 0; }
     B.bub.hidden = false; if(!B.w){ B.w = B.bub.offsetWidth; B.h = B.bub.offsetHeight; }
