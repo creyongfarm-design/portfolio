@@ -535,7 +535,7 @@ const ROSTER = [
   {id:"studio",  name:"대관",   role:"스튜디오 매니저", zone:"studio", room:"4F 예운옥 데스크", f4:true, desk:[7.2,18.0,1.9,0.9], look:{skin:"#F2D0B6", hair:"#5A3A2C", style:"long",  shirt:"#C8B4D0", pants:"#45404A"}},
   {id:"promo",   name:"홍보",   role:"영업 PD",        zone:"studio", room:"4F 예운옥 영업", f4:true, desk:[9.3,18.0,1.8,0.9], look:{skin:"#DDB08C", hair:"#1C1A1A", style:"bun",   shirt:"#E8B5C8", pants:"#4A4250"}},   // 2F 예운옥 없앰 (2026-11-22 감독님 "업무층에 예운옥 중복")
   {id:"class",   name:"조교",   role:"강의 조교",      zone:"school", room:"4F 필름스쿨 데스크", f4:true, desk:[25.9,11.2,2.0,0.9], look:{skin:"#E9C4A4", hair:"#2E241E", style:"bun",   shirt:"#8B5A3C", pants:"#34322F"}},
-  {id:"admin",   name:"경영지원", role:"경영지원 PD · 타워 관리", zone:"hq", room:"로비 경영지원 데스크", desk:[15.4,13.2,1.5,0.75], look:{skin:"#EBC6A8", hair:"#2A221E", style:"short", shirt:"#5C6B8A", pants:"#2E2E2C"}},
+  {id:"admin",   name:"경영지원", role:"경영지원 PD · 타워 관리", zone:"hq", room:"로비 경영지원 데스크", desk:[16.75,18.35,1.5,0.75], look:{skin:"#EBC6A8", hair:"#2A221E", style:"short", shirt:"#5C6B8A", pants:"#2E2E2C"}},
   {id:"taling",  name:"탈잉",   role:"온라인 수업 매니저", zone:"school", room:"4F 탈잉 VOD 데스크", f4:true, desk:[25.9,16.5,1.9,0.8], look:{skin:"#EFCBB0", hair:"#1F1A17", style:"short", shirt:"#C08A66", pants:"#3A3631"}, headphones:true},
 ];
 /* 인력 구조조정 (2026-11-09 감독님: "썸네일도 디자인으로, 모션도 디자인으로. 컷과 포스트는 편집으로, 기획 작가 합쳐")
@@ -1569,7 +1569,7 @@ function furniture(t){
     box(27.3,18.95,0.12,0.12,4,"#E8B5C8",22); box(28.3,18.9,0.2,0.16,3,"#FFFFFF",22); });
 
   /* 화분 */
-  [[0.45,0.45,true],[11.75,6.7,true],[13.45,6.7,true],[11.75,9.3,true],[12.25,10.75,true],[16.6,14.6,false],[11.75,15.6,true],[5.6,16.9,true],[11.75,19.6,true],[13.45,19.6,true],[17.55,12.7,true],[18.2,9.5,true],[23.6,0.5,true],[28.6,6.6,false],[28.65,19.5,true]].forEach(([i,j,tall]) => add(i+j, () => plant(i,j,tall)));
+  [[0.45,0.45,true],[11.75,6.7,true],[13.45,6.7,true],[11.75,9.3,true],[12.25,10.75,true],[18.2,15.4,false],[11.75,15.6,true],[5.6,16.9,true],[11.75,19.6,true],[13.45,19.6,true],[17.55,12.7,true],[18.2,9.5,true],[23.6,0.5,true],[28.6,6.6,false],[28.65,19.5,true]].forEach(([i,j,tall]) => add(i+j, () => plant(i,j,tall)));
   return items;
 }
 function drawLamps(){

@@ -82,7 +82,7 @@ const ROSTER = [
   {id:"color",  name:"컬러",   role:"컬러리스트",     zone:"prod",   desk:[19.6,14.0,2.8,0.8], noDesk:true, look:{skin:"#F2D2BA", hair:"#8A8A88", style:"short", shirt:"#4A5A6E", pants:"#26282B"}, stand:[23.2,15.3]},   // 색보정실 가죽 의자
   {id:"design", name:"디자인", role:"디자인 · 썸네일 · 모션",   zone:"prod",   desk:[7.0,16.9,2.6,1.25], draft:true, seat:[8.3,18.6], dir:"-j", look:{skin:"#F0CDB2", hair:"#7A4A30", style:"bob",   shirt:"#5C6B8A", pants:"#2E2F33"}, stand:[9.95,19.25]},
   {id:"sales",  name:"영업",   role:"영업 PD",        zone:"prod",   desk:[10.6,10.95,1.3,0.9], look:{skin:"#EAC7A8", hair:"#2A2420", style:"long",  shirt:"#2F6F61", pants:"#2B2D30"}, stand:[11.55,12.95]},
-  {id:"admin",  name:"경영지원", role:"경영지원 PD · 타워 관리", zone:"hq", desk:[15.4,13.2,1.5,0.75], look:{skin:"#EBC6A8", hair:"#2A221E", style:"short", shirt:"#5C6B8A", pants:"#2E2E2C"}},
+  {id:"admin",  name:"경영지원", role:"경영지원 PD · 타워 관리", zone:"hq", desk:[16.75,18.35,1.5,0.75], look:{skin:"#EBC6A8", hair:"#2A221E", style:"short", shirt:"#5C6B8A", pants:"#2E2E2C"}},
 ];
 const SPARE = [
   {id:"graphic", zone:"farm", desk:[1.7,2.6,2.3,1.0], island:true, seat:[2.9,2.15], dir:"+j"}, {id:"thumb", zone:"farm", desk:[1.7,3.1,0.6,1.0], island:true, seat:[1.25,3.6], dir:"+i"},
@@ -123,7 +123,7 @@ function islandPts3(g = 0){ const [ci,cj] = ISLAND.c, {hl, r} = ISLAND, rr = r +
   for(let k = 0; k <= 14; k++){ const a = Math.PI/2 + k * Math.PI / 14; out.push([ci - hl + rr*Math.cos(a), cj + rr*Math.sin(a)]); }
   return out; }
 const HEAD = {"-j":Math.PI, "+j":0, "+i":Math.PI / 2, "-i":-Math.PI / 2}, deskHead = r => HEAD[r.dir || "-j"];
-const PLANTS = [[0.45,0.45,true],[11.75,6.7,true],[13.45,6.7,true],[11.75,9.3,true],[12.25,10.75,true],[16.6,14.6,false],[11.75,15.6,true],[5.6,16.9,true],[11.75,19.6,true],[13.45,19.6,true],[17.55,12.7,true],[18.2,9.5,true],[23.6,0.5,true],[28.6,6.6,false],[28.65,19.5,true],[31.15,0.45,false],[35.6,6.6,true]];
+const PLANTS = [[0.45,0.45,true],[11.75,6.7,true],[13.45,6.7,true],[11.75,9.3,true],[12.25,10.75,true],[18.2,15.4,false],[11.75,15.6,true],[5.6,16.9,true],[11.75,19.6,true],[13.45,19.6,true],[17.55,12.7,true],[18.2,9.5,true],[23.6,0.5,true],[28.6,6.6,false],[28.65,19.5,true],[31.15,0.45,false],[35.6,6.6,true]];
 
 let R = null;
 /* 다른 층 (2026-11-22 감독님 "다른 층도 다 해야지"): opts.floor = 층 정의(floor3d_*.js). 없으면 업무층 */
