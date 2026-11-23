@@ -256,10 +256,11 @@ try { AU.on = localStorage.getItem("crayon-yuna-sound") !== "0"; } catch(_){}
 const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
 function auInit(){
   const C = window.AudioContext || window.webkitAudioContext; if(!C) return null;
+  try { if(navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch(_){}   // 아이폰 무음 스위치여도 들리게
   if(!AU.ctx){ const c = AU.ctx = new C(); AU.m = c.createGain(); AU.m.gain.value = AU.on ? 0.9 : 0; AU.m.connect(c.destination);
     AU.sfx = c.createGain(); AU.sfx.gain.value = 0.55; AU.sfx.connect(AU.m); AU.bgm = c.createGain(); AU.bgm.gain.value = 0.28; AU.bgm.connect(AU.m);
     const len = c.sampleRate * 0.5 | 0, b = c.createBuffer(1, len, c.sampleRate), dd = b.getChannelData(0); for(let k = 0; k < len; k++) dd[k] = Math.random() * 2 - 1; AU.noise = b; }
-  if(AU.ctx.state === "suspended" && !document.hidden) AU.ctx.resume?.();
+  if(AU.ctx.state !== "running" && AU.ctx.state !== "closed" && !document.hidden) AU.ctx.resume?.();
   if(!AU.iv){ AU.next = AU.ctx.currentTime + 0.15; AU.step = 0; AU.iv = setInterval(bgmPump, 90); }
   return AU.ctx;
 }
@@ -783,8 +784,13 @@ export function start(api){
     S.charge = 0; runB.classList.remove("full"); e.playSet({boost:4500}); sfx("boost"); yuSay(pick(["달려라~! 🏃‍♀️💨", "부스트 온! ⚡", "슝~ 💨"]), 1400);
   }
   runB.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); doRun(); });
-  const auKick = () => auInit(), auVis = () => { if(AU.ctx) document.hidden ? AU.ctx.suspend() : AU.ctx.resume(); };
-  addEventListener("pointerdown", auKick, true); document.addEventListener("visibilitychange", auVis); auInit();
+  /* 아이폰은 손가락을 뗄 때(touchend·click)만 소리를 열어 줌 → 그때 무음 한 번 틀어 깨움 (2026-11-23 감독님 "음악이랑 효과음 안들리는데") */
+  const auKick = () => { const c = auInit(); if(c && !AU.woke){ try { const b = c.createBufferSource(); b.buffer = c.createBuffer(1, 1, 22050); b.connect(c.destination); b.start(0); AU.woke = c.state === "running"; } catch(_){} } },
+    auVis = () => { if(AU.ctx) document.hidden ? AU.ctx.suspend() : AU.ctx.resume(); }, AU_EV = ["pointerdown", "touchend", "click", "keydown"];
+  AU_EV.forEach(k => addEventListener(k, auKick, true)); document.addEventListener("visibilitychange", auVis); auInit();
+  /* 버튼 두 개를 같이 누르거나 두 번 톡 치면 화면이 확대되던 것: 게임 중엔 확대 막기 (2026-11-23 감독님 "갑자기 확대되서 방향키 숨음") */
+  const noZoom = ev => ev.preventDefault(), oldTA = api.host.style.touchAction;
+  api.host.style.touchAction = "none"; ["gesturestart", "gesturechange", "dblclick"].forEach(k => document.addEventListener(k, noZoom, {passive:false}));
 
   /* ---------- 시작 · 끝 ---------- */
   let waitT = 0;
@@ -802,7 +808,8 @@ export function start(api){
   function stop(){
     if(!live) return; live = false; clearTimeout(waitT); endGame(); save();
     removeEventListener("keydown", kd, true); removeEventListener("keyup", ku, true); removeEventListener("blur", blur);
-    removeEventListener("pointerdown", auKick, true); document.removeEventListener("visibilitychange", auVis); auStop();
+    AU_EV.forEach(k => removeEventListener(k, auKick, true)); document.removeEventListener("visibilitychange", auVis); auStop(); AU.woke = false;
+    ["gesturestart", "gesturechange", "dblclick"].forEach(k => document.removeEventListener(k, noZoom)); api.host.style.touchAction = oldTA;
     try { E()?.playInput(0, 0); E()?.playStop(); } catch(e){ console.warn(e); }
     root.remove(); api.exit?.();
   }
