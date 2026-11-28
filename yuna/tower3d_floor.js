@@ -1789,7 +1789,22 @@ const YU_FITS = {
   director:yuL({shirt:"#2A2A28", pants:"#3A3D42", shoe:"#F1F2F4", hat:"bucket", hatC:"#CDBB9A", ribbon:null, extra:{headphones:"max", hpC:"#F4C7D3"}}),
   spring:yuL({shirt:"#FFD36B", skirt:"#FFD36B", skirtL:0.4, legs:YU_SKIN, shoe:"#FFFFFF", ribbon:"#FFFFFF"}),
   swim:yuL({shirt:"#FF6FAE", pants:"#FF6FAE", sleeve:YU_SKIN, thigh:YU_SKIN, legs:YU_SKIN, shoe:YU_SKIN, ribbon:"#FFFFFF"})};
-const PL = {on:false, char:"yu", fit:"base", hair:"pig", hairC:"#3A261C", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
+/* 엄마 · 아빠 옷 (2026-11-29 감독님 "갈아입을 수 있게 해주라") */
+const chL = (k, o) => ({look:{...PLAY_LOOKS[k].look, ...o}, b:PLAY_LOOKS[k].b, extra:o.extra});
+const DAD_SKIN = PLAY_LOOKS.dad.look.skin, MOM_SKIN = PLAY_LOOKS.mom.look.skin;
+const CHAR_FITS = {
+  dad:{base:PLAY_LOOKS.dad,
+    suit:chL("dad", {hat:null, shirt:"#2F3A56", sleeve:"#2F3A56", pants:"#2F3A56", shoe:"#2A2A28"}),
+    hanbok:chL("dad", {hat:null, shirt:"#CFE3F5", sleeve:"#CFE3F5", pants:"#8FA0C8", shoe:"#F1F2F4"}),
+    futsal:chL("dad", {hat:null, shirt:"#E8604A", sleeve:"#E8604A", pants:"#FFFFFF", legs:"#E8604A", shoe:"#2A2A28"}),
+    swim:chL("dad", {hat:null, shirt:DAD_SKIN, sleeve:DAD_SKIN, pants:"#2F4A6E", legs:DAD_SKIN, shoe:DAD_SKIN})},
+  mom:{base:PLAY_LOOKS.mom,
+    dress:chL("mom", {shirt:"#F4B6CF", skirt:"#F4B6CF", skirtL:0.5, legs:MOM_SKIN, shoe:"#FFFFFF"}),
+    hanbok:chL("mom", {shirt:"#FFF4E0", sleeve:"#F4A7B9", skirt:"#B03A5A", skirtL:0.62, legs:"#FFFFFF", shoe:"#E8607F"}),
+    tennis:chL("mom", {shirt:"#FFFFFF", skirt:"#FFFFFF", skirtL:0.34, legs:MOM_SKIN, shoe:"#FFFFFF"}),
+    swim:chL("mom", {shirt:"#8C5A9A", pants:"#8C5A9A", sleeve:MOM_SKIN, thigh:MOM_SKIN, legs:MOM_SKIN, shoe:MOM_SKIN})}};
+const curFit = () => PL.char && PL.char !== "yu" ? (PL.cfit[PL.char] || "base") : PL.fit;
+const PL = {on:false, char:"yu", cfit:{dad:"base", mom:"base"}, fit:"base", hair:"pig", hairC:"#3A261C", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
   mark:null, actors:{}, ball:null, water:[], hide:new Set(), cb:null, spawn:null, tg:null, jy:0, jv:0, boost:0, items:[], fx:[], swam:false, wet:0, drip:0, rip:0, dunk:0, bump:null, bumpAt:0, still:0, idleK:null, idleWait:8000, emoN:0, lastPost:0, hold:null, slosh:0, rk:null, sw:{}, camLock:null, tb:null};
 const YU_R = 0.17, PV = new THREE.Vector3(), PV2 = new THREE.Vector3();
 const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -1949,7 +1964,7 @@ function playMakeAvatars(){
   const yus = {}; Object.keys(YU_FITS).forEach(k => yus[k] = mk("yu", YU_FITS[k]));
   const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, bub:{}}; ACT_KEYS.forEach(k => A[k] = mk(k));
   /* 노라 · 크레용으로 놀기 (2026-11-29 감독님 "캐릭도 노라 크레용도 만들자 유나모드처럼"): 조종하는 몸을 엄마 · 아빠로 바꾸고, 그 사람 자리(배우)는 유나가 대신 섬 */
-  A.chars = {dad:mk("yu", PLAY_LOOKS.dad, true), mom:mk("yu", PLAY_LOOKS.mom, true)}; A.swapN = {dad:mk("dad", PLAY_LOOKS.yu), mom:mk("mom", PLAY_LOOKS.yu)}; A.orig = {dad:A.dad, mom:A.mom}; applyChar();
+  A.chars = {dad:{}, mom:{}}; ["dad", "mom"].forEach(c => Object.keys(CHAR_FITS[c]).forEach(k => A.chars[c][k] = mk("yu", CHAR_FITS[c][k], true))); A.swapN = {dad:mk("dad", PLAY_LOOKS.yu), mom:mk("mom", PLAY_LOOKS.yu)}; A.orig = {dad:A.dad, mom:A.mom}; applyChar();
   // 테니스공 + 바닥 그림자 (playTBall)
   { const tc = document.createElement("canvas"); tc.width = 64; tc.height = 32; const x = tc.getContext("2d"); x.fillStyle = "#DDF24E"; x.fillRect(0, 0, 64, 32); x.strokeStyle = "#FFFFFF"; x.lineWidth = 2.4; x.beginPath();
     for(let u = 0; u <= 64; u++){ const y = 16 + Math.sin(u / 64 * Math.PI * 2) * 9; u ? x.lineTo(u, y) : x.moveTo(u, y); } x.stroke(); const tt = new THREE.CanvasTexture(tc); tt.colorSpace = THREE.SRGBColorSpace;
@@ -2001,7 +2016,7 @@ function playTick(now, t, dt){
     if(Math.abs(v) > 0.15 && now - PL.dragAt > 1400) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 0.9);
     mag = 0; }
   const hs = PL.hold && !PL.swim ? PL.hold.slow : 1;   // 손에 든 게 있으면 조심조심 (2026-11-23 감독님 "커피 심부름은 흐를까바 들고 약간 천천히")
-  const sp = AU ? AU.v * mag : (PL.swim ? (PL.fit === "swim" ? 1.8 : 1.45) : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
+  const sp = AU ? AU.v * mag : (PL.swim ? (curFit() === "swim" ? 1.8 : 1.45) : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
   if(mag > 0.06){
     const fx = -Math.sin(PL.yaw), fz = -Math.cos(PL.yaw), rx = Math.cos(PL.yaw), rz = -Math.sin(PL.yaw);
     if(AU){ mi = Math.sin(AU.h); mj = Math.cos(AU.h); } else { mi = (fx * iy + rx * ix) / Math.hypot(ix, iy); mj = (fz * iy + rz * ix) / Math.hypot(ix, iy); }
@@ -2453,7 +2468,7 @@ function playState(){
   const m = markPos(); let mark = null;
   if(m){ PV2.set(m.x, m.y + 1.4, m.z).project(R.camera); mark = {x:(PV2.x * 0.5 + 0.5) * R.w, y:(-PV2.y * 0.5 + 0.5) * R.h, front:PV2.z < 1, d:Math.hypot(m.x + OX - PL.i, m.z + OZ - PL.j)}; }
   const act = {}; Object.entries(PL.actors).forEach(([k, a]) => act[k] = {i:a.i, j:a.j, moving:a.moving});
-  return {floor:R.fid, i:PL.i, j:PL.j, h:PL.h, jy:PL.jy, boost:Math.max(0, PL.boost - clock()), swim:!!PL.swim, sit:PL.sit ? (PL.sit.id || "seat") : null, fit:PL.fit, moving:PL.moving, dv:PL.act?.drive ? Math.abs(PL.dv || 0) : 0, near:playNear(), ball:PL.ball && {i:PL.ball.i, j:PL.ball.j, v:Math.hypot(PL.ball.vi, PL.ball.vj)}, mark, actors:act, w:R.w, hgt:R.h};
+  return {floor:R.fid, i:PL.i, j:PL.j, h:PL.h, jy:PL.jy, boost:Math.max(0, PL.boost - clock()), swim:!!PL.swim, sit:PL.sit ? (PL.sit.id || "seat") : null, fit:curFit(), moving:PL.moving, dv:PL.act?.drive ? Math.abs(PL.dv || 0) : 0, near:playNear(), ball:PL.ball && {i:PL.ball.i, j:PL.ball.j, v:Math.hypot(PL.ball.vi, PL.ball.vj)}, mark, actors:act, w:R.w, hgt:R.h};
 }
 function playTags(now){
   if(!R.pl) return;
@@ -2557,12 +2572,13 @@ export function playSit(s){
   if(PL.swim || PL.jy > 0 || PL.sit) return false;
   PL.sit = {...s, from:[PL.i, PL.j]}; PL.i = s.i; PL.j = s.j; PL.h = s.h; PL.sitYaw = s.h + 0.6; PL.dragAt = 0; return true;   // 앉으면 카메라를 앞쪽 비스듬히 (2026-11-23 감독님 "앉으면 왜 뒷모습만 보이지?")
 }
-function applyChar(){ const A = R && R.pl; if(!A || !A.chars) return; const c = A.chars[PL.char] ? PL.char : "yu";
-  A.yu.root.visible = false; A.yu = c === "yu" ? (A.yus[PL.fit] || A.yus.base) : A.chars[c];
+function applyChar(){ const A = R && R.pl; if(!A || !A.chars) return; const c = A.chars[PL.char] ? PL.char : "yu"; Object.values(A.chars).forEach(o => Object.values(o).forEach(p => p.root.visible = false));
+  A.yu.root.visible = false; A.yu = c === "yu" ? (A.yus[PL.fit] || A.yus.base) : (A.chars[c][PL.cfit[c]] || A.chars[c].base);
   ["dad", "mom"].forEach(k => { A[k].root.visible = false; A[k] = c === k ? A.swapN[k] : A.orig[k]; }); }
 export function playChar(k){ PL.char = k === "dad" || k === "mom" ? k : "yu"; applyChar(); return PL.char; }
 export function playOutfit(k){
-  if(!YU_FITS[k]) return false; PL.fit = k; if(PL.char && PL.char !== "yu") return true;   // 엄마 · 아빠로 놀 땐 옷은 기억만
+  if(PL.char && PL.char !== "yu"){ if(!CHAR_FITS[PL.char]?.[k]) return false; PL.cfit[PL.char] = k; applyChar(); return true; }   // 엄마 · 아빠 옷
+  if(!YU_FITS[k]) return false; PL.fit = k;
   if(R && R.pl){ const A = R.pl, nw = A.yus[k]; if(nw && nw !== A.yu){ A.yu.root.visible = false; A.yu = nw; } }
   return true;
 }
