@@ -246,7 +246,8 @@ const BADGES = [
   ["friend", "👭", "친구랑 하루 놀기", r => r.done.friend],
   ["gym", "🏋️", "헬스장 기구 4개 써 보기", r => GYM.filter(k => r.uses?.[k]).length >= 4],
   ["claw", "🧸", "인형뽑기 성공", r => (r.dolls || []).length > 0],
-  ["tncup", "🏆", "동네 테니스 대회 우승", r => (r.cup?.tennis || 0) >= 1], ["swcup", "🥇", "동네 수영 대회 우승", r => (r.cup?.swim || 0) >= 1]];
+  ["tncup", "🏆", "동네 테니스 대회 우승", r => (r.cup?.tennis || 0) >= 1], ["swcup", "🥇", "동네 수영 대회 우승", r => (r.cup?.swim || 0) >= 1],
+  ["bumper", "🚗", "범퍼카 대결 1등", r => (r.bumper?.win || 0) >= 1], ["dodge", "🤾", "피구왕 (셋 다 아웃)", r => (r.dodge?.win || 0) >= 1], ["shop", "🍢", "분식집 알바왕 (손님 10명)", r => (r.shop?.bestN || 0) >= 10]];
 
 const YU_HI = ["안녕하세요! 뭐 해요? 👀", "저 왔어요~ 😆", "우와 이거 뭐예요?", "같이 놀래요? 🥺", "오늘 바빠요?", "저 심심해요~ 😗", "저 보물 찾는 중이에요! ✨", "제 점프 볼래요? 🦘"];
 const RE_ANY = ["유나 왔어? 😊", "오늘도 신났네~ 😆", "이따 같이 놀자!", "엄마는 4층에 계셔 🌈", "옥상 수영장 가 봤어? 🏊‍♀️", "간식 먹었어? 🍪", "뛰지 말고 천천히~ 😅",
@@ -382,6 +383,24 @@ const CSS = `
 .yg-tn button[data-aim] span::after{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;font-weight:900;color:#FF4F86;text-shadow:0 1px 0 #fff,0 0 6px #fff}
 .yg-tn button[data-aim="-1"] span::after{content:"◀";left:-24px}.yg-tn button[data-aim="1"] span::after{content:"▶";right:-24px}
 .yg-tn.go button span,.yg-act.beat span{box-shadow:0 0 0 5px rgba(255,255,255,.92),0 0 24px 8px rgba(255,205,80,.95)}
+.yg-shop{pointer-events:auto;position:absolute;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(460px,calc(100% - 16px));box-sizing:border-box;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:14px 14px 12px;box-shadow:0 24px 60px -20px rgba(40,20,30,.55);z-index:6;display:grid;gap:10px;animation:ygUp .3s ease-out}
+.yg-shop .hd{display:flex;align-items:center;gap:6px;font-weight:800;font-size:15px}.yg-shop .hd b{margin-right:auto;white-space:nowrap}
+.yg-shop .hd span{font-variant-numeric:tabular-nums;white-space:nowrap;background:color-mix(in srgb,#E8A04A 16%,var(--paper));border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700}.yg-shop .hd .t{background:#2A2A28;color:#FFF}
+.yg-shop .cs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.yg-shop .c{position:relative;min-height:112px;border:1.5px solid var(--line);border-radius:18px;background:var(--paper);padding:10px 4px 14px;display:grid;justify-items:center;align-content:start;gap:4px;transition:border-color .15s,background .15s}
+.yg-shop .c.no{border-style:dashed;opacity:.4;align-content:center}.yg-shop .c .f{font-size:30px;line-height:1}.yg-shop .c small{font-size:11px;font-weight:700;opacity:.65;white-space:nowrap}
+.yg-shop .c .o{font-size:20px;line-height:1.25;letter-spacing:1px;font-weight:800}.yg-shop .c.ok .o,.yg-shop .c.gone .o{font-size:13px;letter-spacing:0}
+.yg-shop .c .p{position:absolute;left:10px;right:10px;bottom:7px;height:4px;border-radius:9px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}.yg-shop .c .p i{display:block;height:100%;width:100%;background:#4DAA97;border-radius:9px}
+.yg-shop .c.hot{border-color:#E8604A}.yg-shop .c.hot .p i{background:#E8604A}.yg-shop .c.ok{border-color:#4DAA97;background:color-mix(in srgb,#4DAA97 16%,var(--paper))}.yg-shop .c.gone{opacity:.55}.yg-shop .c.bad{animation:ygShake .32s}
+.yg-shop .tr{display:flex;align-items:center;gap:8px;min-height:52px;border:1.5px dashed color-mix(in srgb,#E8A04A 60%,var(--line));border-radius:18px;padding:6px 8px 6px 14px;background:color-mix(in srgb,#E8A04A 8%,var(--paper))}
+.yg-shop .tr small{font-size:12px;font-weight:700;opacity:.55}.yg-shop .tr .t{display:flex;gap:2px;flex:1;min-height:34px;align-items:center}.yg-shop .tr .t button{font-size:26px;line-height:1;border:0;background:none;padding:0 3px}
+.yg-shop .tr .x{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 12px;font-size:12px;font-weight:700}
+.yg-shop .mn{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.yg-shop .mn button{display:grid;justify-items:center;gap:3px;border:1px solid var(--line);background:var(--paper);border-radius:16px;padding:9px 0 7px;min-height:62px;transition:transform .08s}
+.yg-shop .mn button span{font-size:26px;line-height:1}.yg-shop .mn button b{font-size:11px;font-weight:700}.yg-shop .mn button:active{transform:scale(.93);background:color-mix(in srgb,#E8A04A 22%,var(--paper))}
+.yg-shop .tip{margin:0;text-align:center;font-size:11px;font-weight:600;opacity:.5}
+@keyframes ygShake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (max-height:520px){.yg-shop{width:min(720px,calc(100% - 16px));grid-template-columns:1.15fr 1fr;padding:10px 12px;gap:8px}.yg-shop .hd{grid-column:1/-1}.yg-shop .cs{grid-column:1;grid-row:2/4}.yg-shop .tr{grid-column:2;grid-row:2}.yg-shop .mn{grid-column:2;grid-row:3}.yg-shop .tip{display:none}.yg-shop .c{min-height:0}.yg-shop .mn button{min-height:52px;padding:6px 0 5px}}
 .yg-tm{position:absolute;left:50%;top:31%;transform:translateX(-50%);pointer-events:none;text-align:center;font-weight:900;font-size:30px;letter-spacing:.02em;white-space:nowrap;opacity:0;color:#3A8A78;text-shadow:0 2px 0 rgba(255,255,255,.95),0 6px 18px rgba(40,20,60,.35)}
 .yg-tm small{display:block;font-size:13px;font-weight:800;margin-top:3px;color:#5A5048;letter-spacing:0}
 .yg-tm[data-g="perfect"]{color:#F0A020;font-size:34px}.yg-tm[data-g="early"],.yg-tm[data-g="late"]{color:#8E86B0;font-size:24px}
@@ -580,11 +599,12 @@ Promise.all([import("./floor3d_market.js").then(m => AREA_MOD.market = m.MARKET)
       SEATS[f] = (M.seats || []).map(x => x.k === "swing" ? {...x, swing:0.42} : x);
       Object.entries(M.sitLines || {}).forEach(([k, l]) => SIT_YU[k] = SIT_YU[k] ? [...SIT_YU[k], ...l] : l);
       USE[f] = (M.use || []).filter(u => ACTS[PFX[f] + u.k] || AREA_SPECIAL.has(PFX[f] + u.k)).map(u => ({...u, k:PFX[f] + u.k}));
-      if(f === "town") USE[f].push({at:BUS.at, k:"tw_bus", h:PI, r:0.6});
+      if(f === "town"){ USE[f].push({at:BUS.at, k:"tw_bus", h:PI, r:0.6}); USE[f].push({at:[18.0, 5.9], k:"tw_shop", h:PI, r:0.55}); }
+      if(f === "school") USE[f].push({at:[15.2, 19.45], k:"sc_dodge", h:PI, r:0.8});
     } catch(e){ console.warn("동네 연결", f, e); } });
 });
 /* 동네 놀이 (ACTS 형식. give = 끝나면 손에 듦, anim = 도는 동안 소품 움직임) */
-const AREA_SPECIAL = new Set(["gy_race", "ct_tennis", "ct_wall", "pk_slide", "pk_merry", "tw_gacha", "tw_bell", "tw_bus", "rv_boat", "fn_carousel", "fn_wheel", "fn_coaster", "fn_bumper", "fn_viking"]);
+const AREA_SPECIAL = new Set(["gy_race", "ct_tennis", "ct_wall", "pk_slide", "pk_merry", "tw_gacha", "tw_bell", "tw_bus", "rv_boat", "fn_carousel", "fn_wheel", "fn_coaster", "fn_bumper", "fn_viking", "tw_shop", "sc_dodge"]);
 const AREA_PLAY = ["pk_slide", "pk_merry", "pk_seesaw", "pk_sand", "pk_fountain", "pk_duck", "pk_icecream", "tw_gacha", "tw_slime", "tw_tteok", "tw_fishcake", "tw_bungeo", "tw_store", "tw_bell"];
 const GACHA = [["🦖", "공룡 피규어"], ["🦄", "유니콘 키링"], ["🐰", "토끼 지우개"], ["💍", "반짝 반지"], ["🚀", "로켓 팽이"], ["🧸", "곰돌이 자석"], ["🌈", "무지개 스티커"], ["👑", "황금 왕관 캡슐", 1]];
 const QUIZ = [["사과는 영어로?", ["🍎 애플", "🍌 바나나", "🍇 그레이프"], 0], ["3 + 4 = ?", ["6", "7", "8"], 1], ["무지개는 몇 가지 색?", ["5가지", "6가지", "7가지"], 2],
@@ -666,7 +686,7 @@ Object.assign(ACTS, {
   tw_bungeo:{ms:3400, pose:"drink", lb:["🐟", "붕어빵"], say:"붕어빵 3개요! 팥으로요 🐟", fx:["🐟", "♨️"], done:"🐟 붕어빵 사 먹기", end:"따끈따끈 🐟", give:["🐟"]},
   tw_store:{ms:3000, pose:"drink", lb:["🏪", "편의점"], say:"뭐 먹지~ 🤔", fx:["🍙", "🥛", "🍫"], done:"🏪 골목 편의점 간식", end:"아빠한텐 비밀 😋", give:["🍙", "🥛", "🍫", "🍬"]}});
 Object.assign(USE_LB, {gy_race:["🏊", "50m 수영 시합"], ct_tennis:["🎾", "테니스 치기"], ct_wall:["🧱", "벽치기 연습"], squirt:["💦", "물총 싸움"]});
-Object.assign(USE_LB, {pk_slide:["🛝", "미끄럼틀"], pk_merry:["🎠", "뺑뺑이"], tw_gacha:["🎰", "캡슐 뽑기"], tw_bell:["🔔", "학교 종"], rv_boat:["🦢", "오리배"], tw_bus:["🚌", "놀이공원 버스"], fn_carousel:["🎠", "회전목마"], fn_wheel:["🎡", "대관람차"], fn_coaster:["🐛", "애벌레 기차"], fn_bumper:["🚗", "범퍼카"], fn_viking:["🏴‍☠️", "바이킹"]});
+Object.assign(USE_LB, {pk_slide:["🛝", "미끄럼틀"], pk_merry:["🎠", "뺑뺑이"], tw_gacha:["🎰", "캡슐 뽑기"], tw_bell:["🔔", "학교 종"], rv_boat:["🦢", "오리배"], tw_bus:["🚌", "놀이공원 버스"], fn_carousel:["🎠", "회전목마"], fn_wheel:["🎡", "대관람차"], fn_coaster:["🐛", "애벌레 기차"], fn_bumper:["🚗", "범퍼카 대결"], tw_shop:["🍢", "분식집 알바"], sc_dodge:["🤾", "피구 하기"], fn_viking:["🏴‍☠️", "바이킹"]});
 const AREA_NPC_TALK = {
   ice:[["아저씨 무슨 맛 있어요?", "딸기, 초코, 바닐라~ 오늘은 메론맛도 있어 🍈", "메론맛 궁금하다!"], ["아저씨 트럭 어디로 가요?", "해 지면 강가 공원으로 가지 🚚", "나도 데려가 주세요 😆"]],
   kid:[["연재야 뭐 해?", "개미 구경! 이거 봐 🐜", "우와 줄 서서 간다!"], ["같이 그네 탈래?", "좋아! 누가 더 높이 가나 시합 😎", "내가 이길걸?"], ["너 숙제 했어?", "아… 아직 😱", "나도 😅"]],
@@ -871,6 +891,7 @@ export function start(api){
   const mapKey = f => TOWER_F.includes(f) ? "tower" : isHome(f) ? "home" : f;
   const mapName = k => k === "tower" ? ["🏢", "크레용 타워"] : k === "home" ? ["🏡", "유나네 집"] : [AREA[k].e, AREA[k].name.replace("·동네 교회", "·교회").replace("·놀이터", "")];
   function openMap(){
+    if(S.boat) landBoat(); else if(S.busy){ toast("지금 하는 놀이가 끝나면 갈 수 있어요", "", 1400); return; }   // 타는 중에 다른 곳으로 가면 버튼이 사라지던 것
     panel.hidden = true; const here = mapKey(S.floor), P = Object.fromEntries(MAP_T.map(([k, x, y]) => [k, [x, y]]));
     const ln = ([a, b], dash) => `<line x1="${P[a][0]}" y1="${P[a][1] * 0.625}" x2="${P[b][0]}" y2="${P[b][1] * 0.625}" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" ${dash ? 'stroke-dasharray="0.1 3" opacity=".95"' : ""}/><line x1="${P[a][0]}" y1="${P[a][1] * 0.625}" x2="${P[b][0]}" y2="${P[b][1] * 0.625}" stroke="#E8DCC8" stroke-width="1.1" stroke-linecap="round" ${dash ? 'stroke-dasharray="0.1 3"' : ""}/>`;
     mapEl.innerHTML = `<h3>🗺️ 크레용 마을<small>누르면 걸어가요</small></h3><div class="m"><svg viewBox="0 0 100 62.5" preserveAspectRatio="none">
@@ -969,8 +990,8 @@ export function start(api){
       BADGES.forEach(([id, e, t]) => { const d = document.createElement("div"); d.className = "yg-bg " + (rec.badge[id] ? "ok" : "no"); d.innerHTML = `<span class="e"></span><small></small>`; d.querySelector(".e").textContent = e; d.querySelector("small").textContent = t; g.append(d); });
       panel.append(g); panel.hidden = false; return; }
     { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row yg-roam";   // 2026-11-28 감독님 "그냥 돌아다니기를 맨 위로"
-      r.innerHTML = `<span class="e">🚶‍♀️</span><span><b></b><small></small></span>`; r.querySelector("b").textContent = Q ? "이 할 일 그만하고 그냥 돌아다니기" : "그냥 돌아다니기"; r.querySelector("small").textContent = "마음대로 구경하고 놀기 · 보물 찾기";
-      r.onclick = () => { panel.hidden = true; if(Q){ endGame(); E()?.playActor("fr", null); Q = null; setCarry(""); setup(); renderCard(); } }; panel.append(r); }
+      r.innerHTML = `<span class="e">🚶‍♀️</span><span><b></b><small></small></span>`; r.querySelector("b").textContent = G ? "이 놀이 그만하고 그냥 돌아다니기" : Q ? "이 할 일 그만하고 그냥 돌아다니기" : "그냥 돌아다니기"; r.querySelector("small").textContent = "마음대로 구경하고 놀기 · 보물 찾기";
+      r.onclick = () => { panel.hidden = true; if(G && !Q){ endGame(); setup(); renderCard(); } if(Q){ endGame(); E()?.playActor("fr", null); Q = null; setCarry(""); setup(); renderCard(); } }; panel.append(r); }
     { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row"; const o = rec.race;
       r.innerHTML = `<span class="e">🏎️</span><span><b>나이트 레이스</b><small></small></span>${o?.wins ? `<span class="ok">🏆 ${o.wins}번</span>` : ""}`;
       r.querySelector("small").textContent = o?.time > 0 ? `밤 도시 3바퀴 · 내 기록 ${Math.floor(o.time / 60)}:${(o.time % 60).toFixed(2).padStart(5, "0")}` : "밤 도시 3바퀴 · 드리프트와 니트로로 1등 하기";
@@ -1004,7 +1025,7 @@ export function start(api){
   function setup(){
     const e = E(); if(!e || !S.floor) return;
     const f = S.floor, st = curStep(), hide = [];
-    const need = k => (G?.type === "hide" || G?.type === "tag" || G?.type === "freeze") && k === "dad" || G?.type === "futsal" && (k === "dad" || k === G.mate) || G?.type === "swim" && k === G.rival || G?.type === "pong" && k === "dad" || G?.type === "tennis" && k === G.rv || G?.type === "squirt" && k === G.rv || G?.type === "race" && G.riv?.includes(k) || G?.type === "ending" || (st && st.f === f && st.talk === "@" + k);
+    const need = k => (G?.type === "hide" || G?.type === "tag" || G?.type === "freeze") && k === "dad" || G?.type === "futsal" && (k === "dad" || k === G.mate) || G?.type === "swim" && k === G.rival || G?.type === "pong" && k === "dad" || G?.type === "tennis" && k === G.rv || G?.type === "squirt" && k === G.rv || G?.type === "bumper" || G?.type === "race" && G.riv?.includes(k) || G?.type === "ending" || (st && st.f === f && st.talk === "@" + k);
     if(st && st.goAuto && st.f === f && !st.go){   // 엄마한테서 먼 자리에 소품
       const w = e.playWhere("_nora") || e.playWhere("l_nora"), sp = e.playSpots(5, 77 + rec.round, AVOID, 2.2);
       st.go = sp.sort((a, b) => (w ? Math.hypot(b[0] - w[0], b[1] - w[1]) - Math.hypot(a[0] - w[0], a[1] - w[1]) : 0))[0] || e.playFree(EXIT[0] + 4, EXIT[1] - 3, 0.2); }
@@ -1061,12 +1082,187 @@ export function start(api){
   }
 
   /* ---------- 미니게임 ---------- */
-  function endGame(){ if(!G) return; const was = G.type, wasRv = G.rv; clearInterval(G.iv); G.tm?.forEach(clearTimeout); const e = E(); if(e){ e.playSet({ball:null, freeze:false, act:null}); } G = null; tnPad.classList.remove("go"); act.classList.remove("beat"); hud.hidden = true; grillEl.hidden = true; grillEl.classList.remove("claw"); grillEl.querySelector(".bar em").style.left = ""; pickEl.hidden = true;
+  function endGame(){ if(!G) return; const was = G.type, wasRv = G.rv, wasG = G; clearInterval(G.iv); G.tm?.forEach(clearTimeout); const e = E(); if(e){ e.playSet({ball:null, freeze:false, act:null}); } G = null; tnPad.classList.remove("go"); act.classList.remove("beat"); hud.hidden = true; grillEl.hidden = true; grillEl.classList.remove("claw"); grillEl.querySelector(".bar em").style.left = ""; pickEl.hidden = true;
     if(was === "ending"){ nightEl.classList.remove("on"); lbOn(false); credEl.hidden = true; fade.classList.remove("on"); }
     if(COL.has(was) || was === "catmeat") refreshItems();
     if(was === "tennis") tnClean(wasRv);
-    if(was === "squirt") e?.playSet({camLock:null, camLead:null, cam:{el:0.62, d:5.2}});
-    if(was === "race") e?.playSet({auto:null, camLock:null, camLead:null, cam:{el:0.62, d:5.2}}); }
+    if(was === "squirt"){ e?.playSet({camLock:null, camLead:null, cam:{el:0.62, d:5.2}}); if(wasG.phase !== "end" && wasRv === "fr" && Q?.id !== "friend") e?.playActor("fr", null); }
+    if(was === "bumper") bpClean(wasG);
+    if(was === "dodge") dgClean();
+    if(was === "shop"){ if(shEl) shEl.hidden = true; if(wasG.back) e?.playSet({pos:wasG.back}); }
+    if(was === "race"){ e?.playSet({auto:null, camLock:null, camLead:null, cam:{el:0.62, d:5.2}}); if(wasG.phase !== "end" && S.floor === "gym") rcClean(wasG.riv); } }
+  /* ================= 새 놀이 셋 (2026-11-28 감독님 "다 만들어"): 범퍼카 쿵쿵 대결 · 학교 피구 · 분식집 알바 ================= */
+  const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
+  /* ---------- 범퍼카 쿵쿵 대결 (놀이공원): 조이스틱으로 직접 몰아 60초 동안 제일 많이 박기.
+     앞으로 들이받은 쪽이 1점, 뒤에서 박으면 2점, 💨 부스터로 박으면 +1. 상대 다섯도 서로 · 유나를 박음 ---------- */
+  const BP_DRV = [["dad", "아빠", 1.3, 0.42], ["fr", "지유", 1.45, 0.5], ["mom", "엄마", 1.25, 0.34], ["kid", "연재", 1.5, 0.55], ["classmate", "서연", 1.35, 0.42]];   // 배우 · 이름 · 빠르기 · 유나를 노리는 정도
+  const BP_HIT = ["쿵! 😆", "받아라~ 💥", "비켜 비켜~ 🚗", "내가 간다! 😎"], BP_OUCH = ["으악! 😵", "앗 당했다 😆", "누구야~ 💫", "뒤에서 치기 없기! 😤"];
+  const BP_D = 1.08, BP_M = 0.62;
+  function bpStart(u){ const e = E(), H = AREA_MOD.fun?.bumper; if(!e || !H?.cars || !H.cars().length){ funRide(u); return; } startGame("bumper");
+    const cs = H.cars(), r = H.rect, tall = innerHeight > innerWidth * 1.1;
+    const cars = cs.slice(0, 6).map((c, k) => { const d = BP_DRV[k - 1]; return {k, i:c[0], j:c[1], h:c[2], v:0, ki:0, kj:0, sp:0, stun:0, think:0, tg:-1, pt:[(r[0] + r[2]) / 2, (r[1] + r[3]) / 2], sc:0, who:d ? d[0] : "yu", nm:d ? d[1] : "유나", vm:d ? d[2] : 0, ag:d ? d[3] : 0}; });
+    Object.assign(G, {H, r, cars, phase:"ready", until:0, back:[u.at[0], u.at[1], u.h ?? 0], boost:0, bcd:0, lt:now(), drv:BP_DRV.map(d => d[0]), pc:{}, hits:0, rear:0});
+    cars.forEach(c => { if(!c.k) return; H.set(c.k, c.i, c.j, c.h); e.playActor(c.who, {at:[c.i, c.j, c.h], pose:"crouch", to:null}); });
+    G.dv = {start:[cs[0][0], cs[0][1], cs[0][2]], seat:H.seat ?? 0.3, speed:0, turn:3.2, ok:(i, j) => i > r[0] + BP_M && i < r[2] - BP_M && j > r[1] + BP_M && j < r[3] - BP_M, set:(i, j, h) => { try { H.set(0, i, j, h); } catch(_){} }, bump:() => sfx("bump")};
+    e.playSet({freeze:false, mark:null, act:{k:"ride", cam:tall ? 1.55 : 1.25, drive:G.dv}}); jumpB.style.visibility = runB.style.visibility = "hidden";
+    toast("🚗 범퍼카 쿵쿵 대결!", "60초 동안 제일 많이 박기 · 뒤에서 박으면 2점 · 💨 부스터", 3400); yuSay("범퍼카 운전할래! 🚗", 1600); npcSay("@staff", "안전벨트 매고~ 출발 신호 기다려요! 😊", 2400);
+    ["3", "2", "1"].forEach((n, k) => later(1500 + k * 800, () => { toast(n, "", 600); sfx("blip"); }));
+    later(1500 + 3 * 800, () => { toast("출발! 🚗💨", "", 800); sfx("go"); G.phase = "go"; G.until = now() + 60000; G.lt = now(); }); }
+  function bpBoost(){ const t = now(); if(G?.type !== "bumper" || G.phase !== "go" || t < G.bcd) return; G.boost = t + 1100; G.bcd = t + 3400; sfx("boost"); E()?.playEmote?.("yu", "💨", 700); }
+  function bpHud(tm){ if(!G.cars) return "🚗"; const C = G.cars, top = C.slice(1).sort((a, b) => b.sc - a.sc)[0], pl = 1 + C.slice(1).filter(c => c.sc > C[0].sc).length;
+    return G.phase === "go" ? `🚗 유나 <b>${C[0].sc}</b>점 · ${pl}등 <i>${top.nm} ${top.sc}</i> ${tm}` : "🚗 준비…"; }
+  function bpTick(st, t){ const e = E(); if(!e || !G.cars) return; const dt = clampN((t - G.lt) / 1000, 0.001, 0.05); G.lt = t; const C = G.cars, r = G.r, Y = C[0];
+    Y.i = st.i; Y.j = st.j; Y.h = st.h; Y.v = st.dv || 0; if(G.phase !== "go") return;
+    G.dv.speed = t < G.boost ? 3.1 : 1.75; act.style.opacity = t < G.bcd ? 0.45 : "";
+    if(t > G.until){ bpEnd(); return; }
+    for(let k = 1; k < C.length; k++){ const c = C[k];   // 상대 차: 노릴 곳을 가끔 바꾸며 달림
+      if(t > c.think){ c.think = t + 900 + Math.random() * 1500; const q = Math.random(); c.tg = q < c.ag ? 0 : q < c.ag + 0.3 ? 1 + (Math.random() * (C.length - 1) | 0) : -1; if(c.tg === k) c.tg = 0;
+        if(c.tg < 0) c.pt = [r[0] + 1 + Math.random() * (r[2] - r[0] - 2), r[1] + 1 + Math.random() * (r[3] - r[1] - 2)]; }
+      const T = c.tg >= 0 ? C[c.tg] : null, ti = T ? T.i : c.pt[0], tj = T ? T.j : c.pt[1];
+      if(t > c.stun){ c.h += wrapA(Math.atan2(ti - c.i, tj - c.j) - c.h) * Math.min(1, dt * 2.3); c.v += (c.vm - c.v) * Math.min(1, dt * 1.5); } else c.v *= Math.exp(-dt * 2.2);
+      c.h += c.sp * dt; c.sp *= Math.exp(-dt * 3.4);
+      c.i += (Math.sin(c.h) * c.v + c.ki) * dt; c.j += (Math.cos(c.h) * c.v + c.kj) * dt; const kd = Math.exp(-dt * 3.2); c.ki *= kd; c.kj *= kd; }
+    for(let a = 0; a < C.length; a++) for(let b = a + 1; b < C.length; b++){ const A = C[a], B = C[b], di = B.i - A.i, dj = B.j - A.j, d = Math.hypot(di, dj); if(d >= BP_D || d < 1e-4) continue;
+      const ni = di / d, nj = dj / d, ov = BP_D - d;
+      if(a === 0){ B.i += ni * ov; B.j += nj * ov; } else { A.i -= ni * ov / 2; A.j -= nj * ov / 2; B.i += ni * ov / 2; B.j += nj * ov / 2; }
+      const key = a * 10 + b; if(t - (G.pc[key] || 0) < (a === 0 ? 1100 : 3200)) continue;
+      const fA = A.v * (Math.sin(A.h) * ni + Math.cos(A.h) * nj), fB = -B.v * (Math.sin(B.h) * ni + Math.cos(B.h) * nj), f = Math.max(fA, fB), Ht = fA >= fB ? A : B, V = Ht === A ? B : A; if(f < (Ht.k ? 0.8 : 0.95) || t < (V.safe || 0) || t < (Ht.cool || 0)) continue;   // 속도를 붙여 들이받아야 점수 · 방금 맞은 차는 잠깐 무적
+      G.pc[key] = t; V.safe = t + 1300; Ht.cool = t + 650; const s = Ht === A ? 1 : -1, hi = ni * s, hj = nj * s, rear = Math.sin(V.h) * hi + Math.cos(V.h) * hj > 0.4, bst = Ht.k === 0 && t < G.boost + 200;
+      const pts = 1 + (rear ? 1 : 0) + (bst ? 1 : 0), kb = 1.9 + Math.min(1.6, f * 0.7) + (bst ? 0.8 : 0); Ht.sc += pts; V.ki += hi * kb; V.kj += hj * kb;
+      const away = c => { c.tg = -1; c.pt = [r[0] + 1 + Math.random() * (r[2] - r[0] - 2), r[1] + 1 + Math.random() * (r[3] - r[1] - 2)]; c.think = t + 1400 + Math.random() * 1200; };   // 박고 나면 흩어짐 (한데 뭉치지 않게)
+      if(V.k){ V.sp = (Math.random() - 0.5) * 7; V.stun = t + 550; away(V); } if(Ht.k){ Ht.v *= 0.35; away(Ht); }
+      const mid = [(A.i + B.i) / 2, (A.j + B.j) / 2, 0.8];
+      if(Ht.k === 0){ G.hits++; if(rear) G.rear++; sfx(pts >= 2 ? "goal" : "bump"); e.playEmote?.(mid, "💥", 600); tmShow(pts >= 2 ? "perfect" : "good", (bst ? "부스터 쾅! " : rear ? "뒤치기! " : "쿵! ") + "+" + pts);
+        if(Math.random() < 0.4) npcSay("@" + V.who, pick(BP_OUCH), 1200); if(Math.random() < 0.3) yuSay(pick(BP_HIT), 900); }
+      else if(V.k === 0){ sfx("bump"); e.playEmote?.("yu", "💫", 700); if(Math.random() < 0.5) npcSay("@" + Ht.who, pick(BP_HIT), 1200); if(Math.random() < 0.35) yuSay(pick(BP_OUCH), 900); }
+      else if(Math.hypot(mid[0] - Y.i, mid[1] - Y.j) < 4 && Math.random() < 0.5) e.playEmote?.(mid, "💥", 450); }
+    for(let k = 1; k < C.length; k++){ const c = C[k]; let w = false;   // 벽
+      if(c.i < r[0] + BP_M){ c.i = r[0] + BP_M; c.ki = Math.abs(c.ki) * 0.4; w = true; } if(c.i > r[2] - BP_M){ c.i = r[2] - BP_M; c.ki = -Math.abs(c.ki) * 0.4; w = true; }
+      if(c.j < r[1] + BP_M){ c.j = r[1] + BP_M; c.kj = Math.abs(c.kj) * 0.4; w = true; } if(c.j > r[3] - BP_M){ c.j = r[3] - BP_M; c.kj = -Math.abs(c.kj) * 0.4; w = true; }
+      if(w && c.tg < 0){ c.pt = [(r[0] + r[2]) / 2 + (Math.random() - 0.5) * 3, (r[1] + r[3]) / 2 + (Math.random() - 0.5) * 2]; }
+      const dy = Math.hypot(c.i - Y.i, c.j - Y.j); if(dy < BP_D - 0.05 && dy > 1e-4){ Y.ki += (Y.i - c.i) / dy * 1.4; Y.kj += (Y.j - c.j) / dy * 1.4; }   // 벽에 낀 차랑 겹치면 유나 차가 밀려남
+      G.H.set(c.k, c.i, c.j, c.h); e.playActor(c.who, {at:[c.i, c.j, c.h]}); }
+    if(Math.hypot(Y.ki, Y.kj) > 0.08){ e.playSet({at:[clampN(Y.i + Y.ki * dt, r[0] + BP_M + 0.01, r[2] - BP_M - 0.01), clampN(Y.j + Y.kj * dt, r[1] + BP_M + 0.01, r[3] - BP_M - 0.01)]}); const kd = Math.exp(-dt * 3.4); Y.ki *= kd; Y.kj *= kd; } }
+  function bpEnd(){ if(G?.type !== "bumper" || G.phase === "end") return; G.phase = "end"; G.dv.speed = 0; act.style.opacity = ""; const C = G.cars, my = C[0].sc, top = C.slice(1).sort((a, b) => b.sc - a.sc)[0], pl = 1 + C.slice(1).filter(c => c.sc > my).length;
+    const T = rec.bumper = rec.bumper || {play:0, win:0, best:0}; T.play++; T.best = Math.max(T.best || 0, my); if(pl === 1){ T.win++; rec.stars++; sfx("star"); } else sfx("ding"); rec.rides = rec.rides || {}; rec.rides.fn_bumper = 1; save();
+    toast(pl === 1 ? `🏆 범퍼카 1등! ${my}점` : `🚗 ${pl}등 · 유나 ${my}점`, pl === 1 ? `⭐ +1 · 뒤치기 ${G.rear}번` : `1등은 ${top.nm} ${top.sc}점 · 뒤에서 박으면 2점이에요`, 3200, true);
+    npcSay("@" + top.who, pl === 1 ? pick(["유나 운전 진짜 잘한다! 👏", "졌다 졌어~ 😆"]) : pick(["내가 1등이다~ 😎", "한 판 더 할래? 😆"]), 2600); E()?.playEmote?.("yu", pl === 1 ? "🏆" : "😆", 1500);
+    firstUse("fn_bumper", "🚗 범퍼카 운전"); renderCard(); later0(1200, checkBadges); later(3300, () => endGame()); }
+  function bpClean(g){ const e = E(); jumpB.style.visibility = runB.style.visibility = ""; act.style.opacity = ""; if(!e) return;
+    try { for(let k = 0; k < 6; k++) g.H?.set(k, null); } catch(_){}
+    BP_DRV.forEach(d => e.playActor(d[0], null)); if(g.back) e.playSet({pos:g.back, wave:1200}); if(Q?.id === "friend") S.frF = null; later0(250, () => { if(live && !G) setup(); }); }
+  window.__ygBP = {start:() => bpStart((USE.fun || []).find(u => u.k === "fn_bumper")), boost:() => bpBoost(), end:() => bpEnd(), g:() => G};   // 시험용
+
+  /* ---------- 피구 (학교 운동장 안쪽): 코트 안에서 공 피하기. 🙌 받기는 공이 닿기 직전에 눌러야 잡힘 → 🔥 던지기로 바깥 친구 맞히면 아웃.
+     ❤️ 셋 다 잃으면 짐, 친구 셋 다 아웃시키면 이김 ---------- */
+  const DG = {i0:13.4, i1:18.6, j0:14.3, j1:18.9};   // floor3d_school.js 바닥에 그린 피구 코트와 같은 자리
+  const DG_TH = [["classmate", "서연", 0], ["fr", "지유", 1], ["kid", "연재", 2]];   // 배우 · 이름 · 서는 쪽 (0 왼쪽 · 1 오른쪽 · 2 뒤쪽)
+  const dgAt = (side, s) => side === 0 ? [DG.i0 - 0.9, clampN(s, DG.j0 + 0.2, DG.j1 - 0.2)] : side === 1 ? [DG.i1 + 0.9, clampN(s, DG.j0 + 0.2, DG.j1 - 0.2)] : [clampN(s, DG.i0 + 0.2, DG.i1 - 0.2), DG.j0 - 0.9];
+  function dgStart(){ const e = E(); if(!e) return; startGame("dodge"); const tall = innerHeight > innerWidth * 1.1, ci = (DG.i0 + DG.i1) / 2, cj = (DG.j0 + DG.j1) / 2;
+    Object.assign(G, {phase:"ready", lives:3, outs:0, th:DG_TH.map(([k, n, side]) => ({k, n, side, alive:true})), holder:"kid", actAt:0, ball:null, aim:false, passN:0, catchAt:0, inv:0, heldAt:0, lt:now(), prev:null, vel:[0, 0], until:0, t1:0, catches:0, mv:0});
+    e.playSet({pos:[ci, cj + 0.8, PI], mark:null, freeze:true, camLock:0, camLead:tall ? -0.2 : 0.4, cam:{el:tall ? 1.0 : 0.86, d:tall ? 10.4 : 7.6}});
+    G.th.forEach(T => { const p = dgAt(T.side, T.side === 2 ? ci : cj); e.playActor(T.k, {at:[p[0], p[1], T.side === 0 ? PI / 2 : T.side === 1 ? -PI / 2 : 0], pose:"stand", to:null}); }); S.npcF = S.npcF || {}; S.npcF.classmate = null;
+    Object.keys(S.vil || {}).forEach(k => { const a = S.st?.actors?.[k]; if(a && a.i > DG.i0 - 2 && a.i < DG.i1 + 2 && a.j > DG.j0 - 2 && a.j < DG.j1 + 1) e.playActor(k, {at:[DG.i0 + Math.random() * (DG.i1 - DG.i0), DG.j1 + 1.1 + Math.random() * 0.5, PI], to:null}); });   // 코트 안 사람은 구경 자리로
+    npcSay("@coach", "피구 시작한다~ 삐익! 📣", 2200); toast("🤾 피구!", "공 피하기 · 닿기 직전에 🙌 받기 → 🔥 던져서 셋 다 아웃시키기", 3600); yuSay("다 덤벼라~ 💪", 1500);
+    ["3", "2", "1"].forEach((n, k) => later(1500 + k * 800, () => { toast(n, "", 600); sfx("blip"); }));
+    later(1500 + 3 * 800, () => { toast("시작! 🏐", "", 800); sfx("go"); e.playSet({freeze:false}); G.phase = "play"; G.t1 = now(); G.until = G.t1 + 80000; G.actAt = G.t1 + 1300; G.lt = G.t1; }); }
+  const dgLv = t => G.outs + Math.min(2, (t - G.t1) / 30000);
+  const dgHand = (st, k) => { if(k === "yu") return [st.i + Math.sin(st.h) * 0.28, st.j + Math.cos(st.h) * 0.28, 0.55]; const a = st.actors?.[k]; return a ? [a.i, a.j, 0.62] : null; };
+  function dgHud(tm){ return G.phase === "play" ? `🤾 ${"❤️".repeat(G.lives)}${"🤍".repeat(3 - G.lives)} · 아웃 <b>${G.outs}</b>/3 ${tm}` : "🤾 준비…"; }
+  function dgPickup(p, t, not){ const st = S.st, al = G.th.filter(T => T.alive && T.k !== not), L = al.length ? al : G.th.filter(T => T.alive); if(!L.length || !st) return; let best = L[0], bd = 1e9;
+    L.forEach(T => { const a = st.actors?.[T.k]; if(!a) return; const d = Math.hypot(a.i - p[0], a.j - p[1]); if(d < bd){ bd = d; best = T; } });
+    G.ball = null; G.aim = false; G.holder = best.k; G.actAt = t + Math.max(600, 1500 - dgLv(t) * 220) + Math.random() * 500; }   // 처음엔 천천히, 갈수록 빨리
+  function dgRvAct(st, t){ const e = E(), T = G.th.find(x => x.k === G.holder), a = st.actors?.[G.holder]; if(!e || !T || !a) return; const lv = dgLv(t), oth = G.th.filter(x => x.alive && x !== T);
+    if(oth.length && G.passN < 2 && Math.random() < 0.3){ const O = pick(oth), b = st.actors?.[O.k]; if(b){ G.passN++; const TT = 0.58; G.ball = {p:[a.i, a.j, 0.7], v:[(b.i - a.i) / TT, (b.j - a.j) / TT, 3 * TT], by:"pass", to:O.k, tEnd:t + TT * 1000}; G.holder = null; e.playActor(T.k, {wave:350}); sfx("blip"); return; } }
+    G.aim = true; e.playActor(T.k, {to:null, h:Math.atan2(st.i - a.i, st.j - a.j)}); e.playEmote?.("@" + T.k, "🎯", 520);
+    later(Math.max(340, 540 - lv * 45), () => { if(G?.type !== "dodge" || G.phase !== "play" || G.holder !== T.k) return; const s2 = S.st, a2 = s2?.actors?.[T.k]; if(!s2 || !a2) return;
+      const sp = Math.min(8.4, 5.6 + lv * 0.7), d0 = Math.hypot(s2.i - a2.i, s2.j - a2.j), ld = (Math.random() < 0.35 + lv * 0.12 ? 1 : 0.25) * d0 / sp;
+      const ti = clampN(s2.i + G.vel[0] * ld, DG.i0, DG.i1), tj = clampN(s2.j + G.vel[1] * ld, DG.j0, DG.j1), dd = Math.hypot(ti - a2.i, tj - a2.j) || 1;
+      G.ball = {p:[a2.i, a2.j, 0.72], v:[(ti - a2.i) / dd * sp, (tj - a2.j) / dd * sp, -0.12], by:"rv", from:T.k, dist:0, sp}; G.holder = null; G.aim = false; G.passN = 0;
+      e.playActor(T.k, {h:Math.atan2(ti - a2.i, tj - a2.j), wave:420}); sfx("jump"); if(Math.random() < 0.3) npcSay("@" + T.k, pick(["받아라~! 🏐", "간다~!! 😆", "피해 봐라~ 😝"]), 900); }); }
+  function dgPress(){ const t = now(), st = S.st; if(G?.type !== "dodge" || G.phase !== "play" || !st) return;
+    if(G.holder === "yu"){ dgThrow(st, t); return; } if(t - G.catchAt < 650) return; G.catchAt = t; E()?.playSet({wave:320}); sfx("blip"); }
+  function dgThrow(st, t){ const e = E(), al = G.th.filter(T => T.alive); if(!e || !al.length) return; let best = null, bs = -9;
+    al.forEach(T => { const a = st.actors?.[T.k]; if(!a) return; const d = Math.hypot(a.i - st.i, a.j - st.j) || 1, dot = (Math.sin(st.h) * (a.i - st.i) + Math.cos(st.h) * (a.j - st.j)) / d, sc = dot - d * 0.04; if(sc > bs){ bs = sc; best = T; } }); if(!best) return;
+    const a = st.actors[best.k], d = Math.hypot(a.i - st.i, a.j - st.j) || 1, sp = 7.8, lv = dgLv(t);
+    G.ball = {p:[st.i, st.j, 0.7], v:[(a.i - st.i) / d * sp, (a.j - st.j) / d * sp, -0.1], by:"yu", to:best.k, dist:0, sp}; G.holder = null; e.playSet({hold:null, wave:420}); sfx("boost"); yuSay(pick(["받아라~!! 🔥", "얍!! 🏐", "간다~!"]), 800);
+    if(Math.random() < (0.42 + lv * 0.1) * (d < 2.6 ? 0.45 : 1)){ /* 가까이서 던질수록 못 피함 */ const cur = best.side === 2 ? a.i : a.j, lo = best.side === 2 ? DG.i0 : DG.j0, hi = best.side === 2 ? DG.i1 : DG.j1, dir = cur - lo < 1.5 ? 1 : hi - cur < 1.5 ? -1 : Math.random() < 0.5 ? -1 : 1, p = dgAt(best.side, cur + dir * 1.5);
+      later(110, () => { if(G?.type === "dodge") E()?.playActor(best.k, {to:p, spd:3.2}); }); } }
+  function dgTick(st, t){ const e = E(); if(!e || !G.th) return; const dt = clampN((t - G.lt) / 1000, 0.001, 0.05); G.lt = t;
+    if(G.prev){ const d2 = Math.max(0.016, (t - G.prev[2]) / 1000); G.vel = [G.vel[0] * 0.6 + (st.i - G.prev[0]) / d2 * 0.4, G.vel[1] * 0.6 + (st.j - G.prev[1]) / d2 * 0.4]; } G.prev = [st.i, st.j, t];
+    if(G.phase !== "play"){ if(G.phase === "ready"){ const h = dgHand(st, G.holder); if(h) e.playTBall([h[0], h[1], h[2], 0.17]); } return; }
+    { const ci = clampN(st.i, DG.i0 + 0.25, DG.i1 - 0.25), cj = clampN(st.j, DG.j0 + 0.25, DG.j1 - 0.25); if(ci !== st.i || cj !== st.j) e.playSet({at:[ci, cj]}); }   // 코트 밖으로는 못 나감
+    if(t > G.until){ dgEnd(G.outs >= 2 ? "time" : "draw"); return; }
+    if(t - G.mv > 320){ G.mv = t; G.th.forEach(T => { if(!T.alive || (G.aim && G.holder === T.k) || (G.ball?.by === "yu" && G.ball.to === T.k)) return; const p = dgAt(T.side, T.side === 2 ? st.i : st.j), a = st.actors?.[T.k]; if(a && Math.hypot(a.i - p[0], a.j - p[1]) > 0.5) e.playActor(T.k, {to:p, spd:G.holder === T.k ? 1.5 : 1.0}); }); }   // 바깥 친구들은 유나를 따라 줄 위에서 움직임
+    const b = G.ball;
+    if(!b){ const h = dgHand(st, G.holder); if(h) e.playTBall([h[0], h[1], h[2], 0.17]);
+      if(G.holder === "yu"){ if(t - G.heldAt > 5000) dgThrow(st, t); } else if(!G.aim && t > G.actAt) dgRvAct(st, t); return; }
+    b.p[0] += b.v[0] * dt; b.p[1] += b.v[1] * dt; b.p[2] = Math.max(0.05, b.p[2] + b.v[2] * dt); if(b.by === "pass") b.v[2] -= 6 * dt; else b.dist += b.sp * dt; e.playTBall([b.p[0], b.p[1], b.p[2], 0.17]);
+    if(b.by === "pass"){ if(t >= b.tEnd){ G.ball = null; G.holder = b.to; G.actAt = t + Math.max(300, 520 - dgLv(t) * 50) + Math.random() * 450; } return; }
+    const out = b.dist > 12 || b.p[0] < DG.i0 - 2.6 || b.p[0] > DG.i1 + 2.6 || b.p[1] < DG.j0 - 2.6 || b.p[1] > DG.j1 + 2.4;
+    if(b.by === "rv"){
+      if(t > G.inv && Math.hypot(b.p[0] - st.i, b.p[1] - st.j) < 0.52){ const pr = t - G.catchAt;
+        if(pr >= 0 && pr < 330){ G.ball = null; G.holder = "yu"; G.heldAt = t; G.catches++; const pf = pr < 180; sfx(pf ? "goal" : "pick"); tmShow(pf ? "perfect" : "good", pf ? "PERFECT 캐치 ✨" : "잡았다! 👍"); e.playEmote?.("yu", "🙌", 700); yuSay(pick(["잡았다!! 🙌", "내 공이다~ 😎"]), 900); return; }
+        G.lives--; G.inv = t + 1500; sfx("bump"); e.playEmote?.("yu", "💥", 800); tmShow(pr >= 0 && pr < 900 ? "early" : "late", pr >= 0 && pr < 900 ? "빨라요 ⏩" : "아얏! 💥"); yuSay(pick(["아얏! 😵", "으앗 맞았다 😆", "아프다~ 💫"]), 900);
+        if(Math.random() < 0.6) npcSay("@" + b.from, pick(["맞았다~!! 😆", "명중! 🎯", "나이스~ 👏"]), 1200);
+        if(G.lives <= 0){ G.ball = null; e.playTBall(null); dgEnd("lose"); return; } dgPickup(b.p, t, b.from); return; }
+      if(out) dgPickup(b.p, t); return; }
+    if(b.by === "yu"){ const T = G.th.find(x => x.k === b.to), a = st.actors?.[b.to];
+      if(T && a && Math.hypot(b.p[0] - a.i, b.p[1] - a.j) < 0.56){ T.alive = false; G.outs++; sfx("goal"); tmShow("perfect", `${T.n} 아웃! 🎯`); e.playEmote?.("@" + T.k, "😵", 900); npcSay("@" + T.k, pick(["으악 아웃이다~ 😵", "유나 공 진짜 세다! 😮"]), 1500);
+        e.playActor(T.k, {to:[DG.i1 + 0.6 - G.outs * 1.0, DG.j1 + 0.85], spd:1.8, pose:"crouch"}); if(G.outs >= 3){ G.ball = null; e.playTBall(null); dgEnd("win"); return; } dgPickup(b.p, t); return; }
+      if(out){ if(Math.random() < 0.5) npcSay("@" + b.to, pick(["안 맞았지롱~ 😜", "피했다! 😝"]), 1000); dgPickup(b.p, t); } } }
+  function dgEnd(w){ const e = E(); if(G?.type !== "dodge" || G.phase === "end") return; G.phase = "end"; G.ball = null; e?.playTBall(null); e?.playSet({hold:null}); const ok = w === "win" || w === "time";
+    const T = rec.dodge = rec.dodge || {play:0, win:0, best:0}; T.play++; T.best = Math.max(T.best || 0, G.outs); if(w === "win") T.win++; if(ok){ rec.stars++; sfx("star"); } else sfx("ding"); save();
+    toast(w === "win" ? "🏆 피구왕 유나! 셋 다 아웃" : w === "time" ? `🤾 시간 끝! 아웃 ${G.outs}명 · 판정승` : w === "draw" ? `🤾 시간 끝! 아웃 ${G.outs}명` : "🏐 아웃! 하트를 다 잃었어요", ok ? `⭐ +1 · 잡은 공 ${G.catches}개` : "닿기 직전에 🙌 받기를 눌러 봐요", 3200, true);
+    npcSay("@coach", w === "win" ? "유나 피구왕이다! 👏" : ok ? "끝까지 잘 버텼다! 👍" : "괜찮아~ 다음 체육 시간에 또 하자 😊", 2600); e?.playEmote?.("yu", ok ? "🏆" : "😤", 1500);
+    firstUse("sc_dodge", "🤾 운동장 피구"); renderCard(); later0(1200, checkBadges); later(3300, () => endGame()); }
+  function dgClean(){ const e = E(); if(!e) return; e.playTBall(null); e.playSet({hold:null, camLock:null, camLead:null, cam:{el:0.62, d:5.2}}); ["fr", "kid", "classmate"].forEach(k => e.playActor(k, null));
+    S.npcF = S.npcF || {}; S.npcF.classmate = null; if(Q?.id === "friend") S.frF = null; later0(250, () => { if(live && !G) setup(); }); }
+  window.__ygDG = {start:() => dgStart(), press:() => dgPress(), g:() => G, rect:DG};   // 시험용
+
+  /* ---------- 분식집 알바 (학교 앞 골목 크레용분식): 손님 주문대로 쟁반에 담고 손님을 누르면 드림. 60초, 빠를수록 팁 ---------- */
+  const SH_MENU = [["tteok", "🍢", "떡볶이", 3000], ["odeng", "🍥", "어묵", 1000], ["sundae", "🌭", "순대", 3500], ["twigim", "🍤", "튀김", 2000], ["juice", "🧃", "주스", 1500]];
+  const SH_CUST = [["👧", "지유"], ["👦", "연재"], ["👩‍🏫", "선생님"], ["👵", "문방구 할머니"], ["👨", "아빠"], ["👩", "엄마"], ["🧒", "서연"], ["👮", "지킴이 아저씨"], ["🧑‍🍳", "조리사님"], ["👴", "낚시 할아버지"]];
+  const SH_GOAL = 10, shWon = n => n.toLocaleString("ko-KR") + "원";
+  let shEl = null;
+  function shBuild(){ if(shEl) return shEl; shEl = document.createElement("div"); shEl.className = "yg-shop"; shEl.hidden = true;
+    shEl.innerHTML = `<div class="hd"><b>🍢 크레용분식 알바</b><span class="n"></span><span class="w"></span><span class="t"></span></div><div class="cs"></div><div class="tr"><small>쟁반</small><div class="t"></div><button class="x" type="button">비우기</button></div><div class="mn"></div><p class="tip">음식을 쟁반에 담고, 주문한 손님을 누르면 드려요</p>`;
+    SH_MENU.forEach(([k, em, nm]) => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b>"; b.querySelector("span").textContent = em; b.querySelector("b").textContent = nm; b.setAttribute("aria-label", nm + " 담기");
+      b.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); shAdd(k); }); shEl.querySelector(".mn").append(b); });
+    for(let k = 0; k < 3; k++){ const c = document.createElement("button"); c.type = "button"; c.className = "c no"; c.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); shServe(k); }); shEl.querySelector(".cs").append(c); }
+    shEl.querySelector(".x").addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); if(G?.type === "shop"){ G.tray = []; shTray(); sfx("blip"); } });
+    ["pointerdown", "click", "touchstart"].forEach(k => shEl.addEventListener(k, ev => ev.stopPropagation())); root.append(shEl); return shEl; }
+  const shEm = k => SH_MENU.find(m => m[0] === k)[1];
+  function shTray(){ const t = shEl.querySelector(".tr .t"); t.innerHTML = ""; G.tray.forEach((k, n) => { const b = document.createElement("button"); b.type = "button"; b.textContent = shEm(k); b.setAttribute("aria-label", "빼기"); b.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); if(G?.type === "shop"){ G.tray.splice(n, 1); shTray(); } }); t.append(b); }); }
+  function shCard(k){ const c = shEl.querySelectorAll(".cs .c")[k], cu = G.cs[k]; c.className = "c" + (cu ? "" : " no"); if(!cu){ c.innerHTML = "<small>빈자리</small>"; return; }
+    c.innerHTML = `<span class="f"></span><small></small><span class="o"></span><span class="p"><i></i></span>`; c.querySelector(".f").textContent = cu.f; c.querySelector("small").textContent = cu.nm; c.querySelector(".o").textContent = cu.order.map(shEm).join(""); c.setAttribute("aria-label", cu.nm + " 손님한테 드리기"); }
+  function shStart(u){ const e = E(); if(!e) return; startGame("shop"); shBuild();
+    Object.assign(G, {phase:"ready", cs:[null, null, null], tray:[], money:0, served:0, lost:0, next:0, until:0, t1:0, last:-1, back:[u.at[0], u.at[1], u.h ?? PI]});
+    e.playSet({pos:G.back, freeze:true, mark:null}); [0, 1, 2].forEach(shCard); shTray(); shEl.hidden = false; shEl.classList.remove("end"); shHead(now());
+    npcSay("@aunt", "유나가 도와준다고? 그럼 주문 좀 받아 줘~ 😊", 2400); yuSay("어서 오세요~ 크레용분식입니다! 🍢", 1800); toast("🍢 분식집 알바!", `60초 · 손님 ${SH_GOAL}명 받으면 ⭐`, 2200); sfx("go");
+    later(1400, () => { G.phase = "open"; G.t1 = now(); G.until = G.t1 + 60000; G.next = G.t1 + 300; }); }
+  function shHead(t){ const left = G.until ? Math.max(0, Math.ceil((G.until - t) / 1000)) : 60; shEl.querySelector(".hd .n").textContent = `손님 ${G.served}/${SH_GOAL}`; shEl.querySelector(".hd .w").textContent = shWon(G.money); shEl.querySelector(".hd .t").textContent = `⏱ ${left}`; }
+  function shAdd(k){ if(G?.type !== "shop" || G.phase !== "open") return; if(G.tray.length >= 4){ sfx("bump"); return; } G.tray.push(k); shTray(); sfx("blip"); }
+  function shServe(k){ if(G?.type !== "shop" || G.phase !== "open") return; const cu = G.cs[k], t = now(), c = shEl.querySelectorAll(".cs .c")[k]; if(!cu || cu.done) return;
+    if(!G.tray.length){ sfx("bump"); return; }
+    if([...G.tray].sort().join() === [...cu.order].sort().join()){ const left = 1 - (t - cu.t0) / cu.pat, tip = left > 0.5 ? 500 : 0, sum = cu.order.reduce((s, x) => s + SH_MENU.find(m => m[0] === x)[3], 0) + tip;
+      G.money += sum; G.served++; G.tray = []; shTray(); cu.done = true; c.classList.add("ok"); c.querySelector(".o").textContent = "+" + shWon(sum); c.querySelector(".f").textContent = tip ? "😍" : "😋"; sfx(tip ? "goal" : "pick");
+      E()?.playEmote?.("yu", pick(["🍢", "💰", "😊"]), 800); if(G.served === SH_GOAL){ sfx("star"); npcSay("@aunt", "유나 장사 잘하네~ 이모보다 빠르다! 👏", 2200); }
+      later(480, () => { if(G?.type === "shop" && G.cs[k] === cu){ G.cs[k] = null; shCard(k); G.next = Math.min(G.next, now() + 350); } }); }
+    else { sfx("bump"); cu.t0 -= 2000; c.classList.remove("bad"); void c.offsetWidth; c.classList.add("bad"); c.querySelector(".f").textContent = "🤔"; later(600, () => { if(G?.type === "shop" && G.cs[k] === cu && !cu.done) c.querySelector(".f").textContent = cu.f; }); } }
+  function shTick(st, t){ if(!shEl || G.phase !== "open") return; const lv = Math.min(3, (t - G.t1) / 15000);
+    if(t > G.until){ shEnd(); return; }
+    if(t > G.next){ const k = [0, 1, 2].filter(x => !G.cs[x]); if(k.length){ const slot = pick(k); let who; do { who = Math.random() * SH_CUST.length | 0; } while(who === G.last || G.cs.some(c => c && c.id === who)); G.last = who;
+        const n = 1 + (Math.random() < 0.45 + lv * 0.15 ? 1 : 0) + (lv >= 1.5 && Math.random() < 0.4 ? 1 : 0), pool = SH_MENU.slice(0, lv < 1 ? 4 : 5), order = Array.from({length:n}, () => pick(pool)[0]);
+        G.cs[slot] = {id:who, f:SH_CUST[who][0], nm:SH_CUST[who][1], order, t0:t, pat:Math.max(8000, 13500 - lv * 1500) + n * 1200}; shCard(slot); sfx("ding"); }
+      G.next = t + Math.max(1500, 2900 - lv * 450) + Math.random() * 600; }
+    G.cs.forEach((cu, k) => { if(!cu || cu.done) return; const left = 1 - (t - cu.t0) / cu.pat, c = shEl.querySelectorAll(".cs .c")[k], bar = c.querySelector(".p i"); if(bar) bar.style.width = Math.max(0, left * 100) + "%"; c.classList.toggle("hot", left < 0.3);
+      if(left <= 0){ cu.done = true; G.lost++; c.classList.add("gone"); c.querySelector(".f").textContent = "😤"; c.querySelector(".o").textContent = "너무 늦어요"; sfx("bump"); later(700, () => { if(G?.type === "shop" && G.cs[k] === cu){ G.cs[k] = null; shCard(k); } }); } });
+    shHead(t); }
+  function shEnd(){ if(G?.type !== "shop" || G.phase === "end") return; G.phase = "end"; const ok = G.served >= SH_GOAL, T = rec.shop = rec.shop || {play:0, best:0, bestN:0}; T.play++; T.best = Math.max(T.best || 0, G.money); T.bestN = Math.max(T.bestN || 0, G.served); if(ok){ rec.stars++; sfx("star"); } else sfx("ding"); save();
+    shEl.hidden = true; toast(ok ? `🏆 알바왕 유나! 손님 ${G.served}명` : `🍢 영업 끝! 손님 ${G.served}명`, `오늘 매출 ${shWon(G.money)}` + (ok ? " · ⭐ +1" : ` · ${SH_GOAL}명 받으면 ⭐`), 3200, true);
+    npcSay("@aunt", ok ? "오늘 알바비는 떡볶이 곱빼기다! 😆" : "수고했어~ 다음엔 더 잘할 거야 😊", 2600); E()?.playEmote?.("yu", ok ? "🏆" : "😊", 1500); firstUse("tw_shop", "🍢 분식집 알바"); renderCard(); later0(1200, checkBadges); later(3000, () => endGame()); }
+  window.__ygSH = {start:() => shStart((USE.town || []).find(u => u.k === "tw_shop")), add:k => shAdd(k), serve:k => shServe(k), g:() => G};   // 시험용
   /* 이야기 연출: 위아래 검은 띠 + 장 제목 */
   const lbOn = on => lbEl.classList.toggle("on", !!on);
   function chapter([no, title], sub){ lbOn(true); chapEl.querySelector("small").textContent = no.replace(/(\d)장/, "CHAPTER $1"); chapEl.querySelector("b").textContent = title; chapEl.classList.add("on"); sfx("ding");
@@ -1231,7 +1427,7 @@ export function start(api){
     if(G.phase === "toss"){ tnServeHit(aim); return; }
     if(G.phase === "feed" || G.phase === "toss" || G.phase === "point" || G.phase === "end") return;
     G.press = now(); G.pk = kind; G.paim = aim; G.pf = false; const b = G.b, st = S.st;
-    if(b && st && b.by !== "yu" && tnReach(b, st, true)){ tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])], false, G.rinB === b ? -(now() - G.rin) : 0); return; }
+    if(b && st && (b.by !== "yu" || (b.wall && b.wallHit)) && tnReach(b, st, true)){ tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])], false, G.rinB === b ? -(now() - G.rin) : 0); return; }
     if(b && b.by !== "yu" && !b.done) e.playEmote?.("yu", TN_SHOT[kind]?.[0] || "🎾", 450);   // 공 오는 중: 샷 준비 (0.7초 안에 닿으면 그 샷으로)
     else e.playSwing("yu", "fore"); }
   /* 공이 닿는 범위에 들어옴: 먼저 눌러 뒀으면 그 샷, 아니면 0.3초 기다렸다(늦게 눌러도 됨) 저절로 막기. 범위를 벗어나려 하면 바로 막기 */
@@ -1264,7 +1460,7 @@ export function start(api){
     const call = a >= 3 && r >= 3 ? (a === r ? "듀스! 🔥" : "") : a === r ? `${TN_CALL[a]} 올` : G.srv === "yu" ? `${TN_CALL[a]} ${TN_CALL[r]}` : `${TN_CALL[r]} ${TN_CALL[a]}`;
     later(900, () => toast(`🎾 ${call || "점수"}`, a >= 3 && r >= 3 ? "다음 점수 따는 사람이 이 게임 가져가요" : `유나 ${TN_PT[Math.min(3, a)]} : ${TN_PT[Math.min(3, r)]} ${L.n}`, 1500));
     tnBoard(a >= 3 && r >= 3 ? "DEUCE" : null); later(2300, () => tnServe()); }
-  function tnEnd(w){ const e = E(); if(!G || G.type !== "tennis") return; G.phase = "end"; const rv = G.rv; e?.playTBall(null);
+  function tnEnd(w){ const e = E(); if(!G || G.type !== "tennis") return; G.best = Math.max(G.best || 0, G.rally || 0); G.phase = "end"; const rv = G.rv; e?.playTBall(null);
     const T = rec.tennis = rec.tennis || {play:0, win:0, best:0, wall:0, beat:{}}; T.best = Math.max(T.best, G.best);
     if(rv === "wall"){ const old = T.wall || 0; T.wall = Math.max(old, G.best); save(); toast(`🧱 최고 연속 ${G.best}번!`, (G.best > old ? "🎉 신기록!" : `최고 기록 ${old}번`) + ` · ✨PERFECT ${G.perf || 0}번`, 2600); yuSay(G.best >= 10 ? "벽보다 내가 더 세다 😎" : "다음엔 더 많이! 💪", 2000); firstUse("ct_wall", "🧱 벽치기 연습"); }
     else { const L = TN_RIV[rv]; T.play++; if(w === "yu"){ T.win++; T.beat[rv] = (T.beat[rv] || 0) + 1; rec.stars++; sfx("star"); } save();
@@ -1279,7 +1475,7 @@ export function start(api){
   function tnTick(st, t){ const e = E(), C = tnC(); if(!e) return; const dt = Math.min(0.05, Math.max(0, (t - G.lt) / 1000)); G.lt = t; const b = G.b;
     if(G.rv === "wall" && now() > G.until && G.phase !== "end" && G.phase !== "point"){ tnEnd("wall"); return; }
     if(!b){ const go = G.phase === "toss" && !!G.toss && Math.abs(now() - G.toss.t0 - 420) <= 70; if(tnPad.classList.contains("go") !== go) tnPad.classList.toggle("go", go); return; }
-    const ev = tnPhys(b, dt); { const go = b.by !== "yu" && !b.done && tnSoon(b, st); if(tnPad.classList.contains("go") !== go) tnPad.classList.toggle("go", go); } e.playTBall([b.p[0], b.p[1], b.p[2], 0.075]);
+    const ev = tnPhys(b, dt); { const go = (b.by !== "yu" || (b.wall && b.wallHit)) && !b.done && tnSoon(b, st); if(tnPad.classList.contains("go") !== go) tnPad.classList.toggle("go", go); } e.playTBall([b.p[0], b.p[1], b.p[2], 0.075]);
     if(b.done){ if(!b.gone){ b.gone = t; } else if(t - b.gone > 1100){ G.b = null; e.playTBall(null); } return; }
     if(b.wall){   // 벽치기
       if(ev === "low"){ tnPoint("x", "앗 너무 낮다! 흰 줄 위로 😅"); return; }
@@ -1314,7 +1510,7 @@ export function start(api){
     ["3", "2", "1"].forEach((n, k) => later(1500 + k * 800, () => { toast(n, "", 600); sfx("blip"); }));
     later(1500 + 3 * 800, () => { toast("발사! 💦", "", 800); sfx("go"); e.playSet({freeze:false}); G.phase = "fight"; G.until = now() + 70000; G.nextRv = now() + 1400; }); }
   function sqHud(){ if(!G.sc) return "💦"; return `💦 유나 <b>${G.sc[0]}</b> : <b>${G.sc[1]}</b> ${SQ_RIV[G.rv].n} · 물 ${"●".repeat(G.ammo)}${"○".repeat(6 - G.ammo)}`; }
-  function sqFire(){ const e = E(), st = S.st; if(G?.type !== "squirt" || G.phase !== "fight" || !e || !st) return; const t = now();
+  function sqFire(){ const e = E(), st = S.st; if(G?.type !== "squirt" || (G.phase !== "fight" && G.phase !== "aim") || !e || !st) return; const t = now();
     if(t - G.lastShot < 300) return;
     if(G.ammo <= 0){ if(t - (G.dryAt || 0) > 1200){ G.dryAt = t; yuSay(pick(["물 다 떨어졌다! 😵", "충전 중~ 잠깐만! 💧"]), 900); sfx("bump"); } return; }
     G.ammo--; G.lastShot = t; sfx("splash"); const a = st.actors?.[G.rv]; if(!a) return;
@@ -1324,7 +1520,7 @@ export function start(api){
     if(Math.random() < SQ_RIV[G.rv].dodge){ const side = a.i < 24.8 ? 1 : a.i > 26.8 ? -1 : Math.random() < 0.5 ? -1 : 1;   // 상대가 피함
       later(90, () => E()?.playActor(G.rv, {to:[clampN(a.i + side * 1.6, SQ_W[0], SQ_W[2]), clampN(a.j + (Math.random() - 0.5) * 1.2, SQ_W[1], SQ_W[3])], spd:2.6})); }
     e.playSquirt("yu", [tg[0], tg[1], 0.3]);
-    later(T, () => { if(G?.type !== "squirt" || G.phase !== "fight") return; const b = S.st?.actors?.[G.rv]; if(!b) return;
+    later(T, () => { if(G?.type !== "squirt" || G.phase === "end" || G.phase === "ready") return; const b = S.st?.actors?.[G.rv]; if(!b) return;
       if(Math.hypot(b.i - tg[0], b.j - tg[1]) < 0.62){ G.sc[0]++; sfx("pick"); E()?.playEmote?.("@" + G.rv, pick(["💦", "🥶", "😵"]), 800); if(Math.random() < 0.55) npcSay("@" + G.rv, pick(SQ_RIV[G.rv].hurt), 1300); sqCheck(); }
       else if(Math.random() < 0.4) npcSay("@" + G.rv, pick(["안 맞았지롱~ 😜", "메롱~ 😝", "빗나갔다~ 😆"]), 1100); }); }
   function sqRvFire(st){ const e = E(), a = st.actors?.[G.rv], L = SQ_RIV[G.rv]; if(!e || !a) return;
@@ -1342,7 +1538,7 @@ export function start(api){
     toast(w === "yu" ? `🏆 유나 승! ${G.sc[0]} : ${G.sc[1]}` : w === "rv" ? `💦 ${L.n} 승! ${G.sc[1]} : ${G.sc[0]}` : `🤝 무승부 ${G.sc[0]} : ${G.sc[1]}`, w === "yu" ? "⭐ +1 · 물총 대장!" : "다시 도전! 💦", 3000, true);
     npcSay("@" + rv, w === "yu" ? pick(["졌다 졌어~ 우리 딸 물총 대장! 🏆", "항복~ 다 젖었다 😆"]) : pick(["재밌었다~ 한 판 더? 😆", "다음엔 유나가 이길걸? 😉"]), 2600);
     e?.playEmote?.("yu", w === "yu" ? "🏆" : "😤", 1500); firstUse("rf_squirt", "💦 물총 싸움"); renderCard(); later0(1200, checkBadges);
-    later(3000, () => { endGame(); E()?.playActor(rv, {pose:"swim", to:[Math.max(21, (S.st?.i ?? 24) - 1.8), 18.4]}); later0(4500, () => { if(!G) setup(); }); }); }
+    later(3000, () => { endGame(); E()?.playActor(rv, {pose:"swim", to:[Math.max(21, (S.st?.i ?? 24) - 1.8), 18.4]}); later0(4500, () => { if(G) return; if(rv === "fr" && Q?.id !== "friend") E()?.playActor("fr", null); setup(); }); }); }
   function sqTick(st, t){ const e = E(); if(!e || !G.sc) return;
     if(G.prev){ const dt = Math.max(0.016, (t - G.prev[2]) / 1000); G.vel = [G.vel[0] * 0.6 + (st.i - G.prev[0]) / dt * 0.4, G.vel[1] * 0.6 + (st.j - G.prev[1]) / dt * 0.4]; } G.prev = [st.i, st.j, t];
     if(G.phase !== "fight" && G.phase !== "aim") return;
@@ -1412,7 +1608,7 @@ export function start(api){
   function rcEnd(){ const e = E(), M = AREA_MOD.gym; if(!G || G.type !== "race" || G.phase === "end") return; G.phase = "end"; e?.playSet({auto:null});
     const st = S.st, t = now() - G.t1; G.riv.forEach(k => { if(!G.fin[k]){ const a = st?.actors?.[k]; G.fin[k] = t + Math.max(0, (M.endI - (a?.i ?? M.startI)) / (G.spd[k] || 1.3) * 1000); } });   // 아직 못 닿은 사람은 남은 거리로 기록 추정
     const ord = ["yu", ...G.riv].sort((a, b) => G.fin[a] - G.fin[b]), pl = ord.indexOf("yu") + 1, ms = G.fin.yu, sec = +rcFmt(ms);
-    const R0 = rec.race = rec.race || {play:0, best:0, gold:{}}; const pb = !R0.best || sec < R0.best; R0.play++; if(pb) R0.best = sec;
+    const R0 = rec.race = rec.race || {play:0, best:0, gold:{}}; R0.gold = R0.gold || {}; R0.play = R0.play || 0; /* 밤 레이스 기록과 같은 칸을 써서 gold 가 없을 수 있음 */ const pb = !R0.best || sec < R0.best; R0.play++; if(pb) R0.best = sec;
     let star = false; if(pl === 1 && G.riv.length && !R0.gold[G.mode]){ R0.gold[G.mode] = 1; rec.stars++; star = true; } save();
     G.phase = "end"; rcBoard(ord); sfx(pl === 1 ? "star" : "ding");
     const md = ["🥇", "🥈", "🥉", "🏅", "🏅"][pl - 1];
@@ -1550,7 +1746,7 @@ export function start(api){
       e.playSet({freeze:true, mark:null}); G.phase = "pick"; G.picks = [];
       const ask = k => { if(G?.type !== "edit") return;
         if(k >= EDIT_Q.length){ G.phase = "render"; rec.partyEdit = G.picks.map(x => x[0] + " " + x[1]); save();
-          makeIt({make:{ms:3600, txt:"영상 렌더링 중", fx:["🎞️", "✂️", "🎵", "💕"]}, got:"📼"}, "yu", () => { setCarry("📼"); sfx("pick"); yuSay("완성!! 엄마 아빠 울겠다 🥹", 2200); toast("📼 축하 영상 완성!", "이제 옥상 그릴로", 2400); later(1800, () => { endGame(); advance(); }); });
+          makeIt({make:{ms:3600, txt:"영상 렌더링 중", fx:["🎞️", "✂️", "🎵", "💕"]}, got:"📼"}, "yu", () => { if(G?.type !== "edit") return; setCarry("📼"); sfx("pick"); yuSay("완성!! 엄마 아빠 울겠다 🥹", 2200); toast("📼 축하 영상 완성!", "이제 옥상 그릴로", 2400); later(1800, () => { endGame(); advance(); }); });
           return; }
         const [q, o] = EDIT_Q[k]; choose(`🎞️ 편집 ${k + 1}/${EDIT_Q.length}`, q, o).then(c => { if(G?.type !== "edit") return; G.picks.push(c); yuSay(`${c[0]} ${c[1]}!`, 1500); later(900, () => ask(k + 1)); }); };
       toast("🎞️ 몰래 편집 시작", "장면 · 음악 · 자막 고르기", 1800); yuSay("아빠처럼 편집해 보자! 🎬", 1800); later(1300, () => ask(0));
@@ -1617,9 +1813,11 @@ export function start(api){
     if(G.type === "pong") h = `🏓 랠리 ${G.rally} · 놓침 ${G.miss}/3 ${tm}`;
     if(G.type === "squirt") h = sqHud();
     if(G.type === "race") h = rcHud();
+    if(G.type === "bumper") h = bpHud(tm);
+    if(G.type === "dodge") h = dgHud(tm);
     if(G.type === "tennis") h = G.rv === "wall" ? `🧱 연속 ${G.rally} · 최고 ${Math.max(G.best, G.rally)} · 놓침 ${G.miss}/3 ${tm}` : G.pts ? `🎾 유나 <b>${G.pts[0] >= 3 && G.pts[1] >= 3 ? (G.pts[0] > G.pts[1] ? "AD" : "40") : TN_PT[Math.min(3, G.pts[0])]}</b> : <b>${G.pts[0] >= 3 && G.pts[1] >= 3 ? (G.pts[1] > G.pts[0] ? "AD" : "40") : TN_PT[Math.min(3, G.pts[1])]}</b> ${TN_RIV[G.rv].n} · 게임 ${G.games[0]}:${G.games[1]}${G.rally >= 3 ? ` <i>랠리 ${G.rally}</i>` : ""}` : "🎾";
     if(G.type === "catmeat") h = G.phase === "run" ? `🐈 크레파스 잡기! ${tm}` : "😱 고기 도둑!";
-    if(["grill", "edit", "ending", "claw"].includes(G.type)){ hud.hidden = true; return; }
+    if(["grill", "edit", "ending", "claw", "shop"].includes(G.type)){ hud.hidden = true; return; }
     if(S.st?.boost > 0) h += ` <i>⚡${Math.ceil(S.st.boost / 1000)}</i>`;
     if(hud.innerHTML !== h) hud.innerHTML = h;
   }
@@ -1639,6 +1837,9 @@ export function start(api){
     if(G.type === "tennis"){ tnTick(st, t); gameHud(); return; }
     if(G.type === "squirt"){ sqTick(st, t); gameHud(); return; }
     if(G.type === "race"){ rcTick(st, t); gameHud(); return; }
+    if(G.type === "bumper"){ bpTick(st, t); gameHud(); return; }
+    if(G.type === "dodge"){ dgTick(st, t); gameHud(); return; }
+    if(G.type === "shop"){ shTick(st, t); gameHud(); return; }
     // 공이 경기장 밖으로 나가면 잠깐 뒤 가운데로 (2026-11-24 감독님 "축구할때 공나가면 자동으로 들어와야지 다시")
     if((G.type === "ball" || G.type === "futsal") && st.ball){ const b = st.ball, m = 0.15, out = b.i < FSC.i0 - m || b.i > FSC.i1 + m || b.j < FSC.j0 - m || b.j > FSC.j1 + m;
       if(!out || G.cool || G.phase === "goal") G.outT = 0; else if(!G.outT) G.outT = t + 900;
@@ -1758,7 +1959,7 @@ export function start(api){
         npcSay(am ? "@mom" : mid, pick(["어? 유나야 그 풍선 뭐야? 🤨", "유나 뭐 숨기는 거 있지? 😏"]), 2600);
         later0(1200, () => yuSay(pick(["아, 아무것도 아니야! 😅", "그, 그냥~ 친구 줄 거야! 😳"]), 2000)); toast("🤫 엄마한테 들킬 뻔!", `비밀 하트 ${"❤️".repeat(S.secret)}${"🤍".repeat(3 - S.secret)}`, 2200, true); } }
     // 친구 지유: 유나가 지나간 길을 따라옴
-    if(Q?.id === "friend" && G?.type !== "swim"){ const a = st.actors?.fr, tr = S.trail || (S.trail = []), lt = tr[tr.length - 1];
+    if(Q?.id === "friend" && G?.type !== "swim" && !(G && (G.rv === "fr" || G.riv?.includes("fr") || G.drv?.includes("fr") || G.th))){ /* 지유가 놀이 상대일 땐 안 따라옴 */ const a = st.actors?.fr, tr = S.trail || (S.trail = []), lt = tr[tr.length - 1];
       if(!lt || Math.hypot(st.i - lt[0], st.j - lt[1]) > 0.4){ tr.push([st.i, st.j]); if(tr.length > 50) tr.shift(); }
       if(a){ const d = Math.hypot(a.i - st.i, a.j - st.j);
         if(d > 9){ const p = e.playFree(st.i - Math.sin(st.h) * 0.9, st.j - Math.cos(st.h) * 0.9, 0.2); e.playActor("fr", {at:p, to:null}); }
@@ -1801,7 +2002,7 @@ export function start(api){
     if(hit){ yuSay(st.yu); talkAt = now() + 3200; const gv = !st.got && carry && carry !== "🐈" ? carry : "";
       later0(1100, () => { npcSay(n.id, st.re, 3200); if(gv){ setCarry(""); sfx("pick"); e?.playEmote?.(n.id, gv, 1700); later0(700, () => e?.playEmote?.(n.id, "💕", 1500)); } else setCarry(st.got || "");
         if(st.photo) later0(1700, () => { flash(); sfx("ding"); E()?.playEmote?.("yu", "✌️", 1600); E()?.playEmote?.("@fr", "✌️", 1600); toast("📸 찰칵!", "지유랑 구름 앞에서 한 장", 1800); });
-        later0(st.photo ? 3400 : 1500, advance); }); return; }
+        { const q0 = Q, s0 = st; later0(st.photo ? 3400 : 1500, () => { if(Q === q0 && curStep() === s0) advance(); }); } }); return; }
     const isDad = n.id === "_dir" || n.id === "@dad", isMom = /nora$/.test(n.id) || n.id === "@mom";
     if(!isMom && Math.random() < 0.28){ const c = isDad ? FAN_DAD : pick(FAN); yuSay(c[0], 3000); talkAt = now() + 4400;
       later0(1300, () => { npcSay(n.id, c[1], 2800); e?.playEmote?.(isDad ? "yu" : n.id, isDad ? "💕" : pick(["😆", "👍", "✨"]), 1400); }); return; }
@@ -1971,13 +2172,13 @@ export function start(api){
   function useIt(u){
     const e = E(); if(!e || S.busy) return;
     if(u.k === "ct_tennis"){ const T = rec.tennis || {}, opts = [["👧", "지유랑", "fr"], ["👩", "엄마랑", "mom"], ["👨", "아빠랑", "dad"], ["🧑‍🏫", "체육 선생님이랑", "coach"]].map(o => [o[0], o[1] + ((T.beat || {})[o[2]] ? " 🏆" : ""), o[2]]);
-      opts.push(["🏆", "동네 대회 (토너먼트)" + (rec.cup?.tennis ? ` 🏆${rec.cup.tennis}` : ""), "cup"]);
-      npcSay("@coach", "라켓 여기 있다~ 누구랑 칠래? 🎾", 2000); choose("🎾 스포츠센터 테니스장", "누구랑 칠까?", opts).then(o => { if(G || S.floor !== "court") return; if(o[2] === "cup") cupOpen("tennis"); else tnStart(o[2]); }); return; }
+      opts.push(["🏆", "동네 대회 (토너먼트)" + (rec.cup?.tennis ? ` 🏆${rec.cup.tennis}` : ""), "cup"], ["↩️", "다음에 할래", ""]);
+      npcSay("@coach", "라켓 여기 있다~ 누구랑 칠래? 🎾", 2000); choose("🎾 스포츠센터 테니스장", "누구랑 칠까?", opts).then(o => { if(G || S.floor !== "court" || !o[2]) return; if(o[2] === "cup") cupOpen("tennis"); else tnStart(o[2]); }); return; }
     if(u.k === "ct_wall"){ tnStart("wall"); return; }
     if(u.k === "gy_race"){ const R0 = rec.race || {}, g = R0.gold || {};
-      npcSay("@coach", "50m 시합? 출발대로~ 🏁", 2000); choose("🏊 50m 수영 시합", R0.best ? `내 최고 기록 ${R0.best.toFixed(2)}초 · 누구랑 할까?` : "누구랑 할까?", [["👨‍👩‍👧", "가족이랑" + (g.fam ? " 🥇" : ""), "fam"], ["🧑‍🏫", "다 같이 (선생님도)" + (g.all ? " 🥇" : ""), "all"], ["🏆", "동네 수영 대회 (예선→결승)" + (rec.cup?.swim ? ` 🏆${rec.cup.swim}` : ""), "cup"], ["⏱️", "혼자 기록 재기", "solo"]])
-        .then(o => { if(G || S.floor !== "gym") return; if(o[2] === "cup") cupOpen("swim"); else rcStart(o[2]); }); return; }
-    if(u.k === "squirt"){ const W0 = rec.squirt || {}; choose("💦 물총 싸움", "누구랑 할까?", [["👧", "지유랑", "fr"], ["👩", "엄마랑", "mom"], ["👨", "아빠랑", "dad"]]).then(o => { if(!G && S.floor === "roof") sqStart(o[2]); }); return; }
+      npcSay("@coach", "50m 시합? 출발대로~ 🏁", 2000); choose("🏊 50m 수영 시합", R0.best ? `내 최고 기록 ${R0.best.toFixed(2)}초 · 누구랑 할까?` : "누구랑 할까?", [["👨‍👩‍👧", "가족이랑" + (g.fam ? " 🥇" : ""), "fam"], ["🧑‍🏫", "다 같이 (선생님도)" + (g.all ? " 🥇" : ""), "all"], ["🏆", "동네 수영 대회 (예선→결승)" + (rec.cup?.swim ? ` 🏆${rec.cup.swim}` : ""), "cup"], ["⏱️", "혼자 기록 재기", "solo"], ["↩️", "다음에 할래", ""]])
+        .then(o => { if(G || S.floor !== "gym" || !o[2]) return; if(o[2] === "cup") cupOpen("swim"); else rcStart(o[2]); }); return; }
+    if(u.k === "squirt"){ const W0 = rec.squirt || {}; choose("💦 물총 싸움", "누구랑 할까?", [["👧", "지유랑", "fr"], ["👩", "엄마랑", "mom"], ["👨", "아빠랑", "dad"], ["↩️", "다음에 할래", ""]]).then(o => { if(!G && S.floor === "roof" && o[2]) sqStart(o[2]); }); return; }
     if(u.k === "arcade" && u.n === "RACER"){ e.playSet({pos:[u.at[0], u.at[1], PI]}); openRace(); return; }
     if(u.k === "arcade"){ e.playSet({pos:[u.at[0], u.at[1], PI]}); startGame("arcade"); G.arc = u; return; }
     if(u.k === "piano"){ S.busy = true; e.playSet({freeze:true, pos:[u.at[0], u.at[1], -PI / 2]}); yuSay("작은 별 칠게요~ 🎹", 1600); const c = auInit();
@@ -1995,6 +2196,9 @@ export function start(api){
     if(u.k === "tw_bell"){ ringBell(u); return; }
     if(u.k === "rv_boat"){ rideBoat(u); return; }
     if(u.k === "tw_bus"){ yuSay("크레용랜드행 버스 탄다~ 🚌", 1400); sfx("ding"); walkTo({f:"town", to:"fun", spawn:AREA.fun.spawn}); fade.textContent = "🚌 크레용랜드행 버스"; firstUse("tw_bus", "🚌 버스 타고 놀이공원"); return; }
+    if(u.k === "fn_bumper"){ bpStart(u); return; }
+    if(u.k === "sc_dodge"){ dgStart(); return; }
+    if(u.k === "tw_shop"){ shStart(u); return; }
     if(FUN_RIDE[u.k]){ funRide(u); return; }
     if(u.k === "futsal") startGame("futsal");
     if(u.k === "pong" || u.k === "claw") startGame(u.k);
@@ -2259,7 +2463,8 @@ export function start(api){
       if(G?.type === "tennis" && fid !== "court") endGame();
       if(G?.type === "squirt" && fid !== "roof") endGame();   // 옥상 떠나면 공놀이 끝
       if(G?.type === "race" && fid !== "gym") endGame();
-      S.floor = fid; S.st = null; REQ = null; S.npcF = S.npcF || {}; S.frF = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
+      if(S.boat){ clearInterval(S.boat.fx); try { AREA_MOD.river?.boat?.set(null); } catch(_){} S.boat = null; } S.busy = false;
+        S.floor = fid; S.st = null; REQ = null; S.npcF = S.npcF || {}; S.frF = null; S.near = null; S.reqNext = now() + 30000; bgmFloor(fid);
       if(!rec.vis[fid]){ rec.vis[fid] = 1; save(); later0(1500, checkBadges); }
       E()?.playSet({water:fid === "roof" ? [POOL] : fid === "gym" && AREA_MOD.gym?.pool ? [AREA_MOD.gym.pool] : []}); setCarry(carry); spotsFor(fid); boltFor();
       if(Q?.cat === "follow") S.catPos = [EXIT[0] + 0.4, EXIT[1] + 0.5];
@@ -2286,7 +2491,7 @@ export function start(api){
       const qn = n && sp && sp.f === st.floor && (sp.talk === n.id || Array.isArray(sp.talk) && sp.talk.includes(n.id));   // 할 일 상대가 엘베 앞에 있어도 말 걸기 먼저
       const land = S.boat && st.floor === "river" && now() - S.boat.t0 > 2500 && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) < 1.7;   // 오리배: 선착장 앞이면 내리기
       if(S.boat && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) > 2.5) S.boat.far = true;
-      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "tennis" ? "" : G?.type === "squirt" ? "squirt" : G?.type === "race" ? "kick" : G?.type === "claw" ? "grab" : retry ? "retry" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
+      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "tennis" ? "" : G?.type === "squirt" ? "squirt" : G?.type === "bumper" ? "bboost" : G?.type === "dodge" ? (G.holder === "yu" ? "dthrow" : "dcatch") : G?.type === "shop" ? "" : G?.type === "race" ? "kick" : G?.type === "claw" ? "grab" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : retry ? "retry" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
       { const tp = G?.type === "tennis" && G.phase !== "end"; if(tnPad.hidden === tp){ tnPad.hidden = !tp; toastEl.classList.toggle("up", tp); root.classList.toggle("tn", tp); jumpB.style.visibility = tp ? "hidden" : ""; runB.querySelector("b").textContent = tp ? "대시" : "달리기"; }
         const sv = tp && G.phase === "yuserve" ? "1" : tp && G.phase === "toss" ? "2" : ""; if(tp && tnPad.dataset.sv !== sv){ tnPad.dataset.sv = sv; tnPad.querySelector(".d b").textContent = sv === "2" ? "지금!" : sv ? "강서브" : "강타"; tnPad.querySelector(".l b").textContent = sv === "2" ? "지금!" : sv ? "서브" : "로브"; tnPad.querySelector(".p b").textContent = sv === "2" ? "지금!" : sv ? "서브" : "드롭"; } }
       if(mode !== act.dataset.m || (mode === "talk" && act.dataset.id !== n.id)){
@@ -2309,9 +2514,12 @@ export function start(api){
         if(mode === "serve"){ act.querySelector("span").textContent = "🎾"; act.querySelector("b").textContent = "서브!"; }
         if(mode === "grab"){ act.querySelector("span").textContent = "🪝"; act.querySelector("b").textContent = "뽑기!"; }
         if(mode === "land"){ act.querySelector("span").textContent = "⚓"; act.querySelector("b").textContent = "내리기"; }
+        if(mode === "bboost"){ act.querySelector("span").textContent = "💨"; act.querySelector("b").textContent = "부스터!"; }
+        if(mode === "dcatch"){ act.querySelector("span").textContent = "🙌"; act.querySelector("b").textContent = "받기!"; }
+        if(mode === "dthrow"){ act.querySelector("span").textContent = "🔥"; act.querySelector("b").textContent = "던지기!"; }
         if(use && mode.startsWith("use:")){ const L = use.n === "RACER" ? ["🏎️", "레이싱 게임"] : USE_LB[use.k] || ACTS[use.k]?.lb || ["✨", "놀기"]; act.querySelector("span").textContent = L[0]; act.querySelector("b").textContent = L[1]; }
         if(mode !== "elev") closeElev(); if(mode !== "dress" && mode !== "room") fitP.hidden = true; }
-      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "swing" || mode === "serve") tnPress(); else if(mode === "squirt") sqFire(); else if(mode === "kick") rcTap(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress" || mode === "room") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "place") decoPlace(); else if(mode === "hide") hideNow(hideAt); else if(mode === "tidy") tidyUp(); else if(mode === "talk") talk(n); };
+      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "swing" || mode === "serve") tnPress(); else if(mode === "squirt") sqFire(); else if(mode === "bboost") bpBoost(); else if(mode === "dcatch" || mode === "dthrow") dgPress(); else if(mode === "kick") rcTap(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress" || mode === "room") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "place") decoPlace(); else if(mode === "hide") hideNow(hideAt); else if(mode === "tidy") tidyUp(); else if(mode === "talk") talk(n); };
       // 목표 화살표 (화면 밖일 때만)
       const m = st.mark, W = st.w, H = st.hgt, pad = 34;
       if(m && (!m.front || m.x < 6 || m.x > W - 6 || m.y < 6 || m.y > H - 6)){
@@ -2322,6 +2530,7 @@ export function start(api){
       } else arrow.hidden = true;
       S.n = (S.n || 0) + 1; if(S.n % 6 === 0) renderCard(m?.d);
       gameTick(st);
+      { const idle = !G && !S.busy && !S.boat; if(idle && S.wasBusy && Q && !pendingFloor) setup(); S.wasBusy = !idle; }   // 놀이·놀이기구가 끝나면 할 일 표시 다시
       if(st.swim && st.moving){ rec.strokes = rec.strokes || {}; if(!rec.strokes[S.stroke]){ rec.strokes[S.stroke] = 1; save(); later0(1500, checkBadges); } }
       { const jm = G?.type === "futsal" ? "pass" : st.swim ? "stroke:" + S.stroke : st.sit ? "stand" : !G && nearSeat(st) ? "sit" : "jump", sk = STROKES[(STROKES.findIndex(x => x[0] === S.stroke) + 1) % STROKES.length];   // 버튼엔 바꿀 영법 (2026-11-28 감독님 "바꾸고 싶은게 나와야지")
         if(jm !== jumpB.dataset.m){ jumpB.dataset.m = jm; jumpB.querySelector("span").innerHTML = jm === "pass" ? "🤝" : jm === "jump" ? JUMP_SVG : jm === "sit" ? "🪑" : st.swim ? sk[1] : "🧍‍♀️";
@@ -2375,6 +2584,9 @@ export function start(api){
     if(G?.type === "pong"){ hit(); return; }
     if(G?.type === "tennis"){ tnPress("drive"); return; }
     if(G?.type === "squirt"){ sqFire(); return; }
+    if(G?.type === "bumper"){ bpBoost(); return; }
+    if(G?.type === "dodge"){ dgPress(); return; }
+    if(G?.type === "shop") return;
     if(G?.type === "race"){ rcTap(); return; }
     if(G?.type === "claw"){ grab(); return; }
     if(S.st?.sit){ e.playSit?.(null); sfx("blip"); return; }
@@ -2395,7 +2607,8 @@ export function start(api){
   S.charge = 0.35;
   function charge(st){
     const tn = now(), dt = Math.min(0.1, (tn - (S.lastT || tn)) / 1000); S.lastT = tn;
-    if(!(st.boost > 0) && !st.swim){ const was = S.charge; S.charge = Math.min(1, S.charge + dt / (st.moving ? 9 : 22)); if(was < 1 && S.charge >= 1){ sfx("ready"); runB.classList.add("full"); } }
+    if(!(st.boost > 0) && !st.swim){ const was = S.charge; S.charge = Math.min(1, S.charge + dt / (st.moving ? 9 : 22)); if(was < 1 && S.charge >= 1) sfx("ready"); }
+    if(G?.type !== "tennis") runB.classList.toggle("full", S.charge >= 1 && !runB.classList.contains("ban"));
     if(G?.type === "tennis"){ const q = 1 - Math.max(0, (S.dashCd || 0) - tn) / 1400; runB.style.setProperty("--p", q.toFixed(3)); runB.classList.toggle("full", q >= 1); runB.classList.toggle("go", st.boost > 0); return; }
     runB.style.setProperty("--p", Math.min(1, st.boost > 0 ? st.boost / 4500 : S.charge).toFixed(3)); runB.classList.toggle("go", st.boost > 0);
   }

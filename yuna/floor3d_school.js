@@ -235,6 +235,9 @@ function paint(c, dark){
   for(let i = 6; i < 26; i += 1.2) p.rect(i, 11, i + 0.6, 22, v("rgba(255,255,255,.08)", "rgba(255,255,255,.03)"));
   const wl = v("rgba(255,255,255,.85)", "rgba(230,230,220,.35)");
   p.line(ci, 12, ci, 22, wl, 0.06); p.ellS(ci, cj, 1.1, 1.1, wl, 0.06); p.ell(ci, cj, 0.08, 0.08, wl);
+  { const dl = v("rgba(255,224,130,.95)", "rgba(255,214,102,.5)"), a0 = 13.4, b0 = 14.3, a1 = 18.6, b1 = 18.9;   // 피구 코트 (유나 모드 피구: yuna_game.js DG와 같은 자리, 2026-11-28)
+    p.rect(a0, b0, a1, b1, v("rgba(255,224,130,.10)", "rgba(255,214,102,.05)")); p.line(a0, b0, a1, b0, dl, 0.08); p.line(a0, b1, a1, b1, dl, 0.08); p.line(a0, b0, a0, b1, dl, 0.08); p.line(a1, b0, a1, b1, dl, 0.08);
+    p.text("피구", a0 + 0.55, b0 + 0.38, 5.5, dl, 800, JUA); }
   [[9.55, 10.9], [21.1, 22.45]].forEach(([a, b]) => { c.strokeStyle = wl; c.lineWidth = 0.06; c.strokeRect(a, 15.3, b - a, 2.6); });
   [[11.4, 16.6], [BALL0[0], BALL0[1]]].forEach(([i, j]) => p.ell(i, j, 0.07, 0.07, wl));
   c.restore();
