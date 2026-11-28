@@ -4,18 +4,17 @@
 
 export const HALF_W = 8.5;          // 도로 반폭 (4차로)
 export const LANES = [-5.6, -1.9, 1.9, 5.6];
+
+/* 코스 목록 (2026-11-29 감독님 "맵도 좀 더 필요해"). 위에서 본 모양 (x 오른쪽, z 아래), 출발 직선은 +x 쪽으로.
+   zone = 터널·다리 구간 (한 바퀴를 0~1로): 배경이 이걸 보고 세움. hills = [가운데, 반폭, 높이] 완만한 언덕 */
+export const TRACKS = {
+  city:{name:"도심 서킷", sub:"터널 · 강 다리 · 헤어핀",   // 출발 직선 → 큰 우회전 → 터널 → S자 → 강 다리 → 헤어핀 → 연속 코너 → 출발선
+    ctrl:[[-150, 0], [80, 0], [290, 0], [420, 42], [470, 150], [462, 285], [400, 392], [292, 436], [200, 398], [108, 440], [-10, 500], [-200, 506], [-390, 484], [-486, 402], [-468, 300], [-380, 262], [-296, 200], [-318, 112], [-286, 26]],
+    zone:{tunnel:[0.262, 0.372], bridge:[0.535, 0.665]}, hills:[[0.60, 0.085, 7.5], [0.86, 0.05, 2.6], [0.14, 0.05, 1.8]]},
+  river:{name:"강변 순환로", sub:"긴 직선 · 큰 다리 · 고속 코너",   // 긴 출발 직선 → 넓은 우회전 → 긴 강 다리 → 시케인 → 터널 → 언덕 고속 코너
+    ctrl:[[-260, 0], [0, 0], [260, 0], [470, 10], [610, 90], [650, 240], [600, 390], [470, 470], [300, 480], [150, 440], [30, 500], [-110, 560], [-290, 560], [-450, 500], [-560, 380], [-590, 230], [-540, 100], [-430, 20]],
+    zone:{tunnel:[0.70, 0.79], bridge:[0.335, 0.455]}, hills:[[0.395, 0.08, 6.5], [0.90, 0.05, 3.2], [0.58, 0.04, 2.0]]}};
 const SCALE = 0.86;
-
-/* 위에서 본 모양 (x 오른쪽, z 아래). 출발 직선 → 큰 우회전 → 터널 → S자 → 강 다리 → 헤어핀 → 연속 코너 → 출발선 */
-const CTRL = [
-  [-150, 0], [80, 0], [290, 0], [420, 42], [470, 150], [462, 285], [400, 392], [292, 436],
-  [200, 398], [108, 440], [-10, 500], [-200, 506], [-390, 484], [-486, 402], [-468, 300], [-380, 262],
-  [-296, 200], [-318, 112], [-286, 26]
-].map(p => [p[0] * SCALE, p[1] * SCALE]);
-
-/* 구간 (한 바퀴를 0~1로): 배경이 이걸 보고 터널·다리를 세움 */
-export const ZONE = {tunnel:[0.262, 0.372], bridge:[0.535, 0.665]};
-const HILLS = [[0.60, 0.085, 7.5], [0.86, 0.05, 2.6], [0.14, 0.05, 1.8]];   // [가운데, 반폭, 높이] 완만한 언덕
 
 function catmull(p0, p1, p2, p3, t){   // centripetal Catmull-Rom
   const d = (a, b) => Math.pow(Math.hypot(b[0] - a[0], b[1] - a[1]), 0.5) || 1e-4;
@@ -26,7 +25,8 @@ function catmull(p0, p1, p2, p3, t){   // centripetal Catmull-Rom
   return L(B1, B2, t1, t2);
 }
 
-export function buildPath(ds = 2){
+export function buildPath(ds = 2, track = "city"){
+  const TR = TRACKS[track] || TRACKS.city, CTRL = TR.ctrl.map(p => [p[0] * SCALE, p[1] * SCALE]), HILLS = TR.hills;
   const n = CTRL.length, fine = [];
   for(let k = 0; k < n; k++){ const p0 = CTRL[(k + n - 1) % n], p1 = CTRL[k], p2 = CTRL[(k + 1) % n], p3 = CTRL[(k + 2) % n];
     for(let q = 0; q < 80; q++) fine.push(catmull(p0, p1, p2, p3, q / 80)); }
@@ -44,7 +44,7 @@ export function buildPath(ds = 2){
   const bump = u => { let y = 0; for(const [c, w, h] of HILLS){ let d = Math.abs(u - c); d = Math.min(d, 1 - d); if(d < w) y += h * (0.5 + 0.5 * Math.cos(Math.PI * d / w)); } return y; };
   for(let k = 0; k < N; k++) py[k] = bump(k / N);
   for(let k = 0; k < N; k++) sl[k] = (py[(k + 1) % N] - py[(k + N - 1) % N]) / (2 * step);
-  return {N, step, total, px, pz, py, tx, tz, kv, sl};
+  return {N, step, total, px, pz, py, tx, tz, kv, sl, zone:TR.zone, track:TRACKS[track] ? track : "city"};
 }
 
 /* 점 (x,z)가 코스 어디쯤인지: 지난번 칸(hint) 근처만 뒤짐. 돌려주는 것 {k 칸, u 칸 안 0~1, d 가운데서 오른쪽으로 몇 m} */

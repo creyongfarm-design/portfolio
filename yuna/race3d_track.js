@@ -2,7 +2,17 @@
    도로·방호벽·터널·강 다리·빌딩·네온 간판·가로등을 재료별 한 덩어리로 합침 → 그리기 15번 안쪽 (폰에서도 가볍게)
    조명 계산 없이 밤 색을 그대로 칠하고, 빛은 더하기(Additive) 판으로 얹음 */
 import * as THREE from "three";
-import { HALF_W, ZONE, at, inZone } from "./race3d_path.js";
+import { HALF_W, at, inZone } from "./race3d_path.js";
+
+/* 시간대 (2026-11-29 감독님 "밤만 있는 것도 싫어"): 배경은 조명 계산 없이 색을 그대로 칠하므로, 시간대마다 재료 색 배율 · 하늘 · 안개 · 빛 번짐 세기만 바꿈
+   mul = 재료 색 배율 (밤 그림 기준), glow = 더하기 빛 세기, sky = [꼭대기, 중간, 지평선 위, 지평선], sun = [x, y, z, 크기, 색, 알맹이 반지름] */
+export const TIMES = {
+  day:{name:"낮", e:"☀️", title:"CREYONG GRAND PRIX", gp:"CREYONG GRAND PRIX", sky:["#2a78d2", "#62aeea", "#bfe0f6", "#eaf4fb"], fog:0xbcd8ee, fogD:0.0015, mul:{road:3.3, wall:2.3, tun:1.15, bld:1, dark:4.6, sign:1.25, ring:[9, 10, 12], ringA:0.45}, glow:0.14, pts:0.12, ground:0x7f9a6b, stars:0,
+    sun:[-520, 1250, -900, 300, 0xfff8e6, 30], cloud:[0xffffff, 0.62], win:"day", water:["#3f84bd", ["255,255,255", "190,225,255", "120,190,240"]], sheen:[0.22, 0.25, 0.3], hemi:[0xd6e8ff, 0x8f9488, 2.5], dir:[0xfff3dc, 2.6], env:[0x9cc4ee, 0xffffff], exposure:1.02, beam:0.12, vig:0.25},
+  sunset:{name:"노을", e:"🌇", title:"CREYONG SUNSET RUN", gp:"CREYONG SUNSET GP", sky:["#1d2256", "#7a4488", "#ff8f5e", "#ffd28a"], fog:0x8c5068, fogD:0.0024, mul:{road:1.9, wall:1.6, tun:1.05, bld:[2.3, 1.75, 1.65], dark:2.5, sign:1.1, ring:[2.6, 1.7, 2.2]}, glow:0.62, pts:0.7, ground:0x3a2f3c, stars:0.25,
+    sun:[-900, 150, -1100, 430, 0xffb060, 44], cloud:[0xffb48a, 0.5], win:"night", water:["#3a2a52", ["255,170,90", "255,120,150", "255,210,150"]], sheen:[1.0, 0.5, 0.3], hemi:[0xffb69a, 0x3a2440, 1.7], dir:[0xff9a5a, 1.9], env:[0x70445e, 0xffb070], exposure:1.14, beam:0.6, vig:0.7},
+  night:{name:"밤", e:"🌙", title:"CREYONG NIGHT RACE", gp:"CREYONG NIGHT GP", sky:["#04050d", "#15103a", "#6a2a5c", "#c2553f"], fog:0x120c26, fogD:0.0034, mul:{road:1, wall:1, tun:1, bld:1, dark:1, sign:1, ring:1}, glow:1, pts:1, ground:0x0b0c13, stars:0.8,
+    sun:[-700, 760, -1100, 210, 0xfff1d0, 26], cloud:null, win:"night", water:["#070b1c", ["255,190,110", "120,200,255", "255,120,200", "200,210,255"]], sheen:[0.8, 0.34, 0.52], hemi:[0x8fa0ff, 0x2a1830, 1.25], dir:[0xffd6b0, 1.1], env:[0x0a0c1c, 0], exposure:1.22, beam:1, vig:1}};
 
 const EDGE = HALF_W + 0.6;          // 방호벽 자리
 const rnd = (() => { let s = 20261128; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; })();
@@ -64,13 +74,22 @@ function windowTex(){   // 24×48칸 창문. 층마다 띠, 불 켜진 창은 �
         if(c[1] === "f"){ if(Math.random() < 0.45){ g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(x * cw + 6, y * ch + 9, (cw - 12) * (0.2 + Math.random() * 0.5), ch - 13); } g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(x * cw + 6, y * ch + 9, cw - 12, 3); } } }
   }, {repeat:true, aniso:4});
 }
+function windowTexDay(){   // 낮: 밝은 벽 + 하늘 비친 유리창
+  return tex(768, 1536, (g, w, h) => {
+    const cw = w / 24, ch = h / 48; g.fillStyle = "#c3c9d2"; g.fillRect(0, 0, w, h);
+    for(let y = 0; y < 48; y++){ g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(0, y * ch, w, 4); g.fillStyle = "rgba(60,70,90,.18)"; g.fillRect(0, y * ch + 4, w, 2);
+      for(let x = 0; x < 24; x++){ const r = Math.random(), c = r < 0.5 ? "#6f9cc4" : r < 0.8 ? "#5b88b2" : r < 0.93 ? "#8fbbe0" : "#3f5f82";
+        g.fillStyle = c; g.fillRect(x * cw + 6, y * ch + 9, cw - 12, ch - 13); g.fillStyle = "rgba(255,255,255,.28)"; g.fillRect(x * cw + 6, y * ch + 9, cw - 12, 5);
+        if(r > 0.6){ g.fillStyle = "rgba(255,255,255,.16)"; g.beginPath(); g.moveTo(x * cw + 6, y * ch + ch - 4); g.lineTo(x * cw + cw * 0.55, y * ch + 9); g.lineTo(x * cw + cw * 0.8, y * ch + 9); g.lineTo(x * cw + 6 + cw * 0.3, y * ch + ch - 4); g.fill(); } } }
+  }, {repeat:true, aniso:4});
+}
 const SIGNS = [["CREYONG", "#5fe8cf"], ["NIGHT RACE", "#ff4fb0"], ["크레용팜", "#ffb648"], ["OOOhouse", "#ff9ad6"], ["FILM SCHOOL", "#ffd27a"], ["NITRO ⚡", "#57d7ff"], ["24H 카페", "#fff0a8"], ["YUNA ♥", "#ff7fc4"],
   ["DRIFT", "#b78bff"], ["떡볶이", "#ff6a4a"], ["노래방 ♪", "#ff58c8"], ["PC방", "#6fa8ff"], [">>>", "#ffd21f"], ["CREYONG NIGHT GP", "#ffffff"], ["TUNNEL", "#ffb040"], ["HOTEL", "#ff5a6e"]];
 const CELL = k => { const c = k % 4, r = k / 4 | 0; return [c / 4, 1 - (r + 1) / 4, (c + 1) / 4, 1 - r / 4]; };   // u0 v0 u1 v1
-function signTex(){
+function signTex(gp){
   return tex(1024, 512, (g, w, h) => {
     g.fillStyle = "#05060a"; g.fillRect(0, 0, w, h); const cw = w / 4, ch = h / 4;
-    SIGNS.forEach(([t, c], k) => { const x = (k % 4) * cw, y = (k / 4 | 0) * ch; g.save(); g.beginPath(); g.rect(x, y, cw, ch); g.clip();
+    SIGNS.forEach(([t0, c], k) => { const t = k === 13 && gp ? gp : t0, x = (k % 4) * cw, y = (k / 4 | 0) * ch; g.save(); g.beginPath(); g.rect(x, y, cw, ch); g.clip();
       if(k === 12){ g.fillStyle = "#0b0b0d"; g.fillRect(x, y, cw, ch); g.fillStyle = c; for(let q = 0; q < 3; q++){ const ox = x + 26 + q * 78; g.beginPath(); g.moveTo(ox, y + 14); g.lineTo(ox + 34, y + 14); g.lineTo(ox + 74, y + ch / 2); g.lineTo(ox + 34, y + ch - 14); g.lineTo(ox, y + ch - 14); g.lineTo(ox + 40, y + ch / 2); g.closePath(); g.fill(); } g.restore(); return; }
       if(k === 13){ const s = 16; for(let a = 0; a < cw / s; a++) for(let b = 0; b < 2; b++){ g.fillStyle = (a + b) % 2 ? "#f4f4f6" : "#101014"; g.fillRect(x + a * s, y + b * s, s, s); g.fillRect(x + a * s, y + ch - (b + 1) * s, s, s); }
         g.fillStyle = "#0b0c12"; g.fillRect(x, y + 32, cw, ch - 64); g.font = `italic 900 30px "Inter Tight", Pretendard, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#ffffff"; g.shadowColor = "#ff4fb0"; g.shadowBlur = 12; g.fillText(t, x + cw / 2, y + ch / 2 + 1, cw - 16); g.restore(); return; }
@@ -90,15 +109,15 @@ function skylineTex(){
       if(bh > 150){ g.fillStyle = "#ff4a4a"; g.fillRect(x + bw / 2 - 1, h - bh - 4, 2, 4); } x += bw + Math.random() * 6; }
   }, {repeat:true});
 }
-function waterTex(){
-  return tex(256, 256, (g, w, h) => { g.fillStyle = "#070b1c"; g.fillRect(0, 0, w, h);
-    for(let k = 0; k < 150; k++){ const c = ["255,190,110", "120,200,255", "255,120,200", "200,210,255"][Math.random() * 4 | 0]; g.fillStyle = `rgba(${c},${0.05 + Math.random() * 0.22})`; g.fillRect(Math.random() * w, Math.random() * h, 8 + Math.random() * 40, 1.5); } }, {repeat:true});
+function waterTex(base, cols){
+  return tex(256, 256, (g, w, h) => { g.fillStyle = base; g.fillRect(0, 0, w, h);
+    for(let k = 0; k < 150; k++){ const c = cols[Math.random() * cols.length | 0]; g.fillStyle = `rgba(${c},${0.05 + Math.random() * 0.22})`; g.fillRect(Math.random() * w, Math.random() * h, 8 + Math.random() * 40, 1.5); } }, {repeat:true});
 }
 
 /* ---------- 세우기 ---------- */
-export function buildWorld(P){
-  const N = P.N, group = new THREE.Group(), o = {}, o2 = {};
-  const T = {road:roadTex(), wall:wallTex(), tunnel:tunnelTex(), win:windowTex(), sign:signTex(), glow:glowTex(), sky:skylineTex(), water:waterTex()};
+export function buildWorld(P, time = "night"){
+  const N = P.N, group = new THREE.Group(), o = {}, o2 = {}, TH = TIMES[time] || TIMES.night, ZONE = P.zone, MUL = TH.mul;
+  const T = {road:roadTex(), wall:wallTex(), tunnel:tunnelTex(), win:TH.win === "day" ? windowTexDay() : windowTex(), sign:signTex(TH.gp), glow:glowTex(), sky:skylineTex(), water:waterTex(TH.water[0], TH.water[1])};
   const road = MB(), wall = MB(), tun = MB(), bld = MB(), sign = MB(), glow = MB(), dark = MB();
   const pt = (k, d, y = 0) => { at(P, k, d, o); return [o.x, o.y + y, o.z]; };
   const inT = k => inZone(P, k, ZONE.tunnel), inB = k => inZone(P, k, ZONE.bridge);
@@ -210,44 +229,48 @@ export function buildWorld(P){
   for(let k = 8; k < N; k += 16) for(const sd of [-1, 1]){ building(k, sd, EDGE + 92 + rr(0, 40), 1); }
 
   /* 재료 · 메쉬 */
-  const basic = (map, x = {}) => new THREE.MeshBasicMaterial({map, vertexColors:true, side:THREE.DoubleSide, ...x});
+  const mulC = m => Array.isArray(m) ? new THREE.Color(m[0], m[1], m[2]) : new THREE.Color(m, m, m);
+  const basic = (map, x = {}, m = 1) => { const mt = new THREE.MeshBasicMaterial({map, vertexColors:true, side:THREE.DoubleSide, ...x}); mt.color.copy(mulC(m)); return mt; };
   const add = (geo, mat, order = 0) => { const m = new THREE.Mesh(geo, mat); m.frustumCulled = false; m.renderOrder = order; m.matrixAutoUpdate = false; group.add(m); return m; };
-  const roadMat = basic(T.road), sheen = {value:new THREE.Color(0.8, 0.34, 0.52)};
+  const roadMat = basic(T.road, {}, MUL.road), sheen = {value:new THREE.Color(TH.sheen[0], TH.sheen[1], TH.sheen[2])};
   roadMat.onBeforeCompile = sh => { sh.uniforms.uSheen = sheen;
     sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vWP;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvWP = (modelMatrix * vec4(position, 1.0)).xyz;");
     sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec3 vWP; uniform vec3 uSheen;").replace("#include <map_fragment>", "#include <map_fragment>\n{ vec3 Vd = normalize(cameraPosition - vWP); float fr = pow(1.0 - clamp(Vd.y, 0.0, 1.0), 7.0); diffuseColor.rgb += uSheen * fr * (0.35 + diffuseColor.g * 2.2) * 0.6; }"); };
-  add(road.geo(), roadMat); add(wall.geo(), basic(T.wall)); add(tun.geo(), basic(T.tunnel)); add(bld.geo(), basic(T.win));
-  add(dark.geo(), new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide})); add(sign.geo(), basic(T.sign));
-  const glowMat = basic(T.glow, {transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2});
+  add(road.geo(), roadMat); add(wall.geo(), basic(T.wall, {}, MUL.wall)); add(tun.geo(), basic(T.tunnel, {}, MUL.tun)); add(bld.geo(), basic(T.win, {}, MUL.bld));
+  { const dm = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide}); dm.color.copy(mulC(MUL.dark)); add(dark.geo(), dm); } add(sign.geo(), basic(T.sign, {}, MUL.sign));
+  const glowMat = basic(T.glow, {transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2}, TH.glow);
   add(glow.geo(), glowMat, 3);
   const pts = (arr, size) => { const n = arr.length / 6, pos = new Float32Array(n * 3), col = new Float32Array(n * 3); for(let k = 0; k < n; k++){ pos.set(arr.slice(k * 6, k * 6 + 3), k * 3); col.set(arr.slice(k * 6 + 3, k * 6 + 6), k * 3); }
     const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    const m = new THREE.Points(g, new THREE.PointsMaterial({map:T.glow, size, sizeAttenuation:true, vertexColors:true, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false})); m.frustumCulled = false; m.renderOrder = 4; group.add(m); return m; };
+    const m = new THREE.Points(g, new THREE.PointsMaterial({map:T.glow, size, sizeAttenuation:true, vertexColors:true, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, fog:false})); m.material.color.setScalar(TH.pts); m.frustumCulled = false; m.renderOrder = 4; group.add(m); return m; };
   pts(lampA, 11); pts(lampB, 4.5);
 
   /* 땅 · 강 · 하늘 */
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshBasicMaterial({color:0x0b0c13})); ground.rotation.x = -Math.PI / 2; ground.position.y = -0.06; group.add(ground);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(4000, 4000), new THREE.MeshBasicMaterial({color:TH.ground})); ground.rotation.x = -Math.PI / 2; ground.position.y = -0.06; group.add(ground);
   { const km = Math.round((wk0 + wk1) / 2); at(P, km, 0, o); const len = (wk1 - wk0) * P.step; T.water.repeat.set(len / 40, 9);
     const w = new THREE.Mesh(new THREE.PlaneGeometry(len, 360), new THREE.MeshBasicMaterial({map:T.water})); w.rotation.x = -Math.PI / 2; w.rotation.z = -Math.atan2(o.tz, o.tx); w.position.set(o.x, -0.02, o.z); group.add(w); }
   const sky = new THREE.Mesh(new THREE.SphereGeometry(1700, 24, 14), new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.BackSide, fog:false, depthWrite:false}));
-  { const g = sky.geometry, p = g.attributes.position, c = new Float32Array(p.count * 3), top = hex("#04050d"), mid = hex("#15103a"), hor = hex("#6a2a5c"), low = hex("#c2553f");
+  { const g = sky.geometry, p = g.attributes.position, c = new Float32Array(p.count * 3), top = hex(TH.sky[0]), mid = hex(TH.sky[1]), hor = hex(TH.sky[2]), low = hex(TH.sky[3]);
     for(let k = 0; k < p.count; k++){ const h = Math.max(-0.05, p.getY(k) / 1700); let a, b, t; if(h > 0.35){ a = mid; b = top; t = Math.min(1, (h - 0.35) / 0.5); } else if(h > 0.07){ a = hor; b = mid; t = (h - 0.07) / 0.28; } else { a = low; b = hor; t = Math.max(0, (h + 0.05) / 0.12); }
       c[k * 3] = a[0] + (b[0] - a[0]) * t; c[k * 3 + 1] = a[1] + (b[1] - a[1]) * t; c[k * 3 + 2] = a[2] + (b[2] - a[2]) * t; }
     g.setAttribute("color", new THREE.BufferAttribute(c, 3)); }
   sky.renderOrder = -3; group.add(sky);
   T.sky.repeat.set(7, 1);
-  const ring = new THREE.Mesh(new THREE.CylinderGeometry(1250, 1250, 300, 48, 1, true), new THREE.MeshBasicMaterial({map:T.sky, transparent:true, side:THREE.BackSide, fog:false, depthWrite:false})); ring.position.y = 138; ring.renderOrder = -2; group.add(ring);
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(1250, 1250, 300, 48, 1, true), new THREE.MeshBasicMaterial({map:T.sky, transparent:true, side:THREE.BackSide, fog:false, depthWrite:false})); ring.material.color.copy(mulC(MUL.ring)); ring.material.opacity = MUL.ringA ?? 1; ring.position.y = 138; ring.renderOrder = -2; group.add(ring);
   { const n = 420, pos = new Float32Array(n * 3); for(let k = 0; k < n; k++){ const a = rnd() * 6.283, h = 0.16 + rnd() * 0.8, r = 1600 * Math.sqrt(1 - h * h); pos[k * 3] = Math.cos(a) * r; pos[k * 3 + 1] = 1600 * h; pos[k * 3 + 2] = Math.sin(a) * r; }
-    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); const st = new THREE.Points(g, new THREE.PointsMaterial({color:0xdfe6ff, size:2.2, sizeAttenuation:false, fog:false, transparent:true, opacity:0.8, depthWrite:false})); st.renderOrder = -2; st.frustumCulled = false; group.add(st); o2.stars = st; }
-  const moon = new THREE.Sprite(new THREE.SpriteMaterial({map:T.glow, color:0xfff1d0, fog:false, depthWrite:false, blending:THREE.AdditiveBlending})); moon.scale.set(210, 210, 1); moon.position.set(-700, 760, -1100); moon.renderOrder = -1; group.add(moon);
-  const moon2 = new THREE.Mesh(new THREE.CircleGeometry(26, 24), new THREE.MeshBasicMaterial({color:0xfff6e0, fog:false, depthWrite:false})); moon2.position.copy(moon.position); moon2.renderOrder = -1; group.add(moon2);
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); const st = new THREE.Points(g, new THREE.PointsMaterial({color:0xdfe6ff, size:2.2, sizeAttenuation:false, fog:false, transparent:true, opacity:TH.stars, depthWrite:false})); st.visible = TH.stars > 0; st.renderOrder = -2; st.frustumCulled = false; group.add(st); o2.stars = st; }
+  const moon = new THREE.Sprite(new THREE.SpriteMaterial({map:T.glow, color:TH.sun[4], fog:false, depthWrite:false, blending:THREE.AdditiveBlending})); moon.scale.set(TH.sun[3], TH.sun[3], 1); moon.position.set(TH.sun[0], TH.sun[1], TH.sun[2]); moon.renderOrder = -1; group.add(moon);
+  const moon2 = new THREE.Mesh(new THREE.CircleGeometry(TH.sun[5], 24), new THREE.MeshBasicMaterial({color:time === "sunset" ? 0xffd9a0 : 0xfff6e0, fog:false, depthWrite:false})); moon2.position.copy(moon.position); moon2.renderOrder = -1; group.add(moon2);
 
+  /* 구름 (낮 · 노을): 큰 흐린 빛 덩어리 몇 개 */
+  const clouds = []; if(TH.cloud) for(let k = 0; k < 16; k++){ const a = rnd() * 6.283, r = 1150 + rnd() * 250, w = 420 + rnd() * 520;
+    const c = new THREE.Sprite(new THREE.SpriteMaterial({map:T.glow, color:TH.cloud[0], fog:false, depthWrite:false, transparent:true, opacity:TH.cloud[1] * (0.6 + rnd() * 0.4)})); c.scale.set(w, w * (0.2 + rnd() * 0.12), 1); c.position.set(Math.cos(a) * r, 240 + rnd() * 520, Math.sin(a) * r); c.userData.o = [c.position.x, c.position.z]; c.renderOrder = -1; group.add(c); clouds.push(c); }
   /* 출발 신호등 5개 */
   const lights = []; { const k = 2; for(let q = 0; q < 5; q++){ const p = pt(k - 0.6, (q - 2) * 1.5, 5.5), m = new THREE.Mesh(new THREE.SphereGeometry(0.42, 12, 8), new THREE.MeshBasicMaterial({color:0x2a0808, fog:false})); m.position.set(p[0], p[1], p[2]); group.add(m); lights.push(m); }
     const bar = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({color:0x0c0d12})); at(P, k - 0.45, 0, o); bar.position.set(o.x, o.y + 5.5, o.z); bar.scale.set(0.5, 1.3, 8.2); bar.rotation.y = Math.atan2(o.tx, o.tz); group.add(bar); }
 
-  return {group, sky:[sky, ring, o2.stars, moon, moon2], water:T.water, glowTex:T.glow, sheen:sheen.value,
+  return {group, time:TIMES[time] ? time : "night", th:TH, sky:[sky, ring, o2.stars, moon, moon2], water:T.water, glowTex:T.glow, sheen:sheen.value,
     setLights(n, go){ lights.forEach((m, q) => m.material.color.setHex(go ? 0x35ff7a : q < n ? 0xff2b2b : 0x2a0808)); },
-    update(t, cam){ T.water.offset.x = t * 0.012; for(const m of this.sky) if(m !== moon && m !== moon2){ m.position.x = cam.x; m.position.z = cam.z; } },
+    update(t, cam){ T.water.offset.x = t * 0.012; for(const m of this.sky) if(m !== moon && m !== moon2){ m.position.x = cam.x; m.position.z = cam.z; } for(const c of clouds){ c.position.x = cam.x + c.userData.o[0]; c.position.z = cam.z + c.userData.o[1]; } },
     dispose(){ Object.values(T).forEach(x => x.dispose()); group.traverse(m => { m.geometry?.dispose(); m.material?.dispose?.(); }); }};
 }

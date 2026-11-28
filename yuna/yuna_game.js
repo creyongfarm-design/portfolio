@@ -912,10 +912,10 @@ export function start(api){
   /* 마을 지도 (2026-11-24 감독님 "큰 마을이면 좋겠네"): 어디 있는지 보이고, 누르면 그쪽으로 걸어감 */
   const mapEl = $(".yg-map"), mapB = $(".yg-mapb");
   const TOWER_F = ["lobby", "main", "wf", "s4", "roof"];
-  const MAP_T = [["gym", 10, 80], ["court", 30, 82], ["river", 10, 50], ["park", 29, 50], ["tower", 50, 46], ["town", 70, 50], ["market", 90, 50], ["school", 66, 16], ["fun", 90, 16], ["home", 50, 84]];
+  const MAP_T = [["gym", 10, 80], ["court", 30, 82], ["river", 10, 50], ["park", 29, 50], ["tower", 50, 46], ["town", 70, 50], ["market", 90, 50], ["school", 66, 16], ["fun", 90, 16], ["home", 50, 84], ["race", 74, 84]];
   const MAP_R = [["river", "gym"], ["gym", "court"], ["river", "park"], ["park", "tower"], ["tower", "town"], ["town", "market"], ["town", "school"], ["tower", "home"]];
   const mapKey = f => TOWER_F.includes(f) ? "tower" : isHome(f) ? "home" : f;
-  const mapName = k => k === "tower" ? ["🏢", "크레용 타워"] : k === "home" ? ["🏡", "유나네 집"] : [AREA[k].e, AREA[k].name.replace("·동네 교회", "·교회").replace("·놀이터", "")];
+  const mapName = k => k === "race" ? ["🏎️", "레이스 경기장"] : k === "tower" ? ["🏢", "크레용 타워"] : k === "home" ? ["🏡", "유나네 집"] : [AREA[k].e, AREA[k].name.replace("·동네 교회", "·교회").replace("·놀이터", "")];
   function openMap(){
     if(S.boat) landBoat(); else if(S.busy){ toast("지금 하는 놀이가 끝나면 갈 수 있어요", "", 1400); return; }   // 타는 중에 다른 곳으로 가면 버튼이 사라지던 것
     panel.hidden = true; const here = mapKey(S.floor), P = Object.fromEntries(MAP_T.map(([k, x, y]) => [k, [x, y]]));
@@ -924,8 +924,8 @@ export function start(api){
       <path d="M0 22 C6 26 4 40 10 46 S6 58 2 62.5 L0 62.5Z" fill="#A9CBEA" opacity=".85"/><path d="M0 24 C5 28 3 40 8 46 S4 58 1 62.5" fill="none" stroke="#FFFFFF" stroke-width=".5" opacity=".7"/>
       <circle cx="29" cy="24" r="9" fill="#BFE3C9" opacity=".8"/><circle cx="90" cy="9" r="8" fill="#F6E1EA" opacity=".9"/><circle cx="70" cy="8" r="7" fill="#F4ECD8" opacity=".9"/>
       ${MAP_R.map(r => ln(r)).join("")}${ln(["town", "fun"], true)}<text x="83.5" y="22" font-size="2.6" fill="#8A847C" text-anchor="middle">🚌 버스</text></svg>
-      ${MAP_T.map(([k, x, y]) => { const [e, n] = mapName(k), ok = k === "tower" || k === "home" || AREA_MOD[k]; return `<button type="button" class="t${k === here ? " on" : ""}${ok ? "" : " off"}" data-k="${k}" style="left:${x}%;top:${y}%"><i>${e}</i><span>${n}</span></button>`; }).join("")}</div><button type="button" class="x">닫기</button>`;
-    mapEl.querySelectorAll(".t").forEach(b => b.onclick = ev => { ev.stopPropagation(); const k = b.dataset.k; mapEl.hidden = true; if(k === here) return;
+      ${MAP_T.map(([k, x, y]) => { const [e, n] = mapName(k), ok = k === "tower" || k === "home" || k === "race" || AREA_MOD[k]; return `<button type="button" class="t${k === here ? " on" : ""}${ok ? "" : " off"}" data-k="${k}" style="left:${x}%;top:${y}%"><i>${e}</i><span>${n}</span></button>`; }).join("")}</div><button type="button" class="x">닫기</button>`;
+    mapEl.querySelectorAll(".t").forEach(b => b.onclick = ev => { ev.stopPropagation(); const k = b.dataset.k; mapEl.hidden = true; if(k === "race"){ openRace(); return; } if(k === here) return;
       if(k === "tower") walkTo({f:S.floor, to:"lobby", spawn:AREA[S.floor]?.back || [17.6, 28.2, PI]});
       else if(k === "home") walkTo({f:S.floor, to:"home1", spawn:HOME.spawnGate});
       else walkTo({f:S.floor, to:k, spawn:AREA[k].spawn}); });
@@ -1025,8 +1025,8 @@ export function start(api){
       r.innerHTML = `<span class="e">🚶‍♀️</span><span><b></b><small></small></span>`; r.querySelector("b").textContent = G ? "이 놀이 그만하고 그냥 돌아다니기" : Q ? "이 할 일 그만하고 그냥 돌아다니기" : "그냥 돌아다니기"; r.querySelector("small").textContent = "마음대로 구경하고 놀기 · 보물 찾기";
       r.onclick = () => { panel.hidden = true; if(G && !Q){ endGame(); setup(); renderCard(); } if(Q){ endGame(); E()?.playActor("fr", null); Q = null; setCarry(""); setup(); renderCard(); } }; panel.append(r); }
     { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row"; const o = rec.race;
-      r.innerHTML = `<span class="e">🏎️</span><span><b>나이트 레이스</b><small></small></span>${o?.wins ? `<span class="ok">🏆 ${o.wins}번</span>` : ""}`;
-      r.querySelector("small").textContent = o?.time > 0 ? `밤 도시 3바퀴 · 내 기록 ${Math.floor(o.time / 60)}:${(o.time % 60).toFixed(2).padStart(5, "0")}` : "밤 도시 3바퀴 · 드리프트와 니트로로 1등 하기";
+      r.innerHTML = `<span class="e">🏎️</span><span><b>크레용 레이스</b><small></small></span>${o?.wins ? `<span class="ok">🏆 ${o.wins}번</span>` : ""}`;
+      r.querySelector("small").textContent = o?.time > 0 ? `맵 2개 · 낮 · 노을 · 밤 · 내 기록 ${Math.floor(o.time / 60)}:${(o.time % 60).toFixed(2).padStart(5, "0")}` : "맵 2개 · 낮 · 노을 · 밤 · 드리프트와 니트로로 1등 하기";
       r.onclick = () => { panel.hidden = true; openRace(); }; panel.append(r); }
     { const h = document.createElement("p"); h.className = "yg-sec"; h.innerHTML = "🎮 놀이 하러 가기 <small>누르면 그 자리까지 데려다줘요</small>"; panel.append(h);   // 2026-11-29 감독님 "피구는 어디서해??"
       const g = document.createElement("div"); g.className = "yg-plays";
@@ -2097,10 +2097,11 @@ export function start(api){
     const back = () => { S.race = false; AU.duck = false; const e2 = E(); e2?.pause?.(false); e2?.playSet({freeze:false}); if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(AU.on ? 0.9 : 0, AU.ctx.currentTime, 0.2); };
     try { const m = await import("./race3d.js"); if(!m.webglOK()) throw new Error("webgl");
       AU.duck = true; if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(0, AU.ctx.currentTime, 0.1); e?.pause?.(true);
-      m.open({sound:AU.on, best:rec.race,
+      const R1 = rec.race || {}, bests = {...(R1.bests || {})}; if(R1.time > 0 && !bests["city:night"]) bests["city:night"] = {time:R1.time, lap:R1.lap};   // 예전 기록은 도심 서킷 · 밤
+      m.open({sound:AU.on, bests, pref:R1.pref, onPref(pf){ const o = rec.race = rec.race || {}; o.pref = pf; save(); },
         onSound(on){ AU.on = on; try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} sndB.textContent = on ? "🔊" : "🔇"; },
-        onEnd(r){ const o = rec.race = rec.race || {}; o.runs = (o.runs || 0) + 1; if(!(o.time > 0) || r.time < o.time){ o.time = r.time; o.lap = r.bestLap; } if(!(o.rank > 0) || r.rank < o.rank) o.rank = r.rank; if(r.rank === 1) o.wins = (o.wins || 0) + 1; S.raceEnd = r; save(); },
-        onExit(){ back(); const r = S.raceEnd; S.raceEnd = null; if(!r) return; firstUse("race", "🏎️ 나이트 레이스 완주");
+        onEnd(r){ const o = rec.race = rec.race || {}; o.runs = (o.runs || 0) + 1; if(!(o.time > 0) || r.time < o.time){ o.time = r.time; o.lap = r.bestLap; } if(r.key){ o.bests = o.bests || {}; const b0 = o.bests[r.key]; if(!b0 || r.time < b0.time) o.bests[r.key] = {time:r.time, lap:r.bestLap}; } if(!(o.rank > 0) || r.rank < o.rank) o.rank = r.rank; if(r.rank === 1) o.wins = (o.wins || 0) + 1; S.raceEnd = r; save(); },
+        onExit(){ back(); const r = S.raceEnd; S.raceEnd = null; if(!r) return; firstUse("race", "🏎️ 크레용 레이스 완주");
           if(r.rank === 1 && rec.race.wins === 1){ rec.stars += 2; save(); renderCard(); later0(2600, () => { sfx("star"); toast("🏆 레이스 첫 우승!", "⭐ +2", 2600, true); }); }
           else later0(400, () => toast(`🏁 ${r.rank}등으로 골인`, r.rank === 1 ? "또 우승이에요 🏆" : "다음엔 1등 해 봐요", 2400, true)); }}); }
     catch(err){ console.warn("레이스를 못 열었어요", err); back(); toast("레이스를 못 열었어요", "잠깐 뒤에 다시 해 봐요", 2200, true); }

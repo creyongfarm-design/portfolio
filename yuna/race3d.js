@@ -3,8 +3,8 @@
    조작: 폰은 왼쪽을 좌우로 밀어 핸들(가속은 자동), 오른쪽에 드리프트·니트로 / 컴퓨터는 방향키·WASD, 스페이스 드리프트, Shift 니트로
    파일: race3d_path(길 계산) · race3d_track(배경) · race3d_car(차·주행) · race3d_audio(소리). 유나 게임과 별개 화면으로 뜸 */
 import * as THREE from "three";
-import { buildPath, HALF_W, LANES, ZONE, at, inZone } from "./race3d_path.js";
-import { buildWorld } from "./race3d_track.js";
+import { buildPath, HALF_W, LANES, TRACKS, at, inZone } from "./race3d_path.js";
+import { buildWorld, TIMES } from "./race3d_track.js";
 import { makeCar, Player, Bot, collide, LIM } from "./race3d_car.js";
 import { makeAudio } from "./race3d_audio.js";
 
@@ -72,15 +72,31 @@ const CSS = `
 .ngp-btn small{display:block;font-size:10px;font-weight:700;opacity:.75;margin-top:3px}
 .ngp-end{position:absolute;inset:0;display:grid;place-items:center;background:rgba(4,5,12,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .5s;padding:20px}
 .ngp-end.on{opacity:1;pointer-events:auto}
+.ngp-x{z-index:6}
+.ngp-sel{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:radial-gradient(ellipse at 50% 30%,#1a1240 0%,#05060c 75%);overflow:auto}
+.ngp-sel[hidden]{display:none}
+.ngp-selc{width:min(560px,100%);display:grid;gap:12px}
+.ngp-selc h2{margin:0;font-style:italic;font-weight:900;font-size:clamp(26px,5vw,40px);line-height:1;text-align:center;text-shadow:0 0 30px var(--pk)}
+.ngp-selc .cl{display:grid;gap:10px}
+.ngp-selc h3{margin:4px 0 0;font:800 13px/1 Pretendard,sans-serif;letter-spacing:.04em;color:#c9ceea}
+.ngp-trk{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ngp-tod{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ngp-sel button{font:inherit;color:#fff;border:1.5px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);border-radius:16px;padding:10px;text-align:center}
+.ngp-sel button[aria-pressed="true"]{border-color:#ff4fb0;background:rgba(255,79,176,.18);box-shadow:0 0 0 1px rgba(255,79,176,.5),0 10px 26px -14px rgba(255,79,176,.9)}
+.ngp-trk canvas{display:block;width:100%;height:84px}.ngp-trk b,.ngp-tod b{display:block;font:800 15px/1.2 Pretendard,sans-serif}.ngp-trk small{display:block;margin-top:3px;font:600 11.5px/1.3 Pretendard,sans-serif;opacity:.7}
+.ngp-trk em{display:block;margin-top:5px;font:700 11.5px/1 Pretendard,sans-serif;font-style:normal;color:#ffd27a;min-height:12px}
+.ngp-tod span{display:block;font-size:26px;line-height:1.1;margin-bottom:4px}
+.ngp-sel .go{margin-top:4px;padding:16px;border:0;font:800 17px/1 Pretendard,sans-serif;background:linear-gradient(100deg,#ff4fb0,#ff8a5a);box-shadow:0 8px 26px -8px rgba(255,79,176,.8)}
+.ngp.t-day .ngp-vig{opacity:.25}.ngp.t-sunset .ngp-vig{opacity:.7}
 .ngp-card{width:min(430px,100%);max-height:100%;overflow:auto;text-align:center}
 .ngp-card h2{margin:0;font-style:italic;font-weight:900;font-size:76px;line-height:1;text-shadow:0 0 40px var(--pk)}
 .ngp-card h2 small{font-size:26px;margin-left:4px}
-.ngp-card p{margin:10px 0 18px;font:700 16px/1.5 Pretendard,sans-serif;color:#e9ecff}
+.ngp-card p{word-break:keep-all;margin:10px 0 18px;font:700 16px/1.5 Pretendard,sans-serif;color:#e9ecff}
 .ngp-rows{display:grid;gap:6px;margin:0 0 20px;text-align:left}
 .ngp-rows div{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);font:700 15px/1 Pretendard,sans-serif;font-variant-numeric:tabular-nums}
 .ngp-rows div.me{background:rgba(255,79,176,.26);box-shadow:inset 0 0 0 1px rgba(255,79,176,.7)}
 .ngp-rows b{width:22px;font:italic 900 18px/1 "Inter Tight",sans-serif}.ngp-rows i{width:10px;height:10px;border-radius:3px}.ngp-rows span{flex:1}.ngp-rows em{font-style:normal;opacity:.8}
-.ngp-go{display:flex;gap:10px}.ngp-go button{flex:1;padding:16px 10px;border-radius:14px;border:0;font:800 16px/1 Pretendard,sans-serif;color:#fff;background:rgba(255,255,255,.14)}
+.ngp-rows span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ngp-go{display:flex;gap:10px}.ngp-go button{flex:1;min-width:0;white-space:nowrap;padding:16px 10px;border-radius:14px;border:0;font:800 16px/1 Pretendard,sans-serif;color:#fff;background:rgba(255,255,255,.14)}
 .ngp-go button.p{background:linear-gradient(100deg,#ff4fb0,#ff8a5a);box-shadow:0 8px 26px -8px rgba(255,79,176,.8)}
 .ngp-load{position:absolute;inset:0;display:grid;place-items:center;background:#05060c;font:italic 900 30px/1 "Inter Tight",Pretendard,sans-serif;letter-spacing:.02em;transition:opacity .5s;text-shadow:0 0 30px var(--pk)}
 .ngp-load.out{opacity:0;pointer-events:none}
@@ -89,6 +105,8 @@ const CSS = `
 .ngp-help.on{opacity:.85}.ngp.touch .ngp-help{bottom:auto;top:calc(max(14px,env(safe-area-inset-top)) + 134px);padding:0 20px}
 .ngp.end .ngp-hud,.ngp.end .ngp-touch,.ngp.end .ngp-snd{opacity:0;pointer-events:none;transition:opacity .4s}.ngp.end .ngp-touch *{pointer-events:none}
 @media (max-width:560px){.ngp-pos b{font-size:48px}.ngp-time{font-size:20px;top:calc(max(14px,env(safe-area-inset-top)) + 96px)}.ngp-map{width:96px;height:70px}.ngp-msg{font-size:26px}.ngp-count{font-size:110px}.ngp-card h2{font-size:58px}}
+@media (max-height:560px){.ngp-selc{width:min(760px,100%);grid-template-columns:1.25fr 1fr;column-gap:16px;align-items:start}.ngp-selc h2{grid-column:1/-1;font-size:24px}.ngp-selc .cl{display:grid;gap:8px}.ngp-trk canvas{height:66px}.ngp-tod span{font-size:22px}
+  .ngp-card{width:min(760px,100%);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);column-gap:24px;align-items:center}.ngp-card h2{grid-column:1;grid-row:1;font-size:54px}.ngp-card p{grid-column:1;grid-row:2;margin:8px 0 14px;font-size:14px}.ngp-rows{grid-column:2;grid-row:1/4;margin:0;gap:4px}.ngp-rows div{padding:7px 12px;font-size:14px}.ngp-go{grid-column:1;grid-row:3;gap:6px}.ngp-go button{padding:13px 2px;font-size:13.5px}}
 `;
 
 let R = null;
@@ -102,31 +120,51 @@ export function open(opts = {}){
   root.innerHTML = `<canvas class="gl"></canvas><canvas class="ngp-fx"></canvas><div class="ngp-vig"></div><div class="ngp-nfl"></div><div class="ngp-hit"></div>
     <div class="ngp-hud"><div class="ngp-pos"><b>6</b><i>/6</i><small>LAP <b>1</b>/${LAPS}</small></div><div class="ngp-time"><span>0:00.00</span><small></small></div><canvas class="ngp-map"></canvas>
       <div class="ngp-gauge"><canvas></canvas><div class="ngp-kmh"><span>0</span><small>KM/H</small></div><div class="ngp-gear">N</div><div class="ngp-nlb">NITRO</div><div class="ngp-nbar"><i></i></div></div>
-      <div class="ngp-title"><b>CREYONG NIGHT RACE</b><span>크레용 나이트 레이스</span></div><div class="ngp-msg"></div><div class="ngp-dr"></div><div class="ngp-wrong">반대 방향이에요</div><div class="ngp-count"></div><div class="ngp-help"></div></div>
+      <div class="ngp-title"><b>CREYONG NIGHT RACE</b><span>크레용 레이스</span></div><div class="ngp-msg"></div><div class="ngp-dr"></div><div class="ngp-wrong">반대 방향이에요</div><div class="ngp-count"></div><div class="ngp-help"></div></div>
     <div class="ngp-touch"><div class="ngp-wheel"><i></i></div><button class="ngp-btn ngp-nitro" type="button">니트로<small>NITRO</small></button><button class="ngp-btn ngp-drift" type="button">드리프트<small>브레이크</small></button></div>
     <button class="ngp-x" type="button" aria-label="레이스 나가기">✕</button><button class="ngp-x ngp-snd" type="button" aria-label="소리 켜기·끄기">🔊</button>
-    <div class="ngp-end"><div class="ngp-card"></div></div><div class="ngp-load"><div>CREYONG NIGHT RACE<small>시동 거는 중…</small></div></div>`;
+    <div class="ngp-end"><div class="ngp-card"></div></div><div class="ngp-sel" hidden></div><div class="ngp-load"><div>CREYONG RACE<small>시동 거는 중…</small></div></div>`;
   document.body.append(root);
   const $ = s => root.querySelector(s);
   R = {root, opts, $, state:"load", t:0, live:true, raf:0, last:0, keys:{}, touch:{steer:0, id:null, x0:0, drift:false, nitro:false}, I:{steer:0, gas:0, brake:0, hand:false, nitro:false}, auto:!!opts.auto, sound:opts.sound !== false, frames:0, slow:0, fxS:[], msgT:0, tun:0, shake:0, lapT:0, laps:[], best:null, order:[], nearN:0, driftBest:0, usedKeys:false};
   R.au = makeAudio(R.sound); $(".ngp-snd").textContent = R.sound ? "🔊" : "🔇";
-  setTimeout(() => { if(R && R.root === root) build(); }, 30);
+  const pf = opts.pref || {}; R.track = TRACKS[opts.track || pf.track] ? (opts.track || pf.track) : "city"; R.time = TIMES[opts.time || pf.time] ? (opts.time || pf.time) : "night";
+  $(".ngp-x").onclick = exit;   // 고르는 화면 · 불러오는 중에도 나갈 수 있게 (달리기 시작하면 bind 가 다시 검)
+  if(opts.auto || opts.track) setTimeout(() => { if(R && R.root === root) build(); }, 30); else select();
   return {close, get state(){ return R?.state; }};
 }
 
+/* 맵 · 시간 고르기 (2026-11-29 감독님 "맵도 좀 더 필요해 밤만있는것도 싫어") */
+function select(){
+  const el = R.$(".ngp-sel"), root = R.root; R.$(".ngp-load").classList.add("out"); R.state = "select";
+  const bestOf = k => { let b = 0; Object.keys(TIMES).forEach(t => { const v = R.opts.bests?.[k + ":" + t]?.time; if(v > 0 && (!b || v < b)) b = v; }); return b; };
+  el.innerHTML = `<div class="ngp-selc"><h2>CREYONG RACE</h2><div class="cl"><h3>어디서 달릴까</h3><div class="ngp-trk">${Object.entries(TRACKS).map(([k, t]) => `<button type="button" data-k="${k}"><canvas width="240" height="132"></canvas><b>${t.name}</b><small>${t.sub}</small><em>${bestOf(k) ? "내 기록 " + fmt(bestOf(k)) : ""}</em></button>`).join("")}</div></div>
+    <div class="cl"><h3>언제 달릴까</h3><div class="ngp-tod">${Object.entries(TIMES).map(([k, t]) => `<button type="button" data-k="${k}"><span>${t.e}</span><b>${t.name}</b></button>`).join("")}</div><button type="button" class="go">출발!</button></div></div>`;
+  const mark = () => { el.querySelectorAll(".ngp-trk button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === R.track)); el.querySelectorAll(".ngp-tod button").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === R.time)); };
+  el.querySelectorAll(".ngp-trk button").forEach(b => { const P = buildPath(8, b.dataset.k), c = b.querySelector("canvas"), g = c.getContext("2d"), w = c.width, h = c.height; let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+    for(let k = 0; k < P.N; k++){ x0 = Math.min(x0, P.px[k]); x1 = Math.max(x1, P.px[k]); z0 = Math.min(z0, P.pz[k]); z1 = Math.max(z1, P.pz[k]); } const sc = Math.min((w - 28) / (x1 - x0), (h - 28) / (z1 - z0)), X = x => (x - x0) * sc + (w - (x1 - x0) * sc) / 2, Z = z => (z - z0) * sc + (h - (z1 - z0) * sc) / 2;
+    const seg = (a, b2, col, lw) => { g.beginPath(); for(let k = a; k <= b2; k++){ const q = k % P.N; g[k === a ? "moveTo" : "lineTo"](X(P.px[q]), Z(P.pz[q])); } g.strokeStyle = col; g.lineWidth = lw; g.lineJoin = g.lineCap = "round"; g.stroke(); };
+    seg(0, P.N, "rgba(255,255,255,.16)", 12); seg(0, P.N, "#ffffff", 5); seg(Math.floor(P.zone.tunnel[0] * P.N), Math.ceil(P.zone.tunnel[1] * P.N), "#ffb040", 5); seg(Math.floor(P.zone.bridge[0] * P.N), Math.ceil(P.zone.bridge[1] * P.N), "#57d7ff", 5);
+    g.fillStyle = "#ff4fb0"; g.beginPath(); g.arc(X(P.px[0]), Z(P.pz[0]), 6, 0, 7); g.fill();
+    b.onclick = () => { R.track = b.dataset.k; mark(); R.au.sfx?.("tick"); }; });
+  el.querySelectorAll(".ngp-tod button").forEach(b => b.onclick = () => { R.time = b.dataset.k; mark(); R.au.sfx?.("tick"); });
+  el.querySelector(".go").onclick = () => { if(!R || R.root !== root) return; R.opts.pref = {track:R.track, time:R.time}; R.opts.onPref?.(R.opts.pref); el.hidden = true; R.$(".ngp-load").classList.remove("out"); R.state = "load"; setTimeout(() => { if(R && R.root === root) build(); }, 60); };
+  mark(); el.hidden = false;
+}
 function build(){
+  const TH = TIMES[R.time] || TIMES.night; R.th = TH; R.root.classList.add("t-" + R.time); R.key = R.track + ":" + R.time; R.$(".ngp-title b").textContent = TH.title; R.$(".ngp-title span").textContent = `${TRACKS[R.track].name} · ${TH.name}`;
   const {root, $} = R, canvas = $("canvas.gl"), mobile = matchMedia("(pointer:coarse)").matches || innerWidth < 720;
   const renderer = new THREE.WebGLRenderer({canvas, antialias:!mobile, powerPreference:"high-performance"}); R.renderer = renderer; R.pr = Math.min(devicePixelRatio || 1, mobile ? 1.6 : 2); renderer.setPixelRatio(R.pr);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.22;
-  const scene = new THREE.Scene(), FOG = new THREE.Color(0x120c26); scene.background = FOG.clone(); scene.fog = new THREE.FogExp2(FOG.getHex(), 0.0034); R.scene = scene; R.FOG = FOG;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = TH.exposure;
+  const scene = new THREE.Scene(), FOG = new THREE.Color(TH.fog); scene.background = FOG.clone(); scene.fog = new THREE.FogExp2(FOG.getHex(), TH.fogD); R.scene = scene; R.FOG = FOG;
   const camera = new THREE.PerspectiveCamera(64, 1, 0.3, 2600); R.camera = camera; camera.rotation.order = "YXZ";
   /* 차에 비칠 밤거리 (작은 가짜 풍경을 구워 반사로 씀) */
   { const es = new THREE.Scene(); es.background = new THREE.Color(0x05060f); const bx = (c, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), new THREE.MeshBasicMaterial({color:c})); m.position.set(x, y, z); es.add(m); };
-    es.background = new THREE.Color(0x0a0c1c); for(let q = -3; q <= 3; q++) bx(q % 2 ? 0xfff0d0 : 0xffc890, q * 3.2 % 5, 8, q * 7, 1.6, 0.3, 2.6);
+    es.background = new THREE.Color(TH.env[0]); if(TH.env[1]) bx(TH.env[1], 0, 14, 0, 44, 0.5, 44); for(let q = -3; q <= 3; q++) bx(q % 2 ? 0xfff0d0 : 0xffc890, q * 3.2 % 5, 8, q * 7, 1.6, 0.3, 2.6);
     bx(0xff3fa8, -9, 2.5, 0, 0.5, 4, 30); bx(0x2aa8c8, 9, 2.2, 0, 0.5, 2.4, 22); bx(0xffb060, -9, 7, 6, 0.5, 2, 6); bx(0xb78bff, 9, 8, -8, 0.5, 2, 6); bx(0x8a3a6c, 0, 1.5, -18, 50, 7, 0.5); bx(0x3a4aa0, 0, 1.5, 18, 50, 6, 0.5); bx(0x1c1c26, 0, -3, 0, 50, 0.5, 50);
     const pm = new THREE.PMREMGenerator(renderer); R.env = pm.fromScene(es, 0.03).texture; pm.dispose(); es.traverse(m => { m.geometry?.dispose(); m.material?.dispose(); }); }
-  R.hemi = new THREE.HemisphereLight(0x8fa0ff, 0x2a1830, 1.25); scene.add(R.hemi); const dl = new THREE.DirectionalLight(0xffd6b0, 1.1); dl.position.set(-0.4, 1, -0.6); scene.add(dl);
-  const P = buildPath(2); R.P = P; R.world = buildWorld(P); scene.add(R.world.group);
+  R.hemi = new THREE.HemisphereLight(TH.hemi[0], TH.hemi[1], TH.hemi[2]); R.hemiC = R.hemi.color.clone(); scene.add(R.hemi); const dl = new THREE.DirectionalLight(TH.dir[0], TH.dir[1]); dl.position.set(-0.4, 1, -0.6); scene.add(dl);
+  const P = buildPath(2, R.track); R.P = P; R.world = buildWorld(P, R.time); scene.add(R.world.group);
   /* 차 */
   const glow = R.world.glowTex, N = P.N;
   R.me = new Player(P, makeCar("sport", ME.color, R.env, glow, {glow:ME.glow})); scene.add(R.me.car.root);
@@ -135,6 +173,8 @@ function build(){
   const TK = [["sedan", 0xd9dce6], ["taxi", 0xf2b019], ["van", 0xeceff4], ["sedan", 0x25345c], ["bus", 0x2f9a6a], ["sedan", 0x8a8f9c], ["taxi", 0xf08a1c], ["van", 0x3d6fb0], ["sedan", 0x7a1f2a], ["bus", 0x2a62c4], ["sedan", 0xc9c2b0]];
   R.traffic = TK.map(([kind, color], k) => { const s = 70 + (N - 230) * (k + 0.5) / TK.length + (k * 37 % 19), taxi = kind === "taxi"; const b = new Bot(P, makeCar(taxi ? "sedan" : kind, color, R.env, glow, {taxi}), {traffic:true, s, d:LANES[(k * 3 + 1) % 4], lane:LANES[(k * 3 + 1) % 4], top:kind === "bus" ? 15 : 17 + (k * 7 % 8), v:16}); b.car.beam.scale.set(5.5, 1, 11); scene.add(b.car.root); return b; });
   R.bots = [...R.rivals, ...R.traffic]; R.all = [...R.bots, R.me];
+  if(TH.beam !== 1) R.all.forEach(c => c.car.root.traverse(m => { const mt = m.material; if(mt && mt.blending === THREE.AdditiveBlending){ mt.userData.c0 = mt.userData.c0 || mt.color.clone(); mt.color.copy(mt.userData.c0).multiplyScalar(TH.beam); } }));   // 낮엔 전조등 · 바닥 불빛을 약하게
+  else R.all.forEach(c => c.car.root.traverse(m => { const mt = m.material; if(mt && mt.userData.c0) mt.color.copy(mt.userData.c0); }));
   /* 연기·불꽃 */
   { const n = 260, g = new THREE.BufferGeometry(); R.pp = {n, i:0, pos:new Float32Array(n * 3), vel:new Float32Array(n * 3), col:new Float32Array(n * 4), size:new Float32Array(n), life:new Float32Array(n), max:new Float32Array(n), add:new Float32Array(n), grow:new Float32Array(n), a0:new Float32Array(n)};
     g.setAttribute("position", new THREE.BufferAttribute(R.pp.pos, 3)); g.setAttribute("pc", new THREE.BufferAttribute(R.pp.col, 4)); g.setAttribute("size", new THREE.BufferAttribute(R.pp.size, 1)); g.setAttribute("add", new THREE.BufferAttribute(R.pp.add, 1));
@@ -197,13 +237,13 @@ function finish(){
   const rank = 1 + R.rivals.filter(b => b.fin).length; R.rank = rank; R.au.sfx(rank <= 3 ? "win" : "lose"); msg(rank === 1 ? "1등!! 🏆" : rank + "등으로 골인!", fmt(total));
 }
 function showEnd(){
-  R.state = "done"; const total = R.finT, rank = R.rank, bestLap = Math.min(...R.laps), old = R.opts.best || {}, newBest = !(old.time > 0) || total < old.time;
+  R.state = "done"; const total = R.finT, rank = R.rank, bestLap = Math.min(...R.laps), old = (R.opts.bests || {})[R.key] || {}, newBest = !(old.time > 0) || total < old.time;
   const rows = [{me:true, name:ME.name, color:ME.glow, prog:1e12 - rank, t:total}, ...R.rivals.map(b => ({name:b.name, color:b.glow, prog:b.fin ? 1e12 - b.fin : b.prog, t:b.finT || 0}))].sort((a, b) => b.prog - a.prog);
   R.$(".ngp-card").innerHTML = `<h2>${rank}<small>등</small></h2><p>${rank === 1 ? "우승이에요! 🏆" : rank <= 3 ? "시상대에 올랐어요 🎉" : "다음엔 더 빨리 달려 봐요 💪"}<br>기록 ${fmt(total)} · 가장 빠른 바퀴 ${fmt(bestLap)}${newBest ? " · 새 기록!" : ""}</p>
     <div class="ngp-rows">${rows.map((r, k) => `<div class="${r.me ? "me" : ""}"><b>${k + 1}</b><i style="background:#${r.color.toString(16).padStart(6, "0")}"></i><span>${r.name}</span><em>${r.t ? fmt(r.t) : "달리는 중"}</em></div>`).join("")}</div>
-    <div class="ngp-go"><button type="button" class="again p">다시 달리기</button><button type="button" class="out">나가기</button></div>`;
-  R.$(".ngp-end").classList.add("on"); R.root.classList.add("end"); R.$(".again").onclick = restart; R.$(".out").onclick = exit;
-  R.result = {rank, time:total, bestLap, near:R.nearN, drift:R.driftBest}; R.opts.onEnd?.(R.result); if(newBest) R.opts.best = {time:total, lap:bestLap};
+    <div class="ngp-go"><button type="button" class="again p">다시 달리기</button><button type="button" class="chg">맵 바꾸기</button><button type="button" class="out">나가기</button></div>`;
+  R.$(".ngp-end").classList.add("on"); R.root.classList.add("end"); R.$(".again").onclick = restart; R.$(".out").onclick = exit; R.$(".chg").onclick = () => { const o = R.opts; o.track = null; o.time = null; o.sound = R.sound; close(); open(o); };
+  R.result = {rank, time:total, bestLap, near:R.nearN, drift:R.driftBest, key:R.key, track:R.track, tod:R.time}; R.opts.onEnd?.(R.result); if(newBest){ R.opts.bests = R.opts.bests || {}; R.opts.bests[R.key] = {time:total, lap:bestLap}; }
 }
 
 /* ---------- 한 프레임 ---------- */
@@ -319,8 +359,8 @@ function step(dt){
     } else if(R.stT > 2.6) showEnd();
   }
   /* 가로등 아래를 지날 때 차에 빛이 스침 · 터널 안은 주황빛 */
-  const ph = (me.s % 17) / 17, pulse = Math.pow(Math.max(0, Math.cos((ph - 0.5) * 2 * PI) * -1), 2); const inTun = inZone(P, me.k, ZONE.tunnel); R.tun = lerp(R.tun, inTun ? 1 : 0, ease(3, dt));
-  me.car.paint.envMapIntensity = 1.2 + pulse * 1.3 + R.tun * 1.4; R.scene.fog.color.setRGB(lerp(R.FOG.r, 0.16, R.tun), lerp(R.FOG.g, 0.085, R.tun), lerp(R.FOG.b, 0.03, R.tun)); R.scene.background.copy(R.scene.fog.color); R.hemi.color.setRGB(lerp(0.56, 1, R.tun), lerp(0.63, 0.62, R.tun), lerp(1, 0.3, R.tun)); R.world.sheen.setRGB(lerp(0.8, 1.0, R.tun), lerp(0.34, 0.6, R.tun), lerp(0.52, 0.22, R.tun));
+  const ph = (me.s % 17) / 17, pulse = Math.pow(Math.max(0, Math.cos((ph - 0.5) * 2 * PI) * -1), 2); const inTun = inZone(P, me.k, P.zone.tunnel); R.tun = lerp(R.tun, inTun ? 1 : 0, ease(3, dt));
+  me.car.paint.envMapIntensity = 1.2 + pulse * 1.3 + R.tun * 1.4; R.scene.fog.color.setRGB(lerp(R.FOG.r, 0.16, R.tun), lerp(R.FOG.g, 0.085, R.tun), lerp(R.FOG.b, 0.03, R.tun)); R.scene.background.copy(R.scene.fog.color); R.hemi.color.setRGB(lerp(R.hemiC.r, 1, R.tun), lerp(R.hemiC.g, 0.62, R.tun), lerp(R.hemiC.b, 0.3, R.tun)); { const sh = R.th.sheen; R.world.sheen.setRGB(lerp(sh[0], 1.0, R.tun), lerp(sh[1], 0.6, R.tun), lerp(sh[2], 0.22, R.tun)); }
   effects(dt); camStep(dt); R.world.update(R.t, R.camera.position); hud(dt);
   R.au.update({rpm:me.rpm, gas:R.state === "race" ? I.gas : 0.2, speed:Math.abs(me.vf), slip:me.drift ? Math.max(0.6, me.slip) : me.slip > 0.4 ? me.slip : 0, nitro:me.nitroOn, live:R.state !== "done"});
 }
