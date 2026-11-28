@@ -130,7 +130,7 @@ function build(){
   /* 차 */
   const glow = R.world.glowTex, N = P.N;
   R.me = new Player(P, makeCar("sport", ME.color, R.env, glow, {glow:ME.glow})); scene.add(R.me.car.root);
-  R.rivals = RIVALS.map((r, k) => { const b = new Bot(P, makeCar("sport", r.color, R.env, glow, {glow:r.glow, name:r.name}), {...r, s:N - 9 - (k / 2 | 0) * 8, d:k % 2 ? 2.7 : -2.7, top:57}); scene.add(b.car.root); return b; });
+  R.rivals = RIVALS.map((r, k) => { const b = new Bot(P, makeCar("sport", r.color, R.env, glow, {glow:r.glow, name:r.name, lo:true}), {...r, s:N - 9 - (k / 2 | 0) * 8, d:k % 2 ? 2.7 : -2.7, top:57}); scene.add(b.car.root); return b; });
   R.me.reset(N - 25, 2.7);
   const TK = [["sedan", 0xd9dce6], ["taxi", 0xf2b019], ["van", 0xeceff4], ["sedan", 0x25345c], ["bus", 0x2f9a6a], ["sedan", 0x8a8f9c], ["taxi", 0xf08a1c], ["van", 0x3d6fb0], ["sedan", 0x7a1f2a], ["bus", 0x2a62c4], ["sedan", 0xc9c2b0]];
   R.traffic = TK.map(([kind, color], k) => { const s = 70 + (N - 230) * (k + 0.5) / TK.length + (k * 37 % 19), taxi = kind === "taxi"; const b = new Bot(P, makeCar(taxi ? "sedan" : kind, color, R.env, glow, {taxi}), {traffic:true, s, d:LANES[(k * 3 + 1) % 4], lane:LANES[(k * 3 + 1) % 4], top:kind === "bus" ? 15 : 17 + (k * 7 % 8), v:16}); b.car.beam.scale.set(5.5, 1, 11); scene.add(b.car.root); return b; });
@@ -255,10 +255,11 @@ function camStep(dt){
     cam.position.set(me.x - Math.sin(a) * rad, me.y + h, me.z - Math.cos(a) * rad); cam.lookAt(me.x, me.y + (pt ? 1.6 : 0.9), me.z); C.yaw = me.yaw; C.fov = lerp(C.fov, pt ? 84 : 58, ease(3, dt)); cam.fov = C.fov; cam.updateProjectionMatrix(); return; }
   const vyaw = sp > 6 ? Math.atan2(me.vx, me.vz) : me.yaw, want = me.yaw + wrapA(vyaw - me.yaw) * 0.55; C.yaw += wrapA(want - C.yaw) * ease(me.drift ? 4.2 : 6.5, dt);
   const dist = (pt ? 9.2 : 6.5) + sf * 1.5 + nk * 1.5, h = (pt ? 3.5 : 2.3) + sf * 0.3, cx = Math.sin(C.yaw), cz = Math.cos(C.yaw);
-  R.shake = Math.max(R.shake * Math.exp(-dt * 6), me.hit * 0.5); const sh = R.shake + sf * sf * 0.035 + nk * 0.05;
+  /* 흔들림은 부딪힌 순간에만 잠깐 (2026-11-28 감독님 "왜케 흔들리냐": 달리는 내내 떨리던 것 · 부딪힌 뒤 안 멎던 것 없앰) */
+  R.shake = Math.max(R.shake * Math.exp(-dt * 10), me.hit * 0.09); const sh = R.shake, st = R.t * 38;
   C.y = lerp(C.y, me.y + h, ease(9, dt));
-  cam.position.set(me.x - cx * dist + (Math.random() - 0.5) * sh, C.y + (Math.random() - 0.5) * sh, me.z - cz * dist + (Math.random() - 0.5) * sh);
-  _v.set(me.x + cx * (pt ? 10 : 7), me.y + (pt ? 3.2 : 1.15), me.z + cz * (pt ? 10 : 7)); cam.lookAt(_v); cam.rotation.z += -me.steerV * 0.045 * sf - (me.slipA || 0) * 0.1;
+  cam.position.set(me.x - cx * dist + cz * Math.sin(st) * sh, C.y + Math.sin(st * 1.31 + 1) * sh * 0.6, me.z - cz * dist - cx * Math.sin(st) * sh);
+  _v.set(me.x + cx * (pt ? 10 : 7), me.y + (pt ? 3.2 : 1.15), me.z + cz * (pt ? 10 : 7)); cam.lookAt(_v); cam.rotation.z += -me.steerV * 0.026 * sf - (me.slipA || 0) * 0.07;
   C.fov = lerp(C.fov, (pt ? 88 : 62) + sf * 16 + nk * 11, ease(4, dt)); cam.fov = C.fov; cam.updateProjectionMatrix();
 }
 

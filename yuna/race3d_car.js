@@ -16,21 +16,51 @@ function extr(pts, width, bevel = 0.07){
   const g = new THREE.ExtrudeGeometry(sh, {depth:width - bevel * 2, bevelEnabled:true, bevelSize:bevel, bevelThickness:bevel, bevelSegments:2, curveSegments:4});
   g.translate(0, 0, -(width - bevel * 2) / 2); g.rotateY(-PI / 2); return g;
 }
-/* 스포츠카 몸통: 앞에서 뒤로 단면 10개를 이어 붙임 (칠 · 유리 · 바닥 세 덩어리) */
-const SPORT = [[2.25, 0.72, 0.30, 0.44, 0.47, 0.62], [2.05, 0.90, 0.22, 0.52, 0.56, 0.80], [1.55, 0.95, 0.20, 0.62, 0.66, 0.84], [1.05, 0.95, 0.20, 0.70, 0.75, 0.84], [0.35, 0.95, 0.20, 0.77, 1.16, 0.66],
-  [-0.45, 0.96, 0.20, 0.80, 1.18, 0.66], [-1.25, 0.98, 0.20, 0.85, 0.96, 0.76], [-1.85, 0.98, 0.22, 0.87, 0.90, 0.86], [-2.15, 0.94, 0.27, 0.86, 0.88, 0.84], [-2.25, 0.88, 0.36, 0.80, 0.82, 0.78]];
-function loft(S, cab){
-  const rings = S.map(([z, w, y0, ys, yt, wt]) => { const h = [[0, y0], [w * 0.88, y0], [w, y0 + 0.1], [w, ys], [wt, yt - 0.015], [0, yt + 0.025]]; return [...h, ...h.slice(1, 5).reverse().map(q => [-q[0], q[1]])].map(q => [q[0], q[1], z]); });
-  const out = {paint:[], glass:[], dark:[]}, tri = (k, a, b, c) => out[k].push(...a, ...b, ...c);
-  for(let i = 0; i < rings.length - 1; i++) for(let j = 0; j < 10; j++){ const a = rings[i][j], b = rings[i][(j + 1) % 10], c = rings[i + 1][(j + 1) % 10], d = rings[i + 1][j];
-    const k = j === 0 || j === 9 ? "dark" : (j === 3 || j === 6) && i >= cab[0] && i < cab[1] ? "glass" : (j === 4 || j === 5) && (i === cab[0] || i === cab[1] - 1) ? "glass" : "paint"; tri(k, a, b, c); tri(k, a, c, d); }
-  for(const [i, k, flip] of [[0, "paint", false], [rings.length - 1, "dark", true]]){ const r = rings[i], cy = r.reduce((s, q) => s + q[1], 0) / 10, c = [0, cy, r[0][2]]; for(let j = 0; j < 10; j++){ const a = r[j], b = r[(j + 1) % 10]; flip ? tri(k, c, a, b) : tri(k, c, b, a); } }
+/* 스포츠카 몸통 (2026-11-28 감독님 "유나 차 너무 거칠게 생겼어" → 각진 단면 10개 대신 매끈한 곡면):
+   앞에서 뒤로 56칸 · 둘레 36칸의 둥근 단면(모서리 둥근 네모)을 이어 붙이고, 바퀴 자리는 동그랗게 파냄. 유리 지붕은 따로 둥근 덮개 */
+function curve(keys){   // keys = [[t, a, b, …]] (t 오름차순) → t 를 주면 [a, b, …] 를 부드럽게 이어 줌
+  return t => { let i = 0; while(i < keys.length - 2 && t > keys[i + 1][0]) i++; const A = keys[Math.max(0, i - 1)], B = keys[i], C = keys[i + 1], D = keys[Math.min(keys.length - 1, i + 2)], h = C[0] - B[0], u = clamp((t - B[0]) / h, 0, 1), u2 = u * u, u3 = u2 * u;
+    return B.slice(1).map((_, k) => { const p0 = A[k + 1], p1 = B[k + 1], p2 = C[k + 1], p3 = D[k + 1], m1 = (p2 - p0) / ((C[0] - A[0]) || 1), m2 = (p3 - p1) / ((D[0] - B[0]) || 1);
+      return (2 * u3 - 3 * u2 + 1) * p1 + (u3 - 2 * u2 + u) * h * m1 + (-2 * u3 + 3 * u2) * p2 + (u3 - u2) * h * m2; }); };
+}
+const se = (c, n) => Math.sign(c) * Math.pow(Math.abs(c), 2 / n);
+const BODY = curve([[0, 0.60, 0.37, 0.53], [0.10, 0.76, 0.29, 0.58], [0.35, 0.91, 0.23, 0.70], [0.89, 0.975, 0.20, 0.87], [1.45, 0.965, 0.20, 0.875], [2.25, 0.96, 0.20, 0.875], [3.05, 0.98, 0.20, 0.91], [3.59, 1.00, 0.21, 0.94], [4.15, 0.97, 0.25, 0.92], [4.40, 0.90, 0.32, 0.87], [4.50, 0.80, 0.40, 0.81]]);
+const CANOPY = curve([[0, 0.60, 0], [0.10, 0.67, 0.19], [0.28, 0.705, 0.385], [0.45, 0.71, 0.43], [0.62, 0.70, 0.385], [0.82, 0.66, 0.21], [1, 0.58, 0]]);
+const WHEEL_Z = [1.36, -1.34], WHEEL_Y = 0.36, ARCH_R = 0.43, CAN_Z0 = 1.02, CAN_Z1 = -1.82;
+function sportBody(NU = 56, NV = 36, NS = 30, NA = 22){   // 내 차는 촘촘하게, 상대 차는 성기게 (36 · 24 · 18 · 14)
+  const P = [], out = {paint:[], glass:[], dark:[]}, tri = (k, a, b, c) => out[k].push(...a, ...b, ...c), quad = (k, a, b, c, d) => { tri(k, a, b, c); tri(k, a, c, d); };
+  for(let i = 0; i <= NU; i++){ const t = 4.5 * i / NU, [w, y0, y1] = BODY(t), cy = (y0 + y1) / 2, hy = (y1 - y0) / 2, row = [];
+    for(let j = 0; j < NV; j++){ const th = -PI / 2 + 2 * PI * j / NV, y = cy + hy * se(Math.sin(th), 4.2), up = Math.max(0, (y - cy) / hy); const p = [w * se(Math.cos(th), 7) * (1 - 0.1 * up * up * up), y, 2.25 - t]; p.flank = Math.abs(p[0]) > 0.8 * w || (y < cy && Math.abs(p[0]) > 0.5); row.push(p); }
+    P.push(row); }
+  /* 바퀴 자리: 원에 걸친 면의 안쪽 점을 원 위로 밀어내고, 원 안에 다 들어간 면은 뺌 → 가장자리가 매끈한 휠 아치 */
+  const arch = p => { if(!p.flank) return null; for(const z of WHEEL_Z){ const d = Math.hypot(p[2] - z, p[1] - WHEEL_Y); if(d < ARCH_R + 0.03) return [z, d]; } return null; };
+  for(const row of P) for(const p of row){ const a = arch(p); p.in = !!a && a[1] < ARCH_R; p.az = a ? a[0] : null; p.ad = a ? a[1] : 0; }
+  const Q = []; for(let i = 0; i < NU; i++) for(let j = 0; j < NV; j++){ const v = [P[i][j], P[i + 1][j], P[i + 1][(j + 1) % NV], P[i][(j + 1) % NV]]; if(v.every(p => p.in)) continue; if(v.some(p => p.az != null)) v.forEach(p => { if(p.az != null) p.snap = true; }); Q.push([i, j, v]); }
+  for(const row of P) for(const p of row) if(p.snap && p.ad > 1e-3){ const k = ARCH_R / p.ad; p[2] = p.az + (p[2] - p.az) * k; p[1] = WHEEL_Y + (p[1] - WHEEL_Y) * k; }
+  /* 면마다 색 구역: 전조등(눈매) · 앞 숨구멍 · 뒤 아래 범퍼 · 옆 숨구멍 · 바닥 */
+  out.head = [];
+  for(const [i, j, v] of Q){ const t = 4.5 * (i + 0.5) / NU, ax = Math.abs(v[0][0] + v[1][0] + v[2][0] + v[3][0]) / 4, y = (v[0][1] + v[1][1] + v[2][1] + v[3][1]) / 4, th = -PI / 2 + 2 * PI * (j + 0.5) / NV, tm = th > PI / 2 ? PI - th : th;   // tm: 좌우 같은 각도 (0 = 옆구리, π/2 = 윗면 가운데)
+    let k = "paint";
+    if(y < 0.3 && ax < 0.9) k = "dark";
+    else if(t > 0.16 && t < 0.49 && tm > 0.7 && tm < 1.05) k = "head";
+    else if(t < 0.2 && ax < 0.5 && y < 0.5) k = "dark";
+    else if(t > 4.26 && y < 0.56) k = "dark";
+    quad(k, v[0], v[1], v[2], v[3]); }
+  for(const [i, flip] of [[0, false], [NU, true]]){ const r = P[i], c = [0, r.reduce((q, p) => q + p[1], 0) / NV, r[0][2]]; for(let j = 0; j < NV; j++){ const a = r[j], b = r[(j + 1) % NV], k = flip && (a[1] + b[1]) / 2 < 0.6 ? "dark" : !flip && Math.abs(a[0] + b[0]) / 2 < 0.5 && (a[1] + b[1]) / 2 < 0.46 ? "dark" : "paint"; flip ? tri(k, c, b, a) : tri(k, c, a, b); } }
+  /* 유리 지붕: 앞유리 → 지붕 → 뒷유리가 한 곡면. 가운데 윗면만 차 색 */
+  const Cp = [];
+  for(let i = 0; i <= NS; i++){ const s = i / NS, z = CAN_Z0 + (CAN_Z1 - CAN_Z0) * s, [wc, hc] = CANOPY(s), yb = BODY(2.25 - z)[2] - 0.075, row = [];
+    for(let j = 0; j <= NA; j++){ const th = PI * j / NA; row.push([wc * se(Math.cos(th), 3.6), yb + Math.max(0, hc) * se(Math.sin(th), 2.5), z]); } Cp.push(row); }
+  for(let i = 0; i < NS; i++) for(let j = 0; j < NA; j++){ const s = (i + 0.5) / NS, a = (j + 0.5) / NA, roof = s > 0.3 && s < 0.6 && a > 0.28 && a < 0.72; quad(roof ? "paint" : "glass", Cp[i][j + 1], Cp[i][j], Cp[i + 1][j], Cp[i + 1][j + 1]); }
   const res = {}; for(const k in out){ let g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(out[k], 3)); g = mergeVertices(g, 1e-4); g.computeVertexNormals(); res[k] = g; } return res;
 }
 function geos(){
   if(GEO.ok) return GEO; GEO.ok = true;
-  GEO.sp = loft(SPORT, [3, 6]);
-  GEO.arch = new THREE.CircleGeometry(0.47, 18).rotateY(PI / 2);
+  GEO.sp = sportBody(); GEO.spLo = sportBody(36, 24, 18, 14);
+  GEO.well = new THREE.CylinderGeometry(ARCH_R + 0.012, ARCH_R + 0.012, 0.5, 26, 1, true).rotateZ(PI / 2);   // 바퀴집 안쪽 (어두운 통)
+  GEO.wellCap = new THREE.CircleGeometry(ARCH_R + 0.012, 26).rotateY(PI / 2);
+  GEO.ball = new THREE.SphereGeometry(0.5, 18, 12);
+  GEO.blade = new THREE.CylinderGeometry(0.5, 0.5, 1, 22).rotateZ(PI / 2);   // 납작하게 눌러 날개로 씀
   GEO.pipe = new THREE.CylinderGeometry(0.085, 0.085, 0.22, 10).rotateX(PI / 2);
   GEO.vplane = new THREE.PlaneGeometry(1, 1);
   GEO.sedan = extr([[2.2, 0.34], [2.18, 0.72], [1.3, 0.86], [-1.5, 0.9], [-2.2, 0.86], [-2.24, 0.4], [2.0, 0.3]], 1.84, 0.08);
@@ -41,7 +71,11 @@ function geos(){
   GEO.busCab = extr([[5.38, 1.55], [5.14, 2.7], [-5.2, 2.72], [-5.2, 1.55]], 2.54, 0.02);
   { const paintG = (g, r, gg, b) => { g = g.toNonIndexed(); g.deleteAttribute("uv"); const n = g.attributes.position.count, c = new Float32Array(n * 3); for(let k = 0; k < n; k++){ c[k * 3] = r; c[k * 3 + 1] = gg; c[k * 3 + 2] = b; } g.setAttribute("color", new THREE.BufferAttribute(c, 3)); return g; };
     GEO.wheel = mergeGeometries([paintG(new THREE.CylinderGeometry(0.36, 0.36, 0.3, 14).rotateZ(PI / 2), 0.012, 0.012, 0.016), paintG(new THREE.CylinderGeometry(0.22, 0.22, 0.32, 10).rotateZ(PI / 2), 0.62, 0.64, 0.7), paintG(new THREE.BoxGeometry(0.33, 0.07, 0.4), 0.05, 0.05, 0.06)]);
-    GEO.wheels4 = (x, z1, z2, y) => mergeGeometries([[x, z1], [-x, z1], [x, z2], [-x, z2]].map(([a, b]) => GEO.wheel.clone().translate(a, y, b))); }
+    GEO.wheels4 = (x, z1, z2, y) => mergeGeometries([[x, z1], [-x, z1], [x, z2], [-x, z2]].map(([a, b]) => GEO.wheel.clone().translate(a, y, b)));
+    const tire = new THREE.LatheGeometry([[0.2, -0.15], [0.315, -0.15], [0.35, -0.125], [0.36, -0.07], [0.36, 0.07], [0.35, 0.125], [0.315, 0.15], [0.2, 0.15]].map(q => new THREE.Vector2(q[0], q[1])), 24).rotateZ(PI / 2);
+    const spokes = []; for(let k = 0; k < 5; k++) spokes.push(paintG(new THREE.BoxGeometry(0.318, 0.2, 0.05).translate(0, 0.115, 0).rotateX(k * PI * 2 / 5), 0.78, 0.8, 0.86));
+    GEO.wheelS = mergeGeometries([paintG(tire, 0.012, 0.012, 0.016), paintG(new THREE.CylinderGeometry(0.235, 0.235, 0.27, 26, 1, true).rotateZ(PI / 2), 0.5, 0.52, 0.58), paintG(new THREE.CylinderGeometry(0.22, 0.22, 0.2, 20).rotateZ(PI / 2), 0.04, 0.04, 0.05),
+      paintG(new THREE.CylinderGeometry(0.06, 0.06, 0.325, 12).rotateZ(PI / 2), 0.86, 0.88, 0.92), ...spokes]); }
   GEO.box = new THREE.BoxGeometry(1, 1, 1);
   GEO.plane = new THREE.PlaneGeometry(1, 1).rotateX(-PI / 2);
   GEO.flame = new THREE.ConeGeometry(0.17, 1.5, 8).rotateX(-PI / 2).translate(0, 0, -0.75);
@@ -52,7 +86,7 @@ function mats(env, glow){
   if(M.ok) return M; M.ok = true;
   M.wheel = new THREE.MeshStandardMaterial({vertexColors:true, metalness:0.55, roughness:0.4, envMap:env}); M.rim = new THREE.MeshStandardMaterial({color:0xc9ccd6, metalness:1, roughness:0.25, envMap:env});
   M.glass = new THREE.MeshStandardMaterial({color:0x05060a, metalness:0.55, roughness:0.12, envMap:env, envMapIntensity:0.55});
-  M.dark = new THREE.MeshBasicMaterial({color:0x0b0c11}); M.dark2 = new THREE.MeshBasicMaterial({color:0x0b0c11, side:THREE.DoubleSide});
+  M.dark = new THREE.MeshBasicMaterial({color:0x0b0c11}); M.dark2 = new THREE.MeshBasicMaterial({color:0x0b0c11, side:THREE.DoubleSide}); M.liner = new THREE.MeshBasicMaterial({color:0x08090d, side:THREE.BackSide});
   M.glass2 = new THREE.MeshPhysicalMaterial({color:0x04050a, metalness:0.5, roughness:0.1, clearcoat:1, envMap:env, envMapIntensity:0.7, side:THREE.DoubleSide}); M.head = new THREE.MeshBasicMaterial({color:0xfff6dc, fog:false});
   M.shadow = new THREE.MeshBasicMaterial({color:0x000000, map:glow, transparent:true, opacity:0.85, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-1, polygonOffsetUnits:-1});
   M.beam = new THREE.MeshBasicMaterial({color:0xfff0c8, map:glow, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, polygonOffset:true, polygonOffsetFactor:-3, polygonOffsetUnits:-3});
@@ -64,22 +98,27 @@ const part = (g, m, x = 0, y = 0, z = 0, sx = 1, sy = 1, sz = 1) => { const o = 
 
 export function makeCar(kind, color, env, glow, o = {}){
   const G = geos(), m = mats(env, glow), root = new THREE.Group(), body = new THREE.Group(); root.add(body);
-  const paint = kind === "sport" ? new THREE.MeshPhysicalMaterial({color, metalness:0.5, roughness:0.34, clearcoat:1, clearcoatRoughness:0.07, envMap:env, envMapIntensity:1.5, side:THREE.DoubleSide})
+  const paint = kind === "sport" ? new THREE.MeshPhysicalMaterial({color, metalness:0.45, roughness:0.3, clearcoat:1, clearcoatRoughness:0.05, envMap:env, envMapIntensity:1.5})
     : new THREE.MeshStandardMaterial({color, metalness:0.35, roughness:0.5, envMap:env, envMapIntensity:1.5});
   const tailM = new THREE.MeshBasicMaterial({color:0xb01018, fog:false});
   const car = {root, body, paint, tailM, kind, wheels:[], front:[], len:kind === "bus" ? 10.7 : kind === "van" ? 4.8 : CAR_LEN, wid:kind === "bus" ? 2.5 : kind === "van" ? 2.0 : CAR_W};
   const wheel = (x, z, steer) => { const g = new THREE.Group(); g.position.set(x, 0.36, z); const w = part(G.wheel, m.wheel); g.add(w); root.add(g); car.wheels.push(w); if(steer) car.front.push(g); };
   const fixedWheels = (x, z1, z2, y, sc = 1) => { const w = new THREE.Mesh(G.wheels4(x / sc, z1 / sc, z2 / sc, y / sc), m.wheel); w.scale.setScalar(sc); root.add(w); };
   if(kind === "sport"){
-    body.add(part(G.sp.paint, paint), part(G.sp.glass, m.glass2), part(G.sp.dark, m.dark2));
-    for(const sx of [-1, 1]){ for(const z of [1.36, -1.34]){ const a = part(G.arch, m.dark, 0.958 * sx, 0.38, z); a.rotation.y = sx < 0 ? PI : 0; body.add(a); }
-      body.add(part(G.box, m.dark, 0.96 * sx, 0.25, 0, 0.08, 0.1, 1.9), part(G.box, paint, 1.0 * sx, 0.84, 0.72, 0.16, 0.07, 0.12), part(G.box, m.dark, 0.66 * sx, 0.98, -2.02, 0.05, 0.3, 0.26), part(G.box, paint, 0.9 * sx, 1.13, -2.04, 0.04, 0.2, 0.46),
-        part(G.box, m.head, 0.56 * sx, 0.5, 2.13, 0.4, 0.055, 0.1), part(G.pipe, m.rim, 0.42 * sx, 0.36, -2.24)); }
-    body.add(part(G.box, m.dark, 0, 0.24, 2.1, 1.7, 0.07, 0.34), part(G.box, paint, 0, 1.13, -2.04, 1.82, 0.045, 0.4), part(G.box, tailM, 0, 0.71, -2.262, 1.5, 0.07, 0.04), part(G.box, m.dark, 0, 0.3, -2.2, 1.5, 0.16, 0.16));
-    for(const x of [-0.5, -0.17, 0.17, 0.5]) body.add(part(G.box, m.dark, x, 0.27, -2.26, 0.03, 0.14, 0.2));
-    car.tailGlow = part(G.vplane, new THREE.MeshBasicMaterial({color:0xff2030, map:glow, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, side:THREE.DoubleSide}), 0, 0.71, -2.3, 3.4, 0.9, 1); car.tailGlow.renderOrder = 3; body.add(car.tailGlow);
-    wheel(0.84, 1.36, true); wheel(-0.84, 1.36, true); wheel(0.84, -1.34); wheel(-0.84, -1.34);
-    car.f1 = part(G.flame, m.flame, 0.42, 0.36, -2.25); car.f2 = part(G.flame, m.flame, -0.42, 0.36, -2.25); car.f3 = part(G.flame, m.flame2, 0.42, 0.36, -2.25, 0.5, 0.5, 0.6); car.f4 = part(G.flame, m.flame2, -0.42, 0.36, -2.25, 0.5, 0.5, 0.6);
+    const B = o.lo ? G.spLo : G.sp; body.add(part(B.paint, paint), part(B.paint, m.liner), part(B.glass, m.glass2), part(B.dark, m.dark2), part(B.head, m.head));   // liner = 몸통 안쪽 면 (바퀴집으로 속이 비쳐 보이지 않게)
+    for(const sx of [-1, 1]){
+      for(const z of WHEEL_Z) body.add(part(G.well, m.dark2, 0.66 * sx, WHEEL_Y, z, 0.8, 1, 1), part(G.wellCap, m.dark2, 0.46 * sx, WHEEL_Y, z));
+      body.add(part(G.box, m.dark, 0.95 * sx, 0.235, 0.01, 0.07, 0.08, 1.74),   // 옆 치마
+        part(G.ball, paint, 0.955 * sx, 0.93, 0.6, 0.2, 0.1, 0.15), part(G.box, m.dark, 0.9 * sx, 0.9, 0.62, 0.12, 0.03, 0.05),   // 거울
+        part(G.box, m.dark, 0.56 * sx, 1.02, -1.92, 0.035, 0.24, 0.16), part(G.pipe, m.rim, 0.36 * sx, 0.36, -2.22)); }
+    body.add(part(G.box, m.dark, 0, 0.245, 2.02, 1.42, 0.05, 0.3),   // 앞 립
+      part(G.blade, paint, 0, 1.15, -1.95, 1.84, 0.05, 0.36), part(G.blade, m.dark, 0, 1.135, -1.95, 1.86, 0.02, 0.4),   // 뒷날개 (둥근 날)
+      part(G.box, tailM, 0, 0.7, -2.246, 1.38, 0.07, 0.03), part(G.box, m.dark, 0, 0.36, -2.2, 1.3, 0.14, 0.14));
+    for(const x of [-0.18, 0, 0.18]) body.add(part(G.box, m.dark, x, 0.3, -2.25, 0.025, 0.12, 0.16));
+    car.tailGlow = part(G.vplane, new THREE.MeshBasicMaterial({color:0xff2030, map:glow, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, side:THREE.DoubleSide}), 0, 0.68, -2.3, 3.2, 0.85, 1); car.tailGlow.renderOrder = 3; body.add(car.tailGlow);
+    const wheelS = (x, z, steer) => { const g = new THREE.Group(); g.position.set(x, 0.36, z); const w = part(o.lo ? G.wheel : G.wheelS, m.wheel); g.add(w); root.add(g); car.wheels.push(w); if(steer) car.front.push(g); };
+    wheelS(0.83, 1.36, true); wheelS(-0.83, 1.36, true); wheelS(0.84, -1.34); wheelS(-0.84, -1.34);
+    car.f1 = part(G.flame, m.flame, 0.36, 0.36, -2.25); car.f2 = part(G.flame, m.flame, -0.36, 0.36, -2.25); car.f3 = part(G.flame, m.flame2, 0.36, 0.36, -2.25, 0.5, 0.5, 0.6); car.f4 = part(G.flame, m.flame2, -0.36, 0.36, -2.25, 0.5, 0.5, 0.6);
     [car.f1, car.f2, car.f3, car.f4].forEach(f => { f.visible = false; body.add(f); });
     const ug = new THREE.MeshBasicMaterial({color:o.glow ?? color, map:glow, transparent:true, opacity:0.75, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2});
     car.under = part(G.plane, ug, 0, 0.04, 0, 4.4, 1, 7.4); car.under.renderOrder = 2; root.add(car.under);
@@ -163,7 +202,8 @@ export class Player {
     const fwd = this.vx * tx + this.vz * tz; if(fwd < -3 || (Math.abs(wrapA(Math.atan2(tx, tz) - this.yaw)) > 2.0 && sp < 12)) this.wrong += dt; else this.wrong = Math.max(0, this.wrong - dt * 3);
     at(P, sNew, 0, _o); this.y = _o.y; this.pitch = lerp(this.pitch, -Math.atan(_o.sl) * (fwd >= 0 ? 1 : -1) + clamp(-acc * 0.0022, -0.05, 0.05), 1 - Math.exp(-dt * 8));
     this.vf = this.vx * f2x + this.vz * f2z; this.vl = vl; this.acc = acc; this.brakeOn = brake > 0.1 && vf > 1;
-    this.roll = lerp(this.roll, clamp(-this.steerV * sp * 0.0035, -0.13, 0.13), 1 - Math.exp(-dt * 7));   // 도는 반대쪽으로 기울어짐 this.spin += this.vf * dt / 0.36; this.hit = Math.max(0, this.hit - dt * 2.2);
+    this.roll = lerp(this.roll, clamp(-this.steerV * sp * 0.0035, -0.13, 0.13), 1 - Math.exp(-dt * 7));   // 도는 반대쪽으로 기울어짐
+    this.spin += this.vf * dt / 0.36; this.hit = Math.max(0, this.hit - dt * 2.2);
     /* 기어 · 엔진 회전수 (소리·계기판) */
     const G = [0, 14, 26, 38, 50, 62, 90], v = Math.max(0, this.vf); let g = 1; while(g < 6 && v > G[g]) g++; if(g !== this.gear){ this.gear = g; this.ev.push("shift"); }
     this.rpm = lerp(this.rpm, clamp(0.28 + 0.72 * (v - G[g - 1] * 0.72) / (G[g] - G[g - 1] * 0.72), 0.15, 1), 1 - Math.exp(-dt * 10));

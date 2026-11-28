@@ -193,11 +193,34 @@ const HOMEPLAY = ["bike", "splash", "bbq", "easel", "flower", "cook2", "fridge",
 const FSC = {i0:1.4, i1:12.6, j0:1.2, j1:8.4};   // 풋살장 안
 const TWINKLE = [72, 72, 79, 79, 81, 81, 79, 0, 77, 77, 76, 76, 74, 74, 72];   // 작은 별
 const BOOTHS = {s4:[[34.2, 12.0], [35.38, 12.0]], roof:[[27.45, 16.95]]};
+const inRoom = st => !!st && st.floor === "home3" && !st.swim && !st.sit && st.i > YU_ROOM[0] && st.i < YU_ROOM[2] && st.j > YU_ROOM[1] && st.j < YU_ROOM[3];
 const nearBooth = st => !!st && !st.swim && !st.sit && (BOOTHS[st.floor] || []).some(([i, j]) => Math.hypot(st.i - i, st.j - j) < 0.85);
 const FITS = [["base", "👕", "평소 옷", "역시 편한 게 최고 👕"], ["dress", "👑", "공주 드레스", "짜잔~ 공주님 등장 👑"], ["hanbok", "🌸", "한복", "한복 예쁘죠? 🌸"],
   ["director", "🎬", "꼬마 감독", "레디~ 액션! 🎬 아빠처럼"], ["spring", "🌼", "봄 원피스", "봄바람 살랑살랑 🌼"], ["swim", "🩱", "수영복", "수영하러 가자! 🩱💦"]];
+/* 장난치기 (2026-11-28 감독님 "여전히 재미없는데…" → 장난치기·꾸미기 "좋네~", "다 해"): 집 안 장난감을 툭 치면 와르르. 많이 어지르면 엄마가 올라와 쫓아옴 → 도망치거나 엄마가 안 볼 때 숨기.
+   k = 엔진 PROP_KIND, at = 놓는 자리(막혀 있으면 가까운 빈 곳), h = 놓인 방향 */
+const PRANK = {
+  home2:[{k:"pillows", at:[12.5, 4.6]}, {k:"domino", at:[9.7, 2.6]}, {k:"blocks", at:[14.3, 8.7]}, {k:"ball", at:[10.9, 4.9]}, {k:"cups", at:[9.6, 8.3]}, {k:"pot", at:[15.3, 1.3]}, {k:"pot", at:[9.0, 10.3]}, {k:"bucket", at:[4.3, 3.3]}, {k:"books", at:[14.7, 6.0]}, {k:"tp", at:[5.5, 8.7]}],
+  home3:[{k:"pins", at:[2.35, 1.5]}, {k:"ball", at:[3.9, 3.95]}, {k:"books", at:[5.6, 1.4]}, {k:"blocks", at:[4.6, 3.95]}, {k:"domino", at:[7.4, 5.2], h:PI / 2}, {k:"pillows", at:[8.0, 2.7]}, {k:"tp", at:[5.7, 7.3]}, {k:"duck", at:[5.0, 8.3]}, {k:"cups", at:[13.2, 3.6]}, {k:"pot", at:[15.3, 4.0]}],
+  home4:[{k:"pins", at:[4.6, 5.0]}, {k:"ball", at:[5.6, 6.6]}, {k:"pillows", at:[3.4, 7.9]}, {k:"books", at:[6.6, 3.5]}, {k:"pot", at:[10.6, 7.6]}, {k:"bucket", at:[13.2, 2.8]}, {k:"domino", at:[9.2, 4.3], h:PI / 2}, {k:"cups", at:[12.3, 8.3]}]};
+const HIDES = {home2:[{at:[12.5, 7.5], lb:"소파 뒤"}, {at:[15.3, 3.3], lb:"빈백 뒤"}, {at:[3.65, 8.7], lb:"화장실"}, {at:[1.5, 1.7], lb:"냉장고 옆"}],
+  home3:[{at:[1.8, 1.6], lb:"이불 속"}, {at:[5.2, 9.3], lb:"욕조 옆"}, {at:[4.75, 3.0], lb:"인형집 뒤"}, {at:[11.7, 2.7], lb:"엄마 침대 옆"}, {at:[10.9, 8.2], lb:"아빠 소파 뒤"}],
+  home4:[{at:[6.39, 2.62], lb:"텐트 옆"}, {at:[4.6, 8.0], lb:"방석 사이"}, {at:[14.84, 9.58], lb:"화분 뒤"}, {at:[14.8, 2.4], lb:"망원경 뒤"}]};
+const MOM_IN = {home2:[3.2, 4.65, PI / 2], home3:[3.2, 9.0, PI], home4:[2.1, 4.65, PI / 2]}, MESS_MAX = 14;
+const CAT_HOME = {at:[13.9, 5.5], flee:[[9.3, 9.9], [15.3, 9.9], [9.3, 1.3], [15.3, 2.4]]};
+const KNOCK_YU = {_:["와르르~ 😆", "앗… 엄마한텐 비밀 🤫", "우당탕! 😝", "히히 재밌다 😆"], pins:["스트라이크!! 🎳", "볼링이다~ 🎳"], domino:["도미노 간다~ 😆", "우와 다 넘어간다! 🤩"], bucket:["앗 물 쏟았다! 💦", "첨벙! 큰일 났다 😱"], pot:["앗 화분… 😱", "흙 다 쏟았다 🙈"],
+  pillows:["베개 싸움이다! 😆", "푹신푹신 와르르~"], tp:["휴지 탑 무너진다~ 🧻", "데굴데굴 🧻"], ball:["슛~! ⚽", "공아 굴러가라~"], cups:["컵 탑 와르르! 🥤"], duck:["삑삑! 오리 굴러간다 🐤"], books:["책 탑이 와르르 📚"], blocks:["블록 성 무너졌다! 🧱"]};
+const KNOCK_E = {pins:"🎳", domino:"💥", bucket:"💦", pot:"🌱", pillows:"☁️", tp:"🧻", ball:"⚽", cups:"🥤", duck:"🐤", books:"📚", blocks:"🧱"};
+/* 꾸미기: 머리 모양 · 머리색 (옷은 FITS). 방 꾸미기 목록은 floor3d_home.js HOME.room */
+const HAIRS = [["pig", "🎀", "양갈래"], ["long", "💁‍♀️", "긴 머리"], ["bob", "🍄", "단발"], ["pony", "🐴", "포니테일"], ["twin", "🐼", "만두머리"], ["braid", "🌾", "땋은 머리"], ["bun", "🍡", "올림머리"]];
+const HAIR_COLS = [["#3A261C", "밤색"], ["#1E1B18", "까만색"], ["#8A5A3C", "밝은 갈색"], ["#E2B95C", "금발"], ["#F28DB2", "딸기 분홍"], ["#86BCEB", "하늘색"], ["#A98AD8", "보라"], ["#F2884B", "주황"]];
+const YU_ROOM = [0.25, 0.25, 6.15, 4.4];   // 집 3층 유나 방 (여기 들어오면 '방 꾸미기' 버튼)
 const BADGES = [
   ["first", "🌱", "첫 별 받기", r => r.stars >= 1],
+  ["prank", "🙈", "장난꾸러기 (50개 와르르)", r => (r.prank?.n || 0) >= 50],
+  ["ninja", "🫣", "숨기 대장 (엄마 3번 따돌리기)", r => (r.prank?.esc || 0) >= 3],
+  ["style", "💇", "멋쟁이 (머리 모양 4가지)", r => cnt(r.hairs) >= 4],
+  ["deco", "🎀", "방 꾸미기 대장 (장식 5개)", r => (r.room?.deco?.length || 0) >= 5],
   ["home", "🏡", "우리 집 놀이 전부", r => HOMEPLAY.every(k => r.uses?.[k])],
   ["star10", "🌟", "별 10개 모으기", r => r.stars >= 10],
   ["friend10", "👋", "10명한테 말 걸기", r => cnt(r.met) >= 10],
@@ -318,6 +341,17 @@ const CSS = `
 .yg-elev button b{font-family:var(--f-mono);font-size:13px;width:24px;color:#FFC23D}
 .yg-elev button[aria-current="true"]{background:#FF6FA8}
 .yg-elev button[aria-current="true"] b{color:#FFF}
+.yg-fit{width:min(318px,calc(100vw - 128px));grid-template-columns:1fr 1fr;max-height:min(430px,calc(100dvh - 36px));overflow-y:auto;overscroll-behavior:contain}
+.yg-fit .yg-ftabs{grid-column:1/-1;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.yg-fit .yg-ftabs button{flex:1 0 auto;min-width:38px;min-height:38px;justify-content:center;padding:4px 8px;font-size:18px;background:rgba(255,255,255,.06);gap:5px}
+.yg-fit .yg-ftabs button small{font-size:11.5px;font-weight:700;display:none}
+.yg-fit .yg-ftabs button[aria-selected="true"]{background:#FFF;color:#2A2A28}
+.yg-fit .yg-ftabs button[aria-selected="true"] small{display:inline}
+.yg-fit > button{min-width:0;gap:7px;padding:6px 9px;font-size:13px;line-height:1.2}
+.yg-fit > button b{width:auto;font-size:17px;font-family:inherit;color:inherit}
+.yg-fit > button i{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.7)}
+.yg-fit > button.wide{grid-column:1/-1;justify-content:center;background:rgba(255,255,255,.14)}
+.yg-fit > p{grid-column:1/-1;margin:2px 4px 0;font-size:12px;line-height:1.4;color:rgba(255,255,255,.72)}
 .yg-fade{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--paper) 94%,transparent);opacity:0;pointer-events:none;transition:opacity .3s;font-size:22px;font-weight:800}
 .yg-fade.on{opacity:1;pointer-events:auto}
 .yg-help{position:absolute;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translateX(-50%);max-width:calc(100% - 330px);font-size:12.5px;font-weight:600;color:var(--ink-2);background:color-mix(in srgb,var(--card) 88%,transparent);border:1px solid var(--line);border-radius:999px;padding:6px 12px;text-align:center;transition:opacity .6s}
@@ -816,6 +850,7 @@ export function start(api){
 
   const S = {floor:null, st:null, spots:[], bolt:null, near:null, tab:"q", reqNext:0, greet:{}, wetUntil:0};
   let REQ = null;   // 💬 유나를 부른 사람 {id, name, floor, until, kind}   // st = 엔진이 매 프레임 주는 상태
+  const PR = {f:null, mess:0, down:0, chase:null, cool:0, cat:null, place:null};   // 장난치기 · 장식 놓기 상태
   let Q = null, step = 0, G = null, carry = "", pendingFloor = null, talkAt = 0, live = true, toastT = 0, helpT = 0;
   const E = () => api.eng();
   const now = () => performance.now();
@@ -930,6 +965,7 @@ export function start(api){
     areaNpcs(f); villagers(f);
     // 아빠(2층)·엄마(4층) 배우: 원래 자리 근처에 세우고 원래 사람은 숨김
     [["dad", "main", "_dir", [32.2, 4.4]], ["mom", "s4", "_nora", [6.7, 17.9]]].forEach(([k, fl, id, def]) => {
+      if(k === "mom" && PR.chase && PR.chase.phase !== "warn" && PR.chase.f === f) return;   // 장난치다 쫓아온 엄마는 그대로
       if(need(k) && (f === fl || G)){ if(!(S.st?.actors || {})[k] && !G){ const w0 = e.playWhere(id), w = w0 && Math.hypot(w0[0] - ELEV[0], w0[1] - ELEV[1]) > 2.4 ? w0 : null, at = e.playFree(...(w ? [w[0], w[1]] : def), 0.22); e.playActor(k, {at:[at[0], at[1], w ? w[2] : 0], pose:"stand"}); }
         hide.push(id, "l_" + id.slice(1)); }
       else e.playActor(k, null); });
@@ -956,6 +992,7 @@ export function start(api){
     if(Q?.id === "party" && f === "roof"){ const it = (id, e, i, j, y, s, bob = false) => L.push({id, e, i, j, y, s, pick:false, glow:false, bob});
       if(step > 1) it("p_cake", "🎂", 24.4, 3.5, 0.92, 0.5); if(step > 4){ it("p_b1", "🎈", 22.85, 3.4, 1.55, 0.55, true); it("p_b2", "🎈", 25.95, 3.4, 1.65, 0.55, true); it("p_fl", "💐", 23.4, 3.5, 0.9, 0.42); } }
     if(G?.type === "pong" && G.b) L.push({id:"pball", e:"⚪", i:G.b.f[0], j:G.b.f[1], y:0.95, s:0.24, pick:false, glow:false, bob:false});
+    if(PR.cat && PR.f === f) L.push({id:"hcat", e:"🐈", model:"cat", i:PR.cat.at[0], j:PR.cat.at[1], y:0.27, s:0.62, pick:false, glow:false, bob:false});
     if(G?.type === "catmeat" && G.cat) L.push({id:"pcat", e:"🐈", model:"cat", meat:true, i:G.cat[0], j:G.cat[1], y:0.27, s:0.62, pick:false, glow:false, bob:false});
     if(REQ && REQ.floor === f) L.push({id:"req", e:"💬", on:REQ.id, pick:false, glow:false, s:0.4});
     e.playItems(L);
@@ -1163,7 +1200,10 @@ export function start(api){
   }
   function freeHud(){
     let h = "";
-    if(Q?.id === "cat" && curStep()?.find && S.floor === Q.catF) h = S.catHint || "";
+    if(PR.chase && PR.chase.phase !== "warn"){ const C = PR.chase, left = Math.max(0, Math.ceil(((C.phase === "seek" ? C.seekUntil : C.until) - now()) / 1000));
+      h = C.phase === "seek" ? `🫣 쉿… 숨는 중 <i>${left}</i>` : C.phase === "caught" ? "🙈 딱 걸렸다" : `🏃‍♀️ 엄마한테서 도망쳐요 <i>${left}</i>`; }
+    else if(PR.place) h = `🎀 ${PR.place[2]} 놓을 자리로 가요`;
+    else if(Q?.id === "cat" && curStep()?.find && S.floor === Q.catF) h = S.catHint || "";
     else if(S.st?.boost > 0) h = `⚡ 쌩쌩! <i>${Math.ceil(S.st.boost / 1000)}초</i>`;
     else if(S.near != null && S.near < 3.2) h = S.nearHigh && S.near < 1.2 ? "✨ 바로 위에 있어요! 점프 🦘" : "✨ 근처에 뭔가 반짝여요";
     hud.hidden = !h; if(h && hud.innerHTML !== h) hud.innerHTML = h;
@@ -1276,7 +1316,7 @@ export function start(api){
         e.playItem("cat", {at:S.catPos}); } }
     // 가까이 지나가면 먼저 인사 (들고 있는 것·고양이·젖은 머리·번개에 맞춰서)
     const nb = st.near;
-    if((S.n || 0) % 20 === 0 && !G && nb && nb.d < 1.5 && t > talkAt + 1500 && !(REQ && nb.id === REQ.id) && !(S.greet[nb.id] > t) && Math.random() < 0.55){
+    if((S.n || 0) % 20 === 0 && !G && !PR.chase && nb && nb.d < 1.5 && t > talkAt + 1500 && !(REQ && nb.id === REQ.id) && !(S.greet[nb.id] > t) && Math.random() < 0.55){
       S.greet[nb.id] = t + 75000; const isDad = nb.id === "_dir" || nb.id === "@dad", isMom = /nora$/.test(nb.id) || nb.id === "@mom";
       const line = Q?.cat === "follow" ? pick(CAT_RE) : carry ? pick(CARRY_RE(carry)) : t < S.wetUntil ? pick(WET_RE) : st.boost > 0 ? pick(BOOST_RE)
         : isDad ? pick(["우리 딸~ 👋", "유나 왔어? 😆"]) : isMom ? pick(["유나야~ 💕", "우리 유나 왔네 🤗"]) : pick(GREET[S.floor] || GREET.main);
@@ -1389,6 +1429,116 @@ export function start(api){
           if(r.rank === 1 && rec.race.wins === 1){ rec.stars += 2; save(); renderCard(); later0(2600, () => { sfx("star"); toast("🏆 레이스 첫 우승!", "⭐ +2", 2600, true); }); }
           else later0(400, () => toast(`🏁 ${r.rank}등으로 골인`, r.rank === 1 ? "또 우승이에요 🏆" : "다음엔 1등 해 봐요", 2400, true)); }}); }
     catch(err){ console.warn("레이스를 못 열었어요", err); back(); toast("레이스를 못 열었어요", "잠깐 뒤에 다시 해 봐요", 2200, true); }
+  }
+  /* ---------- 장난치기 (2026-11-28) ---------- */
+  function prankSetup(f){
+    const e = E(); if(PR.chase) chaseEnd(true); PR.f = f; PR.mess = 0; PR.down = 0; PR.warned = 0; PR.cat = null; PR.place = null;
+    if(!e?.playProps) return;
+    const L = (PRANK[f] || []).map((p, k) => { const at = e.playFreeAt(p.at[0], p.at[1], 0.34) ? p.at : e.playFree(p.at[0], p.at[1], 0.34); return {id:"pr" + k, kind:p.k, at:[at[0], at[1]], h:p.h || 0}; });
+    e.playProps(L);
+    if(f === "home2"){ const at = e.playFree(CAT_HOME.at[0], CAT_HOME.at[1], 0.3); PR.cat = {at:[at[0], at[1]], home:[at[0], at[1]], to:null, back:0}; }
+  }
+  function onKnock(o){
+    const e = E(), t = now(); if(!e) return;
+    if(o.again){ if(t - (PR.sAt || 0) > 200){ PR.sAt = t; sfx(o.kind === "ball" || o.kind === "duck" ? "jump" : "blip", true); } return; }
+    PR.mess += o.n; PR.down += o.n; const P = rec.prank = rec.prank || {n:0, esc:0, caught:0, tidy:0}; P.n += o.n;
+    if(t - (PR.sAt || 0) > 90){ PR.sAt = t; sfx(o.chain ? "blip" : o.kind === "bucket" ? "splash" : "bump", true); if(!o.chain && o.n > 2) later0(110, () => sfx("blip")); }
+    if(!o.chain || Math.random() < 0.3) e.playEmote?.([o.at[0], o.at[1], 0.7], o.chain ? "💥" : KNOCK_E[o.kind] || "💥", 800);
+    if(!o.chain && t - (PR.sayAt || 0) > 2400 && !PR.chase){ PR.sayAt = t; yuSay(pick(KNOCK_YU[o.kind] || KNOCK_YU._), 1500); }
+    if(PR.cat && !PR.cat.to && Math.hypot(PR.cat.at[0] - o.at[0], PR.cat.at[1] - o.at[1]) < 4.2){   // 고양이 깜짝
+      const st = S.st, far = CAT_HOME.flee.map(p => e.playFree(p[0], p[1], 0.25)).sort((a, b) => Math.hypot(b[0] - (st?.i || 0), b[1] - (st?.j || 0)) - Math.hypot(a[0] - (st?.i || 0), a[1] - (st?.j || 0)))[0];
+      PR.cat.to = far; PR.cat.back = t + 14000; e.playEmote?.([PR.cat.at[0], PR.cat.at[1], 0.75], "🙀", 1100); later0(250, () => toast("🙀 야옹!!", "고양이가 깜짝 놀라 도망갔어요", 1500)); }
+    if(!P.first){ P.first = 1; rec.stars++; renderCard(); later0(1200, () => { sfx("star"); toast("🙈 첫 장난!", "툭 치면 와르르 · ⭐ +1", 2200, true); }); }
+    clearTimeout(PR.saveT); PR.saveT = setTimeout(() => { save(); checkBadges(); }, 1500);
+    const calm = !PR.chase && !G && !S.busy && !(Q && Q.story) && MOM_IN[S.floor] && t > (PR.cool || 0);
+    if(calm && PR.mess >= MESS_MAX) momComing();
+    else if(calm && PR.mess >= MESS_MAX - 6 && !PR.warned){ PR.warned = 1; later0(700, () => !PR.chase && toast("👂 쿵쾅쿵쾅…", "더 어지르면 엄마가 올라와요", 1900)); }
+  }
+  function momComing(){
+    const e = E(), f = S.floor, sp = MOM_IN[f]; if(!e || !sp) return;
+    PR.chase = {phase:"warn", f, t0:now()}; sfx("ready"); toast("😱 엄마 발소리가 들려요!", "도망치거나, 엄마가 안 볼 때 숨어요", 2600); later0(500, () => yuSay(pick(["헉… 엄마 온다!! 😱", "큰일 났다, 숨자! 🫣", "어떡해 어떡해 😱"]), 1800));
+    later0(2400, () => { const C = PR.chase; if(!C || C.phase !== "warn" || S.floor !== f) return;
+      const st = S.st, far = st && Math.hypot(st.i - sp[0], st.j - sp[1]) < 3 ? (HIDES[f] || []).map(h => h.at).sort((a, b) => Math.hypot(b[0] - st.i, b[1] - st.j) - Math.hypot(a[0] - st.i, a[1] - st.j))[0] : null, at = e.playFree(...(far || sp), 0.24);
+      e.playActor("mom", {at:[at[0], at[1], sp[2]], pose:"stand", to:null, spd:1.95}); C.phase = "run"; C.until = now() + 32000; C.pathAt = 0; C.sayAt = now() + 4200; sfx("bump");
+      later0(250, () => { npcSay("@mom", pick(["유나야~!! 이게 다 뭐야!! 😠", "어머머 집이 난장판이네!! 😤", "요 녀석 거기 서~!! 😠"]), 2400); e.playEmote?.("@mom", "💢", 1400); }); });
+  }
+  function chaseEnd(quiet){
+    const e = E(), C = PR.chase; PR.chase = null; if(!C) return; C.tm?.forEach(clearTimeout);
+    if(C.hide){ e?.playSet({cloak:false, freeze:false}); }
+    if(quiet) e?.playActor("mom", null);
+  }
+  function momLeave(f){ const e = E(), sp = MOM_IN[f]; if(!e || !sp) return; const m = S.st?.actors?.mom; if(!m){ e.playActor("mom", null); return; }
+    let n = 0; const iv = setInterval(() => { const m2 = S.st?.actors?.mom; if(!live || PR.chase || S.floor !== f || !m2 || ++n > 30 || Math.hypot(m2.i - sp[0], m2.j - sp[1]) < 0.6){ clearInterval(iv); if(!PR.chase && live) E()?.playActor("mom", null); return; }
+      const wp = E()?.playPath?.(m2.i, m2.j, sp[0], sp[1]); if(wp) E().playActor("mom", {to:wp, spd:1.5}); }, 300); }
+  function escaped(how){
+    const e = E(), C = PR.chase; if(!C || !e) return; const f = C.f, hid = !!C.hide; chaseEnd(false); PR.mess = 0; PR.warned = 0; PR.cool = now() + 20000;
+    e.playSet({cloak:false, freeze:false, wave:1500}); const P = rec.prank = rec.prank || {n:0, esc:0, caught:0, tidy:0}; P.esc++; sfx("star");
+    npcSay("@mom", how === "hid" ? pick(["에휴… 어디 숨었담. 이따 꼭 치워야 해~ 😮‍💨", "못 찾겠다 꾀꼬리~ 😮‍💨 나오면 같이 치우자"]) : pick(["헥헥… 엄마가 졌다 😮‍💨 이따 꼭 치워~", "아이고 숨차… 못 잡겠네 😵"]), 2800);
+    later0(1500, () => yuSay(hid ? pick(["휴… 안 들켰다 😆", "히히 숨기 성공 🤫"]) : pick(["내가 더 빠르지롱~ 😝", "휴… 살았다 😆"]), 2000));
+    if(!P.escStar){ P.escStar = 1; rec.stars++; renderCard(); toast(hid ? "🫣 안 들켰다!" : "🏃‍♀️ 끝까지 도망쳤다!", "엄마 따돌리기 성공 · ⭐ +1", 2600, true); } else toast(hid ? "🫣 안 들켰다!" : "🏃‍♀️ 끝까지 도망쳤다!", `엄마 따돌리기 ${P.esc}번째`, 2400, true);
+    save(); later0(2600, checkBadges); later0(2200, () => momLeave(f));
+  }
+  function caught(){
+    const e = E(), C = PR.chase; if(!C || !e) return; const f = C.f; C.phase = "caught"; e.playSet({freeze:true}); e.playActor("mom", {to:null}); sfx("bump");
+    npcSay("@mom", pick(["잡았다 요 녀석! 😤 같이 치우자~", "딱 걸렸어! 😤 엄마랑 정리하자"]), 2400); e.playEmote?.("yu", "💦", 1200);
+    toast("🙈 딱 걸렸다!", "엄마랑 같이 치우기", 2200); later0(900, () => yuSay(pick(["히잉… 죄송해요 🥲", "앗 들켰다… 치울게요 😅"]), 1900));
+    later0(1500, () => { E()?.playTidy?.(); sfx("pick"); });
+    later0(3100, () => { if(PR.chase !== C) return; PR.chase = null; PR.mess = 0; PR.down = 0; PR.warned = 0; PR.cool = now() + 12000; const P = rec.prank = rec.prank || {n:0, esc:0, caught:0, tidy:0}; P.caught++; save();
+      E()?.playSet({freeze:false, wave:1200}); npcSay("@mom", pick(["다음엔 살살 놀자~ 사랑해 💕", "말끔해졌네! 우리 유나 최고 👍"]), 2600); later0(2200, () => momLeave(f)); });
+  }
+  function hideNow(h){
+    const e = E(), C = PR.chase, st = S.st; if(!e || !C || C.phase !== "run" || !st) return; const m = st.actors?.mom;
+    if(m && Math.hypot(m.i - st.i, m.j - st.j) < 4.2 && e.playClear(m.i, m.j, st.i, st.j, 0.06)){ sfx("bump"); yuSay("앗, 엄마가 보고 있어! 😱", 1400); toast("👀 엄마가 보고 있어요", "안 보이는 데서 숨어요", 1600); return; }
+    C.phase = "seek"; C.hide = h; C.seekUntil = now() + 8500; C.pathAt = 0; e.playSet({cloak:true, freeze:true}); sfx("ready"); e.playEmote?.([h.at[0], h.at[1], 0.75], "🫣", 8400);
+    toast(`🫣 ${h.lb}에 숨었다!`, "쉿… 엄마가 갈 때까지", 2400);
+    const last = [st.i, st.j], rnd = () => e.playFree(last[0] + (Math.random() - 0.5) * 5, last[1] + (Math.random() - 0.5) * 4, 0.24);
+    C.goals = [e.playFree(last[0] + (m ? Math.sign(m.i - last[0]) : 1) * 1.3, last[1] + (m ? Math.sign(m.j - last[1]) : 1) * 1.1, 0.24), rnd(), rnd()].filter(g => Math.hypot(g[0] - h.at[0], g[1] - h.at[1]) > 1.1);
+    C.tm = [later0(1700, () => npcSay("@mom", pick(["어? 어디 갔지…? 🤔", "분명 이쪽으로 왔는데… 🤔"]), 2200)), later0(4900, () => npcSay("@mom", pick(["유나야~ 나와라~ 안 혼낼게 🙂", "어디 숨었니~ 🙂"]), 2200))];
+  }
+  function tidyUp(){
+    const e = E(); if(!e?.playTidy?.()) return; S.busy = true; PR.mess = 0; PR.down = 0; PR.warned = 0; sfx("pick"); yuSay(pick(["내가 치울게요~ 🧹", "정리 시작! 🧹"]), 1500);
+    const P = rec.prank = rec.prank || {n:0, esc:0, caught:0, tidy:0}; P.tidy = (P.tidy || 0) + 1; save();
+    later0(1100, () => { S.busy = false; sfx("star"); e.playSet({wave:1200}); e.playEmote?.("yu", "✨", 1200); if(P.tidy === 1){ rec.stars++; save(); renderCard(); toast("✨ 말끔!", "스스로 정리했어요 · ⭐ +1", 2200, true); } else toast("✨ 말끔!", "다시 쌓아 놨어요", 1500); });
+  }
+  function prankTick(st){
+    const e = E(), t = now(); if(!e) return;
+    if(PR.cat){ const c = PR.cat, dt = Math.min(0.1, (t - (c.lt || t)) / 1000); c.lt = t;
+      if(c.to){ const dx = c.to[0] - c.at[0], dy = c.to[1] - c.at[1], d = Math.hypot(dx, dy); if(d < 0.06) c.to = null; else { const m = Math.min(d, 4.6 * dt); c.at[0] += dx / d * m; c.at[1] += dy / d * m; e.playItem("hcat", {at:c.at}); } }
+      else if(c.back && t > c.back && !PR.chase){ c.back = 0; c.to = c.home.slice(); c.slow = true; } }
+    const C = PR.chase; if(!C || C.phase === "warn" || C.phase === "caught") return;
+    if(st.floor !== C.f){ chaseEnd(true); return; }
+    const m = st.actors?.mom; if(!m) return; const d = Math.hypot(m.i - st.i, m.j - st.j);
+    if(C.phase === "run"){
+      if(d < 0.74){ caught(); return; }
+      if(t > C.until){ escaped("ran"); return; }
+      if(t - C.pathAt > 280){ C.pathAt = t; const wp = e.playPath?.(m.i, m.j, st.i, st.j); if(wp) e.playActor("mom", {to:wp, spd:st.boost > 0 ? 2.35 : 1.95}); }
+      if(t > C.sayAt){ C.sayAt = t + 4200 + Math.random() * 2500; npcSay("@mom", pick(["거기 서~!! 😤", "유나야 뛰지 마~ 다쳐! 😠", "이리 안 와? 😤", "잡히기만 해 봐~ 😏"]), 1700); } }
+    else if(C.phase === "seek"){
+      if(t > C.seekUntil){ escaped("hid"); return; }
+      if(t - C.pathAt > 300){ C.pathAt = t; const g = C.goals && C.goals[0]; if(g){ if(Math.hypot(m.i - g[0], m.j - g[1]) < 0.45){ C.goals.shift(); C.pathAt = t + 900; e.playActor("mom", {to:null}); } else { const wp = e.playPath?.(m.i, m.j, g[0], g[1]); if(wp) e.playActor("mom", {to:wp, spd:1.35}); else C.goals.shift(); } } } }
+  }
+  const nearHide = st => PR.chase?.phase === "run" && st.floor === PR.chase.f ? (HIDES[st.floor] || []).find(h => Math.hypot(st.i - h.at[0], st.j - h.at[1]) < 1.0) || null : null;
+  /* ---------- 꾸미기: 옷 · 머리 · 머리색 (+ 유나 방에서는 벽지 · 이불 · 러그 · 장식) ---------- */
+  const roomSt = () => (rec.room = rec.room || {wall:"base", bed:"base", rug:"base", deco:[]});
+  const roomPush = () => { try { E()?.playF?.()?.room?.(roomSt()); } catch(err){ console.warn("방 꾸미기", err); } };
+  function hairSet(style, color){
+    const e = E(); if(!e?.playHair) return; const cur = rec.hair || ["pig", HAIR_COLS[0][0]], nw = [style || cur[0], color || cur[1]]; if(nw[0] === cur[0] && nw[1] === cur[1]) return;
+    rec.hair = nw; rec.hairs = rec.hairs || {}; rec.hairs[nw[0]] = 1; e.playHair(nw[0], nw[1]); e.playSet({wave:1300}); sfx("star"); e.playEmote?.("yu", style ? "💇" : "🎨", 1200);
+    yuSay(style ? pick([`${HAIRS.find(x => x[0] === nw[0])[2]} 어때요? 💕`, "머리 바꿨다~ 예쁘죠? ✨"]) : pick(["머리색 바꿨다! 🎨", "이 색 마음에 들어 💕"]), 1900); save(); firstUse("hair", "💇 머리 바꾸기"); later0(2400, checkBadges);
+  }
+  function roomSet(key, val){
+    const r = roomSt(); if(r[key] === val) return; r[key] = val; roomPush(); save(); sfx("star"); E()?.playEmote?.("yu", "✨", 1100); yuSay(pick(["우와 방이 달라졌다! ✨", "예쁘다~ 마음에 들어 💕", "내 방 최고 🎀"]), 1800); firstUse("room", "🎀 방 꾸미기");
+  }
+  function decoPlace(){
+    const e = E(), st = S.st, D = PR.place; if(!e || !st || !D) return; const r = roomSt(), R0 = HOME.room.rect, i = st.i + Math.sin(st.h) * 0.62, j = st.j + Math.cos(st.h) * 0.62;
+    if(r.deco.length >= HOME.room.max){ toast("장식은 10개까지예요", "하나 치우고 놓아요", 1800); return; }
+    if(i < R0[0] || i > R0[2] || j < R0[1] || j > R0[3] || !e.playFreeAt(i, j, 0.26) || r.deco.some(d => Math.hypot(d.i - i, d.j - j) < 0.45)){ sfx("bump"); toast("여긴 자리가 없어요", "조금 옮겨서 놓아 봐요", 1500); return; }
+    r.deco.push({k:D[0], i:+i.toFixed(2), j:+j.toFixed(2), h:+(st.h + PI).toFixed(2)}); roomPush(); save(); sfx("pick"); e.playEmote?.([i, j, 0.9], "✨", 1000); yuSay(pick([`${D[2]} 여기 딱이야! ${D[1]}`, "짠~ 놓았다 ✨"]), 1700); firstUse("room", "🎀 방 꾸미기"); later0(2400, checkBadges);
+  }
+  function decoRemove(){
+    const st = S.st, r = roomSt(); if(!r.deco.length){ toast("치울 장식이 없어요", "", 1200); return; } let k = r.deco.length - 1, bd = 1e9;
+    if(st) r.deco.forEach((d, q) => { const dd = Math.hypot(d.i - st.i, d.j - st.j); if(dd < bd){ bd = dd; k = q; } });
+    const d = r.deco.splice(k, 1)[0], nm = HOME.room.deco.find(x => x[0] === d.k); roomPush(); save(); sfx("blip"); toast(`${nm ? nm[1] + " " + nm[2] : "장식"} 치웠어요`, `남은 장식 ${r.deco.length}개`, 1400);
   }
   function useIt(u){
     const e = E(); if(!e || S.busy) return;
@@ -1596,10 +1746,20 @@ export function start(api){
     elevP.hidden = false;
   }
   function closeElev(){ elevP.hidden = true; }
-  function openFit(){
-    panel.hidden = true; fitP.innerHTML = ""; const cur = S.st?.fit || rec.fit || "base";
-    FITS.forEach(([k, em, name], q) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-current", k === cur);
-      b.innerHTML = `<b></b>`; b.querySelector("b").textContent = em; b.append(name); b.title = `${q + 1}`; b.onclick = () => changeFit(k); fitP.append(b); });
+  function openFit(tab){
+    panel.hidden = true; fitP.innerHTML = ""; const room = inRoom(S.st), T = [["fit", "👗", "옷"], ["hair", "💇", "머리"], ["col", "🎨", "머리색"], ...(room ? [["wall", "🖼️", "벽지"], ["bed", "🛏️", "이불"], ["rug", "🧶", "러그"], ["deco", "🧸", "장식"]] : [])];
+    tab = T.some(x => x[0] === tab) ? tab : T.some(x => x[0] === S.fitTab) ? S.fitTab : room ? "wall" : "fit"; S.fitTab = tab;
+    const tabs = document.createElement("div"); tabs.className = "yg-ftabs"; tabs.setAttribute("role", "tablist");
+    T.forEach(([k, em, name]) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", k === tab); b.setAttribute("aria-label", name); b.textContent = em; const sm = document.createElement("small"); sm.textContent = name; b.append(sm); b.onclick = () => openFit(k); tabs.append(b); });
+    fitP.append(tabs);
+    const opt = (em, name, on, fn, dot) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-current", !!on); if(dot){ const i = document.createElement("i"); i.style.background = dot; b.append(i); } else { const e2 = document.createElement("b"); e2.textContent = em; b.append(e2); } b.append(name); b.onclick = fn; fitP.append(b); return b; };
+    const note = t => { const p = document.createElement("p"); p.textContent = t; fitP.append(p); };
+    if(tab === "fit"){ const cur = S.st?.fit || rec.fit || "base"; FITS.forEach(([k, em, name]) => opt(em, name, k === cur, () => changeFit(k))); }
+    if(tab === "hair"){ const cur = (rec.hair || ["pig"])[0]; HAIRS.forEach(([k, em, name]) => opt(em, name, k === cur, () => { hairSet(k, null); openFit("hair"); })); }
+    if(tab === "col"){ const cur = (rec.hair || [0, HAIR_COLS[0][0]])[1]; HAIR_COLS.forEach(([c, name]) => opt("", name, c === cur, () => { hairSet(null, c); openFit("col"); }, c)); }
+    if(tab === "wall" || tab === "bed" || tab === "rug"){ const cur = roomSt()[tab]; HOME.room[tab].forEach(([k, em, name]) => opt(em, name, k === cur, () => { roomSet(tab, k); openFit(tab); })); }
+    if(tab === "deco"){ const n = roomSt().deco.length; HOME.room.deco.forEach(D => opt(D[1], D[2], PR.place && PR.place[0] === D[0], () => { PR.place = D; act.dataset.m = ""; fitP.hidden = true; sfx("blip"); toast(`${D[1]} ${D[2]} 골랐어요`, "놓고 싶은 자리로 가서 [여기 놓기]", 2400); }));
+      opt("🧹", `가까운 장식 치우기 (${n}/${HOME.room.max})`, false, () => { decoRemove(); openFit("deco"); }).className = "wide"; note("고른 장식은 유나 바로 앞에 놓여요. 방 안 어디든 10개까지."); }
     fitP.hidden = false;
   }
   function changeFit(k){
@@ -1665,11 +1825,12 @@ export function start(api){
       if(Q?.cat === "follow") S.catPos = [EXIT[0] + 0.4, EXIT[1] + 0.5];
       if(pendingFloor && fid === pendingFloor){ pendingFloor = null; setTimeout(() => { if(live){ fade.classList.remove("on"); } }, 250); }
       else if(!pendingFloor) fade.classList.remove("on");
+      prankSetup(fid); if(fid === "home3") roomPush();
       setup(); renderCard();
       const st = curStep(); if(st?.game && st.f === fid && !G) startGame(st.game);
     },
     onTick(st){
-      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; walks(st); jaywalk(st); kidWander(st); swingSync(st); vilTick(st);
+      S.st = st; charge(st); momCatch(st); if(st.floor !== S.floor) return; prankTick(st); walks(st); jaywalk(st); kidWander(st); swingSync(st); vilTick(st);
       const sp = curStep();
       // 도착하기 단계
       if(sp && sp.go && sp.f === st.floor && !G && !S.busy && Math.hypot(st.i - sp.go[0], st.j - sp.go[1]) < sp.r){ if(sp.yu) yuSay(sp.yu);
@@ -1679,18 +1840,23 @@ export function start(api){
       const nearElev = !!FL[st.floor]?.n && Math.hypot(st.i - ELEV[0], st.j - ELEV[1]) < 1.45 && !G; S.atElev = nearElev;
       const n = !G || G.type === "ball" ? st.near : null;
       const retry = sp && sp.game && sp.f === st.floor && !G;
-      const booth = !G && nearBooth(st);
+      const booth = !G && nearBooth(st), hideAt = !G && nearHide(st), myRoom = !G && !S.busy && !PR.chase && inRoom(st);
+      if(PR.place && !myRoom) PR.place = null;
       const use = !G && !S.busy ? (nearUse(st) || (inCourt(st) && !(sp?.game === "ball") ? {k:"futsal"} : null)) : null;
       const qn = n && sp && sp.f === st.floor && (sp.talk === n.id || Array.isArray(sp.talk) && sp.talk.includes(n.id));   // 할 일 상대가 엘베 앞에 있어도 말 걸기 먼저
       const land = S.boat && st.floor === "river" && now() - S.boat.t0 > 2500 && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) < 1.7;   // 오리배: 선착장 앞이면 내리기
       if(S.boat && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) > 2.5) S.boat.far = true;
-      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "claw" ? "grab" : retry ? "retry" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : use ? "use:" + use.k : n ? "talk" : "";
+      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "claw" ? "grab" : retry ? "retry" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
       if(mode !== act.dataset.m || (mode === "talk" && act.dataset.id !== n.id)){
         act.dataset.m = mode; act.dataset.id = n?.id || ""; act.hidden = !mode;
         if(mode === "elev"){ act.querySelector("span").textContent = "🛗"; act.querySelector("b").textContent = matchMedia("(hover:hover) and (pointer:fine)").matches ? "숫자 키로 층" : "엘리베이터"; }
         if(mode === "talk"){ act.querySelector("span").textContent = "💬"; act.querySelector("b").textContent = n.name; }
         if(mode === "retry"){ act.querySelector("span").textContent = "🔁"; act.querySelector("b").textContent = "다시 하기"; }
-        if(mode === "dress"){ act.querySelector("span").textContent = "👗"; act.querySelector("b").textContent = "옷 갈아입기"; }
+        if(mode === "dress"){ act.querySelector("span").textContent = "👗"; act.querySelector("b").textContent = "꾸미기"; }
+        if(mode === "room"){ act.querySelector("span").textContent = "🎀"; act.querySelector("b").textContent = "방 꾸미기"; }
+        if(mode === "place"){ act.querySelector("span").textContent = PR.place[1]; act.querySelector("b").textContent = "여기 놓기"; }
+        if(mode === "hide"){ act.querySelector("span").textContent = "🫣"; act.querySelector("b").textContent = "숨기"; }
+        if(mode === "tidy"){ act.querySelector("span").textContent = "🧹"; act.querySelector("b").textContent = "치우기"; }
         if(mode === "flip"){ act.querySelector("span").textContent = "🍳"; act.querySelector("b").textContent = "뒤집기"; }
         if(mode === "mash"){ act.querySelector("span").textContent = "👊"; act.querySelector("b").textContent = "연타!"; }
         if(mode === "shoot"){ act.querySelector("span").textContent = "⚽"; act.querySelector("b").textContent = "슛"; }
@@ -1698,8 +1864,8 @@ export function start(api){
         if(mode === "grab"){ act.querySelector("span").textContent = "🪝"; act.querySelector("b").textContent = "뽑기!"; }
         if(mode === "land"){ act.querySelector("span").textContent = "⚓"; act.querySelector("b").textContent = "내리기"; }
         if(use && mode.startsWith("use:")){ const L = use.n === "RACER" ? ["🏎️", "레이싱 게임"] : USE_LB[use.k] || ACTS[use.k]?.lb || ["✨", "놀기"]; act.querySelector("span").textContent = L[0]; act.querySelector("b").textContent = L[1]; }
-        if(mode !== "elev") closeElev(); if(mode !== "dress") fitP.hidden = true; }
-      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "talk") talk(n); };
+        if(mode !== "elev") closeElev(); if(mode !== "dress" && mode !== "room") fitP.hidden = true; }
+      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress" || mode === "room") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "place") decoPlace(); else if(mode === "hide") hideNow(hideAt); else if(mode === "tidy") tidyUp(); else if(mode === "talk") talk(n); };
       // 목표 화살표 (화면 밖일 때만)
       const m = st.mark, W = st.w, H = st.hgt, pad = 34;
       if(m && (!m.front || m.x < 6 || m.x > W - 6 || m.y < 6 || m.y > H - 6)){
@@ -1716,8 +1882,8 @@ export function start(api){
           jumpB.querySelector("b").textContent = jm === "pass" ? "패스" : jm === "jump" ? "점프" : jm === "sit" ? "앉기" : st.swim ? sk[2] : "일어나기"; jumpB.setAttribute("aria-label", st.swim ? "영법 바꾸기" : jumpB.querySelector("b").textContent); } }
       if(st.moving && !helpT){ helpT = setTimeout(() => { help.style.opacity = 0; }, 5000); }
     },
-    onPick,
-    onBump(id){ if(G && G.type !== "ball") return; if(HOLD[carry]?.spill){ spill(); later0(800, () => npcSay(id, pick(["어이쿠 조심! 안 쏟았지? 😅", "천천히~ 뜨거워! ☕", "괜찮아? 흘릴 뻔했네 😮"]), 2200)); return; } sfx("bump"); const isDad = id === "@dad" || id === "_dir", isMom = id === "@mom" || /nora$/.test(id);
+    onPick, onKnock,
+    onBump(id){ if(PR.chase) return; if(G && G.type !== "ball") return; if(HOLD[carry]?.spill){ spill(); later0(800, () => npcSay(id, pick(["어이쿠 조심! 안 쏟았지? 😅", "천천히~ 뜨거워! ☕", "괜찮아? 흘릴 뻔했네 😮"]), 2200)); return; } sfx("bump"); const isDad = id === "@dad" || id === "_dir", isMom = id === "@mom" || /nora$/.test(id);
       yuSay(pick(BUMP_YU), 1500); E()?.playEmote?.(id, "💫", 1200); later0(700, () => npcSay(id, pick(isDad ? BUMP_DAD : isMom ? BUMP_MOM : BUMP_RE), 2200)); },
     onSplash(kind){ sfx("splash"); if(kind === "in" && !S.strokeTip){ S.strokeTip = true; later0(1800, () => toast(`${(STROKES.find(x => x[0] === S.stroke) || STROKES[0])[1]} 오른쪽 버튼으로 영법 바꾸기`, "자유형 · 평형 · 배영 (키보드 F)", 2400, true)); } if(kind === "in" && S.st && S.st.fit !== "swim" && !S.clothSwim){ S.clothSwim = true; yuSay("앗 옷 입고 들어왔다 😆 탈의실에서 수영복 입을걸!", 2600); }
       else if(kind === "in") yuSay(pick(SPLASH_IN), 1500); else { S.wetUntil = now() + 45000; later0(350, () => yuSay(pick(SPLASH_OUT), 1600)); } },
@@ -1739,7 +1905,7 @@ export function start(api){
     if(e.code === "KeyF" && S.st?.swim){ nextStroke(); e.preventDefault(); return; }
     const dn = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);   // 엘리베이터 앞이면 숫자 키로 층 고르기 (2026-11-23 감독님 "키보드로 엘베 층을 고를수없네")
     if(dn && !pickEl.hidden){ const b = pickEl.querySelectorAll("button")[+dn[1] - 1]; if(b){ b.click(); e.preventDefault(); e.stopPropagation(); return; } }
-    if(dn && !fitP.hidden && +dn[1] <= FITS.length){ changeFit(FITS[+dn[1] - 1][0]); e.preventDefault(); e.stopPropagation(); return; }
+    if(dn && !fitP.hidden){ const b = fitP.querySelectorAll(":scope > button")[+dn[1] - 1]; if(b){ b.click(); e.preventDefault(); e.stopPropagation(); return; } }
     if(dn && (S.atElev || !elevP.hidden)){ const f = Object.keys(FL).find(k => FL[k].n === +dn[1]); if(f){ closeElev(); if(f !== S.floor) ride(f); else yuSay("여기가 " + FL[f].n + "층이야! 😆", 1400); e.preventDefault(); e.stopPropagation(); return; } }
     if(e.code === "KeyE" || e.code === "Enter"){ if(!act.hidden){ act.click(); e.preventDefault(); } }
     if(e.key === "Escape"){ if(!panel.hidden) panel.hidden = true; else if(!elevP.hidden) closeElev(); else stop(); }
@@ -1784,6 +1950,7 @@ export function start(api){
   }
   /* 달리다 엄마한테 걸리면 20초 달리기 금지 (2026-11-23 감독님 "달리다가 엄마한테 걸리면 못 뛰는것도 있으면 좋겟고") */
   function momCatch(st){
+    if(PR.chase) return;
     if(!(st.boost > 0) || G || S.runBan > now()) return;
     const e = E(); if(!e) return;
     const ids = ["_nora", "l_nora"], wid = ids.find(id => e.playWhere(id)), w = wid && e.playWhere(wid), am = st.actors?.mom;
@@ -1821,7 +1988,7 @@ export function start(api){
     if(!e || e.floorId?.() !== api.floor()){ waitT = setTimeout(boot, 150); return; }
     const y = api.yuna?.(), f = api.floor();
     const spawn = f === "main" ? [23.95, 4.6, 0] : y && y.floor === f && !y.hidden ? [y.i, y.j, 0] : EXIT;
-    e.playStart(cb, spawn); e.playOutfit?.(rec.fit || "base"); e.playSet({stroke:S.stroke});
+    e.playStart(cb, spawn); e.playOutfit?.(rec.fit || "base"); if(rec.hair) e.playHair?.(rec.hair[0], rec.hair[1]); e.playSet({stroke:S.stroke});
     setTimeout(() => { if(live && !Q && panel.hidden && !rec.stars) openList("q"); }, 700);
     setTimeout(() => { if(live) checkBadges(); }, 2500);
   }

@@ -1050,7 +1050,7 @@ function buildLamps(ok){
 }
 
 /* ---------- 사람: 도형 조립 인형 (tower3d.js makePerson 그대로 + 치마·헤드폰·리본) → 같은 도형끼리 인스턴싱 ---------- */
-const PARTS = [];
+const PARTS = [], HAIR_STYLES = ["pig", "long", "bob", "pony", "twin", "braid", "bun"];
 function makePerson(look, b = {}, extra = {}){
   const mesh = (g, c, x = 0, y = 0, z = 0, parent, cls = "p") => { const o = new THREE.Object3D(); o.position.set(x, y, z); parent.add(o); PARTS.push({o, g, c, cls}); return o; };
   const W = b.w || 1;
@@ -1079,12 +1079,25 @@ function makePerson(look, b = {}, extra = {}){
   mesh(sph(0.026, 8, 6), look.skin, 0, 0.165, 0.205, head);
   const smile = mesh(geo("smile", () => new THREE.TorusGeometry(0.034, 0.008, 5, 12, Math.PI)), "#7A3B34", 0, 0.115, 0.19, head); smile.rotation.z = Math.PI; smile.rotation.x = -0.25;
   const hc = mesh(geo("hairCap", () => new THREE.SphereGeometry(0.228, 22, 12, 0, Math.PI * 2, 0, Math.PI * 0.5)), look.hair, 0, 0.2, -0.008, head); hc.rotation.x = -0.42; hc.scale.set(1, 1.06, 1);
-  const st = look.style;
-  if(st === "long"){ mesh(rbox(0.42, 0.5, 0.13, 0.06, 2), look.hair, 0, 0.02, -0.13, head); [-1, 1].forEach(s => mesh(cap(0.055, 0.3), look.hair, s * 0.19, 0.03, -0.03, head)); }
-  else if(st === "bun"){ mesh(sph(0.1, 12, 10), look.hair, 0, 0.36, -0.16, head); mesh(rbox(0.4, 0.2, 0.12, 0.06, 2), look.hair, 0, 0.14, -0.13, head); }
-  else if(st === "bob"){   // 단발: 뒤통수를 둥글게 감싸는 한 덩어리 (네모 판이 상자처럼 보여서, 2026-11-26)
-    mesh(geo("bobBack", () => new THREE.SphereGeometry(0.236, 22, 14, Math.PI * 0.82, Math.PI * 1.36, Math.PI * 0.22, Math.PI * 0.56)), look.hair, 0, 0.17, -0.025, head).scale.set(1.02, 1.0, 0.98); }
-  else if(st === "pig"){ [-1, 1].forEach(s => { mesh(sph(0.08, 12, 8), look.hair, s * 0.25, 0.12, -0.08, head); if(look.ribbon) mesh(sph(0.045, 8, 6), look.ribbon, s * 0.22, 0.2, -0.05, head); }); }
+  PARTS[PARTS.length - 1].hair = 1;
+  /* 머리 모양 (2026-11-28 감독님 "꾸미기": 유나는 extra.hairAll 로 전부 만들어 두고 PL.hair 인 것만 보임) */
+  const rib = look.ribbon || (extra.hairAll ? "#FF8FB8" : null);
+  const hairStyle = st => { const k0 = PARTS.length;
+    if(st === "long"){ mesh(rbox(0.42, 0.5, 0.13, 0.06, 2), look.hair, 0, 0.02, -0.13, head); [-1, 1].forEach(s => mesh(cap(0.055, 0.3), look.hair, s * 0.19, 0.03, -0.03, head)); }
+    else if(st === "bun"){ mesh(sph(0.1, 12, 10), look.hair, 0, 0.36, -0.16, head); mesh(rbox(0.4, 0.2, 0.12, 0.06, 2), look.hair, 0, 0.14, -0.13, head); }
+    else if(st === "bob"){   // 단발: 뒤통수를 둥글게 감싸는 한 덩어리 (네모 판이 상자처럼 보여서, 2026-11-26)
+      mesh(geo("bobBack", () => new THREE.SphereGeometry(0.236, 22, 14, Math.PI * 0.82, Math.PI * 1.36, Math.PI * 0.22, Math.PI * 0.56)), look.hair, 0, 0.17, -0.025, head).scale.set(1.02, 1.0, 0.98); }
+    else if(st === "pig"){ [-1, 1].forEach(s => { mesh(sph(0.08, 12, 8), look.hair, s * 0.25, 0.12, -0.08, head); if(rib){ mesh(sph(0.045, 8, 6), rib, s * 0.22, 0.2, -0.05, head); PARTS[PARTS.length - 1].rib = 1; } }); }
+    else if(st === "pony"){   // 포니테일: 뒤통수 위에서 묶어 내려옴
+      mesh(sph(0.075, 12, 10), look.hair, 0, 0.33, -0.2, head); const t = mesh(cap(0.058, 0.24), look.hair, 0, 0.13, -0.3, head); t.rotation.x = -0.32;
+      mesh(sph(0.05, 10, 8), look.hair, 0, -0.03, -0.33, head); if(rib){ mesh(sph(0.042, 8, 6), rib, 0, 0.35, -0.255, head); PARTS[PARTS.length - 1].rib = 1; } }
+    else if(st === "twin"){   // 만두머리 둘
+      [-1, 1].forEach(s => { mesh(sph(0.088, 14, 10), look.hair, s * 0.15, 0.41, -0.05, head); if(rib){ const r = mesh(geo("bunTie", () => new THREE.TorusGeometry(0.058, 0.017, 6, 14)), rib, s * 0.135, 0.365, -0.045, head); r.rotation.x = Math.PI / 2; r.rotation.y = s * 0.3; PARTS[PARTS.length - 1].rib = 1; } }); }
+    else if(st === "braid"){   // 양쪽으로 땋아 내린 머리
+      [-1, 1].forEach(s => { for(let k = 0; k < 5; k++) mesh(sph(0.058 - k * 0.005, 10, 8), look.hair, s * (0.215 + k * 0.006), 0.07 - k * 0.078, 0.01 + k * 0.012, head).scale.set(1, 0.92, 1);
+        if(rib){ mesh(sph(0.04, 8, 6), rib, s * 0.245, -0.3, 0.065, head); PARTS[PARTS.length - 1].rib = 1; } }); }
+    for(let k = k0; k < PARTS.length; k++){ if(!PARTS[k].rib) PARTS[k].hair = 1; if(extra.hairAll) PARTS[k].hs = st; } };
+  if(extra.hairAll) HAIR_STYLES.forEach(hairStyle); else hairStyle(look.style);
   if(look.hat === "bucket"){ mesh(cyl(0.205, 0.235, 0.17, 20), look.hatC || "#CDBB9A", 0, 0.36, -0.01, head); mesh(cyl(0.34, 0.36, 0.025, 22), look.hatC || "#CDBB9A", 0, 0.275, -0.01, head).rotation.x = -0.08; }
   if(look.hat === "crown"){ mesh(cyl(0.1, 0.09, 0.07, 12), "#F2C94C", 0, 0.425, -0.03, head);
     for(let k = 0; k < 5; k++){ const a = k / 5 * Math.PI * 2; mesh(sph(0.024, 8, 6), k % 2 ? "#FF8FB8" : "#FFFFFF", Math.sin(a) * 0.095, 0.475, -0.03 + Math.cos(a) * 0.095, head); } }
@@ -1773,7 +1786,7 @@ const YU_FITS = {
   director:yuL({shirt:"#2A2A28", pants:"#3A3D42", shoe:"#F1F2F4", hat:"bucket", hatC:"#CDBB9A", ribbon:null, extra:{headphones:"max", hpC:"#F4C7D3"}}),
   spring:yuL({shirt:"#FFD36B", skirt:"#FFD36B", skirtL:0.4, legs:YU_SKIN, shoe:"#FFFFFF", ribbon:"#FFFFFF"}),
   swim:yuL({shirt:"#FF6FAE", pants:"#FF6FAE", sleeve:YU_SKIN, thigh:YU_SKIN, legs:YU_SKIN, shoe:YU_SKIN, ribbon:"#FFFFFF"})};
-const PL = {on:false, fit:"base", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
+const PL = {on:false, fit:"base", hair:"pig", hairC:"#3A261C", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
   mark:null, actors:{}, ball:null, water:[], hide:new Set(), cb:null, spawn:null, tg:null, jy:0, jv:0, boost:0, items:[], fx:[], swam:false, wet:0, drip:0, rip:0, dunk:0, bump:null, bumpAt:0, still:0, idleK:null, idleWait:8000, emoN:0, lastPost:0, hold:null, slosh:0};
 const YU_R = 0.17, PV = new THREE.Vector3(), PV2 = new THREE.Vector3();
 const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -1907,7 +1920,8 @@ function itemsPost(now, t){
   if(PL.items.some(gone)) PL.items = PL.items.filter(it => { if(gone(it)){ dropItem(it); return false; } return true; });
 }
 function playMakeAvatars(){
-  const mk = (k, L0) => { const L = L0 || PLAY_LOOKS[k], s = PARTS.length, p = makePerson(L.look, L.b, L.extra || {}); PARTS.slice(s).forEach(pt => pt.vis = () => p.root.visible); p.root.visible = false; return p; };
+  const mk = (k, L0) => { const L = L0 || PLAY_LOOKS[k], yu = k === "yu", s = PARTS.length, p = makePerson(L.look, L.b, {...(L.extra || {}), ...(yu ? {hairAll:1} : {})});
+    PARTS.slice(s).forEach(pt => { pt.vis = pt.hs ? () => p.root.visible && pt.hs === PL.hair : () => p.root.visible; if(yu && pt.hair) pt.yuHair = 1; }); p.root.visible = false; return p; };
   const yus = {}; Object.keys(YU_FITS).forEach(k => yus[k] = mk("yu", YU_FITS[k]));
   const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, bub:{}}; ACT_KEYS.forEach(k => A[k] = mk(k));
   // 공 (흰 바탕 검은 점)
@@ -1926,7 +1940,7 @@ function enterPlay(){
   if(!R || !R.pl) return;
   R.zone = "play"; R.anim = null; R.layer.classList.remove("far"); R.layer.classList.add("play"); touchMode(true); if(R.back) R.back.hidden = true;
   R.camera.fov = 52; R.camera.near = 0.12; R.camera.updateProjectionMatrix();
-  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.cloak = false;
+  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.cloak = false;
   const s = PL.spawn || [13.9, 17.1, Math.PI / 2]; PL.spawn = null;
   playGrid(); [PL.i, PL.j] = nearFree(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
   PL.tg = new THREE.Vector3(X(PL.i), PL.gy + 0.62, Z(PL.j)); PL.dd = PL.d; R.cur = {tg:PL.tg.clone(), d:PL.d}; R.az = PL.yaw; R.el = PL.el;
@@ -1973,6 +1987,7 @@ function playTick(now, t, dt){
   { const cn = clock(); for(const it of PL.items){ if(it.pick === false || it.pop || it.on) continue;
       if(Math.hypot(it.i - PL.i, it.j - PL.j) < (it.r || 0.5) && (!it.high || PL.jy > 0.24)){ it.pop = cn; PL.cb?.onPick?.(it.id); } } }
   if(PL.ball) ballTick(dt, mi, mj, sp);
+  if(PP.list.length) propTick(dt, mi, mj, sp);
   Object.values(PL.actors).forEach(a => { if(!a.to){ a.moving = false; return; }
     const dx = a.to[0] - a.i, dz = a.to[1] - a.j, d = Math.hypot(dx, dz);
     if(d < 0.04){ a.i = a.to[0]; a.j = a.to[1]; a.to = null; a.moving = false; return; }
@@ -1986,6 +2001,121 @@ function playTick(now, t, dt){
   R.az = PL.yaw; R.el = PL.el; R.cur.tg.copy(PL.tg); R.cur.d = PL.dd;
   const fov = R.h > R.w * 1.1 ? 66 : R.h < 560 ? 58 : 52; if(R.camera.fov !== fov){ R.camera.fov = fov; R.camera.updateProjectionMatrix(); }   // 세로 폰은 옆이 좁아서 넓게
   PL.cb?.onTick?.(playState());
+}
+/* ---------- 장난치기: 툭 치면 쓰러지고 굴러가는 장난감 (2026-11-28 감독님 "장난치기") ----------
+   게임이 playProps([{id, kind, at:[i, j], h}])로 놓음 → 유나가 걸어가 부딪히면 와르르. 조각은 도형 세 가지(상자·원통·공)를 인스턴싱.
+   처음 쓰러질 때 cb.onKnock({id, kind, n, at}) · 다시 찰 때 {again:true}. playTidy() = 제자리로 */
+const PP = {list:[], im:null, mat:null, tidy:0, pud:[], cap:110};
+const PQ = new THREE.Quaternion(), PQ2 = new THREE.Quaternion(), PQI = new THREE.Quaternion(), PM4 = new THREE.Matrix4(), PSC = new THREE.Vector3(), PPOS = new THREE.Vector3(), PCOL = new THREE.Color(), PAX = new THREE.Vector3(), PUP = new THREE.Vector3(0, 1, 0);
+const PRB = ["#F4A7B9", "#F9C99B", "#F6E39A", "#A8DCC8", "#A9CBEA", "#C8B4D0"];
+const PROP_KIND = {
+  blocks(a){ [[-0.19, 0], [0, 0], [0.19, 0], [-0.095, 1], [0.095, 1], [0, 2]].forEach(([d, r], k) => a("box", [0.18, 0.18, 0.18], ["#F25F5C", "#5E9BEA", "#FFE066", "#6FCF97", "#F4A7B9", "#C8B4D0"][k], d, 0.09 + r * 0.18, 0, {ry:(k % 3 - 1) * 0.12})); },
+  books(a){ for(let k = 0; k < 5; k++) a("box", [0.32 - (k % 2) * 0.03, 0.055, 0.23], ["#E8607F", "#5E9BEA", "#F6E39A", "#72C4AE", "#C8B4D0"][k], (k % 2) * 0.015, 0.0275 + k * 0.055, 0, {ry:(k - 2) * 0.16, m:1.2}); },
+  pins(a){ [[0, 0], [-0.1, 0.17], [0.1, 0.17], [-0.2, 0.34], [0, 0.34], [0.2, 0.34]].forEach(([d, f], k) => a("cyl", [0.12, 0.36, 0.12], k % 2 ? "#FFFFFF" : "#FFE3EC", d, 0.18, f, {b:0.3, m:0.8})); },
+  ball(a){ a("sph", [0.32, 0.32, 0.32], "#FF6FA8", 0, 0.16, 0, {roll:1, b:0.62, f:0.55, m:0.7}); },
+  cups(a){ [[-0.15, 0], [0, 0], [0.15, 0], [-0.075, 1], [0.075, 1], [0, 2]].forEach(([d, r], k) => a("cyl", [0.14, 0.16, 0.14], PRB[k], d, 0.08 + r * 0.16, 0, {m:0.5, b:0.35})); },
+  pot(a){ a("cyl", [0.26, 0.22, 0.26], "#D98C6A", 0, 0.11, 0, {m:1.7, b:0.15}); a("sph", [0.36, 0.3, 0.36], "#6FAE64", 0, 0.34, 0, {m:1.1, b:0.2}); a("sph", [0.1, 0.1, 0.1], "#F4A7B9", 0.09, 0.5, 0.05, {m:0.4, roll:1}); a("sph", [0.09, 0.09, 0.09], "#FFE066", -0.08, 0.49, -0.04, {m:0.4, roll:1}); },
+  bucket(a){ a("cyl", [0.3, 0.26, 0.3], "#6FB7E8", 0, 0.13, 0, {m:1.1, b:0.25}); a("box", [0.05, 0.5, 0.05], "#C9A27A", 0.1, 0.36, 0, {m:0.7, rz:-0.25}); },
+  pillows(a){ for(let k = 0; k < 4; k++) a("cyl", [0.46, 0.15, 0.46], ["#F29CB7", "#B79AE0", "#F6D36A", "#8FC8F0"][k], 0, 0.07 + k * 0.14, 0, {ry:k * 0.5, b:0.04, f:4.5, m:0.9}); },
+  tp(a){ for(let k = 0; k < 5; k++) a("cyl", [0.18, 0.13, 0.18], "#FFFFFF", (k % 2) * 0.012, 0.065 + k * 0.13, 0, {m:0.45, b:0.3, f:1.6}); },
+  domino(a){ for(let k = 0; k < 11; k++) a("box", [0.14, 0.26, 0.04], PRB[k % 6], 0, 0.13, k * 0.15, {m:0.6, b:0.1, dom:k}); },
+  duck(a){ [[0, 0], [0.2, 0.1], [-0.18, 0.14], [0.05, 0.3]].forEach(([d, f]) => a("sph", [0.17, 0.15, 0.2], "#FFD84D", d, 0.075, f, {roll:1, b:0.5, m:0.5, f:1.4})); },
+};
+function pudClear(){ PP.pud.forEach(d => { if(d.m){ d.m.removeFromParent(); d.m.geometry.dispose(); d.m.material.dispose(); } }); PP.pud = []; }
+function pudAdd(i, j, r, now){ const m = new THREE.Mesh(new THREE.CircleGeometry(1, 30), cutaway(new THREE.MeshStandardMaterial({color:R.dark ? 0x6FA8C8 : 0xA9DCF5, roughness:0.12, metalness:0.1, transparent:true, opacity:0.62, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2})));
+  m.rotation.x = -Math.PI / 2; m.rotation.z = Math.random() * 6.28; m.position.set(X(i), groundH(i, j) + 0.008, Z(j)); m.scale.setScalar(0.01); m.renderOrder = 2; R.scene.add(m); PP.pud.push({m, t0:now, r, k:1}); }
+function propsClear(){ PP.list = []; pudClear(); PP.tidy = 0; if(PP.im){ Object.values(PP.im).forEach(m => { m.removeFromParent(); m.geometry.dispose(); }); PP.mat?.dispose(); PP.im = null; PP.mat = null; } }
+export function playProps(list){
+  propsClear(); if(!R || !R.pl || !list || !list.length) return 0; playGrid();
+  PP.mat = cutaway(new THREE.MeshStandardMaterial({roughness:0.62}));
+  const G = {box:new THREE.BoxGeometry(1, 1, 1), cyl:new THREE.CylinderGeometry(0.5, 0.5, 1, 16), sph:new THREE.SphereGeometry(0.5, 16, 12)};
+  PP.im = {}; Object.entries(G).forEach(([k, g]) => { const m = new THREE.InstancedMesh(g, PP.mat, PP.cap); m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; m.count = 0; R.scene.add(m); PP.im[k] = m; });
+  list.forEach(pr => { const mk = PROP_KIND[pr.kind]; if(!mk) return; const h = pr.h || 0, ch = Math.cos(h), sh = Math.sin(h), g0 = groundH(pr.at[0], pr.at[1]);
+    mk((shp, s, c, d, y, f, o = {}) => { const i = pr.at[0] + d * ch + f * sh, j = pr.at[1] - d * sh + f * ch, q = new THREE.Quaternion().setFromEuler(new THREE.Euler(o.rx || 0, (o.ry || 0) + h, o.rz || 0, "YXZ"));
+      PP.list.push({pr:pr.id, kind:pr.kind, shp, s, c:new THREE.Color(c), i, y:g0 + y, j, vi:0, vy:0, vj:0, q, w:new THREE.Vector3(), r:Math.max(s[0], s[2]) * 0.5, half:[s[0] / 2, s[1] / 2, s[2] / 2], m:o.m || 1, b:o.b ?? 0.25, f:o.f ?? 2.6, roll:!!o.roll, dom:o.dom, dh:h,
+        home:{i, y:g0 + y, j, q:q.clone()}, awake:false, hit:false, kick:0, pk:0, fallAt:0}); }); });
+  propDraw(); return PP.list.length;
+}
+export function playTidy(){ if(!PP.list.some(p => p.hit)) return false; PP.tidy = clock(); PP.list.forEach(p => { p.from = {i:p.i, y:p.y, j:p.j, q:p.q.clone()}; p.awake = false; p.fallAt = 0; }); return true; }
+export const playPropState = () => ({n:PP.list.length, hit:PP.list.filter(p => p.hit).length, awake:PP.list.filter(p => p.awake).length, tidy:!!PP.tidy, list:PP.list.map(p => [p.pr, +p.i.toFixed(2), +p.y.toFixed(2), +p.j.toFixed(2), p.hit ? 1 : 0])});
+function propRest(p){ if(p.shp === "sph") return p.half[1]; let s = 0; for(let k = 0; k < 3; k++){ PAX.set(k === 0 ? 1 : 0, k === 1 ? 1 : 0, k === 2 ? 1 : 0).applyQuaternion(p.q); s += Math.abs(PAX.y) * p.half[k]; } return s; }
+function propWake(p, vi, vy, vj, spin){ p.awake = true; p.vi = vi; p.vy = vy; p.vj = vj; p.w.set((Math.random() - 0.5) * spin, (Math.random() - 0.5) * spin * 0.6, (Math.random() - 0.5) * spin); }
+function propKnock(p, di, dj, spd, now){   // 처음 맞은 조각: 같은 묶음도 같이 무너짐 (도미노는 차례로)
+  const sib = PP.list.filter(q => q.pr === p.pr && q !== p && !q.hit); let n = 1; p.hit = true;
+  if(p.kind === "domino"){ const dir = di * Math.sin(p.dh) + dj * Math.cos(p.dh) >= 0 ? 1 : -1; PP.list.filter(q => q.pr === p.pr).forEach(q => { const dk = (q.dom - p.dom) * dir; if(q !== p && dk > 0 && !q.hit){ q.fallAt = now + dk * 95; q.fdir = dir; } }); }
+  else sib.forEach(q => { q.hit = true; n++; const up = Math.min(1, (q.home.y - p.home.y + 0.2) * 2.2); propWake(q, di * spd * (0.25 + Math.random() * 0.5) + (Math.random() - 0.5) * 0.9, 0.4 + Math.random() * 1.2 * up, dj * spd * (0.25 + Math.random() * 0.5) + (Math.random() - 0.5) * 0.9, 6); });
+  if(p.kind === "bucket"){ pudAdd(p.i + di * 0.4, p.j + dj * 0.4, 0.62, now); fxDrops(p.i, p.j, p.y + 0.15, 18, 1, 0x9FD8F5); fxRing(p.i + di * 0.3, p.j + dj * 0.3, groundH(p.i, p.j) + 0.02, true); }
+  if(p.kind === "pot") fxDrops(p.i, p.j, p.y + 0.2, 10, 0.8, 0x8A5A3C);
+  try { PL.cb?.onKnock?.({id:p.pr, kind:p.kind, n, at:[p.i, p.j]}); } catch(e){ console.warn(e); }
+}
+function propTick(dt, mi, mj, sp){
+  const now = clock(); dt = Math.min(dt, 0.045);
+  if(PP.tidy){ const u = Math.min(1, (now - PP.tidy) / 900), e = u * u * (3 - 2 * u);
+    PP.list.forEach(p => { if(!p.from) return; p.i = p.from.i + (p.home.i - p.from.i) * e; p.j = p.from.j + (p.home.j - p.from.j) * e; p.y = p.from.y + (p.home.y - p.from.y) * e + Math.sin(u * Math.PI) * 0.35 * (p.hit ? 1 : 0); p.q.copy(p.from.q).slerp(p.home.q, e); });
+    PP.pud.forEach(d => d.k *= 1 - Math.min(1, dt * 5));
+    if(u >= 1){ PP.tidy = 0; pudClear(); PP.list.forEach(p => { p.hit = false; p.from = null; p.vi = p.vy = p.vj = 0; p.w.set(0, 0, 0); p.q.copy(p.home.q); }); try { PL.cb?.onTidy?.(); } catch(e){} }
+    propDraw(); return; }
+  const canKick = PL.moving && !PL.sit && !PL.act && !PL.swim && !PL.cloak;
+  for(const p of PP.list){
+    if(p.fallAt && p.hit) p.fallAt = 0;
+    if(p.fallAt && now >= p.fallAt){ p.fallAt = 0; const d = p.fdir || 1, si = Math.sin(p.dh) * d, sj = Math.cos(p.dh) * d; p.hit = true; p.awake = true; p.vi = si * 0.5; p.vj = sj * 0.5; p.vy = 0.2; p.w.set(sj * 7.5, 0, -si * 7.5); try { PL.cb?.onKnock?.({id:p.pr, kind:p.kind, n:1, at:[p.i, p.j], chain:true}); } catch(e){} }
+    if(canKick && now - p.kick > 260){ const dx = p.i - PL.i, dz = p.j - PL.j, d = Math.hypot(dx, dz);
+      if(d < p.r + 0.21 && p.y - p.half[1] - (PL.gy + PL.jy) < 0.75 && p.y + p.half[1] > PL.gy + PL.jy - 0.05){ p.kick = now;
+        let ni = d > 1e-3 ? dx / d : mi, nj = d > 1e-3 ? dz / d : mj; ni = ni * 0.55 + mi * 0.85; nj = nj * 0.55 + mj * 0.85; const L = Math.hypot(ni, nj) || 1; ni /= L; nj /= L;
+        const spd = (1.0 + sp * 0.8) / p.m * (0.75 + Math.random() * 0.5), first = !p.hit;
+        if(p.kind === "domino" && first){ const d2 = ni * Math.sin(p.dh) + nj * Math.cos(p.dh) >= 0 ? 1 : -1, si = Math.sin(p.dh) * d2, sj = Math.cos(p.dh) * d2; p.awake = true; p.vi = si * 0.5; p.vj = sj * 0.5; p.vy = 0.2; p.w.set(sj * 7.5, 0, -si * 7.5); }
+        else propWake(p, ni * spd, (0.9 + Math.random() * 1.5 + sp * 0.22) / Math.sqrt(p.m) * (p.b < 0.1 ? 0.6 : 1), nj * spd, p.roll ? 0 : 7.5);
+        if(first) propKnock(p, ni, nj, spd, now); else try { PL.cb?.onKnock?.({id:p.pr, kind:p.kind, n:0, at:[p.i, p.j], again:true}); } catch(e){} } }
+    if(!p.awake) continue;
+    p.vy -= 9.8 * dt;
+    const ni = p.i + p.vi * dt, nj = p.j + p.vj * dt;
+    if(cellBlocked(ni, p.j)){ p.vi *= -0.42; if(Math.abs(p.vi) > 0.9) p.thud = now; } else p.i = ni;
+    if(cellBlocked(p.i, nj)){ p.vj *= -0.42; if(Math.abs(p.vj) > 0.9) p.thud = now; } else p.j = nj;
+    p.y += p.vy * dt;
+    const wl = p.w.length(); if(wl > 1e-3){ PQ.setFromAxisAngle(PAX.copy(p.w).multiplyScalar(1 / wl), wl * dt); p.q.premultiply(PQ); }
+    const g = groundH(p.i, p.j) + propRest(p);
+    if(p.y <= g){ p.y = g; if(p.vy < -1.3) p.vy = -p.vy * p.b; else p.vy = 0;
+      const fr = Math.exp(-dt * p.f); p.vi *= fr; p.vj *= fr; const hv = Math.hypot(p.vi, p.vj);
+      if(p.roll){ const r = p.half[1]; p.w.set(p.vj / r, 0, -p.vi / r); if(hv < 0.04 && p.vy === 0){ p.awake = false; p.vi = p.vj = 0; p.w.set(0, 0, 0); } }
+      else { p.w.multiplyScalar(Math.exp(-dt * 3.6)); let bk = 0, by = 0;
+        if(p.w.length() < 2.4){ for(let k = 0; k < 3; k++){ PAX.set(k === 0 ? 1 : 0, k === 1 ? 1 : 0, k === 2 ? 1 : 0).applyQuaternion(p.q); if(Math.abs(PAX.y) > Math.abs(by)){ by = PAX.y; bk = k; } }
+          PAX.set(bk === 0 ? 1 : 0, bk === 1 ? 1 : 0, bk === 2 ? 1 : 0).applyQuaternion(p.q); if(by < 0) PAX.multiplyScalar(-1);
+          PQ.setFromUnitVectors(PAX, PUP); PQ2.identity().slerp(PQ, Math.min(1, dt * 9)); p.q.premultiply(PQ2).normalize();
+          if(hv < 0.05 && p.vy === 0 && Math.abs(by) > 0.997 && p.w.length() < 0.4){ p.awake = false; p.vi = p.vj = 0; p.w.set(0, 0, 0); } } } }
+    // 굴러가다 다른 조각을 침 (볼링 · 연쇄)
+    const hv = Math.hypot(p.vi, p.vj);
+    if(hv > 0.55) for(const q of PP.list){ if(q === p || now - q.pk < 220) continue; const dx = q.i - p.i, dz = q.j - p.j, dy = q.y - p.y; if(Math.abs(dy) > p.half[1] + q.half[1] + 0.05) continue; const d = Math.hypot(dx, dz);
+      if(d < p.r + q.r && (dx * p.vi + dz * p.vj) > 0){ q.pk = now; const nx = d > 1e-3 ? dx / d : 0, nz = d > 1e-3 ? dz / d : 0, k = Math.min(1.2, p.m / q.m) * 0.75, first = !q.hit;
+        if(q.kind === "domino" && first){ const d2 = nx * Math.sin(q.dh) + nz * Math.cos(q.dh) >= 0 ? 1 : -1, si = Math.sin(q.dh) * d2, sj = Math.cos(q.dh) * d2; q.awake = true; q.vi = si * 0.5; q.vj = sj * 0.5; q.vy = 0.2; q.w.set(sj * 7.5, 0, -si * 7.5); }
+        else propWake(q, nx * hv * k + p.vi * 0.25, 0.5 + Math.random() * 1.1, nz * hv * k + p.vj * 0.25, q.roll ? 0 : 7);
+        p.vi *= 0.62; p.vj *= 0.62; if(first) propKnock(q, nx, nz, hv * k, now); } }
+  }
+  propDraw();
+}
+function propDraw(){
+  if(!PP.im) return; const n = {box:0, cyl:0, sph:0}, now = clock();
+  for(const p of PP.list){ const im = PP.im[p.shp], k = n[p.shp]++; if(k >= PP.cap) continue; PM4.compose(PPOS.set(X(p.i), p.y, Z(p.j)), p.q, PSC.set(p.s[0], p.s[1], p.s[2])); im.setMatrixAt(k, PM4); im.setColorAt(k, p.c); }
+  for(const d of PP.pud){ const u = Math.min(1, (now - d.t0) / 700), r = Math.max(0.01, d.r * (1 - (1 - u) * (1 - u)) * d.k); d.m.scale.set(r, r * 0.82, 1); }
+  Object.entries(PP.im).forEach(([k, im]) => { im.count = Math.min(PP.cap, n[k]); im.instanceMatrix.needsUpdate = true; if(im.instanceColor) im.instanceColor.needsUpdate = true; });
+}
+/* 길 찾기: (i0, j0)에서 (i1, j1)로 가는 다음 발걸음 한 점 (엄마가 벽·가구를 돌아서 쫓아오게). 못 가면 null */
+export function playPath(i0, j0, i1, j1, r = 0.2){
+  if(!R) return null; const G = playGrid();
+  if(!G.clr || G.clrR !== r){ G.clr = new Uint8Array(G.W * G.H); G.clrR = r; for(let n = 0; n < G.W * G.H; n++) G.clr[n] = freeAt(G.e0 + (n % G.W + 0.5) * G.C, G.f0 + ((n / G.W | 0) + 0.5) * G.C, r) ? 1 : 0; }
+  const cen = n => [G.e0 + (n % G.W + 0.5) * G.C, G.f0 + ((n / G.W | 0) + 0.5) * G.C];
+  const snap = (i, j) => { const n = cellIdx(i, j); if(n >= 0 && G.clr[n]) return n; const x0 = Math.floor((i - G.e0) / G.C), y0 = Math.floor((j - G.f0) / G.C); let best = -1, bd = 1e9;   // 벽에 붙어 서 있으면 가장 가까운 빈 칸에서 시작
+    for(let q = 1; q <= 12 && best < 0; q++) for(let y = y0 - q; y <= y0 + q; y++) for(let x = x0 - q; x <= x0 + q; x++){ if(x < 0 || y < 0 || x >= G.W || y >= G.H || (Math.abs(x - x0) !== q && Math.abs(y - y0) !== q)) continue; const m = y * G.W + x; if(!G.clr[m]) continue; const d = (x - x0) * (x - x0) + (y - y0) * (y - y0); if(d < bd){ bd = d; best = m; } }
+    return best; };
+  const s = snap(i0, j0), g = snap(i1, j1); if(s < 0 || g < 0) return null; if(s === g) return [i1, j1];
+  const par = new Int32Array(G.W * G.H).fill(-1), qu = new Int32Array(G.W * G.H); let qh = 0, qt = 0; par[g] = g; qu[qt++] = g; const W = G.W, H = G.H;
+  while(qh < qt){ const n = qu[qh++]; if(n === s) break; const x = n % W, y = n / W | 0;
+    for(let k = 0; k < 8; k++){ const a = [1, -1, 0, 0, 1, 1, -1, -1][k], b = [0, 0, 1, -1, 1, -1, 1, -1][k], x2 = x + a, y2 = y + b; if(x2 < 0 || y2 < 0 || x2 >= W || y2 >= H) continue; const m = y2 * W + x2;
+      if(par[m] >= 0 || !G.clr[m]) continue; if(k > 3 && (!G.clr[y * W + x2] || !G.clr[y2 * W + x])) continue; par[m] = n; qu[qt++] = m; } }
+  if(par[s] < 0) return null;
+  const clear = (a, b) => { const [ai, aj] = a, [bi, bj] = b, n = Math.max(1, Math.ceil(Math.hypot(bi - ai, bj - aj) / 0.1)); for(let k = 1; k <= n; k++){ const c = cellIdx(ai + (bi - ai) * k / n, aj + (bj - aj) * k / n); if(c < 0 || !G.clr[c]) return false; } return true; };
+  const from = cen(s); if(Math.hypot(from[0] - i0, from[1] - j0) > 0.16) return from; let n = par[s], best = cen(n), steps = 0;
+  while(n !== g && steps++ < 400){ n = par[n]; const c = n === g ? [i1, j1] : cen(n); if(clear(from, c)) best = c; else if(steps > 60) break; }
+  return best;
 }
 /* 유나 둘레 사람들: [i, j, id]. 가까워지는 쪽으로만 막고 멀어지는 건 됨 (겹쳐 있어도 빠져나갈 수 있게) */
 function playObs(){
@@ -2276,7 +2406,7 @@ function playTap(mx, my){
 }
 export function playStart(cb, spawn){ PL.on = true; PL.cb = cb; PL.spawn = spawn || null; PL.in = [0, 0]; if(R && R.pl) enterPlay(); }
 export function playStop(){
-  PL.on = false; PL.cb = null; PL.in = [0, 0]; PCUT_A.value.w = 0; PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
+  PL.on = false; PL.cb = null; PL.in = [0, 0]; PCUT_A.value.w = 0; propsClear(); PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
   if(!R) return; R.layer.classList.remove("play"); R.camera.fov = 22; R.camera.near = 1; R.camera.updateProjectionMatrix(); R.zone = null; setView(HOME(), true);
 }
 export function playInput(x, y){ PL.in[0] = x; PL.in[1] = y; }
@@ -2342,6 +2472,11 @@ export function playOutfit(k){
   if(R && R.pl){ const A = R.pl, nw = A.yus[k]; if(nw && nw !== A.yu){ A.yu.root.visible = false; A.yu = nw; } }
   return true;
 }
+/* 머리 모양 · 머리색 (2026-11-28 꾸미기) */
+function applyHair(){ if(!R || !R.pim) return; const c = new THREE.Color(PL.hairC || "#3A261C"), dirty = new Set();
+  PARTS.forEach(pt => { if(pt.yuHair && pt.im){ pt.im.setColorAt(pt.k, c); dirty.add(pt.im); } }); dirty.forEach(im => { if(im.instanceColor) im.instanceColor.needsUpdate = true; }); }
+export function playHair(style, color){ if(style && HAIR_STYLES.includes(style)) PL.hair = style; if(color) PL.hairC = color; applyHair(); return [PL.hair, PL.hairC]; }
+export const playF = () => R?.F || null;   // 지금 층 모듈 (집 3층 방 꾸미기 등)
 export function playJump(){ if(!PL.on || PL.jy > 0 || PL.swim || PL.freeze) return false; PL.jv = 3.6; PL.jy = 0.001; return true; }
 export function playFreeAt(i, j, r = 0.2){ return !!R && (playGrid(), freeAt(i, j, r)); }
 export function playClear(i0, j0, i1, j1, r = 0.2){ if(!R) return false; playGrid(); const n = Math.max(1, Math.ceil(Math.hypot(i1 - i0, j1 - j0) / 0.12)); for(let k = 1; k <= n; k++){ const u = k / n; if(!freeAt(i0 + (i1 - i0) * u, j0 + (j1 - j0) * u, r)) return false; } return true; }
@@ -2382,7 +2517,7 @@ export function open(host, opts = {}){
     N.tablet = tab; PARTS.slice(k0).forEach(pt => pt.vis = () => N.p.root.visible && tab.visible); }
   R.F?.init?.(KIT);
   playMakeAvatars();
-  batchPeople();
+  batchPeople(); applyHair();
   // 구역 이름
   R.zoneTags = R.only ? [] : [...Object.entries(ZS()), ...Object.entries(SUBS())].map(([id, z]) => {
     const ZZ = ZS(), el = document.createElement(ZZ[id] ? "button" : "div"); el.className = "t3-zone" + (ZZ[id] ? "" : " sub");

@@ -1079,9 +1079,106 @@ function animate(tm, dt){
     W.dtex.needsUpdate = true; }
 }
 
+/* ---------- 방 꾸미기 (2026-11-28 감독님 "꾸미기"): 유나 방 벽지 · 이불 · 러그 · 장식. 유나 모드가 층 모듈의 room(state)로 넘김 ----------
+   기본(base)은 원래 그림 그대로 두고, 고르면 그 위에 한 겹 덧씌움 (벽지 = 벽지 판 바로 앞 0.016, 이불 = 이불보다 살짝 큰 상자, 러그 = 바닥 위 0.006) */
+const ROOM_WALL = [["base", "🌸", "분홍 벽"], ["cloud", "☁️", "구름 하늘"], ["star", "⭐", "별 가득"], ["stripe", "🍬", "사탕 줄무늬"], ["heart", "💗", "하트"], ["mint", "🫧", "민트 방울"], ["rainbow", "🌈", "꼬마 무지개"]],
+  ROOM_BED = [["base", "💜", "보라 이불"], ["berry", "🍓", "딸기"], ["sky", "☁️", "구름"], ["check", "🌼", "노랑 체크"], ["star", "⭐", "민트 별"], ["rainbow", "🌈", "무지개 줄"]],
+  ROOM_RUG = [["base", "🌈", "무지개 러그"], ["cloud", "☁️", "구름 러그"], ["berry", "🍓", "딸기 러그"], ["pitch", "⚽", "풋살장 러그"], ["heart", "💗", "하트 러그"], ["moon", "🌙", "달님 러그"]],
+  ROOM_DECO = [["teddy", "🧸", "큰 곰인형"], ["balloon", "🎈", "풍선 다발"], ["plant", "🪴", "화분"], ["lamp", "⭐", "별 무드등"], ["unicorn", "🦄", "유니콘"], ["castle", "🏰", "블록 성"], ["gift", "🎁", "선물 상자"], ["tent", "🏕️", "인디언 텐트"]];
+const ROOM_RECT = [0.35, 0.35, 6.05, 4.25], ROOM_MAX = 10;
+function roomHeart(c, x, y, r){ c.beginPath(); c.moveTo(x, y + r * 0.9); c.bezierCurveTo(x - r * 1.5, y - r * 0.2, x - r * 0.6, y - r * 1.1, x, y - r * 0.35); c.bezierCurveTo(x + r * 0.6, y - r * 1.1, x + r * 1.5, y - r * 0.2, x, y + r * 0.9); c.fill(); }
+function roomStar(c, x, y, r){ c.beginPath(); for(let k = 0; k < 10; k++){ const a = -PI / 2 + k * PI / 5, q = k % 2 ? r * 0.45 : r; c.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } c.fill(); }
+function roomCloud(c, x, y, r){ c.beginPath(); [[-0.9, 0.15, 0.55], [-0.3, -0.2, 0.75], [0.45, -0.1, 0.65], [1.0, 0.2, 0.45]].forEach(([a, b, q]) => { c.moveTo(x + a * r + q * r, y + b * r); c.arc(x + a * r, y + b * r, q * r, 0, 7); }); c.rect(x - r * 1.1, y + r * 0.15, r * 2.3, r * 0.45); c.fill(); }
+function roomBerry(c, x, y, r){ c.fillStyle = "#F25F6E"; c.beginPath(); c.moveTo(x, y + r); c.bezierCurveTo(x - r * 1.3, y, x - r * 0.8, y - r, x, y - r * 0.7); c.bezierCurveTo(x + r * 0.8, y - r, x + r * 1.3, y, x, y + r); c.fill();
+  c.fillStyle = "#6FBF73"; c.beginPath(); c.ellipse(x, y - r * 0.8, r * 0.55, r * 0.22, 0, 0, 7); c.fill(); c.fillStyle = "#FFF3C4"; [[-0.3, -0.1], [0.3, -0.05], [0, 0.35], [-0.15, -0.45], [0.2, -0.4]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a * r, y + b * r, r * 0.07, 0, 7); c.fill(); }); }
+function roomWallPaint(c, k, dark){
+  const S = 256; c.clearRect(0, 0, S, S);
+  const bg = {cloud:"#CFE8F7", star:"#E4DAF2", stripe:"#FFF6F8", heart:"#FFF7EC", mint:"#D7F0E6", rainbow:"#FFFBF4"}[k] || "#FBE4EC"; c.fillStyle = bg; c.fillRect(0, 0, S, S);
+  if(k === "cloud"){ c.fillStyle = "rgba(255,255,255,.95)"; [[60, 62, 26], [188, 150, 30], [84, 214, 20], [214, 40, 16]].forEach(([x, y, r]) => roomCloud(c, x, y, r)); }
+  if(k === "star"){ [[40, 44, 13, "#FFE58A"], [150, 30, 8, "#FFFFFF"], [216, 96, 12, "#FFE58A"], [96, 128, 9, "#FFFFFF"], [34, 190, 9, "#FFFFFF"], [150, 204, 14, "#FFE58A"], [232, 226, 7, "#FFFFFF"]].forEach(([x, y, r, col]) => { c.fillStyle = col; roomStar(c, x, y, r); }); }
+  if(k === "stripe"){ ["#F9C7D6", "#FFF6F8", "#CFE6F5", "#FFF6F8"].forEach((col, q) => { c.fillStyle = col; c.fillRect(q * 64, 0, 64, S); }); c.fillStyle = "rgba(255,255,255,.55)"; for(let q = 0; q < 4; q++) c.fillRect(q * 64 + 28, 0, 8, S); }
+  if(k === "heart"){ [[48, 50, "#F4A7B9"], [176, 50, "#F9C7D6"], [112, 114, "#F4A7B9"], [240, 114, "#F9C7D6"], [-16, 114, "#F9C7D6"], [48, 178, "#F9C7D6"], [176, 178, "#F4A7B9"], [112, 242, "#F9C7D6"], [112, -14, "#F9C7D6"]].forEach(([x, y, col]) => { c.fillStyle = col; roomHeart(c, x, y, 17); }); }
+  if(k === "mint"){ c.fillStyle = "rgba(255,255,255,.9)"; for(let y = 0; y < 4; y++) for(let x = 0; x < 4; x++){ c.beginPath(); c.arc(32 + x * 64 + (y % 2) * 32, 32 + y * 64, y % 2 ? 9 : 13, 0, 7); c.fill(); } }
+  if(k === "rainbow"){ [[64, 86], [192, 214]].forEach(([x, y]) => { RB.forEach((col, q) => { c.strokeStyle = col; c.lineWidth = 6; c.beginPath(); c.arc(x, y, 40 - q * 6, PI, 0); c.stroke(); }); c.fillStyle = "#FFFFFF"; roomCloud(c, x - 38, y + 2, 9); roomCloud(c, x + 38, y + 2, 9); });
+    c.fillStyle = "#F6E39A"; roomStar(c, 192, 60, 9); roomStar(c, 60, 190, 9); }
+  if(dark){ c.fillStyle = "rgba(34,26,44,.62)"; c.fillRect(0, 0, S, S); }
+}
+function roomBedPaint(c, k, dark){
+  const S = 256, bg = {berry:"#FFE3EA", sky:"#CFE8F7", check:"#FFF3C4", star:"#CDEBDD", rainbow:"#FFFFFF"}[k] || "#D9C6E6"; c.fillStyle = bg; c.fillRect(0, 0, S, S);
+  if(k === "berry") for(let y = 0; y < 4; y++) for(let x = 0; x < 4; x++) roomBerry(c, 32 + x * 64 + (y % 2) * 32, 32 + y * 64, 15);
+  if(k === "sky"){ c.fillStyle = "#FFFFFF"; [[56, 56, 22], [184, 120, 26], [72, 196, 20], [212, 228, 14]].forEach(([x, y, r]) => roomCloud(c, x, y, r)); }
+  if(k === "check"){ c.fillStyle = "rgba(246,200,80,.55)"; for(let q = 0; q < 4; q++){ c.fillRect(q * 64, 0, 32, S); c.fillRect(0, q * 64, S, 32); } }
+  if(k === "star"){ c.fillStyle = "#FFFFFF"; for(let y = 0; y < 4; y++) for(let x = 0; x < 4; x++) roomStar(c, 32 + x * 64 + (y % 2) * 32, 32 + y * 64, y % 2 ? 9 : 13); }
+  if(k === "rainbow") RB.forEach((col, q) => { c.fillStyle = col; c.fillRect(0, q * S / 6, S, S / 6 + 1); });
+  if(dark){ c.fillStyle = "rgba(34,26,44,.5)"; c.fillRect(0, 0, S, S); }
+}
+function roomRugPaint(c, k, dark){
+  const W2 = 512, H2 = 420, cx = W2 / 2, cy = H2 / 2; c.clearRect(0, 0, W2, H2);
+  const oval = (rx, ry, col) => { c.fillStyle = col; c.beginPath(); c.ellipse(cx, cy, rx, ry, 0, 0, 7); c.fill(); };
+  if(k === "cloud"){ c.fillStyle = "#FFFFFF"; roomCloud(c, cx - 10, cy + 10, 150); c.fillStyle = "#E3F1FA"; roomCloud(c, cx - 6, cy + 22, 118); c.fillStyle = "#F4A7B9"; [[-70, 20], [70, 20]].forEach(([a, b]) => { c.beginPath(); c.ellipse(cx + a, cy + b, 20, 12, 0, 0, 7); c.fill(); });
+    c.fillStyle = "#5A4A52"; [[-40, -4], [40, -4]].forEach(([a, b]) => { c.beginPath(); c.arc(cx + a, cy + b, 7, 0, 7); c.fill(); }); c.strokeStyle = "#5A4A52"; c.lineWidth = 5; c.lineCap = "round"; c.beginPath(); c.arc(cx, cy + 8, 16, 0.15 * PI, 0.85 * PI); c.stroke(); }
+  if(k === "berry"){ oval(246, 200, "#FFFFFF"); oval(232, 186, "#FFE3EA"); roomBerry(c, cx, cy + 10, 120); }
+  if(k === "pitch"){ c.fillStyle = "#FFFFFF"; c.beginPath(); c.roundRect(10, 10, W2 - 20, H2 - 20, 28); c.fill(); c.fillStyle = "#7CC68A"; c.beginPath(); c.roundRect(22, 22, W2 - 44, H2 - 44, 20); c.fill();
+    c.fillStyle = "rgba(255,255,255,.18)"; for(let q = 0; q < 6; q += 2) c.fillRect(22 + q * (W2 - 44) / 6, 22, (W2 - 44) / 6, H2 - 44);
+    c.strokeStyle = "#FFFFFF"; c.lineWidth = 6; c.strokeRect(40, 40, W2 - 80, H2 - 80); c.beginPath(); c.moveTo(cx, 40); c.lineTo(cx, H2 - 40); c.stroke(); c.beginPath(); c.arc(cx, cy, 52, 0, 7); c.stroke(); c.strokeRect(40, cy - 70, 64, 140); c.strokeRect(W2 - 104, cy - 70, 64, 140); }
+  if(k === "heart"){ c.fillStyle = "#FFFFFF"; roomHeart(c, cx, cy + 6, 190); c.fillStyle = "#F9B8CC"; roomHeart(c, cx, cy + 6, 172); c.fillStyle = "#FFE3EC"; roomHeart(c, cx, cy, 104); }
+  if(k === "moon"){ oval(246, 200, "#F6E39A"); oval(230, 186, "#3E3A6E"); c.fillStyle = "#FFE58A"; c.beginPath(); c.arc(cx - 20, cy, 92, 0, 7); c.fill(); c.fillStyle = "#3E3A6E"; c.beginPath(); c.arc(cx + 22, cy - 18, 80, 0, 7); c.fill();
+    c.fillStyle = "#FFFFFF"; [[120, -70, 13], [150, 40, 9], [60, 96, 8], [-150, -84, 9], [-128, 96, 11]].forEach(([a, b, r]) => roomStar(c, cx + a, cy + b, r)); }
+  if(dark){ c.globalCompositeOperation = "source-atop"; c.fillStyle = "rgba(34,26,44,.5)"; c.fillRect(0, 0, W2, H2); c.globalCompositeOperation = "source-over"; }
+}
+function roomDecoGeo(k){
+  const M = Merge(), P = "#F4A7B9", L = "#C8B4D0", cone = (r, h, seg = 14) => myGeo(new THREE.ConeGeometry(r, h, seg));
+  if(k === "teddy"){ const br = D("#C99A6B", "#6B4E38"), cr = D("#EAD3B6", "#8A7056");
+    M.add(K.sph(0.27, 16, 12), br, 0, 0.26, 0); M.add(K.sph(0.2, 16, 12), br, 0, 0.62, 0.02); [-1, 1].forEach(s => { M.add(K.sph(0.075, 10, 8), br, s * 0.15, 0.8, 0); M.add(K.sph(0.04, 8, 6), cr, s * 0.15, 0.8, 0.04); M.add(K.sph(0.1, 10, 8), br, s * 0.27, 0.36, 0.08); M.add(K.sph(0.11, 10, 8), br, s * 0.17, 0.09, 0.2); M.add(K.sph(0.05, 8, 6), cr, s * 0.17, 0.09, 0.29); M.add(K.sph(0.022, 6, 5), "#2A211D", s * 0.07, 0.66, 0.2); });
+    M.add(K.sph(0.085, 10, 8), cr, 0, 0.58, 0.17); M.add(K.sph(0.026, 6, 5), "#2A211D", 0, 0.61, 0.25); M.add(K.sph(0.15, 12, 10), cr, 0, 0.26, 0.17); M.add(K.sph(0.05, 8, 6), "#F06BA8", -0.07, 0.45, 0.2); M.add(K.sph(0.05, 8, 6), "#F06BA8", 0.07, 0.45, 0.2); M.add(K.sph(0.03, 6, 5), "#F06BA8", 0, 0.45, 0.22); }
+  if(k === "balloon"){ M.add(K.rbox(0.2, 0.14, 0.2, 0.03), P, 0, 0.07, 0); [[-0.2, 1.42, 0.05, "#FF8FB8", -0.14], [0.02, 1.62, -0.04, "#FFD84D", 0.02], [0.24, 1.38, 0.08, "#8FC8F0", 0.17], [0.05, 1.22, 0.2, "#C8B4D0", 0.05]].forEach(([x, y, z, c, rz]) => {
+      const b = myGeo(new THREE.SphereGeometry(0.19, 16, 12)); b.scale(1, 1.18, 1); M.add(b, c, x, y, z); M.add(cone(0.035, 0.05, 8), c, x, y - 0.235, z, PI); const len = y - 0.36; M.add(myGeo(new THREE.CylinderGeometry(0.004, 0.004, len, 4)), "#EDE6E0", x / 2, 0.12 + len / 2, z / 2, z / 2 / len * 1.0, 0, -x / 2 / len * 2.0); }); }
+  if(k === "plant"){ M.add(K.cyl(0.19, 0.14, 0.3, 16), D("#FFFFFF", "#8A8088"), 0, 0.15, 0); M.add(K.cyl(0.2, 0.2, 0.04, 16), P, 0, 0.3, 0); M.add(K.cyl(0.02, 0.025, 0.5, 6), D("#7A9A5A", "#4E6A42"), 0, 0.55, 0);
+    [[0, 0.95, 0, 0.2], [-0.2, 0.78, 0.04, 0.16], [0.2, 0.74, -0.03, 0.17], [0.05, 0.68, 0.18, 0.14], [-0.06, 0.7, -0.17, 0.13]].forEach(([x, y, z, r]) => { const g = myGeo(new THREE.SphereGeometry(r, 12, 9)); g.scale(1, 0.72, 1); M.add(g, D("#6FAE64", "#3E6E54"), x, y, z); }); }
+  if(k === "lamp"){ M.add(K.cyl(0.16, 0.18, 0.04, 16), D("#FFFFFF", "#8A8088"), 0, 0.02, 0); M.add(K.cyl(0.018, 0.018, 0.86, 8), D("#F2C94C", "#B89432"), 0, 0.45, 0);
+    const st = myGeo(new THREE.OctahedronGeometry(0.2)); st.scale(1, 1.15, 0.55); M.add(st, D("#FFE58A", "#FFF0B0"), 0, 1.02, 0); [[-0.2, 0.8, 0.07], [0.22, 0.86, 0.06]].forEach(([x, y, r]) => { const g = myGeo(new THREE.OctahedronGeometry(r)); M.add(g, D("#FFF3C4", "#FFF7D8"), x, y, 0.02); }); }
+  if(k === "unicorn"){ const w = D("#FFFFFF", "#B8B0BC"); const bd = myGeo(new THREE.SphereGeometry(0.26, 16, 12)); bd.scale(1.35, 0.9, 0.95); M.add(bd, w, 0, 0.42, 0);
+    [[-0.2, -0.13], [0.2, -0.13], [-0.2, 0.13], [0.2, 0.13]].forEach(([x, z]) => M.add(K.cyl(0.055, 0.06, 0.28, 8), w, x, 0.14, z)); M.add(K.cyl(0.09, 0.11, 0.3, 10), w, 0.27, 0.68, 0, 0, 0, -0.5); M.add(K.sph(0.15, 14, 10), w, 0.37, 0.84, 0);
+    M.add(K.sph(0.085, 10, 8), D("#FCE3EC", "#B898A6"), 0.5, 0.8, 0); M.add(cone(0.035, 0.22, 10), D("#F2C94C", "#B89432"), 0.42, 1.03, 0, 0, 0, -0.35); [-1, 1].forEach(s => { M.add(cone(0.04, 0.09, 6), w, 0.33, 0.98, s * 0.08); M.add(K.sph(0.02, 6, 5), "#2A211D", 0.46, 0.87, s * 0.1); });
+    RB.forEach((c, q) => { M.add(K.sph(0.065, 8, 6), c, 0.27 - q * 0.045, 0.95 - q * 0.075, 0); M.add(K.sph(0.055, 8, 6), c, -0.36 - (q % 3) * 0.03, 0.5 - q * 0.05, (q % 2 - 0.5) * 0.08); }); }
+  if(k === "castle"){ const w = D("#FFF6F8", "#8A7A80"); M.add(K.rbox(0.7, 0.42, 0.5, 0.02), w, 0, 0.21, 0); [-1, 1].forEach(s => { M.add(K.cyl(0.14, 0.14, 0.72, 14), s < 0 ? P : L, s * 0.36, 0.36, 0); M.add(cone(0.18, 0.28), s < 0 ? L : P, s * 0.36, 0.86, 0); });
+    M.add(K.rbox(0.3, 0.3, 0.3, 0.02), D("#FCE9B8", "#8A7A50"), 0, 0.57, 0); M.add(cone(0.24, 0.3, 4), P, 0, 0.87, 0, 0, PI / 4); M.add(K.rbox(0.16, 0.24, 0.02, 0.01), D("#D49AB0", "#6A4E5A"), 0, 0.12, 0.251); [-0.2, 0.2].forEach(x => M.add(K.rbox(0.09, 0.09, 0.02, 0), D("#A9CBEA", "#4A5A6E"), x, 0.28, 0.251));
+    M.add(K.cyl(0.006, 0.006, 0.2, 4), "#C9CDD2", 0, 1.1, 0); M.add(K.rbox(0.1, 0.06, 0.008, 0), "#FFD84D", 0.05, 1.16, 0); }
+  if(k === "gift"){ M.add(K.rbox(0.46, 0.34, 0.46, 0.03), P, 0, 0.17, 0); M.add(K.rbox(0.48, 0.345, 0.08, 0.01), "#FFFFFF", 0, 0.17, 0); M.add(K.rbox(0.08, 0.345, 0.48, 0.01), "#FFFFFF", 0, 0.17, 0); [-1, 1].forEach(s => { const g = myGeo(new THREE.SphereGeometry(0.08, 10, 8)); g.scale(1.3, 0.7, 0.8); M.add(g, "#FFFFFF", s * 0.09, 0.39, 0, 0, 0, s * 0.4); });
+    M.add(K.rbox(0.28, 0.22, 0.28, 0.03), D("#A9CBEA", "#4A5A6E"), 0.34, 0.11, 0.22, 0, 0.4); M.add(K.rbox(0.3, 0.225, 0.05, 0.01), "#FFE58A", 0.34, 0.11, 0.22, 0, 0.4); M.add(K.sph(0.05, 8, 6), "#FFE58A", 0.34, 0.25, 0.22); }
+  if(k === "tent"){ const c1 = myGeo(new THREE.ConeGeometry(0.62, 1.25, 6, 1, true)); M.add(c1, D("#FCE3EC", "#8A6A78"), 0, 0.625, 0, 0, PI / 6); for(let q = 0; q < 6; q++){ const a = q * PI / 3 + PI / 6; M.add(myGeo(new THREE.CylinderGeometry(0.012, 0.012, 1.5, 5)), D("#C9A27A", "#6B4E38"), Math.sin(a) * 0.27, 0.72, Math.cos(a) * 0.27, Math.cos(a) * 0.42, 0, -Math.sin(a) * 0.42); }
+    M.add(myGeo(new THREE.CircleGeometry(0.5, 6)), D("#E2D6EA", "#4E4458"), 0, 0.012, 0, -PI / 2, 0, PI / 6); RB.forEach((c, q) => { const a = q * PI / 3 + PI / 3; M.add(cone(0.05, 0.1, 3), c, Math.sin(a) * 0.5, 0.2, Math.cos(a) * 0.5, PI, a); }); M.add(K.sph(0.1, 10, 8), "#FFE58A", 0, 0.1, 0); }
+  return M.geo();
+}
+function roomBuild(){
+  const R = K.R, mk = (w, h) => { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace; tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.anisotropy = 4; return {cv, c:cv.getContext("2d"), tx}; };
+  const A = W.room = {wall:mk(256, 256), bed:mk(256, 256), rug:mk(512, 420), deco:[], st:{wall:"base", bed:"base", rug:"base", deco:[]}, sig:""};
+  const tile = (g, u, v) => { const a = g.attributes.uv; for(let k = 0; k < a.count; k++) a.setXY(k, a.getX(k) * u, a.getY(k) * v); return g; }, Hh = hz(TALL), T2 = 1.45;
+  const wm = K.cutaway(new THREE.MeshStandardMaterial({map:A.wall.tx, roughness:0.92}));
+  const gb = tile(new THREE.PlaneGeometry(6.4, Hh), 6.4 / T2, Hh / T2), gl2 = tile(new THREE.PlaneGeometry(RJ, Hh), RJ / T2, Hh / T2);
+  A.wb = new THREE.Mesh(gb, wm); A.wb.position.set(X(3.2), Hh / 2, Z(0) + 0.016); A.wl = new THREE.Mesh(gl2, wm); A.wl.rotation.y = PI / 2; A.wl.position.set(X(0) + 0.016, Hh / 2, Z(RJ / 2));
+  const bm = new THREE.MeshStandardMaterial({map:A.bed.tx, roughness:0.85}), bg = new THREE.BoxGeometry(1.3, hz(3.4), 1.42);
+  A.bd = new THREE.Mesh(bg, K.cutaway(bm)); A.bd.position.set(X(0.77), hz(15) + hz(3.4) / 2, Z(1.63)); A.bd.castShadow = true;
+  const rm = new THREE.MeshStandardMaterial({map:A.rug.tx, roughness:0.95, transparent:true, alphaTest:0.5, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2}), rg = new THREE.PlaneGeometry(2.86, 2.34); rg.rotateX(-PI / 2);
+  A.rg = new THREE.Mesh(rg, rm); A.rg.position.set(X(3.05), 0.006, Z(2.55)); A.rg.renderOrder = 1;
+  [A.wb, A.wl, A.bd, A.rg].forEach(m => { m.receiveShadow = true; m.visible = false; R.scene.add(m); });
+}
+function roomApply(st, force){
+  const A = W && W.room; if(!A) return false; const dk = !!K.R.dark, S = A.st, n = {wall:st?.wall || "base", bed:st?.bed || "base", rug:st?.rug || "base", deco:(st?.deco || []).slice(0, ROOM_MAX)};
+  if(force || n.wall !== S.wall || dk !== A.dk){ A.wb.visible = A.wl.visible = n.wall !== "base"; if(n.wall !== "base"){ roomWallPaint(A.wall.c, n.wall, dk); A.wall.tx.needsUpdate = true; } }
+  if(force || n.bed !== S.bed || dk !== A.dk){ A.bd.visible = n.bed !== "base"; if(n.bed !== "base"){ roomBedPaint(A.bed.c, n.bed, dk); A.bed.tx.needsUpdate = true; } }
+  if(force || n.rug !== S.rug || dk !== A.dk){ A.rg.visible = n.rug !== "base"; if(n.rug !== "base"){ roomRugPaint(A.rug.c, n.rug, dk); A.rug.tx.needsUpdate = true; } }
+  const sig = JSON.stringify(n.deco);
+  if(sig !== A.sig){ A.sig = sig; A.deco.forEach(m => { m.removeFromParent(); m.geometry.dispose(); const q = W.recolor.indexOf(m); if(q >= 0) W.recolor.splice(q, 1); }); A.deco = [];
+    n.deco.forEach(d => { if(!ROOM_DECO.some(x => x[0] === d.k)) return; const m = dynMesh(roomDecoGeo(d.k)); m.position.set(X(d.i), 0, Z(d.j)); m.rotation.y = d.h || 0; m.receiveShadow = true;
+      if(dk){ const u = m.geometry.userData; m.geometry.attributes.color.array.set(u.D); m.geometry.attributes.color.needsUpdate = true; } A.deco.push(m); }); }
+  A.st = n; A.dk = dk; return true;
+}
+
 /* ---------- 유나 모드에 넘길 것 (yuna_game.js SEATS 형식: a~b 선분 또는 a 한 점, h = 보는 쪽(0 = +j, PI/2 = +i, PI = −j), H = 앉는 면 높이, k = 대사 종류, f = 앞에서만) ---------- */
 const H = px => px / 31.1;
 export const HOME = {
+  room:{wall:ROOM_WALL, bed:ROOM_BED, rug:ROOM_RUG, deco:ROOM_DECO, rect:ROOM_RECT, max:ROOM_MAX},   // 방 꾸미기 고를 것 (2026-11-28)
   bike:{park:BIKE_PARK, set(i, j, h){ if(!W || !W.bike) return; W.bike.position.set(X(i), 0, Z(j)); W.bike.rotation.y = h; }},   // 유나 모드: 자전거 타기
   floors:{home1:"./floor3d_home.js", home2:"./floor3d_home.js?f=2", home3:"./floor3d_home.js?f=3", home4:"./floor3d_home.js?f=4"},
   names:{home1:"집1층 현관·주차장·마당", home2:"집2층 거실·부엌", home3:"집3층 방", home4:"집4층 다락·옥상"},
@@ -1176,12 +1273,14 @@ const def = {
          egg("h_horse", [6.8, 9.8, 30], ["🐴", "🎠"], ["이랴~ 흔들목마 출발 🐴"])]}[FNO];
     [null, build1, build2, build3, build4][FNO]();
     [null, buildDyn1, buildDyn2, buildDyn3, buildDyn4][FNO](); buildDynamic();
+    if(FNO === 3) roomBuild();
   },
+  room(st){ return FNO === 3 ? roomApply(st) : false; },   // 유나 모드: 방 꾸미기 상태 넘기기
   init(KIT){ LG.forEach(g => g.dispose()); LG.length = 0; },
   tick(KIT, now, t, dt){
     if(W.extraBoxes.length && KIT.R && KIT.R.boxes && !W.boxDone){ W.boxDone = true;   // 트리포 차 막기 상자를 엔진 목록에 더함
       KIT.R.boxes = Float32Array.from([...KIT.R.boxes, ...W.extraBoxes.flat()]); KIT.R.pg = null; }
     animate(KIT.clock ? KIT.clock() : now, dt); },
-  theme(KIT, dark){ if(!W) return; W.recolor.forEach(m => { const u = m.geometry.userData, a = m.geometry.attributes.color; if(u && u.L && a){ a.array.set(dark ? u.D : u.L); a.needsUpdate = true; } }); },
+  theme(KIT, dark){ if(!W) return; if(W.room) setTimeout(() => { if(W && W.room) roomApply(W.room.st, true); }, 0); W.recolor.forEach(m => { const u = m.geometry.userData, a = m.geometry.attributes.color; if(u && u.L && a){ a.array.set(dark ? u.D : u.L); a.needsUpdate = true; } }); },
 };
 export default def;
