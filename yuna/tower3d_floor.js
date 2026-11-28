@@ -1833,6 +1833,26 @@ function reachMap(){
     for(const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]){ const x2 = x + a, y2 = y + b; if(x2 < 0 || y2 < 0 || x2 >= G.W || y2 >= G.H) continue; const m = y2 * G.W + x2; if(M[m]) continue; M[m] = 2; if(ok(m)){ M[m] = 1; q.push(m); } } }
   return G.reach = M;
 }
+/* 도착 자리 (2026-11-28 감독님 "시장에서 나오더니 여기 갇히노": 골목 가로수 화단 안에 떨어져 못 나옴)
+   걸을 수 있는 칸을 이어진 덩어리로 나눠 가장 큰 덩어리(= 그 층 바닥)를 찾고, 도착 자리가 화단·울타리 안 같은 작은 덩어리면 가장 가까운 큰 덩어리 칸으로 옮김 */
+function mainMap(){
+  const G = playGrid(); if(G.main !== undefined) return G.main;
+  const n = G.W * G.H, ok = new Uint8Array(n), lab = new Int32Array(n), st = new Int32Array(n); let best = 0, bs = 0, id = 0;
+  for(let k = 0; k < n; k++) ok[k] = freeAt(G.e0 + (k % G.W + 0.5) * G.C, G.f0 + ((k / G.W | 0) + 0.5) * G.C) ? 1 : 0;
+  for(let k = 0; k < n; k++){ if(!ok[k] || lab[k]) continue; id++; let top = 0, size = 0; st[top++] = k; lab[k] = id;
+    while(top){ const c = st[--top], x = c % G.W, y = c / G.W | 0; size++;
+      if(x > 0 && ok[c - 1] && !lab[c - 1]){ lab[c - 1] = id; st[top++] = c - 1; } if(x < G.W - 1 && ok[c + 1] && !lab[c + 1]){ lab[c + 1] = id; st[top++] = c + 1; }
+      if(y > 0 && ok[c - G.W] && !lab[c - G.W]){ lab[c - G.W] = id; st[top++] = c - G.W; } if(y < G.H - 1 && ok[c + G.W] && !lab[c + G.W]){ lab[c + G.W] = id; st[top++] = c + G.W; } }
+    if(size > bs){ bs = size; best = id; } }
+  if(!best) return G.main = null; const M = new Uint8Array(n); for(let k = 0; k < n; k++) M[k] = lab[k] === best ? 1 : 0; return G.main = M;
+}
+function spawnSpot(i, j){
+  const p = nearFree(i, j), G = playGrid(), M = mainMap(), n = cellIdx(p[0], p[1]); if(!M || (n >= 0 && M[n])) return p;
+  const x0 = Math.floor((i - G.e0) / G.C), y0 = Math.floor((j - G.f0) / G.C); let best = -1, bd = 1e9;
+  for(let q = 1; q <= 80 && best < 0; q++) for(let y = y0 - q; y <= y0 + q; y++) for(let x = x0 - q; x <= x0 + q; x++){ if(x < 0 || y < 0 || x >= G.W || y >= G.H || (Math.abs(x - x0) !== q && Math.abs(y - y0) !== q)) continue; const m = y * G.W + x; if(!M[m]) continue; const d = (x - x0) * (x - x0) + (y - y0) * (y - y0); if(d < bd){ bd = d; best = m; } }
+  return best < 0 ? p : [G.e0 + (best % G.W + 0.5) * G.C, G.f0 + ((best / G.W | 0) + 0.5) * G.C];
+}
+export function playSpawnCheck(i, j){ if(!R) return null; playGrid(); const a = nearFree(i, j), b = spawnSpot(i, j), M = mainMap(), n = cellIdx(a[0], a[1]); return {ok:!!M && n >= 0 && !!M[n], moved:+Math.hypot(a[0] - i, a[1] - j).toFixed(2), fix:[+b[0].toFixed(2), +b[1].toFixed(2)]}; }
 const reachable = (i, j) => { const M = reachMap(), n = cellIdx(i, j); return !M || (n >= 0 && M[n] === 1); };
 export function playReach(i, j){ return R ? reachable(i, j) : false; }   // 시험용: 그 칸에 걸어서 갈 수 있나
 export function playBlocked(i, j){ return R ? (playGrid(), cellBlocked(i, j)) : null; }   // 시험용: 그 점이 막혔나
@@ -1942,7 +1962,7 @@ function enterPlay(){
   R.camera.fov = 52; R.camera.near = 0.12; R.camera.updateProjectionMatrix();
   PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.cloak = false;
   const s = PL.spawn || [13.9, 17.1, Math.PI / 2]; PL.spawn = null;
-  playGrid(); [PL.i, PL.j] = nearFree(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
+  playGrid(); [PL.i, PL.j] = spawnSpot(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
   PL.tg = new THREE.Vector3(X(PL.i), PL.gy + 0.62, Z(PL.j)); PL.dd = PL.d; R.cur = {tg:PL.tg.clone(), d:PL.d}; R.az = PL.yaw; R.el = PL.el;
   PL.cb?.onFloor?.(R.fid);
 }

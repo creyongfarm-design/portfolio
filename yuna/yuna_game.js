@@ -526,8 +526,8 @@ const AREA = {park:{name:"동네 공원·놀이터", e:"🌳", gate:[15, 21.3], 
 const LINKS = [
   {f:"park", at:[0.45, 16.5], r:0.6, to:"river", spawn:[32.5, 12, -Math.PI / 2]}, {f:"river", at:[33.3, 12], r:0.75, to:"park", spawn:[1.3, 16.5, Math.PI / 2]},
   {f:"river", at:[17, 23.3], r:0.55, to:"park", spawn:[1.3, 16.5, Math.PI / 2]},
-  {f:"town", at:[28.0, 17.3], r:0.6, to:"market", spawn:[1.5, 11, Math.PI / 2]}, {f:"market", at:[0.7, 11], r:0.8, to:"town", spawn:[26.9, 17.3, -Math.PI / 2]},
-  {f:"market", at:[15, 21.3], r:0.55, to:"town", spawn:[26.9, 17.3, -Math.PI / 2]},
+  {f:"town", at:[28.0, 17.3], r:0.6, to:"market", spawn:[1.5, 11, Math.PI / 2]}, {f:"market", at:[0.7, 11], r:0.8, to:"town", spawn:[27.3, 16.4, -Math.PI / 2]},
+  {f:"market", at:[15, 21.3], r:0.55, to:"town", spawn:[27.3, 16.4, -Math.PI / 2]},
   {f:"town", at:[4.2, 3.1], r:0.5, to:"school", spawn:[16, 22.5, Math.PI]}, {f:"school", at:[16, 23.3], r:0.55, to:"town", spawn:[4.2, 3.9, 0]},
   {f:"fun", at:[17, 25.3], r:0.55, to:"town", spawn:[21.0, 14.4, 0]}];
 const BUS = {f:"town", at:[21.0, 14.4], to:"fun"};   // 골목 버스 정류장에서 버튼으로 타고 감   // 2026-11-24 감독님 "학교도 만들든가 사립초" · 골목 학교 정문으로 들어감   // 놀이공원은 골목 버스 정류장에서 버스로 (나갈 때도 버스로 골목)
