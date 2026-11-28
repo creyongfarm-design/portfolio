@@ -339,6 +339,10 @@ const CSS = `
 .yg-plays button{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:10px 12px;min-height:56px}
 .yg-plays button span{grid-row:1/3;font-size:24px;line-height:1}.yg-plays button b{font-size:14px;font-weight:700;align-self:end}.yg-plays button small{font-size:11px;color:var(--ink-3);align-self:start;line-height:1.3}
 .yg-snd.off{opacity:.55}
+.yg-chars{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.yg-chars button{display:grid;justify-items:center;gap:3px;border:1.5px solid var(--line);background:var(--paper);border-radius:16px;padding:10px 4px 8px}
+.yg-chars button span{font-size:28px;line-height:1}.yg-chars button b{font-size:13px;font-weight:700}
+.yg-chars button[aria-pressed="true"]{border-color:#FF8FB8;background:color-mix(in srgb,#FF8FB8 18%,var(--paper))}
 .yg-row b{font-size:14.5px;font-weight:700}
 .yg-row small{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
 .yg-row .ok{margin-left:auto;font-size:12px;font-weight:700;color:#3A8A78;background:color-mix(in srgb,#3A8A78 14%,transparent);border-radius:999px;padding:2px 8px;white-space:nowrap}
@@ -901,7 +905,7 @@ export function start(api){
     bt.addEventListener("pointerup", up); bt.addEventListener("pointercancel", up); });
   /* 타이밍 판정 글씨 (2026-11-28 감독님 "타이밍도 섬세하게 해야 재밌지"): PERFECT · GOOD · 빨라요 · 늦어요 */
   const tmEl = $(".yg-tm");
-  function tmShow(g, txt, sub){ tmEl.dataset.g = g; tmEl.textContent = txt; if(sub){ const s = document.createElement("small"); s.textContent = sub; tmEl.append(s); } tmEl.classList.remove("go"); void tmEl.offsetWidth; tmEl.classList.add("go"); }
+  function tmShow(g, txt, sub){ txt = tx(txt); sub = tx(sub); tmEl.dataset.g = g; tmEl.textContent = txt; if(sub){ const s = document.createElement("small"); s.textContent = sub; tmEl.append(s); } tmEl.classList.remove("go"); void tmEl.offsetWidth; tmEl.classList.add("go"); }
   sndB.onclick = ev => { ev.stopPropagation(); auSet(!AU.on); auInit(); sndB.textContent = AU.on ? "🔊" : "🔇"; sndB.classList.toggle("off", !AU.on);
     if(AU.on){ sfx("star"); toast("🔊 소리 켰어요", "딩동 소리가 안 들리면 폰 옆 볼륨 버튼을 올려 봐요", 2400, true); } else toast("🔇 소리 껐어요", "스피커를 다시 누르면 켜져요", 1600, true); };
   sndB.classList.toggle("off", !AU.on);
@@ -944,20 +948,23 @@ export function start(api){
   let Q = null, step = 0, G = null, carry = "", pendingFloor = null, talkAt = 0, live = true, toastT = 0, helpT = 0;
   const E = () => api.eng();
   const now = () => performance.now();
+  /* 노라 · 크레용으로 놀기: 글 속 "유나"와 그 사람 호칭을 서로 바꿈 (아빠로 놀면 "유나 승" → "아빠 승", 상대 "아빠랑" → "유나랑") */
+  const CH = {yu:{n:"유나", full:"유나", e:"👧"}, mom:{n:"엄마", full:"노라", e:"👩"}, dad:{n:"아빠", full:"크레용", e:"👨"}};
+  const tx = s0 => { const c = S.char; if(!c || c === "yu" || typeof s0 !== "string") return s0; const n = CH[c].n; return s0.replace(new RegExp("유나|" + n, "g"), m => m === "유나" ? n : "유나"); };
   const curStep = () => Q ? Q.steps[step] : null;
   const needFloor = st => st.find ? (Q.known ? Q.catF : null) : st.f;
 
   const tq = []; let tUntil = 0;
-  function toast(txt, sub = "", ms = 1900, queue = false){
-    if(queue && now() < tUntil){ tq.push([txt, sub, ms]); return; }
+  function toast(txt, sub = "", ms = 1900, queue = false, raw = false){ if(!raw){ txt = tx(txt); sub = tx(sub); }   // raw = 줄 서 있다 다시 나오는 글 (이름을 두 번 바꾸지 않게)
+    if(queue && now() < tUntil){ tq.push([txt, sub, ms, false, true]); return; }
     toastEl.innerHTML = ""; toastEl.append(txt); if(sub){ const s = document.createElement("small"); s.textContent = sub; toastEl.append(s); } toastEl.classList.add("on"); help.style.opacity = 0;
     clearTimeout(toastT); tUntil = now() + ms;
     toastT = setTimeout(() => { toastEl.classList.remove("on"); tUntil = 0; const n = tq.shift(); if(n) setTimeout(() => { if(live) toast(...n); }, 280); }, ms); }
   function checkBadges(){ BADGES.forEach(([id, e, t, c]) => { if(!rec.badge[id] && c(rec)){ rec.badge[id] = 1; save(); toast(`🏅 새 배지! ${e}`, t, 2400, true); } }); }
   const floorFound = f => TREASURE[f].filter((_, k) => rec.tre[`${f}:${k}`]).length;
   const blip = hi => { const n = performance.now(); if(n - AU.blipAt < 220) return; AU.blipAt = n; sfx("blip", hi); };
-  const yuSay = (t, ms) => { blip(true); return E()?.playSay("yu", t, ms); };
-  const npcSay = (id, t, ms) => { blip(false); return E()?.playSay(id.startsWith("@") ? id.slice(1) : id, t, ms); };
+  const yuSay = (t, ms) => { blip(true); return E()?.playSay("yu", tx(t), ms); };
+  const npcSay = (id, t, ms) => { blip(false); return E()?.playSay(id.startsWith("@") ? id.slice(1) : id, tx(t), ms); };
 
   /* ---------- 들고 있는 것 · 받기 · 만드는 장면 (2026-11-23 감독님 "미션같은 거 하면 시각화가 필요하지 않음?", "바리스타도 만들어서 주는 느낌", "받았는지도 몰랐네") ---------- */
   function setCarry(c){
@@ -995,7 +1002,7 @@ export function start(api){
   }
   function openList(tab = S.tab){
     closeElev(); S.tab = tab;
-    panel.innerHTML = `<h3>유나의 모험 <em>⭐ ${rec.stars}</em></h3><div class="yg-tabs" role="tablist"></div>`;
+    panel.innerHTML = `<h3>${CH[S.char || "yu"].full}의 모험 <em>⭐ ${rec.stars}</em></h3><div class="yg-tabs" role="tablist"></div>`;
     const tabs = panel.querySelector(".yg-tabs");
     [["q", "할 일"], ["t", `보물 ${cnt(rec.tre)}/${TOTAL}`], ["b", `배지 ${cnt(rec.badge)}/${BADGES.length}`]].forEach(([k, l]) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", k === tab); b.textContent = l; b.onclick = () => openList(k); tabs.append(b); });
     if(tab === "t"){
@@ -1012,6 +1019,8 @@ export function start(api){
       const g = document.createElement("div"); g.className = "yg-bgrid";
       BADGES.forEach(([id, e, t]) => { const d = document.createElement("div"); d.className = "yg-bg " + (rec.badge[id] ? "ok" : "no"); d.innerHTML = `<span class="e"></span><small></small>`; d.querySelector(".e").textContent = e; d.querySelector("small").textContent = t; g.append(d); });
       panel.append(g); panel.hidden = false; return; }
+    { const w = document.createElement("div"); w.className = "yg-chars"; w.setAttribute("role", "group"); w.setAttribute("aria-label", "누구로 놀까");   // 2026-11-29 감독님 "캐릭도 노라 크레용도 만들자"
+      ["yu", "mom", "dad"].forEach(k => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", (S.char || "yu") === k); b.innerHTML = "<span></span><b></b>"; b.querySelector("span").textContent = CH[k].e; b.querySelector("b").textContent = CH[k].full; b.onclick = () => setChar(k); w.append(b); }); panel.append(w); }
     { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row yg-roam";   // 2026-11-28 감독님 "그냥 돌아다니기를 맨 위로"
       r.innerHTML = `<span class="e">🚶‍♀️</span><span><b></b><small></small></span>`; r.querySelector("b").textContent = G ? "이 놀이 그만하고 그냥 돌아다니기" : Q ? "이 할 일 그만하고 그냥 돌아다니기" : "그냥 돌아다니기"; r.querySelector("small").textContent = "마음대로 구경하고 놀기 · 보물 찾기";
       r.onclick = () => { panel.hidden = true; if(G && !Q){ endGame(); setup(); renderCard(); } if(Q){ endGame(); E()?.playActor("fr", null); Q = null; setCarry(""); setup(); renderCard(); } }; panel.append(r); }
@@ -1022,8 +1031,9 @@ export function start(api){
     { const h = document.createElement("p"); h.className = "yg-sec"; h.innerHTML = "🎮 놀이 하러 가기 <small>누르면 그 자리까지 데려다줘요</small>"; panel.append(h);   // 2026-11-29 감독님 "피구는 어디서해??"
       const g = document.createElement("div"); g.className = "yg-plays";
       PLAYS.forEach(pl => { if(!AREA_MOD[pl[0]]) return; const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b><small></small>"; b.querySelector("span").textContent = pl[2]; b.querySelector("b").textContent = pl[3]; b.querySelector("small").textContent = pl[4]; b.onclick = () => goPlay(pl); g.append(b); });
-      panel.append(g); const h2 = document.createElement("p"); h2.className = "yg-sec"; h2.textContent = "📋 할 일"; panel.append(h2); }
-    QUESTS.forEach(q => { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row" + (Q === q ? " cur" : "");
+      panel.append(g); const h2 = document.createElement("p"); h2.className = "yg-sec"; h2.textContent = "📋 할 일"; panel.append(h2);
+      if(S.char && S.char !== "yu"){ const n = document.createElement("p"); n.className = "yg-note"; n.textContent = "심부름(할 일)은 유나로 바꾸면 할 수 있어요."; panel.append(n); } }
+    (S.char && S.char !== "yu" ? [] : QUESTS).forEach(q => { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row" + (Q === q ? " cur" : "");
       r.innerHTML = `<span class="e"></span><span><b></b><small></small></span>${rec.done[q.id] ? `<span class="ok">⭐ ${rec.done[q.id]}번</span>` : ""}`;
       r.querySelector(".e").textContent = q.e; r.querySelector("b").textContent = q.t; r.querySelector("small").textContent = q.id === "party" && rec.partyCh ? `이어 하기 · ${q.steps[rec.partyCh]?.ch?.join(" ") || ""}` : q.steps.map(s => s.f ? FL[s.f].name.split(" ")[0] : "❓").filter(x => x).filter((x, k, a) => a.indexOf(x) === k).join(" → ");
       r.onclick = () => { panel.hidden = true; begin(q); }; panel.append(r); });
@@ -1031,6 +1041,9 @@ export function start(api){
   }
   card.onclick = () => panel.hidden ? openList() : (panel.hidden = true);
 
+  function setChar(k){ if((S.char || "yu") === k) return; if(S.busy || S.boat){ toast("지금 하는 놀이가 끝나면 바꿀 수 있어요", "", 1400); return; }
+    endGame(); if(Q){ E()?.playActor("fr", null); Q = null; setCarry(""); } S.goto = null; fitP.hidden = true; S.char = k; rec.char = k; save(); E()?.playChar?.(k); setup(); renderCard(); openList("q"); sfx("star");
+    toast(`${CH[k].e} ${ro(CH[k].full)} 놀아요`, k === "yu" ? "할 일 · 놀이 · 보물 찾기" : "놀이 · 보물 찾기를 할 수 있어요", 2200, true); }
   function goPlay(pl){ const [f, k, em, nm, where] = pl; panel.hidden = true; if(S.busy && !S.boat){ toast("지금 하는 놀이가 끝나면 갈 수 있어요", "", 1400); return; } if(S.boat) landBoat();
     endGame(); if(Q){ E()?.playActor("fr", null); Q = null; setCarry(""); } S.goto = {f, k, em, nm, where}; renderCard();
     if(S.floor === f) setup(); else { sfx("blip"); walkTo({f:S.floor, to:f, spawn:AREA[f].spawn}); } }
@@ -1068,6 +1081,7 @@ export function start(api){
       if(need(k) && (f === fl || G)){ if(!(S.st?.actors || {})[k] && !G){ const w0 = e.playWhere(id), w = w0 && Math.hypot(w0[0] - ELEV[0], w0[1] - ELEV[1]) > 2.4 ? w0 : null, at = e.playFree(...(w ? [w[0], w[1]] : def), 0.22); e.playActor(k, {at:[at[0], at[1], w ? w[2] : 0], pose:"stand"}); }
         hide.push(id, "l_" + id.slice(1)); }
       else e.playActor(k, null); });
+    if(S.char === "dad") hide.push("_dir", "l_dir"); if(S.char === "mom") hide.push("_nora", "l_nora");   // 내가 그 사람이면 원래 자리 사람은 숨김
     let mark = null;
     if(st && !G){ const fn = needFloor(st); if(st.find){ if(fn && fn !== f) mark = {at:wayOut(f, fn)}; }
       else if(st.f !== f) mark = {at:wayOut(f, st.f)};
@@ -1361,7 +1375,7 @@ export function start(api){
   const tnName = () => G.rv === "wall" ? "벽" : TN_RIV[G.rv].n;
   function tnBoard(msg){ const B0 = AREA_MOD.court; if(!B0?.board || !G || G.rv === "wall") return; const [a, r] = G.pts;
     const pa = a >= 3 && r >= 3 ? (a === r ? "40" : a > r ? "AD" : "40") : TN_PT[Math.min(3, a)], pb = a >= 3 && r >= 3 ? (a === r ? "40" : r > a ? "AD" : "40") : TN_PT[Math.min(3, r)];
-    B0.board({a:"YUNA 유나", b:tnName().toUpperCase ? tnName() : tnName(), pa, pb, ga:G.games[0], gb:G.games[1], sv:G.srv === "yu" ? "a" : "b", msg:msg || (G.rally >= 3 ? `RALLY ${G.rally}` : "CREYONG TENNIS")}); }
+    B0.board({a:{dad:"DAD 아빠", mom:"MOM 엄마"}[S.char] || "YUNA 유나", b:tx(tnName()), pa, pb, ga:G.games[0], gb:G.games[1], sv:G.srv === "yu" ? "a" : "b", msg:msg || (G.rally >= 3 ? `RALLY ${G.rally}` : "CREYONG TENNIS")}); }
   function tnStart(rv, cup = null){
     const e = E(), C = tnC(); if(!e) return; startGame("tennis"); Object.assign(G, {rv, cup, need:cup ? cup.need : 2, pts:[0, 0], games:[0, 0], srv:"yu", rally:0, best:0, phase:"ready", lt:now(), b:null, press:0, deuce:false, n:0, miss:0, perf:0, pc:0});
     e.playRacket({yu:1, ...(rv !== "wall" ? {[rv]:1} : {})}); const tall = innerHeight > innerWidth * 1.1; e.playSet({camLock:0, camLead:rv === "wall" ? (tall ? 1.5 : 0.6) : (tall ? 4.6 : 1.6), cam:rv === "wall" ? {el:tall ? 0.72 : 0.66, d:tall ? 7.5 : 5.8} : {el:tall ? 0.5 : 0.6, d:tall ? 12 : 7.6}, mark:null});   // 세로 화면(폰)은 더 높이 · 멀리: 상대까지 보이게
@@ -1851,7 +1865,7 @@ export function start(api){
     if(G.type === "catmeat") h = G.phase === "run" ? `🐈 크레파스 잡기! ${tm}` : "😱 고기 도둑!";
     if(["grill", "edit", "ending", "claw", "shop"].includes(G.type)){ hud.hidden = true; return; }
     if(S.st?.boost > 0) h += ` <i>⚡${Math.ceil(S.st.boost / 1000)}</i>`;
-    if(hud.innerHTML !== h) hud.innerHTML = h;
+    h = tx(h); if(hud.innerHTML !== h) hud.innerHTML = h;
   }
   function freeHud(){
     let h = "";
@@ -2048,8 +2062,8 @@ export function start(api){
   const later0 = (ms, fn) => setTimeout(() => { if(live) fn(); }, ms);
   /* 💬 부름 */
   const pickEl = $(".yg-pick"), flashEl = $(".yg-flash");
-  function choose(who, title, opts){ return new Promise(ok => { pickEl.innerHTML = "<p><small></small><span></span></p><div></div>"; pickEl.querySelector("small").textContent = who; pickEl.querySelector("p span").textContent = title;
-    opts.forEach(o => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b>"; b.querySelector("span").textContent = o[0]; b.querySelector("b").textContent = o[1];
+  function choose(who, title, opts){ return new Promise(ok => { pickEl.innerHTML = "<p><small></small><span></span></p><div></div>"; pickEl.querySelector("small").textContent = tx(who); pickEl.querySelector("p span").textContent = tx(title);
+    opts.forEach(o => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b>"; b.querySelector("span").textContent = o[0]; b.querySelector("b").textContent = tx(o[1]);
       b.onclick = ev => { ev.stopPropagation(); pickEl.hidden = true; sfx("blip"); ok(o); }; pickEl.querySelector("div").append(b); });
     panel.hidden = true; pickEl.hidden = false; }); }
   function flash(){ flashEl.classList.remove("on"); void flashEl.offsetWidth; flashEl.classList.add("on"); } window.__ygFlash = () => { if(live){ flash(); sfx("ding"); } };
@@ -2551,7 +2565,7 @@ export function start(api){
         if(mode === "dthrow"){ act.querySelector("span").textContent = "🔥"; act.querySelector("b").textContent = "던지기!"; }
         if(use && mode.startsWith("use:")){ const L = use.n === "RACER" ? ["🏎️", "레이싱 게임"] : USE_LB[use.k] || ACTS[use.k]?.lb || ["✨", "놀기"]; act.querySelector("span").textContent = L[0]; act.querySelector("b").textContent = L[1]; }
         if(mode !== "elev") closeElev(); if(mode !== "dress" && mode !== "room") fitP.hidden = true; }
-      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "swing" || mode === "serve") tnPress(); else if(mode === "squirt") sqFire(); else if(mode === "bboost") bpBoost(); else if(mode === "dcatch" || mode === "dthrow") dgPress(); else if(mode === "kick") rcTap(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress" || mode === "room") fitP.hidden ? openFit() : (fitP.hidden = true); else if(mode === "place") decoPlace(); else if(mode === "hide") hideNow(hideAt); else if(mode === "tidy") tidyUp(); else if(mode === "talk") talk(n); };
+      act.onclick = () => { if(mode === "land") landBoat(); else if(mode === "flip") flipMeat(); else if(mode === "mash") mash(); else if(mode === "hit") hit(); else if(mode === "swing" || mode === "serve") tnPress(); else if(mode === "squirt") sqFire(); else if(mode === "bboost") bpBoost(); else if(mode === "dcatch" || mode === "dthrow") dgPress(); else if(mode === "kick") rcTap(); else if(mode === "grab") grab(); else if(mode === "shoot") shoot(); else if(mode.startsWith("use:")) useIt(use); else if(mode === "retry") startGame(sp.game); else if(mode === "elev") elevP.hidden ? openElev() : closeElev(); else if(mode === "dress" || mode === "room"){ if(mode === "dress" && S.char && S.char !== "yu") toast("옷 갈아입기는 유나만 할 수 있어요", "", 1500); else fitP.hidden ? openFit() : (fitP.hidden = true); } else if(mode === "place") decoPlace(); else if(mode === "hide") hideNow(hideAt); else if(mode === "tidy") tidyUp(); else if(mode === "talk") talk(n); };
       // 목표 화살표 (화면 밖일 때만)
       const m = st.mark, W = st.w, H = st.hgt, pad = 34;
       if(m && (!m.front || m.x < 6 || m.x > W - 6 || m.y < 6 || m.y > H - 6)){
@@ -2693,7 +2707,7 @@ export function start(api){
     if(!e || e.floorId?.() !== api.floor()){ waitT = setTimeout(boot, 150); return; }
     const y = api.yuna?.(), f = api.floor();
     const spawn = f === "main" ? [23.95, 4.6, 0] : y && y.floor === f && !y.hidden ? [y.i, y.j, 0] : EXIT;
-    e.playStart(cb, spawn); e.playOutfit?.(rec.fit || "base"); if(rec.hair) e.playHair?.(rec.hair[0], rec.hair[1]); e.playSet({stroke:S.stroke});
+    S.char = CH[rec.char] ? rec.char : "yu"; e.playStart(cb, spawn); e.playChar?.(S.char); e.playOutfit?.(rec.fit || "base"); if(rec.hair) e.playHair?.(rec.hair[0], rec.hair[1]); e.playSet({stroke:S.stroke});
     setTimeout(() => { if(live && !Q && panel.hidden && !rec.stars) openList("q"); }, 700);
     setTimeout(() => { if(live) checkBadges(); }, 2500);
     setTimeout(() => { if(live && !AU.on) toast("🔇 소리가 꺼져 있어요", "오른쪽 위 스피커를 누르면 켜져요", 3200); }, 4200);

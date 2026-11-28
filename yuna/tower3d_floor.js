@@ -1789,7 +1789,7 @@ const YU_FITS = {
   director:yuL({shirt:"#2A2A28", pants:"#3A3D42", shoe:"#F1F2F4", hat:"bucket", hatC:"#CDBB9A", ribbon:null, extra:{headphones:"max", hpC:"#F4C7D3"}}),
   spring:yuL({shirt:"#FFD36B", skirt:"#FFD36B", skirtL:0.4, legs:YU_SKIN, shoe:"#FFFFFF", ribbon:"#FFFFFF"}),
   swim:yuL({shirt:"#FF6FAE", pants:"#FF6FAE", sleeve:YU_SKIN, thigh:YU_SKIN, legs:YU_SKIN, shoe:YU_SKIN, ribbon:"#FFFFFF"})};
-const PL = {on:false, fit:"base", hair:"pig", hairC:"#3A261C", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
+const PL = {on:false, char:"yu", fit:"base", hair:"pig", hairC:"#3A261C", sit:null, cloak:false, stroke:"free", i:0, j:0, h:0, gy:0, in:[0, 0], yaw:0, el:0.62, d:5.2, dd:5.2, step:0, spd:0, moving:false, swim:null, freeze:false, dragAt:0, wave:0,
   mark:null, actors:{}, ball:null, water:[], hide:new Set(), cb:null, spawn:null, tg:null, jy:0, jv:0, boost:0, items:[], fx:[], swam:false, wet:0, drip:0, rip:0, dunk:0, bump:null, bumpAt:0, still:0, idleK:null, idleWait:8000, emoN:0, lastPost:0, hold:null, slosh:0, rk:null, sw:{}, camLock:null, tb:null};
 const YU_R = 0.17, PV = new THREE.Vector3(), PV2 = new THREE.Vector3();
 const wrapA = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -1943,11 +1943,13 @@ function itemsPost(now, t){
   if(PL.items.some(gone)) PL.items = PL.items.filter(it => { if(gone(it)){ dropItem(it); return false; } return true; });
 }
 function playMakeAvatars(){
-  const mk = (k, L0) => { const L = L0 || PLAY_LOOKS[k], yu = k === "yu", s = PARTS.length, p = makePerson(L.look, L.b, {...(L.extra || {}), ...(yu ? {hairAll:1} : {})});
-    PARTS.slice(s).forEach(pt => { pt.vis = pt.hs ? () => p.root.visible && pt.hs === PL.hair : () => p.root.visible; if(yu && pt.hair) pt.yuHair = 1; });
+  const mk = (k, L0, plain) => { const L = L0 || PLAY_LOOKS[k], yu = k === "yu", ha = yu && !plain, s = PARTS.length, p = makePerson(L.look, L.b, {...(L.extra || {}), ...(ha ? {hairAll:1} : {})});   // plain = 유나 자리에 서는 다른 사람 (머리 꾸미기 없음)
+    PARTS.slice(s).forEach(pt => { pt.vis = pt.hs ? () => p.root.visible && pt.hs === PL.hair : () => p.root.visible; if(ha && pt.hair) pt.yuHair = 1; });
     racketParts(p, yu ? "yu" : k); p.root.visible = false; return p; };
   const yus = {}; Object.keys(YU_FITS).forEach(k => yus[k] = mk("yu", YU_FITS[k]));
   const A = R.pl = {yus, yu:yus[PL.fit] || yus.base, bub:{}}; ACT_KEYS.forEach(k => A[k] = mk(k));
+  /* 노라 · 크레용으로 놀기 (2026-11-29 감독님 "캐릭도 노라 크레용도 만들자 유나모드처럼"): 조종하는 몸을 엄마 · 아빠로 바꾸고, 그 사람 자리(배우)는 유나가 대신 섬 */
+  A.chars = {dad:mk("yu", PLAY_LOOKS.dad, true), mom:mk("yu", PLAY_LOOKS.mom, true)}; A.swapN = {dad:mk("dad", PLAY_LOOKS.yu), mom:mk("mom", PLAY_LOOKS.yu)}; A.orig = {dad:A.dad, mom:A.mom}; applyChar();
   // 테니스공 + 바닥 그림자 (playTBall)
   { const tc = document.createElement("canvas"); tc.width = 64; tc.height = 32; const x = tc.getContext("2d"); x.fillStyle = "#DDF24E"; x.fillRect(0, 0, 64, 32); x.strokeStyle = "#FFFFFF"; x.lineWidth = 2.4; x.beginPath();
     for(let u = 0; u <= 64; u++){ const y = 16 + Math.sin(u / 64 * Math.PI * 2) * 9; u ? x.lineTo(u, y) : x.moveTo(u, y); } x.stroke(); const tt = new THREE.CanvasTexture(tc); tt.colorSpace = THREE.SRGBColorSpace;
@@ -2555,8 +2557,12 @@ export function playSit(s){
   if(PL.swim || PL.jy > 0 || PL.sit) return false;
   PL.sit = {...s, from:[PL.i, PL.j]}; PL.i = s.i; PL.j = s.j; PL.h = s.h; PL.sitYaw = s.h + 0.6; PL.dragAt = 0; return true;   // 앉으면 카메라를 앞쪽 비스듬히 (2026-11-23 감독님 "앉으면 왜 뒷모습만 보이지?")
 }
+function applyChar(){ const A = R && R.pl; if(!A || !A.chars) return; const c = A.chars[PL.char] ? PL.char : "yu";
+  A.yu.root.visible = false; A.yu = c === "yu" ? (A.yus[PL.fit] || A.yus.base) : A.chars[c];
+  ["dad", "mom"].forEach(k => { A[k].root.visible = false; A[k] = c === k ? A.swapN[k] : A.orig[k]; }); }
+export function playChar(k){ PL.char = k === "dad" || k === "mom" ? k : "yu"; applyChar(); return PL.char; }
 export function playOutfit(k){
-  if(!YU_FITS[k]) return false; PL.fit = k;
+  if(!YU_FITS[k]) return false; PL.fit = k; if(PL.char && PL.char !== "yu") return true;   // 엄마 · 아빠로 놀 땐 옷은 기억만
   if(R && R.pl){ const A = R.pl, nw = A.yus[k]; if(nw && nw !== A.yu){ A.yu.root.visible = false; A.yu = nw; } }
   return true;
 }
