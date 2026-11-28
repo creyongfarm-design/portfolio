@@ -187,13 +187,22 @@ function bake(root){
 /* ---------- 그림판 하나에 글씨·포스터·창밖을 모음 (그리기 1번) ---------- */
 function makeAtlas(W = 2048, Hh = 2048){
   const cv = document.createElement("canvas"); cv.width = W; cv.height = Hh;
-  const A = {cv, ctx:cv.getContext("2d"), W, H:Hh, x:2, y:2, row:0, items:[], tex:null};
+  const A = {cv, ctx:cv.getContext("2d"), W, H:Hh, x:2, y:2, row:0, items:[], tex:null}; window.__lastAtlas = A;   // 시험용
   A.alloc = (w, h) => { w = Math.ceil(w); h = Math.ceil(h);
     if(A.x + w + 2 > W){ A.x = 2; A.y += A.row + 3; A.row = 0; }
     const r = {x:A.x, y:A.y, w, h}; A.x += w + 3; A.row = Math.max(A.row, h);
-    if(A.y + h > Hh) console.warn("atlas full"); return r; };
-  A.paint = dark => { const x = A.ctx; x.clearRect(0, 0, W, Hh);
-    A.items.forEach(it => { x.save(); x.beginPath(); x.rect(it.r.x, it.r.y, it.r.w, it.r.h); x.clip(); x.translate(it.r.x, it.r.y); it.draw(x, it.r.w, it.r.h, dark); x.restore(); });
+    if(A.y + h > Hh) (window.__atlasOver ||= []).push(h); return r; };   // 넘치면 장면 만들 때 그림판을 늘림
+  A.paint = dark => { const x = A.ctx; x.clearRect(0, 0, W, A.H);
+    const fT = CanvasRenderingContext2D.prototype.fillText, sT = CanvasRenderingContext2D.prototype.strokeText;
+    A.items.forEach(it => { x.save(); x.beginPath(); x.rect(it.r.x, it.r.y, it.r.w, it.r.h); x.clip(); x.translate(it.r.x, it.r.y);
+      // 판보다 긴 글씨는 잘리지 않게 판 폭에 맞춰 줄임 (2026-11-26)
+      const fit = f => function(t, px, py, mw){ const T = this.getTransform(); if(T.b || T.c || !(T.a > 0)) return f.call(this, t, px, py, mw);
+        const lx = T.a * px + T.e - it.r.x, tw = this.measureText(t).width * T.a, al = this.textAlign, pad = 1.5, ww = it.r.w;
+        const av = al === "center" ? 2 * Math.min(lx - pad, ww - pad - lx) : (al === "right" || al === "end") ? lx - pad : ww - pad - lx;
+        if(tw > av + 0.5 && av > tw * 0.3){ (window.__clipT ||= []).push([String(t).slice(0, 40), +(av / tw).toFixed(2)]); mw = Math.min(mw ?? Infinity, av / T.a); }
+        return mw == null || mw === Infinity ? f.call(this, t, px, py) : f.call(this, t, px, py, mw); };
+      x.fillText = fit(fT); x.strokeText = fit(sT);
+      it.draw(x, it.r.w, it.r.h, dark); delete x.fillText; delete x.strokeText; x.restore(); });
     if(A.tex) A.tex.needsUpdate = true; };
   return A;
 }
@@ -316,6 +325,7 @@ const KIT = {
   // 3F (복지층): 사람에 소품 붙이기 (init에서, 인스턴싱 전에) · 벽 잘림 조건을 움직이는 물건에도
   part(o, g, c, vis){ PARTS.push({o, g, c, cls:"p", vis:vis || (() => true)}); return o; },
   cutaway:m => cutaway(m),
+  catRig:meat => catRig(meat), catPose:(c, x, g, z, now, t, dt) => catPose(c, x, g, z, now, t, dt),   // 걷는 고양이 (3층 크레파스도 같이, 2026-11-26)
   yuNear:(i, j, r) => !!(PL.on && R && R.pl && Math.hypot(PL.i - i, PL.j - j) < r),   // 유나가 가까이 오면 자동문 열기 (2026-11-23)
   yuAt:() => (PL.on && R && R.pl) ? [PL.i, PL.j, (PL.act?.lift || 0) + (PL.gy || 0)] : null,   // 유나 자리 (빛 번짐이 유나를 덮지 않게, 2026-11-24)
 };
@@ -379,7 +389,7 @@ function build(host, opts){
   PLANTS.filter(([i,j]) => !R.only || inFarm(i, j)).forEach(([i,j,t]) => plant(i, j, t));
   buildLamps(R.only ? inFarm : () => true); }
 
-  R.boxes = playBoxes(SROOT); R.outline = outline;   // 유나 모드 벽·가구 막기
+  R.boxes = playBoxes(SROOT); R.outline = outline; R.walk = R.F?.walk || null;   // walk = 유나가 걸을 수 있는 테두리 (울타리 안쪽, 2026-11-26 감독님 "밖에있으면 어떡해")   // 유나 모드 벽·가구 막기
   /* 합치기 */
   const baked = bake(SROOT); SROOT = null;
   const MAT = {
@@ -393,6 +403,9 @@ function build(host, opts){
   R.MAT = MAT;
 
   /* 글씨·그림 한 장 */
+  { const A = R.atlas, need = A.y + A.row + 4;   // 그림판이 모자라면 아래로 늘리고 글씨 자리(uv)를 다시 맞춤 (2층 간판 깨짐, 2026-11-26)
+    if(need > A.H){ const H0 = A.H, H1 = Math.min(8192, Math.ceil(need / 256) * 256); A.cv.height = H1; A.H = H1;
+      R.decals.forEach(g => { const uv = g.attributes.uv; for(let k = 0; k < uv.count; k++) uv.setY(k, 1 - (1 - uv.getY(k)) * H0 / H1); uv.needsUpdate = true; }); } }
   const atT = new THREE.CanvasTexture(R.atlas.cv); atT.colorSpace = THREE.SRGBColorSpace; atT.anisotropy = 8; R.atlas.tex = atT;
   const dg = mergeGeometries(R.decals, false); R.decals.forEach(g => g.dispose());
   const decMesh = new THREE.Mesh(dg, cutaway(new THREE.MeshBasicMaterial({map:atT, transparent:true, depthWrite:false, toneMapped:false, polygonOffset:true, polygonOffsetFactor:-2})));
@@ -1069,7 +1082,8 @@ function makePerson(look, b = {}, extra = {}){
   const st = look.style;
   if(st === "long"){ mesh(rbox(0.42, 0.5, 0.13, 0.06, 2), look.hair, 0, 0.02, -0.13, head); [-1, 1].forEach(s => mesh(cap(0.055, 0.3), look.hair, s * 0.19, 0.03, -0.03, head)); }
   else if(st === "bun"){ mesh(sph(0.1, 12, 10), look.hair, 0, 0.36, -0.16, head); mesh(rbox(0.4, 0.2, 0.12, 0.06, 2), look.hair, 0, 0.14, -0.13, head); }
-  else if(st === "bob"){ [-1, 1].forEach(s => mesh(rbox(0.08, 0.27, 0.34, 0.04, 2), look.hair, s * 0.205, 0.1, -0.035, head)); mesh(rbox(0.44, 0.27, 0.11, 0.05, 2), look.hair, 0, 0.1, -0.16, head); }
+  else if(st === "bob"){   // 단발: 뒤통수를 둥글게 감싸는 한 덩어리 (네모 판이 상자처럼 보여서, 2026-11-26)
+    mesh(geo("bobBack", () => new THREE.SphereGeometry(0.236, 22, 14, Math.PI * 0.82, Math.PI * 1.36, Math.PI * 0.22, Math.PI * 0.56)), look.hair, 0, 0.17, -0.025, head).scale.set(1.02, 1.0, 0.98); }
   else if(st === "pig"){ [-1, 1].forEach(s => { mesh(sph(0.08, 12, 8), look.hair, s * 0.25, 0.12, -0.08, head); if(look.ribbon) mesh(sph(0.045, 8, 6), look.ribbon, s * 0.22, 0.2, -0.05, head); }); }
   if(look.hat === "bucket"){ mesh(cyl(0.205, 0.235, 0.17, 20), look.hatC || "#CDBB9A", 0, 0.36, -0.01, head); mesh(cyl(0.34, 0.36, 0.025, 22), look.hatC || "#CDBB9A", 0, 0.275, -0.01, head).rotation.x = -0.08; }
   if(look.hat === "crown"){ mesh(cyl(0.1, 0.09, 0.07, 12), "#F2C94C", 0, 0.425, -0.03, head);
@@ -1673,7 +1687,7 @@ function layoutTags(now){
     P.bub.hidden = false; P.bub.classList.toggle("info", !showSay);
     if(!P.bw){ P.bw = P.bub.offsetWidth; P.bh = P.bub.offsetHeight; }
     const bx = clamp(it.tx, P.bw / 2 + 4, w - P.bw / 2 - 4), by = free(bx, it.ty - P.th / 2 - 5 - P.bh / 2, P.bw, P.bh);
-    placed.push({x:bx, y:by, w:P.bw, h:P.bh}); P.bub.style.transform = `translate(${bx}px,${by}px) translate(-50%,-50%)`;
+    placed.push({x:bx, y:by, w:P.bw, h:P.bh}); P.bub.style.transform = `translate(${bx}px,${by}px) translate(-50%,-50%)`; P.bRect = {x:bx, y:by, w:P.bw, h:P.bh, t:now};
     const top = by + P.bh / 2, gap = it.ty - P.th / 2 - top;
     if(gap > 7){ const sx = clamp(it.tx, bx - P.bw / 2 + 12, bx + P.bw / 2 - 12); P.stem.hidden = false; P.stem.classList.toggle("info", !showSay); P.stem.style.height = gap + "px"; P.stem.style.transform = `translate(${sx}px,${top}px)`; } });
   playTags(now);
@@ -1705,7 +1719,7 @@ export function setTheme(dark){
 
 /* ---------- 유나 모드 (2026-11-23 감독님 "유나 앞세워서 GTA처럼 돌아다니게. 이야기하고 다니면 재밌겠다") ----------
    - 유나 등 뒤 카메라 (끌어서 돌리기 · 핀치/휠로 멀고 가깝게). 조종은 yuna_game.js가 playInput으로 넣어 줌
-   - 벽·가구는 못 지나감: 굳히기 전 가구 상자(무릎 아래까지 내려온 것)로 바닥 0.1칸 지도를 만들어 막음. 낮은 단(0.3 아래)은 올라섬
+   - 벽·가구는 못 지나감: 굳히기 전 가구 상자(밑면이 어깨 0.9 아래로 내려온 것, 식탁 상판 포함)로 바닥 0.1칸 지도를 만들어 막음. 낮은 단(0.3 아래)은 올라섬
    - 카메라와 유나 사이를 가리는 벽은 그 줄만 통로처럼 잘라서 보임 (PCUT)
    - 아빠·엄마 배우(숨바꼭질·수영 시합용), 공, 목표 별은 엔진이 그리고 위치는 게임이 정함 */
 const PLAY_LOOKS = {
@@ -1771,17 +1785,19 @@ function playBoxes(root){
   root.traverse(o => { if(!o.isMesh || o.userData.cls === "glow") return;
     if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
     b.copy(o.geometry.boundingBox).applyMatrix4(o.matrixWorld);
-    if(b.min.y < 0.62 && b.max.y > 0.07) out.push(b.min.x, b.min.z, b.max.x, b.max.z, b.min.y, b.max.y); });
+    if(b.min.y < 1.3 && b.max.y > 0.07) out.push(b.min.x, b.min.z, b.max.x, b.max.z, b.min.y, b.max.y); });
   return new Float32Array(out);
 }
+let BOX_Y = 0.9;   // 밑면이 유나 어깨(0.9)보다 낮은 건 다 막음: 식탁 상판(0.71)도 못 뚫게 (2026-11-27 감독님 "집 식탁쪽을 뚫어뿌네")
+export function _boxY(v){ BOX_Y = v; if(R) R.pg = null; return BOX_Y; }   // 시험용
 function inPoly(poly, x, y){ let c = false; for(let a = 0, b = poly.length - 1; a < poly.length; b = a++){ const [xa, ya] = poly[a], [xb, yb] = poly[b]; if((ya > y) !== (yb > y) && x < (xb - xa) * (y - ya) / (yb - ya) + xa) c = !c; } return c; }
 function playGrid(){
   if(R.pg) return R.pg;
-  const [e0, f0, e1, f1] = R.ext, C = 0.1, W = Math.ceil((e1 - e0) / C), H = Math.ceil((f1 - f0) / C), g = new Uint8Array(W * H), hm = new Float32Array(W * H), tp = new Float32Array(W * H), poly = R.outline || [[e0, f0], [e1, f0], [e1, f1], [e0, f1]], m = 0.14;
+  const [e0, f0, e1, f1] = R.ext, C = 0.1, W = Math.ceil((e1 - e0) / C), H = Math.ceil((f1 - f0) / C), g = new Uint8Array(W * H), hm = new Float32Array(W * H), tp = new Float32Array(W * H), poly = R.walk || R.outline || [[e0, f0], [e1, f0], [e1, f1], [e0, f1]], m = 0.14;
   for(let y = 0; y < H; y++) for(let x = 0; x < W; x++){ const i = e0 + (x + 0.5) * C, j = f0 + (y + 0.5) * C;
     if(!inPoly(poly, i - m, j - m) || !inPoly(poly, i + m, j - m) || !inPoly(poly, i - m, j + m) || !inPoly(poly, i + m, j + m)) g[y * W + x] = 1; }
   const b = R.boxes || [];
-  for(let k = 0; k < b.length; k += 6){
+  for(let k = 0; k < b.length; k += 6){ if(b[k + 4] >= BOX_Y) continue;
     const x0 = Math.max(0, Math.floor((b[k] + OX - e0) / C)), x1 = Math.min(W - 1, Math.floor((b[k + 2] + OX - e0) / C - 1e-6));
     const y0 = Math.max(0, Math.floor((b[k + 1] + OZ - f0) / C)), y1 = Math.min(H - 1, Math.floor((b[k + 3] + OZ - f0) / C - 1e-6));
     const top = b[k + 5], low = top < 0.3;
@@ -1806,6 +1822,8 @@ function reachMap(){
 }
 const reachable = (i, j) => { const M = reachMap(), n = cellIdx(i, j); return !M || (n >= 0 && M[n] === 1); };
 export function playReach(i, j){ return R ? reachable(i, j) : false; }   // 시험용: 그 칸에 걸어서 갈 수 있나
+export function playBlocked(i, j){ return R ? (playGrid(), cellBlocked(i, j)) : null; }   // 시험용: 그 점이 막혔나
+export function playGround(i, j){ return R ? (playGrid(), groundH(i, j)) : 0; }   // 그 칸 바닥 높이 (주민이 계산대 위로 올라가지 않게, 2026-11-26)
 
 /* 줍는 것들 (보물·번개 사탕·별똥별·고양이·❗): 이모지 스프라이트 (2026-11-23 감독님 "재미난 모험요소 많이") */
 const EMO = {};
@@ -1817,18 +1835,64 @@ function emoTex(e, glow){
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return EMO[k] = t;
 }
 let SHG = null, SHM = null;
+/* 따라다니는 고양이 (크레파스): 이모지 판 대신 걷는 3D 고양이. 다리·꼬리·머리가 움직이고, 서 있으면 앉아서 유나를 봄 (2026-11-26 감독님 "인형같이 가만히 있잖아") */
+const CATM = {};
+const catMat = c => CATM[c] || (CATM[c] = cutaway(new THREE.MeshStandardMaterial({color:c, roughness:0.78})));
+function catRig(meat){
+  const O = "#E8A04A", D = "#C98436", L = "#FFE9C7", K2 = "#2A2A28", m = (g, c, x, y, z, par) => { const o = new THREE.Mesh(g, catMat(c)); o.position.set(x, y, z); o.castShadow = true; par.add(o); return o; };
+  const root = new THREE.Group(), body = new THREE.Group(); body.position.y = 0.2; root.add(body); root.scale.setScalar(0.85);
+  m(sph(1, 16, 12), O, 0, 0, 0, body).scale.set(0.115, 0.105, 0.21);
+  m(sph(1, 12, 8), L, 0, -0.035, 0.03, body).scale.set(0.085, 0.07, 0.15);   // 배
+  [-0.11, -0.03, 0.05].forEach(z => { const k = Math.sqrt(1 - (z / 0.21) ** 2); m(sph(1, 16, 8), D, 0, 0.012, z, body).scale.set(0.117 * k + 0.002, 0.098 * k + 0.002, 0.022); });   // 등 줄무늬 (몸 곡면을 따라 감싼 띠)
+  const head = new THREE.Group(); head.position.set(0, 0.1, 0.2); body.add(head);
+  m(sph(1, 16, 12), O, 0, 0, 0, head).scale.set(0.118, 0.105, 0.105);
+  m(sph(1, 12, 8), L, 0, -0.035, 0.07, head).scale.set(0.06, 0.042, 0.045);   // 주둥이
+  [-1, 1].forEach(sd => { const e = m(geo("catEar", () => new THREE.ConeGeometry(0.042, 0.075, 4)), O, sd * 0.062, 0.088, -0.005, head); e.rotation.set(-0.15, Math.PI / 4, sd * -0.32);
+    m(sph(1, 8, 6), K2, sd * 0.045, 0.02, 0.092, head).scale.set(0.016, 0.022, 0.01);
+    m(sph(1, 6, 4), "#FFFFFF", sd * 0.04, 0.028, 0.1, head).scale.set(0.006, 0.006, 0.004); });
+  m(sph(1, 8, 6), "#F29BA6", 0, -0.012, 0.112, head).scale.set(0.014, 0.01, 0.008);
+  [-0.05, 0.05].forEach(x => m(rbox(0.05, 0.012, 0.03, 0.004), D, x, 0.075, 0.02, head).rotation.z = x > 0 ? -0.3 : 0.3);   // 이마 줄무늬
+  if(meat){ const mt = m(cap(0.03, 0.07), "#B5503F", 0, -0.06, 0.1, head); mt.rotation.z = Math.PI / 2; m(sph(1, 8, 6), "#F4E3D0", 0.07, -0.06, 0.1, head).scale.set(0.022, 0.018, 0.018); }
+  const legs = [[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([sx, sz]) => { const g = new THREE.Group(); g.position.set(sx * 0.06, -0.03, sz * 0.13); body.add(g);
+    m(cyl(0.03, 0.024, 0.15, 8), O, 0, -0.08, 0, g); m(sph(1, 8, 6), L, 0, -0.16, 0.01, g).scale.set(0.03, 0.02, 0.036); return g; });
+  const tail = []; let par = body;
+  for(let k = 0; k < 5; k++){ const g = new THREE.Group(); g.position.set(0, k ? 0.06 : 0.02, k ? 0 : -0.2); par.add(g); m(cyl(0.022 - k * 0.002, 0.024 - k * 0.002, 0.07, 8), k % 2 ? D : O, 0, 0.03, 0, g); tail.push(g); par = g; }
+  return {root, body, head, legs, tail, ph:0, yaw:0, sit:0, still:0, last:null};
+}
+function catPose(c, x, g, z, now, t, dt){
+  const P = c.last ? Math.hypot(x - c.last[0], z - c.last[1]) : 0, sp = dt > 0 ? P / dt : 0; c.last = [x, z];
+  const mv = sp > 0.12 ? Math.min(1, sp / 1.6) : 0;
+  if(P > 0.0015 && P < 2){ const ty = Math.atan2(x - (c.px ?? x), z - (c.pz ?? z)); if(isFinite(ty) && (c.px != null)) c.yaw += wrapA(ty - c.yaw) * Math.min(1, dt * 9); }
+  c.px = x; c.pz = z; c.still = mv ? 0 : c.still + dt;
+  c.sit += ((c.still > 1.1 ? 1 : 0) - c.sit) * Math.min(1, dt * 4);
+  if(mv) c.ph += dt * (6 + sp * 6);
+  const R0 = c.root, s = c.sit, sw = Math.sin(c.ph) * 0.65 * mv;
+  R0.position.set(x, g, z); R0.rotation.y = c.yaw;
+  c.body.position.y = 0.2 + Math.abs(Math.sin(c.ph)) * 0.018 * mv - s * 0.05; c.body.rotation.x = -s * 0.42; c.body.rotation.z = Math.sin(c.ph) * 0.04 * mv;
+  c.body.scale.y = 1 + Math.sin(t * 2.4) * 0.015 * (1 - mv);   // 숨쉬기
+  c.legs.forEach((l, k) => { const front = k < 2, ph = (k === 0 || k === 3) ? sw : -sw; l.rotation.x = front ? ph + s * 0.42 : ph - s * 1.25; l.position.y = -0.03 + (front ? 0 : s * 0.05); });
+  const tl = mv ? 0.16 : 0.34, tb = mv ? -1.05 : -0.55 - s * 0.25;
+  c.tail.forEach((g2, k) => { g2.rotation.x = k ? (mv ? 0.12 : 0.24) : tb; g2.rotation.z = Math.sin(t * (mv ? 5 : 2.2) - k * 0.7) * tl; });
+  let look = 0; if(!mv && R.pl?.yu){ const p = R.pl.yu.root.position, a = Math.atan2(p.x - x, p.z - z); look = Math.max(-0.7, Math.min(0.7, wrapA(a - c.yaw))); }
+  c.head.rotation.y += (look - c.head.rotation.y) * Math.min(1, dt * 4); c.head.rotation.x = s * 0.4 + Math.sin(c.ph * 2) * 0.05 * mv; c.head.rotation.z = (1 - mv) * Math.sin(t * 0.7) * 0.12;
+}
 function itemObj(it){
+  if(it.model === "cat"){ const c = catRig(it.meat); R.scene.add(c.root);
+    if(!SHG){ SHG = new THREE.CircleGeometry(0.15, 20); SHM = new THREE.MeshBasicMaterial({color:0x2A2030, transparent:true, opacity:0.22, depthWrite:false}); }
+    const sh = new THREE.Mesh(SHG, SHM); sh.rotation.x = -Math.PI / 2; sh.scale.set(1.3, 1.9, 1); sh.renderOrder = 4; R.scene.add(sh); return {s:c.root, sh, cat:c}; }
   const s = new THREE.Sprite(new THREE.SpriteMaterial({map:emoTex(it.e, it.glow !== false), transparent:true, depthWrite:false, toneMapped:false}));
   s.renderOrder = 6; R.scene.add(s);
   if(!SHG){ SHG = new THREE.CircleGeometry(0.15, 20); SHM = new THREE.MeshBasicMaterial({color:0x2A2030, transparent:true, opacity:0.22, depthWrite:false}); }
   let sh = null; if(!it.on){ sh = new THREE.Mesh(SHG, SHM); sh.rotation.x = -Math.PI / 2; sh.renderOrder = 4; R.scene.add(sh); }
   return {s, sh};
 }
-function dropItem(it){ if(!it.o) return; it.o.s.removeFromParent(); it.o.s.material.dispose(); it.o.sh?.removeFromParent(); it.o = null; }
+function dropItem(it){ if(!it.o) return; it.o.s.removeFromParent(); it.o.s.material?.dispose(); it.o.sh?.removeFromParent(); it.o = null; }
 function itemsPost(now, t){
   for(const it of PL.items){
     if(!it.o) it.o = itemObj(it);
     const o = it.o; let x, y, z;
+    if(o.cat){ const g = groundH(it.i, it.j), dt = Math.min(0.1, (now - (o.cat.tl || now)) / 1000); o.cat.tl = now; catPose(o.cat, X(it.i), g, Z(it.j), now, t, dt);
+      o.sh.position.set(X(it.i), g + 0.015, Z(it.j)); o.sh.rotation.z = o.cat.yaw; o.sh.visible = true; o.s.visible = !it.pop; continue; }
     if(it.on){ if(Array.isArray(it.on)){ x = X(it.on[0]); z = Z(it.on[1]); y = groundH(it.on[0], it.on[1]) + (it.on[2] ?? 1); o.s.visible = true; }
       else { const hp = headOf(it.on); o.s.visible = !!hp; if(!hp) continue;
         hp.head.getWorldPosition(tmp); x = tmp.x; z = tmp.z; y = tmp.y + 0.62 * hp.root.scale.y + (reduce || it.emo ? 0 : Math.sin(t * 4) * 0.05); }
@@ -1871,11 +1935,25 @@ function enterPlay(){
 function playTick(now, t, dt){
   const [ix, iy] = PL.in; let mag = PL.freeze ? 0 : Math.min(1, Math.hypot(ix, iy));
   if(PL.sit){ if(mag > 0.35){ standUp(); PL.cb?.onStand?.(); } else mag = 0; }
-  if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt && !PL.act?.path) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
+  if(PL.act?.yawOff != null) PL.sitYaw = PL.h + PL.act.yawOff;   // 도는 놀이기구: 카메라가 기구 따라 돎 (2026-11-26)
+  if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt && !PL.act?.path && !PL.act?.drive) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
+  if(PL.act?.el != null && !PL.dragAt){ if(PL.act.el0 == null) PL.act.el0 = PL.el; PL.el += (PL.act.el - PL.el) * Math.min(1, dt * 1.6); }   // 놀이기구별 카메라 높이 (관람차는 옆에서, 2026-11-26)
   PL.swim = PL.water.find(w => inRect(w.rect, PL.i, PL.j)) || null;
   { const cn = clock(), was = PL.swam; PL.swam = !!PL.swim;
     if(PL.swim && !was){ const sf = (PL.swim.surf ?? 0.06) + 0.012; fxRing(PL.i, PL.j, sf, true); fxDrops(PL.i, PL.j, sf + 0.05, 14, 1); PL.dunk = cn + 450; PL.cb?.onSplash?.("in"); }
     if(!PL.swim && was){ PL.wet = cn + 5200; PL.cb?.onSplash?.("out"); } }
+  const DV = PL.act?.drive;   // 탈것 직접 조종 (오리배, 2026-11-26 감독님 "오리배는 직접 조정하게 해줘"): 걷기와 같은 조이스틱, 갈 수 있는 곳은 DV.ok(i, j)
+  if(DV){ const m2 = Math.min(1, Math.hypot(ix, iy)); let v = PL.dv || 0;
+    if(m2 > 0.06){ const fx = -Math.sin(PL.yaw), fz = -Math.cos(PL.yaw), rx = Math.cos(PL.yaw), rz = -Math.sin(PL.yaw), di = (fx * iy + rx * ix) / Math.hypot(ix, iy), dj = (fz * iy + rz * ix) / Math.hypot(ix, iy);
+      PL.h += wrapA(Math.atan2(di, dj) - PL.h) * Math.min(1, dt * (DV.turn ?? 2.4)); v += ((DV.speed ?? 1.4) * m2 - v) * Math.min(1, dt * 1.8); }
+    else v *= Math.exp(-dt * 1.6);
+    const n = Math.max(1, Math.ceil(Math.abs(v) * dt / 0.05)); let hit = false;
+    for(let k = 0; k < n; k++){ const si = Math.sin(PL.h) * v * dt / n, sj = Math.cos(PL.h) * v * dt / n;
+      if(DV.ok(PL.i + si, PL.j + sj)){ PL.i += si; PL.j += sj; } else { hit = true; if(DV.ok(PL.i + si, PL.j)) PL.i += si * 0.6; else if(DV.ok(PL.i, PL.j + sj)) PL.j += sj * 0.6; } }
+    if(hit){ v *= 0.55; if(clock() - (PL.bumpAt || 0) > 900){ PL.bumpAt = clock(); try { DV.bump?.(); } catch(e){} } }
+    PL.dv = v; PL.act.lift = Math.max(0, (DV.seat ?? 0.4) - 0.4); try { DV.set?.(PL.i, PL.j, PL.h); } catch(e){}
+    if(Math.abs(v) > 0.15 && now - PL.dragAt > 1400) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 0.9);
+    mag = 0; }
   const hs = PL.hold && !PL.swim ? PL.hold.slow : 1;   // 손에 든 게 있으면 조심조심 (2026-11-23 감독님 "커피 심부름은 흐를까바 들고 약간 천천히")
   const sp = (PL.swim ? 1.45 : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
   if(mag > 0.06){
@@ -1890,7 +1968,7 @@ function playTick(now, t, dt){
     if(now - PL.dragAt > 1400 && iy > -0.35) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 1.15 * mag);   // 걸어가면 카메라가 천천히 등 뒤로
   }
   PL.moving = mag > 0.06; PL.spd = sp;
-  PL.gy += ((PL.swim || PL.act?.fn ? 0 : PL.sit ? groundH(...PL.sit.from) : groundH(PL.i, PL.j)) - PL.gy) * Math.min(1, dt * 14);   // 놀이기구 탈 땐 땅 기준
+  PL.gy += ((PL.swim || PL.act?.fn || PL.act?.drive ? 0 : PL.sit ? groundH(...PL.sit.from) : groundH(PL.i, PL.j)) - PL.gy) * Math.min(1, dt * 14);   // 놀이기구 탈 땐 땅 기준
   if(PL.jv || PL.jy > 0){ PL.jv -= 11 * dt; PL.jy = Math.max(0, PL.jy + PL.jv * dt); if(PL.jy === 0) PL.jv = 0; }
   { const cn = clock(); for(const it of PL.items){ if(it.pick === false || it.pop || it.on) continue;
       if(Math.hypot(it.i - PL.i, it.j - PL.j) < (it.r || 0.5) && (!it.high || PL.jy > 0.24)){ it.pop = cn; PL.cb?.onPick?.(it.id); } } }
@@ -1902,7 +1980,7 @@ function playTick(now, t, dt){
   const la = R.h < 560 && R.w > R.h * 1.25 ? 0.95 : 0;   // 가로 폰은 위가 잘려서 앞쪽을 더 보여 줌 (2026-11-23 감독님 "위가 좀 잘리네")
   PV.set(X(PL.i - Math.sin(PL.yaw) * la), PL.gy + (PL.swim ? 0.3 : 0.62) + PL.jy * 0.3 + (PL.act?.lift || 0), Z(PL.j - Math.cos(PL.yaw) * la)); PL.tg.lerp(PV, Math.min(1, dt * 9));
   // 카메라가 높은 벽·건물 뒤로 넘어가면 유나 쪽으로 당겨 옴 (GTA처럼)
-  let lim = PL.act?.fn ? PL.d * (PL.act.cam ?? 1.35) : PL.d; if(!PL.act?.fn){ const G = R.pg, ch = Math.cos(PL.el), sh = Math.sin(PL.el), si = Math.sin(PL.yaw) * ch, sj = Math.cos(PL.yaw) * ch, y0 = PL.tg.y;
+  let lim = PL.act?.fn || PL.act?.drive ? PL.d * (PL.act.cam ?? 1.35) : PL.d; if(!PL.act?.fn && !PL.act?.drive){ const G = R.pg, ch = Math.cos(PL.el), sh = Math.sin(PL.el), si = Math.sin(PL.yaw) * ch, sj = Math.cos(PL.yaw) * ch, y0 = PL.tg.y;
     for(let s = PL.act ? 1.15 : 0.45; s < PL.d; s += 0.12){ const n = cellIdx(PL.i + si * s, PL.j + sj * s); if(n >= 0 && G.tp[n] > y0 + sh * s - 0.25){ lim = Math.max(0.9, s - 0.45); break; } } }
   PL.dd += (lim - PL.dd) * Math.min(1, dt * (lim < PL.dd ? 14 : 3));
   R.az = PL.yaw; R.el = PL.el; R.cur.tg.copy(PL.tg); R.cur.d = PL.dd;
@@ -1981,7 +2059,8 @@ function ballTick(dt, mi, mj, sp){
 function playCut(){
   if(!PL.on || !R.pl){ PCUT_A.value.w = 0; return; }
   PV2.copy(R.cur.tg).addScaledVector(DIR, R.cur.d);
-  PCUT_A.value.set(X(PL.i), PL.gy + 0.4, Z(PL.j), 1); PCUT_B.value.set(PV2.x, PV2.y, PV2.z, 0.9);   // 카메라 → 유나 발끝 줄 위로 가리는 건 잘라 냄
+  PCUT_A.value.set(X(PL.i), PL.gy + 0.4 + (PL.act?.lift || 0), Z(PL.j), 1);   // 놀이기구 탈 땐 앉은 높이 기준 (관람차 살·칸이 뚫려 보이던 것, 2026-11-26)
+  PCUT_B.value.set(PV2.x, PV2.y, PV2.z, 0.9);   // 카메라 → 유나 발끝 줄 위로 가리는 건 잘라 냄
 }
 /* 영법 (2026-11-23 감독님 "수영안 평형과 자유형도 하고"): back = 배영(누워서), free = 자유형(엎드려 팔 번갈아 돌리기 + 발차기 + 옆으로 숨), breast = 평형(팔 벌려 당기고 개구리 발차기, 숨 쉴 때 머리 들림) */
 const BR_U = (t, k) => (t * 0.8 + k * 0.3) % 1;   // 평형 한 번 = 1.25초
@@ -2169,18 +2248,23 @@ function playState(){
   const m = markPos(); let mark = null;
   if(m){ PV2.set(m.x, m.y + 1.4, m.z).project(R.camera); mark = {x:(PV2.x * 0.5 + 0.5) * R.w, y:(-PV2.y * 0.5 + 0.5) * R.h, front:PV2.z < 1, d:Math.hypot(m.x + OX - PL.i, m.z + OZ - PL.j)}; }
   const act = {}; Object.entries(PL.actors).forEach(([k, a]) => act[k] = {i:a.i, j:a.j, moving:a.moving});
-  return {floor:R.fid, i:PL.i, j:PL.j, h:PL.h, jy:PL.jy, boost:Math.max(0, PL.boost - clock()), swim:!!PL.swim, sit:PL.sit ? (PL.sit.id || "seat") : null, fit:PL.fit, moving:PL.moving, near:playNear(), ball:PL.ball && {i:PL.ball.i, j:PL.ball.j, v:Math.hypot(PL.ball.vi, PL.ball.vj)}, mark, actors:act, w:R.w, hgt:R.h};
+  return {floor:R.fid, i:PL.i, j:PL.j, h:PL.h, jy:PL.jy, boost:Math.max(0, PL.boost - clock()), swim:!!PL.swim, sit:PL.sit ? (PL.sit.id || "seat") : null, fit:PL.fit, moving:PL.moving, dv:PL.act?.drive ? Math.abs(PL.dv || 0) : 0, near:playNear(), ball:PL.ball && {i:PL.ball.i, j:PL.ball.j, v:Math.hypot(PL.ball.vi, PL.ball.vj)}, mark, actors:act, w:R.w, hgt:R.h};
 }
 function playTags(now){
   if(!R.pl) return;
   const A = R.pl, clampv = (v, a, b) => Math.min(b, Math.max(a, v));
+  // 말풍선끼리·층 사람 말풍선과 겹치지 않게 위로 비켜 쌓음 (가까운 사람 먼저, 2026-11-26)
+  const placed = Object.values(R.people).map(P => !P.bub.hidden && P.bRect && Math.abs(now - P.bRect.t) < 300 ? P.bRect : null).filter(Boolean), list = [];
   ["yu", ...ACT_KEYS].forEach(k => { const B = A.bub[k], p = A[k];
     if(!PL.on || !p.root.visible || now > B.until){ B.bub.hidden = B.stem.hidden = true; return; }
     if(B.bub.textContent !== B.say){ B.bub.textContent = B.say; B.w = 0; }
     B.bub.hidden = false; if(!B.w){ B.w = B.bub.offsetWidth; B.h = B.bub.offsetHeight; }
     p.head.getWorldPosition(tmp); tmp.y += 0.5 * p.root.scale.y; tmp.project(R.camera);
     if(tmp.z > 1){ B.bub.hidden = B.stem.hidden = true; return; }
-    const x = (tmp.x * 0.5 + 0.5) * R.w, y = (-tmp.y * 0.5 + 0.5) * R.h, bx = clampv(x, B.w / 2 + 4, R.w - B.w / 2 - 4), by = clampv(y - 22 - B.h / 2, B.h / 2 + 4, R.h - B.h / 2 - 4);
+    list.push({B, x:(tmp.x * 0.5 + 0.5) * R.w, y:(-tmp.y * 0.5 + 0.5) * R.h, z:tmp.z}); });
+  list.sort((a, b) => a.z - b.z).forEach(({B, x, y}) => { const bx = clampv(x, B.w / 2 + 4, R.w - B.w / 2 - 4); let by = clampv(y - 22 - B.h / 2, B.h / 2 + 4, R.h - B.h / 2 - 4);
+    for(let g = 0; g < 6; g++){ const hit = placed.find(r => Math.abs(r.x - bx) < (r.w + B.w) / 2 + 3 && Math.abs(r.y - by) < (r.h + B.h) / 2 + 2); if(!hit) break; by = Math.max(B.h / 2 + 4, hit.y - (hit.h + B.h) / 2 - 3); if(by <= B.h / 2 + 4) break; }
+    placed.push({x:bx, y:by, w:B.w, h:B.h});
     B.bub.style.transform = `translate(${bx}px,${by}px) translate(-50%,-50%)`;
     const top = by + B.h / 2, gap = y - top; B.stem.hidden = gap < 6; if(gap >= 6){ B.stem.style.height = gap + "px"; B.stem.style.transform = `translate(${clampv(x, bx - B.w / 2 + 12, bx + B.w / 2 - 12)}px,${top}px)`; } });
 }
@@ -2207,8 +2291,9 @@ export function playSet(o){
   if("spawn" in o) PL.spawn = o.spawn;
   if("wave" in o) PL.wave = clock() + o.wave;
   if("boost" in o) PL.boost = o.boost ? clock() + o.boost : 0;
+  if(o.cam){ const c = o.cam; if(c.yaw != null) PL.yaw = c.yaw; if(c.el != null) PL.el = c.el; if(c.d != null){ PL.d = c.d; PL.dd = c.d; } }   // 시험용 카메라 (2026-11-26)
   if("ball" in o) PL.ball = o.ball ? {i:o.ball[0], j:o.ball[1], vi:0, vj:0} : null;
-  if("act" in o){ const a = o.act; PL.act = a ? (typeof a === "string" ? {k:a} : {...a}) : null; if(PL.act){ PL.act.t0 = clock(); PL.sitYaw = (o.at?.[2] ?? o.pos?.[2] ?? PL.h) + 0.6; } }
+  if("act" in o){ const a = o.act; if(PL.act?.el0 != null && !PL.dragAt) PL.el = PL.act.el0; PL.act = a ? (typeof a === "string" ? {k:a} : {...a}) : null; if(PL.act){ PL.act.t0 = clock(); PL.sitYaw = (o.at?.[2] ?? o.pos?.[2] ?? PL.h) + 0.6; PL.dv = 0; const st = PL.act.drive?.start; if(st){ PL.i = st[0]; PL.j = st[1]; if(st[2] != null){ PL.h = st[2]; PL.yaw = PL.h + Math.PI; } } } }
   if(o.at && R && R.pl){ PL.i = o.at[0]; PL.j = o.at[1]; if(o.at[2] != null){ PL.h = o.at[2]; PL.yaw = PL.h + Math.PI; } PL.tg?.set(X(PL.i), 0.62, Z(PL.j)); }   // 기구 위에 바로 (부딪힘 무시)
   if(o.pos && R && R.pl){ [PL.i, PL.j] = nearFree(o.pos[0], o.pos[1]); if(o.pos[2] != null){ PL.h = o.pos[2]; PL.yaw = PL.h + Math.PI; } PL.tg?.set(X(PL.i), 0.62, Z(PL.j)); }
 }
@@ -2238,7 +2323,7 @@ export function playHideSpot(minD = 7){
 }
 export const playOn = () => PL.on;
 export const playPos = () => PL.on && R && R.pl ? [PL.i, PL.j] : null;   // 1층 차가 유나 앞에서 멈추게 (2026-11-23)
-export const playDebug = () => ({i:PL.i, j:PL.j, jy:PL.jy, actors:JSON.parse(JSON.stringify(PL.actors)), items:PL.items.map(it => [it.id, it.e, +it.i?.toFixed(2), +it.j?.toFixed(2)]), idle:PL.idleK?.k || null, still:Math.round(clock() - PL.still), fx:PL.fx.length});
+export const playDebug = () => ({i:PL.i, j:PL.j, jy:PL.jy, h:PL.h, yaw:PL.yaw, sy:PL.sitYaw, el:PL.el, drag:PL.dragAt, cam:R?.camera ? [R.camera.position.x + OX, R.camera.position.z + OZ] : null, actors:JSON.parse(JSON.stringify(PL.actors)), items:PL.items.map(it => [it.id, it.e, +it.i?.toFixed(2), +it.j?.toFixed(2)]), idle:PL.idleK?.k || null, still:Math.round(clock() - PL.still), fx:PL.fx.length});
 export function playItems(list){ PL.items.forEach(dropItem); PL.items = (list || []).map(o => ({...o, ph:Math.random() * 6.28, o:null, pop:0})); }
 export function playItem(id, patch){ const it = PL.items.find(x => x.id === id); if(!it) return; if(patch === null){ dropItem(it); PL.items = PL.items.filter(x => x !== it); return; } if(patch.at) [it.i, it.j] = patch.at; if(patch.y != null) it.y = patch.y; }
 export function playEmote(on, e, ms = 1400){ if(!PL.on) return; PL.items.push({id:"emo" + (++PL.emoN), e, on, pick:false, emo:clock(), life:ms, s:0.44, glow:false, ph:0, o:null, pop:0}); }
@@ -2374,12 +2459,13 @@ export function open(host, opts = {}){
         const i = hit.x + OX, j = hit.z + OZ, ZZ = ZS(), inR = ([a,b,c,d]) => i >= a && i < c && j >= b && j < d, z = Object.keys(ZZ).find(k => inR(ZZ[k].rect)) || (!R.F && inR(CS) ? "grade" : null);   // 색보정실은 구역 버튼은 없어도 눌러서 들어감
         if(z) setView(z); } }
   }
-  document.addEventListener("visibilitychange", () => { if(!R) return; if(document.hidden){ cancelAnimationFrame(R.raf); R.live = false; } else if(!R.live && !R.closed){ R.live = true; R.last = 0; R.raf = requestAnimationFrame(frame); } });
+  document.addEventListener("visibilitychange", () => { if(!R) return; if(document.hidden){ cancelAnimationFrame(R.raf); R.live = false; } else if(!R.live && !R.closed && !R.paused){ R.live = true; R.last = 0; R.raf = requestAnimationFrame(frame); } });
   if(PL.on) enterPlay();
   R.raf = requestAnimationFrame(frame);
   return R;
 }
 export function close(){ if(R){ R.live = false; R.closed = true; cancelAnimationFrame(R.raf); } }
+export function pause(on){ if(!R) return; if(on){ R.live = false; R.paused = true; cancelAnimationFrame(R.raf); } else if(R.paused){ R.paused = false; if(!R.closed && !document.hidden){ R.live = true; R.last = 0; R.raf = requestAnimationFrame(frame); } } }   // 레이싱 화면이 덮는 동안 3D 타워는 쉼 (2026-11-28)
 /* 층을 바꿀 때: 그래픽 메모리까지 비움 (한 번에 한 층만) */
 export function dispose(){
   if(!R) return; close(); R.ro?.disconnect();

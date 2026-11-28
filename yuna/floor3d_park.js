@@ -829,6 +829,7 @@ const def = {
   id:"park",
   zones:ZONES,
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
+  walk:[[FI0, FJ0], [FI1, FJ0], [FI1, FJ1], [FI0, FJ1]],   // 울타리 안만 (대문 밖 보도로 나가 울타리 바깥 틈으로 돌아가던 것 막음, 2026-11-26)
   ext:EXT,
   top:3.4,
   allPts:V => [V(EXT[0], 0, EXT[1]), V(EXT[2], 0, EXT[1]), V(EXT[2], 0, EXT[3]), V(EXT[0], 0, EXT[3]), V(-0.5, 2.6, -0.5), V(30.5, 2.4, -0.5), V(-0.5, 2.4, 21.7), V(15, 3.3, 21.7)],

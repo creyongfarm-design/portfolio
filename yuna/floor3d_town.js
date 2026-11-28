@@ -177,7 +177,7 @@ function paintTown(c, dark){
     p.text("30", i, 12.08, 22, v("#2A2A28", "#3A3A38"), 900, K.SIGN); });
   // 노란 횡단보도 (흰 줄 사이를 노랗게) + 점자 블록
   CW.forEach(([i0, i1]) => { p.rect(i0, AJ + 0.06, i1, RJ - 0.06, v("#F6D24A", "#7A6A2A"));
-    for(let i = i0 + 0.12; i < i1 - 0.2; i += 0.44) p.rect(i, AJ + 0.2, i + 0.24, RJ - 0.2, v("#FFFFFF", "rgba(255,255,255,.55)"));
+    for(let j = AJ + 0.22; j < RJ - 0.3; j += 0.46) p.rect(i0 + 0.14, j, i1 - 0.14, j + 0.24, v("#FFFFFF", "rgba(255,255,255,.55)"));   // 흰 줄은 차 다니는 방향(i)과 나란히 (2026-11-26 감독님 "횡단보도가 또 90도 잘못")
     [[RJ + 0.06, RJ + 0.44], ...(i0 > 6 ? [[AJ - 0.44, AJ - 0.06]] : [])].forEach(([j0, j1]) => { p.rect(i0 + 0.3, j0, i1 - 0.3, j1, v("#F2C230", "#7A6420"));
       for(let i = i0 + 0.42; i < i1 - 0.34; i += 0.16) for(let j = j0 + 0.08; j < j1 - 0.04; j += 0.12){ c.fillStyle = v("rgba(150,110,0,.45)", "rgba(0,0,0,.3)"); c.beginPath(); c.arc(i, j, 0.026, 0, 7); c.fill(); } }); });
   // 옐로카펫 (횡단보도 기다리는 자리 · 노란 부채꼴)
@@ -406,11 +406,12 @@ function munbanggu(){
   // 걸이판 (오른쪽 뒷벽): 줄넘기 · 요요 · 물총 · 딱지
   K.faceJ(12.35, 13.9, 0.0, 28, 72, D("#FFF4E6", "#4A4238"), "m", 0.02);
   K.decal(150, 140, (c, w, h, dark) => { c.fillStyle = dark ? "rgba(0,0,0,.25)" : "rgba(160,120,90,.18)"; for(let x = 6; x < w; x += 12) for(let y = 6; y < h; y += 12){ c.beginPath(); c.arc(x, y, 1.4, 0, 7); c.fill(); }
+    c.save(); c.translate(0, 18);   // 글씨를 위로 올리고 그림은 아래로 (할머니 머리에 가려서, 2026-11-26)
     c.strokeStyle = "#F06BA8"; c.lineWidth = 3; c.beginPath(); c.arc(30, 40, 18, 0, PI); c.stroke(); c.fillStyle = "#FFD43B"; c.fillRect(8, 30, 6, 16); c.fillRect(46, 30, 6, 16);
     c.fillStyle = "#5E9BEA"; c.beginPath(); c.arc(100, 34, 13, 0, 7); c.fill(); c.fillStyle = "#FFFFFF"; c.beginPath(); c.arc(100, 34, 4, 0, 7); c.fill();
     c.fillStyle = "#72C4AE"; c.fillRect(20, 84, 40, 14); c.fillRect(48, 76, 10, 30); c.fillStyle = "#F6E39A"; c.fillRect(14, 88, 8, 6);
-    [["#E87A6A", 84], ["#A9CBEA", 104], ["#C8B4D0", 124]].forEach(([col, x]) => { c.fillStyle = col; c.fillRect(x - 8, 78, 16, 24); c.fillStyle = "#FFFFFF"; c.fillRect(x - 5, 84, 10, 3); });
-    c.fillStyle = dark ? "#E9E4DA" : "#2A2A28"; c.font = "800 13px 'Jua', sans-serif"; c.textAlign = "center"; c.fillText("장난감 · 딱지", w / 2, h - 10); }, 1.5, hz(42), "i", 13.12, 0.02, hz(50));
+    [["#E87A6A", 84], ["#A9CBEA", 104], ["#C8B4D0", 124]].forEach(([col, x]) => { c.fillStyle = col; c.fillRect(x - 8, 78, 16, 24); c.fillStyle = "#FFFFFF"; c.fillRect(x - 5, 84, 10, 3); }); c.restore();
+    c.fillStyle = dark ? "#E9E4DA" : "#2A2A28"; c.font = "800 13px 'Jua', sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("장난감 · 딱지", w / 2, 13); }, 1.5, hz(42), "i", 13.12, 0.02, hz(50));
   // 계산대 (유리 진열장) · 금전등록기
   B(12.3, 0.95, 1.6, 0.62, 12, PINK, 0, {r:0.03}); B(12.32, 0.97, 1.56, 0.58, 10, D("#EAF4FA", "#7A90B8"), 12, {r:0.01, cls:"glass"});
   [12.5, 12.8, 13.1, 13.4, 13.7].forEach((i, n) => B(i - 0.08, 1.12, 0.16, 0.26, 3, RB[n], 13.5, {r:0.02}));
@@ -439,8 +440,8 @@ function munbanggu(){
       for(let q = 0; q < 6; q++){ const col = CA[(n + r * 2 + q) % 6];
         if((n + r) % 2) ball(ci - 0.11 + (q % 3) * 0.11, jc - 0.06 + (q / 3 | 0) * 0.12, z + 4, 0.045, col, "s", 8);
         else { const s = B(ci - 0.14 + (q % 3) * 0.1, jc - 0.12 + (q / 3 | 0) * 0.13, 0.07, 0.1, 1.6, col, z + 3, {r:0.01}); s.rotation.y = 0.3 * (q - 2); } } } });
-    B(a + 0.75, j0 + 0.02, 0.5, 0.04, 9, D("#FFFFFF", "#8A847C"), 19, {r:0.01});
-    K.wtext("불량식품", a + 1.0, j0 + 0.065, 25, "i", 2.3, CORAL, null, 800, JUA); K.wtext("100원~", a + 1.0, j0 + 0.065, 21.4, "i", 2.0, INK, null, 800); }
+    B(a + 0.7, j0 + 0.02, 0.6, 0.04, 18, D("#FFFFFF", "#E9E2D6"), 19, {r:0.01});   // 팻말을 사탕보다 높게 (2026-11-26)
+    K.wtext("불량식품", a + 1.0, j0 + 0.065, 33, "i", 3.0, D("#D9604E", "#C0503F"), null, 800, JUA, {k:12}); K.wtext("100원~", a + 1.0, j0 + 0.065, 28.6, "i", 2.4, INK, null, 800, undefined, {k:12}); }
   // 위에 매단 장난감 (바람개비 · 풍선 망치 · 공)
   [[9.2, 4.9, "#F4A7B9"], [10.4, 4.95, "#A9CBEA"], [11.6, 4.9, "#F6E39A"], [12.8, 4.95, "#A8DCC8"]].forEach(([i, j, col], k) => { rod([i, j, 74], [i, j, 62], 0.005, D("#E6E1D8", "#6A6560"), "m", 4);
     if(k % 2){ ball(i, j, 58, 0.11, col, "m", 12); ball(i, j, 58, 0.112, "#FFFFFF", "m", 12).scale.set(0.25, 1, 1); }
@@ -449,7 +450,7 @@ function munbanggu(){
   bladeSign(i0 + 0.0, "문구", PINK, "#FFFFFF");
   // 가게 앞: 뽑기 기계 넷 · 오락기 · "뽑기" 팻말
   [[8.95, PINK], [9.65, D("#A9CBEA", "#4A5A72")], [10.35, D("#F6E39A", "#8A7A3A")], [11.05, LEAF]].forEach(([ci, col], k) => gachaMachine(ci, SJ + 0.08, col, k));
-  B(9.2, SJ + 0.1, 1.6, 0.04, 6, WHITE, 36, {r:0.02}); K.wtext("두근두근 뽑기 🎁", 10.0, SJ + 0.145, 39, "i", 2.6, D("#B5607E", "#9A4E6A"), null, 800, JUA);
+  B(9.2, SJ + 0.1, 1.6, 0.04, 6, WHITE, 36, {r:0.02}); K.wtext("두근두근 뽑기 🎁", 10.0, SJ + 0.145, 39, "i", 3.6, D("#A8436A", "#5A2238"), null, 800, JUA, {k:12});
   [9.3, 10.7].forEach(i => { cylAt(i, SJ + 0.12, 0.018, 0.018, 0, 43, D("#FFFFFF", "#9A949C"), "s", 8); ball(i, SJ + 0.12, 43.6, 0.03, PINK, "s", 8); });   // 팻말 기둥 (기계 사이)
   arcade(12.25, SJ + 0.08);
   flowerPot(13.65, SJ + 0.35, "#F4A7B9", 0.8, LILAC2);
@@ -477,8 +478,8 @@ function bunsik(){
   // 앞 조리대 (길을 봄): 떡볶이 판 · 어묵 통 · 튀김 진열장
   { const a = 14.25, b = 18.2, j0 = 4.35, j1 = 5.15, top = 24;
     B(a, j0, b - a, j1 - j0, top, D("#FFFFFF", "#6E6862"), 0, {r:0.02}); B(a - 0.02, j0 - 0.02, b - a + 0.04, j1 - j0 + 0.04, 1.4, STEEL, top, {r:0.01, cls:"s"});
-    K.decal(300, 64, (c, w, h, dark) => { c.fillStyle = dark ? "#6A3A34" : "#E87A6A"; c.fillRect(0, 0, w, h); c.fillStyle = dark ? "#4A2A26" : "#FFFFFF";
-      for(let x = 0; x < w; x += 20) c.fillRect(x, 0, 10, h * 0.16); c.fillStyle = "#FFFFFF"; c.font = `800 ${h * 0.42}px 'Jua', sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("즉석 떡볶이 · 수제 튀김 · 따끈 어묵", w / 2, h * 0.62); },
+    K.decal(560, 64, (c, w, h, dark) => { c.fillStyle = dark ? "#6A3A34" : "#E87A6A"; c.fillRect(0, 0, w, h); c.fillStyle = dark ? "#4A2A26" : "#FFFFFF";   // 판 비율대로 (글씨 안 늘어나고 안 잘리게, 2026-11-26)
+      for(let x = 0; x < w; x += 36) c.fillRect(x, 0, 18, h * 0.16); c.fillStyle = "#FFFFFF"; c.font = `800 ${h * 0.44}px 'Jua', sans-serif`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("즉석 떡볶이 · 수제 튀김 · 따끈 어묵", w / 2, h * 0.62); },
       b - a - 0.1, hz(14), "i", (a + b) / 2, j1, hz(12));
     // 떡볶이 판
     B(14.4, 4.43, 1.5, 0.64, 3, IRON, top + 1.4, {r:0.04, cls:"s"}); B(14.45, 4.48, 1.4, 0.54, 0.8, D("#E0503A", "#7A2C22"), top + 3.3, {r:0.03, cls:"s"});
@@ -866,6 +867,7 @@ const def = {
     t_cvs:{name:"CREYONG 24", color:"#4DAA97", rect:[CVS[0], 0, CVS[1], SJ + 1.2], label:[24.7, 0, "top"]},
     t_street:{name:"등굣길 · 정류장", color:"#E8A04A", rect:[0, AJ, 28, 20], label:[14, 20, "bottom"]}},
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
+  walk:[[-0.08, EXT[1]], [28.32, EXT[1]], [28.32, 19.78], [15.15, 19.78], [15.15, EXT[3]], [12.85, EXT[3]], [12.85, 19.78], [-0.08, 19.78]],   // 산울타리 안 + 아래 길 입구 (2026-11-26)
   ext:EXT,
   top:3.9,
   allPts:V => [V(-0.6, 0, -0.6), V(28.8, 0, -0.6), V(28.8, 0, 20.6), V(-0.6, 0, 20.6), V(-0.25, 3.9, -0.25), V(28, 3.6, -0.25), V(0, 3.9, 2.6), V(4.0, 4.9, 1.4)],

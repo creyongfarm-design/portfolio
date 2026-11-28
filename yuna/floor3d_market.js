@@ -450,7 +450,7 @@ function mural(j0, j1, kind){
     const g = c.createLinearGradient(0, 0, 0, H2); g.addColorStop(0, dark ? "#2E3450" : "#D8ECF8"); g.addColorStop(1, dark ? "#463A52" : "#FBEAF0"); c.fillStyle = g; c.fillRect(0, 0, W2, H2);
     if(kind === 0){ RB.forEach((cc, k) => { c.strokeStyle = cc; c.lineWidth = H2 * 0.06; c.beginPath(); c.arc(W2 * 0.55, H2 * 1.15, H2 * (0.95 - k * 0.06), PI, 0); c.stroke(); });
       [[0.18, 0.3, 0.1], [0.82, 0.25, 0.09], [0.4, 0.72, 0.08], [0.72, 0.68, 0.1]].forEach(([x, y, r]) => { c.fillStyle = dark ? "#D8D0E8" : "#FFFFFF"; [[-1, 0.1, 0.7], [0, -0.25, 1], [1, 0.05, 0.75]].forEach(([dx, dy, rr]) => { c.beginPath(); c.arc(W2 * x + dx * H2 * r, H2 * y + dy * H2 * r, rr * H2 * r, 0, 7); c.fill(); }); });
-      c.font = `${H2 * 0.13}px ${JUA}`; c.textAlign = "center"; c.fillStyle = dark ? "#F4C7D4" : "#B5607E"; c.fillText("무지개 구름 시장 🌈 다 같이 웃는 날", W2 * 0.55, H2 * 0.92); }
+      c.font = `${H2 * 0.11}px ${JUA}`; c.textAlign = "center"; c.fillStyle = dark ? "#F4C7D4" : "#B5607E"; c.textBaseline = "middle"; c.fillText("무지개 구름 시장 🌈 다 같이 웃는 날", W2 * 0.5, H2 * 0.1); }   // 아래는 나무·뻥튀기 수레에 가려서 무지개 위로 (2026-11-26)
     else { const fr = [["🍎", 0.1], ["🥬", 0.24], ["🐟", 0.38], ["🍡", 0.52], ["🥕", 0.66], ["🍠", 0.8], ["🌷", 0.92]];
       c.fillStyle = dark ? "#3E5A54" : "#CDEBE2"; c.beginPath(); c.moveTo(0, H2); c.quadraticCurveTo(W2 * 0.3, H2 * 0.55, W2 * 0.6, H2 * 0.75); c.quadraticCurveTo(W2 * 0.85, H2 * 0.9, W2, H2 * 0.62); c.lineTo(W2, H2); c.fill();
       fr.forEach(([e, x], k) => { c.font = `${H2 * 0.24}px ${EMOF}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(e, W2 * x, H2 * (0.42 + (k % 2) * 0.16)); });
@@ -810,6 +810,7 @@ const def = {
     m_plaza:{name:"뻥튀기 광장", color:"#E8A04A", rect:[RB1, FJ, 30, GJ], label:[30, 8, "side"]},
     m_rest:{name:"쉼터 · 짐차", color:"#72C4AE", rect:[0, 14.6, LB0, 22], label:[5, 22, "bottom"]}},
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
+  walk:[[EXT[0], EXT[1]], [29.85, EXT[1]], [29.85, 21.88], [0.12, 21.88], [0.12, 12.7], [EXT[0], 12.7]],   // 울타리 안만 (2026-11-26)
   ext:EXT,
   top:4.8,
   allPts:V => [V(-0.4, 0, -0.4), V(30.4, 0, -0.4), V(30.4, 0, 22.3), V(-0.4, 0, 22.3), V(0, 4.6, 0), V(30, 3.4, 0), V(0, 4.4, NWJ), V(WC, 5.7, GJ)],

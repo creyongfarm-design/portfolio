@@ -84,9 +84,9 @@ function Merge(){
       gs.forEach(g => { Dk.set(g.userData.d, off); off += g.userData.d.length; g.dispose(); }); out.userData = {L, D:Dk}; return out;
     }};
 }
-function dynMesh(g, parent, basic){
+function dynMesh(g, parent, basic, noCut){   // noCut = 유나 앞을 가려도 반투명으로 안 자름 (관람차 살·칸이 점점이 뚫려 보이던 것, 2026-11-26)
   const mat = basic ? new THREE.MeshBasicMaterial({vertexColors:true, toneMapped:false}) : new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.5, metalness:0.02});
-  const m = new THREE.Mesh(g, K.cutaway(mat)); m.castShadow = !basic; m.receiveShadow = !basic; (parent || K.R.scene).add(m); W.recolor.push(m); return m;
+  const m = new THREE.Mesh(g, noCut ? mat : K.cutaway(mat)); m.castShadow = !basic; m.receiveShadow = !basic; (parent || K.R.scene).add(m); W.recolor.push(m); return m;
 }
 /* 지역 좌표 도형 (Merge용, 캐시를 건드리지 않게 새로 만듦) */
 function rodL(a, b, r, seg = 8){ const va = new THREE.Vector3(...a), vb = new THREE.Vector3(...b), d = vb.clone().sub(va), g = new THREE.CylinderGeometry(r, r, d.length(), seg);
@@ -407,7 +407,7 @@ function gondolaGeo(col){
   M.add(K.cyl(0.45, 0.4, 0.44, 20), col, 0, -1.08, 0);                                  // 통
   M.add(new THREE.TorusGeometry(0.45, 0.03, 6, 24).rotateX(PI / 2), c2, 0, -0.86, 0);
   M.add(new THREE.TorusGeometry(0.43, 0.02, 6, 24).rotateX(PI / 2), WHITE, 0, -1.0, 0);
-  M.add(K.cyl(0.36, 0.36, 0.02, 18), D("#F4E8EE", "#5A4A52"), 0, -0.87, 0);
+  M.add(K.cyl(0.36, 0.36, 0.02, 18), D("#F4E8EE", "#5A4A52"), 0, -0.845, 0);   // 바닥: 통 뚜껑과 겹쳐 줄무늬 나던 것 띄움 (2026-11-26)
   [-1, 1].forEach(s => M.add(K.sph(0.06, 8, 6), c2, s * 0.3, -1.12, 0.33));             // 통 옆 장식 방울
   return M.geo();
 }
@@ -427,9 +427,9 @@ function buildWheelDyn(){
     M.add(K.cyl(0.36, 0.36, 0.06, 24), LEMON, 0, 0, z, PI / 2);
     for(let k = 0; k < 6; k++){ const a = k * TAU / 6; M.add(K.sph(0.15, 10, 8), [PINK, PEACH, LEMON, MINT, SKY, LILAC][k], Math.cos(a) * 0.4, Math.sin(a) * 0.4, z + s * 0.03, 0, 0, 0, [1, 1, 0.45]); }
     M.add(K.sph(0.15, 12, 8), AMBER, 0, 0, z + s * 0.06, 0, 0, 0, [1, 1, 0.6]); });
-  const wheel = dynMesh(M.geo(), g), bulbs = dynMesh(L.geo(), wheel, true);
+  const wheel = dynMesh(M.geo(), g, false, true), bulbs = dynMesh(L.geo(), wheel, true, true);
   const cols = [PINK, PEACH, LEMON, MINT, SKY, LILAC, D("#72C4AE", "#3E7A6C"), D("#F4A7B9", "#7A5262")];
-  const gond = cols.map(c => dynMesh(gondolaGeo(c)));
+  const gond = cols.map(c => dynMesh(gondolaGeo(c), null, false, true));
   const halos = []; for(let k = 0; k < 20; k++) halos.push(glW(0, -50, 0, 13, "#FFE2A0", (tm, dk) => dk ? 0.45 : 0));
   halos.push(glW(X(ci), hub, Z(cj) + rim + 0.1, 36, "#FFC0E0", (tm, dk) => dk ? 0.4 : 0));
   W.fw = {g, wheel, gond, halos, rot:0, man:false, phase:"rest", ts:0, r0:0, d:0, mbase:0, mang:0, rider:0};
@@ -721,6 +721,12 @@ function idleSpin(S, t, step, turn, dur, rest){   // 혼자 돌기: 쉬었다가
   if(S.phase === "rest"){ S.rot = S.r0; if(t - S.ts > rest){ S.phase = "spin"; S.ts = t; S.d = Math.ceil((S.r0 + turn) / step - 1e-6) * step - S.r0; } return 0; }
   const f = (t - S.ts) / dur; S.rot = S.r0 + S.d * ease(f); if(f >= 1){ S.phase = "rest"; S.ts = t; S.r0 = S.rot; } return Math.sin(PI * Math.min(1, f));
 }
+// 기구 놓기 (유나가 탈 땐 set()에서 바로 불러 유나와 한 프레임도 안 어긋나게, 2026-11-26)
+function coPlace(Co){ Co.cars.forEach((m, k) => { const u = Co.u - k * CO.gap / CP.L, p = coAt(u), q = coPath(u); m.position.set(X(p[0]), p[2], Z(p[1])); m.rotation.y = q[3]; m.rotation.x = -coPitch(u); }); }
+function bcPlace(c, t){ const w = c.man ? 0 : Math.max(0, 1 - (t - c.bump) * 4) * 0.12; c.m.position.set(X(c.i), 0, Z(c.j)); c.m.rotation.set(0, c.h + Math.sin(t * 40) * w, Math.sin(t * 33) * w * 0.5); }
+function fwPlace(F, t){ F.wheel.rotation.z = F.rot;
+  F.gond.forEach((g, k) => { const th = F.rot + k * FSTEP; g.position.set(X(FW.ci) + Math.sin(th) * FW.R, FW.hub - Math.cos(th) * FW.R, Z(FW.cj)); g.rotation.z = k === F.rider && F.man ? 0 : Math.sin(t * 0.9 + k) * 0.03; });
+  F.halos.forEach((h, k) => { if(k >= 20) return; const a = F.rot + k * TAU / 20; h.p.set(X(FW.ci) + Math.sin(a) * (FW.R + 0.02), FW.hub - Math.cos(a) * (FW.R + 0.02), Z(FW.cj) + FW.rim + 0.07); }); }
 function animate(tm, dt){
   const dk = !!K.R.dark, red = !!K.reduce, t = tm / 1000;
   // 회전목마
@@ -731,16 +737,14 @@ function animate(tm, dt){
     C.horses.forEach((h, k) => { const amp = k === C.rider && C.man ? 0 : 0.09 * spd; h.position.y = CR.seat + amp * Math.sin(bt * 2.6 + (k % 2) * PI + k * 0.3); }); }
   // 대관람차
   { const F = W.fw; if(F.man) F.rot = F.mbase + F.mang; else if(!red) idleSpin(F, t, FSTEP, FSTEP * 0.5, 5.5, 2.5);
-    F.wheel.rotation.z = F.rot;
-    F.gond.forEach((g, k) => { const th = F.rot + k * FSTEP; g.position.set(X(FW.ci) + Math.sin(th) * FW.R, FW.hub - Math.cos(th) * FW.R, Z(FW.cj)); g.rotation.z = Math.sin(t * 0.9 + k) * 0.03; });
-    F.halos.forEach((h, k) => { if(k >= 20) return; const a = F.rot + k * TAU / 20; h.p.set(X(FW.ci) + Math.sin(a) * (FW.R + 0.02), FW.hub - Math.cos(a) * (FW.R + 0.02), Z(FW.cj) + FW.rim + 0.07); }); }
+    fwPlace(F, t); }
   // 바이킹: 쉼 4초 → 커짐 8초 → 크게 10초 → 작아짐 6초
   { const V = W.vk; if(V.man) V.ang = V.mang;
     else if(!red){ const c = (t - V.ts) % 28, A = c < 4 ? 0 : c < 12 ? (c - 4) / 8 : c < 22 ? 1 : 1 - (c - 22) / 6; V.ang = 0.95 * A * Math.sin(TAU * (c - 4) / 4.4); }
     V.g.rotation.z = V.ang; }
   // 코스터: 역에서 4초 쉬고 12초 한 바퀴
   { const Co = W.co; if(Co.man) Co.u = Co.mu; else if(!red){ const c = (t - Co.ts) % 16; Co.u = c < 4 ? 0 : ease((c - 4) / 12); }
-    Co.cars.forEach((m, k) => { const u = Co.u - k * CO.gap / CP.L, p = coAt(u), q = coPath(u); m.position.set(X(p[0]), p[2], Z(p[1])); m.rotation.y = q[3]; m.rotation.x = -coPitch(u); }); }
+    coPlace(Co); }
   // 범퍼카: 혼자 다님 (벽 · 서로 부딪히면 튕김)
   { const [i0, j0, i1, j1] = BC.rect, cars = W.bc, m = 0.72, ddt = red ? 0 : Math.min(dt, 0.05);
     cars.forEach((c, k) => { if(c.man) return;
@@ -751,7 +755,7 @@ function animate(tm, dt){
       if(d < 1.12 && d > 1e-4){ const push = (1.12 - d) / 2, ni = di / d, nj = dj / d;
         if(!A.man){ A.i -= ni * push * (Bc.man ? 2 : 1); A.j -= nj * push * (Bc.man ? 2 : 1); A.h = Math.atan2(-ni, -nj) + (rnd(a + t) - 0.5); A.bump = t; }
         if(!Bc.man){ Bc.i += ni * push * (A.man ? 2 : 1); Bc.j += nj * push * (A.man ? 2 : 1); Bc.h = Math.atan2(ni, nj) + (rnd(b + t) - 0.5); Bc.bump = t; } } }
-    cars.forEach(c => { const w = Math.max(0, 1 - (t - c.bump) * 4) * 0.12; c.m.position.set(X(c.i), 0, Z(c.j)); c.m.rotation.set(0, c.h + Math.sin(t * 40) * w, Math.sin(t * 33) * w * 0.5); }); }
+    cars.forEach(c => bcPlace(c, t)); }
   // 풍선 흔들림
   if(W.bal && !red){ W.bal.g.rotation.z = Math.sin(t * 0.9) * 0.06; W.bal.g.rotation.x = Math.sin(t * 0.7 + 1) * 0.05; }
   // 빛 번짐
@@ -780,26 +784,26 @@ export const FUN = {
      t = 말 오르내림 시각(초, 생략하면 시계). 처음 부를 때 가까운 말 칸에 맞춰 붙고(멈춰 있으면 안 튐), 탄 말은 오르내리지 않음. set(null) = 다시 혼자 돎 */
   carousel:{center:[CR.ci, CR.cj], r:CR.hr, seat:CR.seat, horses:CR.n,
     set(angle, t){ if(!alive()) return; const C = W.car; if(angle == null){ if(C.man){ C.man = false; C.phase = "rest"; C.ts = K.clock() / 1000; C.r0 = C.rot; } return; }
-      if(!C.man){ C.man = true; const m = Math.round(C.rot / CSP); C.mbase = m * CSP; C.rider = ((-m % CR.n) + CR.n) % CR.n; } C.mang = angle; C.mt = t == null ? null : t; },
+      if(!C.man){ C.man = true; const m = Math.round(C.rot / CSP); C.mbase = m * CSP; C.rider = ((-m % CR.n) + CR.n) % CR.n; } C.mang = angle; C.mt = t == null ? null : t; C.rot = C.mbase + C.mang; C.g.rotation.y = -C.rot; },
     angle(){ return alive() ? W.car.rot : 0; },
     horse(angle = 0){ const a = PI / 2 + angle; return [CR.ci + Math.cos(a) * CR.hr, CR.cj + Math.sin(a) * CR.hr, CR.seat, Math.atan2(-Math.sin(a), Math.cos(a))]; }},
   /* 대관람차: 혼자 천천히 (한 칸 돌고 쉼). set(angle): 처음 부를 때 맨 아래 곤돌라가 유나 칸 (가까운 칸에 붙음), 그 뒤 angle 만큼 더 돎 (TAU = 한 바퀴).
      seat(angle) = 유나 칸 앉는 곳 [i, j, y, h]. set(null) = 다시 혼자 */
   wheel:{board:[FW.ci, 5.2, H(7.5)], hub:[FW.ci, FW.cj, FW.hub], R:FW.R, drop:FW.drop, cabins:FW.n,
     set(angle){ if(!alive()) return; const F = W.fw; if(angle == null){ if(F.man){ F.man = false; F.phase = "rest"; F.ts = K.clock() / 1000; F.r0 = F.rot; } return; }
-      if(!F.man){ F.man = true; const m = Math.round(F.rot / FSTEP); F.mbase = m * FSTEP; F.rider = ((-m % FW.n) + FW.n) % FW.n; } F.mang = angle; },
+      if(!F.man){ F.man = true; const m = Math.round(F.rot / FSTEP); F.mbase = m * FSTEP; F.rider = ((-m % FW.n) + FW.n) % FW.n; } F.mang = angle; F.rot = F.mbase + F.mang; fwPlace(F, K.clock() / 1000); },
     angle(){ return alive() ? W.fw.rot : 0; },
     seat(angle = 0){ const th = angle; return [FW.ci + Math.sin(th) * FW.R, FW.cj, FW.hub - Math.cos(th) * FW.R - FW.drop, PI]; }},
   /* 애벌레 코스터: path(u) = 맨 앞 칸 앉는 곳 [i, j, y, heading], u 0~1 한 바퀴 (길이 비례, u=0 = 역). set(u) = 기차 앞 칸을 u에. set(null) = 다시 혼자 */
   coaster:{path:coPath, pitch:coPitch, length:CP.L, board:[10.75, 13.6, H(7.5)], seat:CO.seat,
-    set(u){ if(!alive()) return; const Co = W.co; if(u == null){ if(Co.man){ Co.man = false; Co.ts = K.clock() / 1000; } return; } Co.man = true; Co.mu = u; }},
+    set(u){ if(!alive()) return; const Co = W.co; if(u == null){ if(Co.man){ Co.man = false; Co.ts = K.clock() / 1000; } return; } Co.man = true; Co.mu = Co.u = u; coPlace(Co); }},
   /* 범퍼카: rect 안 6대. set(k, i, j, h) = k번 차를 직접 (h = 보는 쪽), set(k, null) = 다시 혼자. cars() = [[i, j, h] ...] 지금 자리 */
   bumper:{rect:BC.rect, board:[BC.rect[0] - 0.75, 13.7, 0], seat:BC.seat, n:BC.n,
-    set(k, i, j, h){ if(!alive() || !W.bc[k]) return; const c = W.bc[k]; if(i == null){ c.man = false; return; } c.man = true; c.i = i; c.j = j; if(h != null) c.h = h; },
+    set(k, i, j, h){ if(!alive() || !W.bc[k]) return; const c = W.bc[k]; if(i == null){ c.man = false; return; } c.man = true; c.i = i; c.j = j; if(h != null) c.h = h; bcPlace(c, K.clock() / 1000); },
     cars(){ return alive() ? W.bc.map(c => [c.i, c.j, c.h]) : []; }},
   /* 바이킹: set(angle) = 흔들림 각 (라디안, + = 배 밑이 +i 쪽), 권장 ±0.95 · 4.4초 주기. set(null) = 다시 혼자. seat(angle) = [i, j, y, h, 기울기] */
   viking:{board:[VK.ci, 6.3, 0], pivot:[VK.ci, VK.cj, VK.py], arm:VK.arm, amp:0.95, period:4.4,
-    set(angle){ if(!alive()) return; const V = W.vk; if(angle == null){ if(V.man){ V.man = false; V.ts = K.clock() / 1000; } return; } V.man = true; V.mang = angle; },
+    set(angle){ if(!alive()) return; const V = W.vk; if(angle == null){ if(V.man){ V.man = false; V.ts = K.clock() / 1000; } return; } V.man = true; V.mang = V.ang = angle; V.g.rotation.z = angle; },
     seat(angle = 0){ return [VK.ci + Math.sin(angle) * VK.arm, VK.sj, VK.py - Math.cos(angle) * VK.arm, PI / 2, angle]; }},
   /* 앉는 자리 (yuna_game SEATS 형식: a~b 선분 또는 a 한 점, h = 보는 쪽 (0 = +j, PI/2 = +i, PI = −j), H = 앉는 면 높이, k = 대사 종류) */
   seats:[{a:[10.45, 23.1], b:[11.35, 23.1], h:PI, H:H(12), k:"fbench"}, {a:[22.65, 23.1], b:[23.55, 23.1], h:PI, H:H(12), k:"fbench"},
@@ -829,6 +833,7 @@ const def = {
   zones:ZONES,
   subs:{},
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
+  walk:[[-0.5, -0.5], [34.5, -0.5], [34.5, FJ], [EXT[2], FJ], [EXT[2], EXT[3]], [EXT[0], EXT[3]], [EXT[0], FJ], [-0.5, FJ]],   // 울타리 안 + 앞 광장 (옆 울타리 바깥 틈 막음, 2026-11-26)
   ext:EXT,
   top:8.5,
   backWalls:false,

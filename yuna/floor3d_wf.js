@@ -630,6 +630,7 @@ function buildDynamic(){
     const m = dynMesh(M.geo(), K.cutaway(new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.7, side:THREE.DoubleSide}))); m.position.set(X(35.45), hz(66), Z(6.5)); W.parasol = m; }
   // 냥이 (자는 모습 · 선 모습)
   W.cat = {sleep:catMesh(true), stand:catMesh(false), h:0};
+  if(K.catRig){ W.cat.rig = K.catRig(); W.cat.rig.root.visible = false; K.R.scene.add(W.cat.rig.root); }   // 서 있거나 걸을 땐 다리·꼬리가 움직이는 고양이
   // 영사기 빛줄기
   { const A = [X(15.4), hz(17), Z(6.22)], Cn = [[12.0,24],[12.0,90],[18.8,90],[18.8,24]].map(([i,z]) => [X(i), hz(z), Z(0.04)]), p = [];
     for(let k = 0; k < 4; k++){ const a = Cn[k], b = Cn[(k + 1) % 4]; p.push(...A, ...a, ...b); }
@@ -935,14 +936,15 @@ function animate(S, t, tm, dt){
   W.beam.material.opacity = dk ? 0.07 : 0.1;
   // 냥이
   const C = S?.cat, ct = W.cat;
-  if(!C){ ct.sleep.visible = ct.stand.visible = false; }
+  if(!C){ ct.sleep.visible = ct.stand.visible = false; if(ct.rig) ct.rig.root.visible = false; }
   else { const wag = tm < (C.wagUntil || 0), sl = C.pose === "sleep" && !wag && !on("w_cat"), m = sl ? ct.sleep : ct.stand, o = sl ? ct.stand : ct.sleep;
     o.visible = false; m.visible = true;
     const x = K.X(C.i), z = K.Z(C.j);
     if(ct.lx != null){ const dx = x - ct.lx, dz = z - ct.lz; if(Math.hypot(dx, dz) > 1e-4) ct.h = Math.atan2(dx, dz); } ct.lx = x; ct.lz = z;
     ct.ry = ct.ry == null ? ct.h : ct.ry + Math.atan2(Math.sin(ct.h - ct.ry), Math.cos(ct.h - ct.ry)) * Math.min(1, dt * 8);
     const hop = C.pose === "walk" && !red ? Math.abs(Math.sin(tm * 0.02)) * hz(1.6) : 0;
-    m.position.set(x, hop, z); m.rotation.y = ct.ry; }
+    if(ct.rig && !sl){ m.visible = false; ct.rig.root.visible = true; K.catPose(ct.rig, x, 0, z, tm, tm / 1000, Math.min(0.1, dt)); if(wag) ct.rig.tail.forEach((g, k) => g.rotation.z = Math.sin(tm * 0.012 - k * 0.7) * 0.5); }
+    else { if(ct.rig) ct.rig.root.visible = false; m.position.set(x, hop, z); m.rotation.y = ct.ry; } }
   // 고객 시사 영상 (타워가 재생을 맡고 여기선 그 비디오를 판에 붙임)
   { const F = S?.film, v = W.vid; if(F && F.el){ if(v.userData.el !== F.el){ v.material.map?.dispose(); const tx = new THREE.VideoTexture(F.el); tx.colorSpace = THREE.SRGBColorSpace; v.material.map = tx; v.material.needsUpdate = true; v.userData.el = F.el; } v.visible = true; } else v.visible = false; }
   // 2D 그림판 (초당 20번)

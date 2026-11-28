@@ -543,7 +543,11 @@ function buildGates(){
   [[EXT[0] + 0.05, 15.75], [18.25, EXT[2] - 0.05]].forEach(([a, b]) => { B(a, 22.38, b - a, 0.46, 15, D("#7FB86E", "#2E4A2E"), 0, {r:0.12, seg:2});
     for(let i = a + 0.25; i < b; i += 0.5) ball(i, 22.61, 15, 0.2, K.sh(D("#7FB86E", "#2E4A2E"), (rnd(i * 3) - 0.5) * 0.2), "m", 8).scale.y = 0.55; });
   for(let i = EXT[0] + 0.3, k = 0; i < EXT[2]; i += 0.5, k++){ if(i > 15.4 && i < 18.6) continue; if(k % 3 === 0) ball(i, 22.3, 13, 0.06, RB[k % 6], "m", 6); }
-  // 오른쪽 끝 · 왼쪽 끝 낮은 울타리 (밖으로 안 나가게 보이도록)
+  // 오른쪽 끝 · 왼쪽 끝 낮은 울타리 (밖으로 안 나가게 보이도록, 2026-11-26 감독님 "밖에있으면 어떡해"). 오른쪽은 동네 길 자리만 비움
+  const pk = (i, j0, j1) => { const n = Math.max(1, Math.round((j1 - j0) / 0.32));
+    for(let k = 0; k <= n; k++){ const j = j0 + (j1 - j0) * k / n; B(i - 0.025, j - 0.03, 0.05, 0.06, 14, WHITE, 0, {r:0.01}); if(k % 3 === 0) ball(i, j, 15, 0.04, RB[(k / 3 | 0) % 6], "m", 8); }
+    [4, 10].forEach(z => B(i - 0.02, j0, 0.04, j1 - j0, 1.6, WHITE, z, {r:0})); };
+  pk(EXT[0] + 0.25, RJ + 0.42, 22.38); pk(EXT[2] - 0.25, RJ + 0.42, 11.05); pk(EXT[2] - 0.25, 12.95, 22.38);
 }
 
 /* ---------- 움직이는 것 ---------- */
@@ -798,7 +802,14 @@ export const RIVER = {
   /* 오리배: dock = 타는 자리(유나가 선 곳), path(u) u 0~1 한 바퀴 (0·1 = 선착장, 고르게 감), set(i,j,h) = 탈 오리배 옮김, set(null) = 제자리 */
   boat:{dock:[BERTH[0], 4.85, PI], berth:BERTH, seatH:0.41,
     path(u){ if(!W || !W.boatCurve){ return [BERTH[0], BERTH[1], BERTH[2]]; } const uu = ((u % 1) + 1) % 1, p = W.boatCurve.getPointAt(uu), tg = W.boatCurve.getTangentAt(uu); return [p.x, p.z, Math.atan2(tg.x, tg.z)]; },
-    set(i, j, h){ if(!W) return; W.boatSet = i == null ? null : [i, j, h]; }},
+    set(i, j, h){ if(!W) return; W.boatSet = i == null ? null : [i, j, h]; },
+    /* 직접 저을 때 갈 수 있는 물 (배 가운데 기준, 2026-11-26): 건너편 둑 · 강가 돌 둑 · 낚시 데크 · 선착장 · 묶인 배는 못 감 */
+    water(i, j){ if(i < 0.4 || i > EXT[2] - 0.7 || j < 1.05 || j > RJ - 0.55) return false;
+      if(i > DOCK.i0 - 0.55 && i < DOCK.i1 + 0.55 && j > DOCK.j0 - 0.45) return false;
+      if(i > PIER.i0 - 0.55 && i < PIER.i1 + 0.55 && j > PIER.j0 - 0.5) return false;
+      if(i > PIER.ti0 - 0.55 && i < PIER.ti1 + 0.55 && j > PIER.tj0 - 0.5) return false;
+      for(const m of (W && W.mooredAt) || []) if(Math.hypot(i - m[0], j - m[1]) < 1.0) return false;
+      return true; }},
   /* 연: set(t) t 0 = 안 보임, 0~1 = 유나 손에서 하늘로 올라감, 1 넘으면 계속 날림 */
   kite:{at:KITE_AT, set(t){ if(W && W.yk) W.yk.t = +t || 0; }},
   bell:{ring(ms = 3200){ if(W && K) W.ring = K.clock() + ms; }},   // 종 흔들기 (소리는 게임 쪽)
@@ -816,6 +827,7 @@ const def = {
     rv_path:{name:"자전거길", color:"#E8B5C8", rect:[EXT[0], 6.2, EXT[2], WK1], label:[EXT[2], 7.4, "side"]},
     rv_park:{name:"강변 공원", color:"#72C4AE", rect:[9.6, WK1, EXT[2], 22.4], label:[22.0, 22.4, "bottom"]}},
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
+  walk:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], 22.38], [18.25, 22.38], [18.25, EXT[3]], [15.75, EXT[3]], [15.75, 22.38], [EXT[0], 22.38]],   // 산울타리 안 + 입구 (2026-11-26)
   ext:EXT,
   top:3.8,
   allPts:V => [V(EXT[0], 0, EXT[1]), V(EXT[2], 0, EXT[1]), V(EXT[2], 0, EXT[3]), V(EXT[0], 0, EXT[3]), V(EXT[0], 2.2, EXT[1]), V(EXT[2], 2.2, EXT[1]), V(TW.ci, 4.2, TW.cj), V(27, 3.6, 9.4)],

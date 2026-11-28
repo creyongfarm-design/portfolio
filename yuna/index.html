@@ -6312,12 +6312,12 @@ function lCarStep(c, now, dt){
     if(c.st === "arrive"){ c.st = "wait"; c.dir = "-i"; c.guest = lGuest("cafe", c); return; }
     if(c.st === "out"){ c.dead = true; return; }
   }
-  const [ti, tj] = c.path[0], dx = ti - c.i, dy = tj - c.j, d = Math.hypot(dx, dy); let v = (c.pass ? 3.4 : Math.abs(dy) > 0 && c.j > 21 ? 2.6 : 1.5) * dt;
+  const [ti, tj] = c.path[0], dx = ti - c.i, dy = tj - c.j, d = Math.hypot(dx, dy), vmax = c.pass ? 3.4 : Math.abs(dy) > 0 && c.j > 21 ? 2.6 : 1.5; let v = vmax * dt;
   const hd = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "+i" : "-i") : (dy > 0 ? "+j" : "-j");
   if((hd === "+i" || hd === "-i") && c.j > 22.4 && c.j < 27.3){   // 도로 위: 신호 · 건너는 사람 · 유나 · 앞차
     const f = hd === "+i" ? 1 : -1, stop = (f > 0 ? XW.i0 - 1.75 : XW.i1 + 1.75) - c.i, sd = stop * f, sg = lSig(now); let lim = Infinity;
     if(sd > -0.05){
-      if(sg.car === "r" || (sg.car === "y" && sd > 1.3)) lim = Math.max(0, sd);
+      if(sg.car === "r" || (sg.car === "y" && sd > 2.4)) lim = Math.max(0, sd);
     }
     // 도로 위 사람(건너는 사람·유나): 횡단보도 위에 있으면 양쪽 차 모두 정지선에서 기다리고, 차 앞 차선에 있으면 그 앞에서 멈춤 (2026-11-23 감독님 "차는 횡단보도 무시하고 가네? 무섭네")
     const yp = lYunaAt(), walkers = lGuests.filter(g => !g.hidden && g.j > 22.0 && g.j < 27.7).map(g => [g.i, g.j]); if(yp && yp[1] > 22.0 && yp[1] < 27.7) walkers.push(yp);
@@ -6325,8 +6325,11 @@ function lCarStep(c, now, dt){
       if(sd > -0.05 && pi > XW.i0 - 0.6 && pi < XW.i1 + 0.6) lim = Math.min(lim, Math.max(0, sd));
       if(Math.abs(pj - c.j) < 1.6){ const ahead = (pi - c.i) * f; if(ahead > -0.6 && ahead < 7) lim = Math.min(lim, Math.max(0, ahead - 2.2)); } });
     lCars.forEach(o => { if(o === c || Math.abs(o.j - c.j) > 0.4) return; const od = (o.i - c.i) * f; if(od > 0) lim = Math.min(lim, Math.max(0, od - 2.9)); });
-    c.brake = lim < v * 0.5; v = Math.max(0, Math.min(v, lim)); if(v < 1e-4) return; }
-  else c.brake = false;
+    // 서서히 서고 서서히 출발 (2026-11-26 감독님 "횡단보도 앞에 차가 서서히 서야지"): 남은 거리로 낼 수 있는 속도까지만, 출발은 천천히 붙음
+    const tgt = Math.min(vmax, Math.sqrt(2 * 2.2 * Math.max(0, lim - 0.03))); if(c.spd == null) c.spd = vmax;
+    c.spd = tgt < c.spd ? Math.max(tgt, c.spd - 6 * dt) : Math.min(tgt, c.spd + 1.6 * dt);
+    c.brake = tgt < vmax - 0.05; v = Math.max(0, Math.min(c.spd * dt, lim)); if(v < 1e-4) return; }
+  else { c.brake = false; c.spd = vmax; }
   if(c.rev && c.path.length === 3) c.dir = "-i"; else c.dir = hd;   // 주차칸에서 나올 땐 후진
   if(d <= v){ c.i = ti; c.j = tj; c.path.shift(); } else { c.i += dx / d * v; c.j += dy / d * v; }
 }
