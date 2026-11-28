@@ -1999,7 +1999,7 @@ function playTick(now, t, dt){
     if(Math.abs(v) > 0.15 && now - PL.dragAt > 1400) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 0.9);
     mag = 0; }
   const hs = PL.hold && !PL.swim ? PL.hold.slow : 1;   // 손에 든 게 있으면 조심조심 (2026-11-23 감독님 "커피 심부름은 흐를까바 들고 약간 천천히")
-  const sp = AU ? AU.v * mag : (PL.swim ? 1.45 : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
+  const sp = AU ? AU.v * mag : (PL.swim ? (PL.fit === "swim" ? 1.8 : 1.45) : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
   if(mag > 0.06){
     const fx = -Math.sin(PL.yaw), fz = -Math.cos(PL.yaw), rx = Math.cos(PL.yaw), rz = -Math.sin(PL.yaw);
     if(AU){ mi = Math.sin(AU.h); mj = Math.cos(AU.h); } else { mi = (fx * iy + rx * ix) / Math.hypot(ix, iy); mj = (fz * iy + rz * ix) / Math.hypot(ix, iy); }
