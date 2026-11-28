@@ -388,7 +388,8 @@ const CSS = `
 .yg-tm.go{animation:ygTm .8s ease-out}
 @keyframes ygTm{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}18%{opacity:1;transform:translate(-50%,0) scale(1.14)}34%{transform:translate(-50%,0) scale(1)}72%{opacity:1}100%{opacity:0;transform:translate(-50%,-16px)}}
 .yg-roam{background:color-mix(in srgb,#FF8FB8 20%,var(--paper));border-color:color-mix(in srgb,#FF8FB8 50%,var(--line))}
-.yg-toast.up{bottom:auto;top:calc(max(14px,env(safe-area-inset-top)) + 122px)}
+.yg-toast.up{bottom:auto;top:calc(max(14px,env(safe-area-inset-top)) + 92px)}
+.yg.tn .yg-hud{left:max(12px,env(safe-area-inset-left));transform:none;top:calc(max(10px,env(safe-area-inset-top)) + 58px);font-size:12px;padding:4px 10px;gap:5px;box-shadow:none;background:rgba(42,42,40,.78)}   /* 테니스: 점수는 왼쪽 위 작게 (상대 안 가리게) */
 @keyframes yg-glow{50%{box-shadow:0 0 0 7px rgba(255,194,61,.35),0 8px 20px -10px rgba(0,0,0,.45)}}
 .yg-snd + .yg-x{margin-left:8px}
 .yg-mapb{margin-right:0}
@@ -2281,7 +2282,7 @@ export function start(api){
       const land = S.boat && st.floor === "river" && now() - S.boat.t0 > 2500 && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) < 1.7;   // 오리배: 선착장 앞이면 내리기
       if(S.boat && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) > 2.5) S.boat.far = true;
       let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "tennis" ? "" : G?.type === "squirt" ? "squirt" : G?.type === "race" ? "kick" : G?.type === "claw" ? "grab" : retry ? "retry" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
-      { const tp = G?.type === "tennis" && G.phase !== "end"; if(tnPad.hidden === tp){ tnPad.hidden = !tp; toastEl.classList.toggle("up", tp); jumpB.style.visibility = tp ? "hidden" : ""; runB.querySelector("b").textContent = tp ? "대시" : "달리기"; }
+      { const tp = G?.type === "tennis" && G.phase !== "end"; if(tnPad.hidden === tp){ tnPad.hidden = !tp; toastEl.classList.toggle("up", tp); root.classList.toggle("tn", tp); jumpB.style.visibility = tp ? "hidden" : ""; runB.querySelector("b").textContent = tp ? "대시" : "달리기"; }
         const sv = tp && G.phase === "yuserve" ? "1" : tp && G.phase === "toss" ? "2" : ""; if(tp && tnPad.dataset.sv !== sv){ tnPad.dataset.sv = sv; tnPad.querySelector(".d b").textContent = sv === "2" ? "지금!" : sv ? "강서브" : "강타"; tnPad.querySelector(".l b").textContent = sv === "2" ? "지금!" : sv ? "서브" : "로브"; tnPad.querySelector(".p b").textContent = sv === "2" ? "지금!" : sv ? "서브" : "드롭"; } }
       if(mode !== act.dataset.m || (mode === "talk" && act.dataset.id !== n.id)){
         act.dataset.m = mode; act.dataset.id = n?.id || ""; act.hidden = !mode;
