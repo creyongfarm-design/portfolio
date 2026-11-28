@@ -1900,7 +1900,8 @@ export function start(api){
     v4:["택배 왔어요~ 📦", "다음 집은 어디더라 🤔"], v5:["뭉치야 천천히 가~ 🐕", "산책 좋다 그치? 🐾"], v6:["엄마 저거 사 줘~ 🍭", "나 잡아 봐라~ 😆"],
     v7:["하나 둘! 하나 둘! 💪", "오늘 만 보 걸었다 👟"], v8:["과제 언제 하지… 📚", "여기 사진 예쁘다 📸"], v9:["우리 아기 잘 잔다 👶", "장 보러 가야지 🛒"], v10:["유나야 안녕~ 👋", "숙제 했어? 😆"]};
   const VIL_ANCH = f => [...(USE[f] || []).map(u => u.at), ...(SEATS[f] || []).map(x => x.a)].filter(Boolean);
-  const flat = (e, i, j) => e.playReach(i, j) && !((e.playGround?.(i, j) || 0) > 0.06);   // 걸을 수 있고 바닥 그대로 (계산대·단 위 X)
+  const wetAt = (i, j) => (S.floor === "roof" ? [POOL] : S.floor === "gym" ? [AREA_MOD.gym?.pool] : []).some(w => w && i > w.walk[0] - 0.2 && i < w.walk[2] + 0.2 && j > w.walk[1] - 0.2 && j < w.walk[3] + 0.2);   // 물 (2026-11-28 감독님 "수영장에서 사람들 걸어댕기네")
+  const flat = (e, i, j) => e.playReach(i, j) && !((e.playGround?.(i, j) || 0) > 0.06) && !wetAt(i, j);   // 걸을 수 있고 바닥 그대로 (계산대·단 위 X, 물 위 X)
   const clearLine = (i0, j0, i1, j1) => { const e = E(), n = Math.max(1, Math.ceil(Math.hypot(i1 - i0, j1 - j0) / 0.25)); for(let q = 1; q <= n; q++) if(!flat(e, i0 + (i1 - i0) * q / n, j0 + (j1 - j0) * q / n)) return false; return true; };
   function villagers(f){ const e = E(); if(!e) return; S.vil = S.vil || {};
     Object.keys(S.vil).forEach(k => { if(S.vil[k].f !== f){ e.playActor(k, null); delete S.vil[k]; } });
@@ -2200,9 +2201,9 @@ export function start(api){
       S.n = (S.n || 0) + 1; if(S.n % 6 === 0) renderCard(m?.d);
       gameTick(st);
       if(st.swim && st.moving){ rec.strokes = rec.strokes || {}; if(!rec.strokes[S.stroke]){ rec.strokes[S.stroke] = 1; save(); later0(1500, checkBadges); } }
-      { const jm = G?.type === "futsal" ? "pass" : st.swim ? "stroke:" + S.stroke : st.sit ? "stand" : !G && nearSeat(st) ? "sit" : "jump", sk = STROKES.find(x => x[0] === S.stroke) || STROKES[0];
+      { const jm = G?.type === "futsal" ? "pass" : st.swim ? "stroke:" + S.stroke : st.sit ? "stand" : !G && nearSeat(st) ? "sit" : "jump", sk = STROKES[(STROKES.findIndex(x => x[0] === S.stroke) + 1) % STROKES.length];   // 버튼엔 바꿀 영법 (2026-11-28 감독님 "바꾸고 싶은게 나와야지")
         if(jm !== jumpB.dataset.m){ jumpB.dataset.m = jm; jumpB.querySelector("span").innerHTML = jm === "pass" ? "🤝" : jm === "jump" ? JUMP_SVG : jm === "sit" ? "🪑" : st.swim ? sk[1] : "🧍‍♀️";
-          jumpB.querySelector("b").textContent = jm === "pass" ? "패스" : jm === "jump" ? "점프" : jm === "sit" ? "앉기" : st.swim ? sk[2] : "일어나기"; jumpB.setAttribute("aria-label", st.swim ? "영법 바꾸기" : jumpB.querySelector("b").textContent); } }
+          jumpB.querySelector("b").textContent = jm === "pass" ? "패스" : jm === "jump" ? "점프" : jm === "sit" ? "앉기" : st.swim ? sk[2] + "으로" : "일어나기"; jumpB.setAttribute("aria-label", st.swim ? sk[2] + "으로 바꾸기" : jumpB.querySelector("b").textContent); } }
       if(st.moving && !helpT){ helpT = setTimeout(() => { help.style.opacity = 0; }, 5000); }
     },
     onPick, onKnock,
