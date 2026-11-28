@@ -1145,6 +1145,9 @@ function pose(p, kind, t, opt = {}){
     legs.forEach((l, k) => { const q = k ? -s : s; l.hip.rotation.x = q * 0.5; l.knee.rotation.x = Math.max(0, -q) * 0.7 + 0.08; });
     arms.forEach((a, k) => { const q = k ? s : -s; a.sh.rotation.x = q * 0.45; a.el.rotation.x = -0.25; });
     hips.position.y = 0.9 + Math.abs(c) * 0.035; }
+  if(kind === "shuffle"){ const s = Math.sin(opt.step || 0), c = Math.cos(opt.step || 0), L = Math.min(1, Math.abs(opt.lat || 0) * 1.3), F = opt.fwd || 0;   // 테니스 옆걸음: 무릎 굽히고 다리를 옆으로 벌렸다 모음
+    legs.forEach((l, k) => { const q = k ? -s : s; l.hip.rotation.z = (k ? -1 : 1) * (0.12 + Math.abs(q) * 0.38) * L; l.hip.rotation.x = -0.3 + q * 0.45 * (1 - L) * Math.sign(F || 1); l.knee.rotation.x = 0.5 + Math.max(0, -q) * 0.35; });
+    chest.rotation.x = 0.16; chest.rotation.z = Math.sin(opt.step || 0) * 0.05 * L; hips.position.y = 0.82 + Math.abs(c) * 0.05; }
   if(kind === "stand" && opt.hold){ arms[1].sh.rotation.x = -0.35; arms[1].el.rotation.x = -1.1; }
   if(opt.talk){ head.rotation.x += Math.sin(t * 7) * 0.05; arms[1].sh.rotation.x += -0.5 - Math.sin(t * 3) * 0.15; arms[1].el.rotation.x = -0.9; }
   if(opt.wave){ const w = Math.sin(t * 9); arms[0].sh.rotation.set(-0.2, 0, 2.5); arms[0].el.rotation.set(0, 0, 0.4 + w * 0.35); }
@@ -1966,7 +1969,7 @@ function enterPlay(){
   if(!R || !R.pl) return;
   R.zone = "play"; R.anim = null; R.layer.classList.remove("far"); R.layer.classList.add("play"); touchMode(true); if(R.back) R.back.hidden = true;
   R.camera.fov = 52; R.camera.near = 0.12; R.camera.updateProjectionMatrix();
-  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.tb = null; PL.cloak = false; PL.auto = null;
+  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.tb = null; PL.cloak = false; PL.auto = null; PL.face = null;
   const s = PL.spawn || [13.9, 17.1, Math.PI / 2]; PL.spawn = null;
   playGrid(); [PL.i, PL.j] = spawnSpot(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
   PL.tg = new THREE.Vector3(X(PL.i), PL.gy + 0.62, Z(PL.j)); PL.dd = PL.d; R.cur = {tg:PL.tg.clone(), d:PL.d}; R.az = PL.yaw; R.el = PL.el;
@@ -2004,11 +2007,13 @@ function playTick(now, t, dt){
     const ob = playObs(), ok = (a, b) => freeAt(a, b) && pplOk(ob, a, b); PL.bump = null; let mv = true;   // 사람은 통과 못 함 (2026-11-23 감독님 "사람 통과하는거 고치면")
     if(ok(ni, nj)){ PL.i = ni; PL.j = nj; } else if(ok(ni, PL.j)) PL.i = ni; else if(ok(PL.i, nj)) PL.j = nj; else mv = false;
     if(!mv && PL.bump && clock() - PL.bumpAt > 2600){ PL.bumpAt = clock(); PL.cb?.onBump?.(PL.bump); }
-    PL.h += wrapA(Math.atan2(mi, mj) - PL.h) * Math.min(1, dt * 12);
-    PL.step += dt * sp * 6.4;
+    if(PL.face == null) PL.h += wrapA(Math.atan2(mi, mj) - PL.h) * Math.min(1, dt * 12);
+    PL.lat = mi * Math.cos(PL.h) - mj * Math.sin(PL.h); PL.fwd = mi * Math.sin(PL.h) + mj * Math.cos(PL.h);   // 옆걸음 · 앞뒤 (테니스)
+    PL.step += dt * sp * (PL.face == null ? 6.4 : 8.2);
     if(now - PL.dragAt > 1400 && iy > -0.35 && PL.camLock == null) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 1.15 * mag);   // 걸어가면 카메라가 천천히 등 뒤로
   }
   PL.moving = mag > 0.06; PL.spd = sp;
+  if(PL.face != null && !PL.act && !PL.sit) PL.h += wrapA(PL.face - PL.h) * Math.min(1, dt * 10);   // 테니스: 늘 네트를 봄 (2026-11-28 감독님 "뛰는것도 사실 좀 달라야지")
   if(PL.camLock != null && now - PL.dragAt > 1400) PL.yaw += wrapA(PL.camLock - PL.yaw) * Math.min(1, dt * 3);   // 테니스: 카메라는 코트 뒤에 고정
   PL.gy += ((PL.swim || PL.act?.fn || PL.act?.drive ? 0 : PL.sit ? groundH(...PL.sit.from) : groundH(PL.i, PL.j)) - PL.gy) * Math.min(1, dt * 14);   // 놀이기구 탈 땐 땅 기준
   if(PL.jv || PL.jy > 0){ PL.jv -= 11 * dt; PL.jy = Math.max(0, PL.jy + PL.jv * dt); if(PL.jy === 0) PL.jv = 0; }
@@ -2283,6 +2288,7 @@ function playPost(){
       if(IK.k === "hop"){ hop = Math.abs(Math.sin(iu * Math.PI * 3)) * 0.13; p.arms.forEach((a, n) => { a.sh.rotation.set(-2.5, 0, (n ? -1 : 1) * 0.3); a.el.rotation.set(-0.2, 0, 0); }); }
       if(IK.k === "dance"){ p.arms.forEach((a, n) => { a.sh.rotation.set(-2.3 + Math.sin(t * 7 + n * Math.PI) * 0.45, 0, (n ? -1 : 1) * 0.35); a.el.rotation.set(-0.4, 0, 0); }); p.chest.rotation.z = Math.sin(t * 7) * 0.13; p.head.rotation.z = Math.sin(t * 7 + 0.6) * 0.15; p.hips.rotation.y = Math.sin(t * 3.5) * 0.25; } } }
   else if(PL.jy > 0){ pose(p, "stand", t, {ph:0.3}); if(!reduce) p.arms.forEach((a, n) => { a.sh.rotation.set(-2.6, 0, (n ? -1 : 1) * 0.35); a.el.rotation.set(-0.2, 0, 0); }); }
+  else if(PL.moving && PL.face != null) pose(p, "shuffle", t, {step:PL.step, lat:PL.lat || 0, fwd:PL.fwd || 0});
   else if(PL.moving) pose(p, "walk", t, {step:PL.step});
   else pose(p, "stand", t, {ph:0.3, talk, wave:now < PL.wave});
   if(PL.rk?.yu && !PL.swim && !PL.sit && !PL.act) racketPose(p, "yu", now, PL.moving);
@@ -2431,6 +2437,7 @@ function racketPose(p, k, now, moving){
   p.legs.forEach(l => { l.hip.rotation.x = -0.25; l.knee.rotation.x = 0.45; }); p.hips.position.y -= 0.05;
 }
 export function playRacket(m){ PL.rk = m || null; }
+export function playRing(i, j, big){ if(!PL.on || !R) return; fxRing(i, j, groundH(i, j) + 0.02, !!big); }   // 테니스: 공 떨어질 자리 표시
 export function playSwing(k, kind = "fore"){ PL.sw[k] = {t0:clock(), kind}; }
 export function playTBall(b){ PL.tb = b ? {i:b[0], j:b[1], y:b[2] || 0, r:b[3] || 0.075} : null; }
 function playNear(){
@@ -2472,7 +2479,7 @@ function playTap(mx, my){
 }
 export function playStart(cb, spawn){ PL.on = true; PL.cb = cb; PL.spawn = spawn || null; PL.in = [0, 0]; if(R && R.pl) enterPlay(); }
 export function playStop(){
-  PL.on = false; PL.cb = null; PL.in = [0, 0]; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.auto = null; PL.tb = null; PCUT_A.value.w = 0; propsClear(); PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
+  PL.on = false; PL.cb = null; PL.in = [0, 0]; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.auto = null; PL.face = null; PL.tb = null; PCUT_A.value.w = 0; propsClear(); PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
   if(!R) return; R.layer.classList.remove("play"); R.camera.fov = 22; R.camera.near = 1; R.camera.updateProjectionMatrix(); R.zone = null; setView(HOME(), true);
 }
 export function playInput(x, y){ PL.in[0] = x; PL.in[1] = y; }
@@ -2487,6 +2494,7 @@ export function playSet(o){
   if("spawn" in o) PL.spawn = o.spawn;
   if("camLock" in o) PL.camLock = o.camLock ?? null;
   if("camLead" in o) PL.camLead = o.camLead ?? null;
+  if("face" in o) PL.face = o.face ?? null;
   if("auto" in o) PL.auto = o.auto ? {h:o.auto.h ?? PL.h, v:o.auto.v ?? 0} : null;
   if("wave" in o) PL.wave = clock() + o.wave;
   if("boost" in o) PL.boost = o.boost ? clock() + o.boost : 0;

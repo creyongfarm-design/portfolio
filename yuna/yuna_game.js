@@ -370,6 +370,16 @@ const CSS = `
 .yg-run.go span{filter:none;opacity:1;background:radial-gradient(closest-side,#FFF3D1 80%,transparent 82%),conic-gradient(#FF6FA8 calc(var(--p) * 360deg),transparent 0)}
 .yg-run b{font-size:11px;font-weight:700;color:var(--ink-2)}
 .yg-run:active span{transform:scale(.92)}
+.yg-tn{position:absolute;inset:0;pointer-events:none}.yg-tn[hidden]{display:none}
+.yg-tn button{pointer-events:auto;position:absolute;display:grid;justify-items:center;gap:4px;border:0;background:none;padding:0;touch-action:none;-webkit-user-select:none;user-select:none}
+.yg-tn button span{position:relative;display:grid;place-items:center;width:60px;height:60px;border-radius:50%;font-size:25px;box-shadow:0 8px 20px -8px rgba(40,30,60,.6),inset 0 2px 0 rgba(255,255,255,.35);transition:transform .08s}
+.yg-tn button b{font-size:11px;font-weight:800;color:var(--ink-2);background:color-mix(in srgb,var(--card) 90%,transparent);border-radius:999px;padding:1px 8px;white-space:nowrap}
+.yg-tn .d{right:max(18px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom))}.yg-tn .d span{width:76px;height:76px;font-size:30px;background:linear-gradient(160deg,#FF8FB8,#FF5F7E)}
+.yg-tn .l{right:calc(max(18px,env(safe-area-inset-right)) + 9px);bottom:calc(max(22px,env(safe-area-inset-bottom)) + 110px)}.yg-tn .l span{background:linear-gradient(160deg,#C8B4F0,#8E86E0)}
+.yg-tn .p{right:calc(max(18px,env(safe-area-inset-right)) + 96px);bottom:calc(max(22px,env(safe-area-inset-bottom)) + 12px)}.yg-tn .p span{background:linear-gradient(160deg,#A8E6C8,#4DAA97)}
+.yg-tn button.on span{transform:scale(.9)}
+.yg-tn button[data-aim] span::after{position:absolute;top:50%;transform:translateY(-50%);font-size:20px;font-weight:900;color:#FF4F86;text-shadow:0 1px 0 #fff,0 0 6px #fff}
+.yg-tn button[data-aim="-1"] span::after{content:"◀";left:-24px}.yg-tn button[data-aim="1"] span::after{content:"▶";right:-24px}
 @keyframes yg-glow{50%{box-shadow:0 0 0 7px rgba(255,194,61,.35),0 8px 20px -10px rgba(0,0,0,.45)}}
 .yg-snd + .yg-x{margin-left:8px}
 .yg-mapb{margin-right:0}
@@ -811,6 +821,7 @@ export function start(api){
     <button class="yg-jump" type="button" aria-label="점프"><span><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></span><b>점프</b></button>
     <button class="yg-run" type="button" aria-label="달리기"><span>🏃‍♀️</span><b>달리기</b></button>
     <button class="yg-act" type="button" hidden><span>💬</span><b>말 걸기</b></button>
+    <div class="yg-tn" hidden><button class="d" type="button" data-s="drive" aria-label="강타"><span>🔥</span><b>강타</b></button><button class="l" type="button" data-s="lob" aria-label="로브"><span>🌙</span><b>로브</b></button><button class="p" type="button" data-s="drop" aria-label="드롭"><span>🪶</span><b>드롭</b></button></div>
     <div class="yg-elev" hidden></div>
     <div class="yg-elev yg-fit" hidden></div>
     <div class="yg-toast"></div>
@@ -825,6 +836,13 @@ export function start(api){
   api.host.append(root);
   const $ = s => root.querySelector(s);
   const runB = $(".yg-run"), sndB = $(".yg-snd"); sndB.textContent = AU.on ? "🔊" : "🔇";
+  /* 테니스 샷 버튼 (2026-11-28 감독님 "기술같은게 없네… 치는방향도 못 정하고"): 누르고 옆으로 끌면 그쪽으로, 떼면 침 */
+  const tnPad = $(".yg-tn"); let tnPtr = null;
+  tnPad.querySelectorAll("button").forEach(bt => {
+    bt.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); try { bt.setPointerCapture(ev.pointerId); } catch(e){} tnPtr = {id:ev.pointerId, x:ev.clientX, aim:0}; bt.classList.add("on"); });
+    bt.addEventListener("pointermove", ev => { if(!tnPtr || tnPtr.id !== ev.pointerId) return; const dx = ev.clientX - tnPtr.x, a = dx < -16 ? -1 : dx > 16 ? 1 : 0; if(a !== tnPtr.aim){ tnPtr.aim = a; if(a) bt.dataset.aim = a; else delete bt.dataset.aim; } });
+    const up = ev => { if(!tnPtr || tnPtr.id !== ev.pointerId) return; const a = tnPtr.aim; tnPtr = null; bt.classList.remove("on"); delete bt.dataset.aim; if(ev.type === "pointerup") tnPress(bt.dataset.s, a || null); };
+    bt.addEventListener("pointerup", up); bt.addEventListener("pointercancel", up); });
   sndB.onclick = ev => { ev.stopPropagation(); auSet(!AU.on); auInit(); sndB.textContent = AU.on ? "🔊" : "🔇"; };
   /* 마을 지도 (2026-11-24 감독님 "큰 마을이면 좋겠네"): 어디 있는지 보이고, 누르면 그쪽으로 걸어감 */
   const mapEl = $(".yg-map"), mapB = $(".yg-mapb");
@@ -1057,7 +1075,9 @@ export function start(api){
     toast(`🏓 최고 랠리 ${G.best}번!`, G.best > old ? "🎉 신기록!" : `최고 기록 ${old}번`, 2400); npcSay("@dad", G.best >= 10 ? "우리 딸 탁구 선수 해도 되겠다! 🏓" : "아빠가 좀 봐줬다~ 또 하자 😆", 2600);
     firstUse("pong", "🏓 아빠랑 탁구"); later(2600, () => { endGame(); e?.playActor("dad", null); setup(); }); }
   /* 테니스 (2026-11-28 감독님 "테니스장" · "심부름 귀찮아. 모으기도 재미없고"): 강변 테니스장 실제 규격 코트. 3판 2선승 (듀스면 다음 점수가 게임, 노애드)
-     유나는 마음대로 뛰어다니고, 공이 손 닿는 곳에 오면 저절로 받아침. 🎾 버튼을 맞춰 누르면 강타(빠르고 깊게, 가끔 아웃). 조이스틱 좌우로 보낼 쪽을 고름
+     유나는 마음대로 뛰어다님(네트를 보고 옆걸음, 🏃 대시). 샷 버튼 셋 (2026-11-28 감독님 "기술같은게 없네… 치는방향도 못 정하고"):
+       🔥 강타 = 빠르고 깊게(가끔 아웃) · 🌙 로브 = 높이 넘김(네트 앞 상대에 강함, 뒤에 있으면 스매시 당함) · 🪶 드롭 = 네트 앞에 톡(뒤에 있는 상대에 강함, 가끔 네트)
+       버튼을 누른 채 옆으로 끌면 그쪽으로 침. 공 오기 조금 전(0.2초 안)에 떼면 ✨ 나이스 타이밍(더 정확). 버튼 안 누르면 저절로 막기만 함(약하게 가운데로 → 상대가 공격)
      상대: 지유 → 엄마 → 아빠 → 체육 선생님 (점점 셈). 벽치기 연습(rv "wall")은 같은 공으로 벽이 받아 줌: 연속 몇 번 치나 */
   const TN_RIV = {fr:{n:"지유", e:"👧", T:1.5, Tmin:1.14, err:0.13, spd:2.2, aim:0.45, hi:["나 테니스 학원 다닌다~ 😎", "봐주기 없기다~ 😆"]},
     mom:{n:"엄마", e:"👩", T:1.42, Tmin:1.06, err:0.11, spd:2.3, aim:0.55, hi:["엄마 왕년에 테니스 좀 쳤다~ 😉", "살살 해 줄게~"]},
@@ -1096,67 +1116,86 @@ export function start(api){
     B0.board({a:"YUNA 유나", b:tnName().toUpperCase ? tnName() : tnName(), pa, pb, ga:G.games[0], gb:G.games[1], sv:G.srv === "yu" ? "a" : "b", msg:msg || (G.rally >= 3 ? `RALLY ${G.rally}` : "CREYONG TENNIS")}); }
   function tnStart(rv){
     const e = E(), C = tnC(); if(!e) return; startGame("tennis"); Object.assign(G, {rv, pts:[0, 0], games:[0, 0], srv:"yu", rally:0, best:0, phase:"ready", lt:now(), b:null, press:0, deuce:false, n:0, miss:0});
-    e.playRacket({yu:1, ...(rv !== "wall" ? {[rv]:1} : {})}); const tall = innerHeight > innerWidth * 1.1; e.playSet({camLock:0, camLead:rv === "wall" ? (tall ? 1.5 : 0.6) : (tall ? 4.6 : 1.6), cam:rv === "wall" ? {el:tall ? 0.72 : 0.66, d:tall ? 7.5 : 5.8} : {el:tall ? 0.78 : 0.6, d:tall ? 12.5 : 7.6}, mark:null});   // 세로 화면(폰)은 더 높이 · 멀리: 상대까지 보이게
+    e.playRacket({yu:1, ...(rv !== "wall" ? {[rv]:1} : {})}); const tall = innerHeight > innerWidth * 1.1; e.playSet({camLock:0, camLead:rv === "wall" ? (tall ? 1.5 : 0.6) : (tall ? 4.6 : 1.6), cam:rv === "wall" ? {el:tall ? 0.72 : 0.66, d:tall ? 7.5 : 5.8} : {el:tall ? 0.5 : 0.6, d:tall ? 12 : 7.6}, mark:null});   // 세로 화면(폰)은 더 높이 · 멀리: 상대까지 보이게
     Object.entries(S.vil || {}).forEach(([k]) => { const a = S.st?.actors?.[k]; if(!a) return; if(a.i > C.fence.i0 - 0.3 && a.i < C.fence.i1 + 0.3 && a.j > C.fence.j0 - 0.3 && a.j < C.fence.j1 + 0.3) e.playActor(k, {at:[27.0, 8 + Math.random() * 10, -PI / 2], to:null});   // 코트 안 동네 사람은 응원석 앞으로
       else if(rv === "wall" && a.i > C.wall.i0 - 1.5 && a.i < C.wall.i1 + 1.5 && a.j < 8) e.playActor(k, {at:[6.2 + Math.random() * 3, 12.2 + Math.random() * 1.6, PI], to:null}); });   // 벽치기 자리 비우기
+    e.playSet({face:PI});
     if(rv === "wall"){ G.until = now() + 60000; G.streak = 0; e.playSet({pos:[8.0, 5.6, PI], face:PI});
       toast("🧱 벽치기 연습!", "벽에 맞고 오는 공을 계속 받아치기 · 흰 줄 위로 · 3번 놓치면 끝", 2800); yuSay("벽아 덤벼라~ 💪", 1600); later(1600, () => tnFeed()); return; }
     const L = TN_RIV[rv]; e.playActor(rv, {at:[C.ci, C.bl0 - 0.4, 0], pose:"stand", to:null}); npcSay("@" + rv, pick(L.hi), 2600);
-    toast(`🎾 ${L.n}랑 테니스!`, "공 쪽으로 달려가면 저절로 쳐요 · 🎾 버튼 맞춰 누르면 강타 · 3판 2선승", 3200); tnBoard("READY"); later(2400, () => tnServe()); }
+    toast(`🎾 ${L.n}랑 테니스! (3판 2선승)`, "🔥강타 🌙로브 🪶드롭 · 버튼을 옆으로 끌면 그쪽으로 · 🏃대시", 4200); tnBoard("READY"); later(2400, () => tnServe()); }
   /* 서브 자리: 이 게임에서 친 점수 합이 짝수면 오른쪽(듀스 코트), 홀수면 왼쪽(애드 코트) */
   function tnServe(){ const e = E(), C = tnC(); if(!e || G?.type !== "tennis") return; const n = G.pts[0] + G.pts[1], dc = n % 2 === 0 ? 1 : -1; G.b = null; G.rally = 0; G.press = 0; G.dc = dc;
     if(G.srv === "yu"){ e.playSet({pos:[C.ci + dc * 0.9, C.bl1 + 0.4, PI], face:PI, freeze:true}); e.playActor(G.rv, {at:[C.ci - dc * 2.0, C.bl0 - 0.3, 0], to:null});
-      G.phase = "yuserve"; e.playTBall([C.ci + dc * 0.9 + 0.22, C.bl1 + 0.25, 0.62, 0.075]); tnBoard(); if(!rec.tnTip){ rec.tnTip = 1; save(); toast("🎾 유나 서브!", "버튼(스페이스)을 누르면 공을 띄워서 쳐요", 2400, true); } }
+      G.phase = "yuserve"; e.playTBall([C.ci + dc * 0.9 + 0.22, C.bl1 + 0.25, 0.62, 0.075]); tnBoard(); if(!rec.tnTip){ rec.tnTip = 1; save(); toast("🎾 유나 서브!", "🔥강서브는 빠르지만 가끔 네트 · 버튼 끌면 바깥/가운데로", 2800, true); } }
     else { e.playSet({pos:[C.ci + dc * 2.0, C.bl1 + 0.35, PI], face:PI, freeze:false}); e.playActor(G.rv, {at:[C.ci - dc * 0.9, C.bl0 - 0.35, 0], to:null});
       G.phase = "rvserve"; tnBoard(); const L = TN_RIV[G.rv];
       later(900, () => { if(G?.phase !== "rvserve") return; const a = S.st?.actors?.[G.rv], p0 = [a ? a.i - 0.2 : C.ci, (a ? a.j : C.bl0) + 0.15, 1.75]; E()?.playSwing(G.rv, "serve");
         later(260, () => { if(G?.phase !== "rvserve") return; sfx("blip"); const ti = C.ci + dc * (0.7 + Math.random() * (C.sw - 1.5)), tj = C.cj + 2.4 + Math.random() * 2.2;
           G.b = {p:p0, v:tnLaunch(p0, [ti, tj], Math.max(0.95, L.T * 0.92)), by:"rv", nb:0, serve:true}; G.phase = "rally"; }); }); } }
-  function tnYuServe(){ const e = E(), C = tnC(); if(G?.phase !== "yuserve" || !e) return; G.phase = "toss"; const st = S.st, i0 = st.i + 0.22, j0 = st.j - 0.15, t0 = now();
+  function tnYuServe(kind = "drive", aim = null){ const e = E(), C = tnC(); if(G?.phase !== "yuserve" || !e) return; G.phase = "toss"; const st = S.st, i0 = st.i + 0.22, j0 = st.j - 0.15, t0 = now();
     e.playSwing("yu", "serve"); sfx("jump"); const up = setInterval(() => { if(G?.phase !== "toss"){ clearInterval(up); return; } const u = (now() - t0) / 420; e.playTBall([i0, j0, 0.62 + Math.sin(Math.min(1, u) * PI / 2) * 1.05, 0.075]); }, 16); G.tm.push(up);
-    later(430, () => { clearInterval(up); if(G?.phase !== "toss") return; const dc = G.dc, ti = C.ci - dc * (0.6 + Math.random() * (C.sw - 1.4)), tj = C.cj - (2.3 + Math.random() * 2.3), p0 = [i0, j0, 1.65];
-      G.b = {p:p0, v:tnLaunch(p0, [ti, tj], 0.98), by:"yu", nb:0, serve:true}; G.phase = "rally"; e.playSet({freeze:false}); sfx("pick"); tnRvPlan(); }); }
+    later(430, () => { clearInterval(up); if(G?.phase !== "toss") return; const dc = G.dc, fast = kind === "drive", a = aim ?? (Math.abs(S.jx || 0) > 0.3 ? Math.sign(S.jx) : 0);
+      const x = a ? (a === -dc ? C.sw - 0.45 : 0.45) : 0.6 + Math.random() * (C.sw - 1.4), ti = C.ci - dc * x, tj = C.cj - (fast ? 3.4 + Math.random() * 1.6 : 2.3 + Math.random() * 2.3), p0 = [i0, j0, 1.65];   // 끌면 바깥(와이드) · 가운데(T)
+      const v = tnLaunch(p0, [ti, tj], fast ? 0.8 : 0.98); if(fast && Math.random() < 0.1) v[2] *= 0.55;   // 강서브는 가끔 네트
+      G.b = {p:p0, v, by:"yu", nb:0, serve:true, kind:fast ? "drive" : "safe", pw:fast}; G.phase = "rally"; e.playSet({freeze:false}); sfx(fast ? "boost" : "pick"); if(fast) e.playEmote?.("yu", "🔥", 600); tnRvPlan(); }); }
   /* 벽치기: 유나가 스스로 공을 떨어뜨려 침 */
   function tnFeed(){ const e = E(); if(G?.type !== "tennis" || G.rv !== "wall" || !e) return; const st = S.st; G.phase = "feed"; G.b = null; G.rally = 0;
     e.playTBall([st.i + 0.25, st.j - 0.25, 0.9, 0.075]); later(700, () => { if(G?.phase !== "feed") return; const s2 = S.st, p0 = [s2.i + 0.25, s2.j - 0.3, 0.75]; tnShot(p0, true); }); }
-  /* 유나가 침 (자동 또는 버튼 강타) */
-  function tnShot(p0, feed){ const e = E(), C = tnC(), st = S.st; if(!e || !st) return; const power = !feed && now() - (G.press || 0) < 520;
-    const ball = G.b, kind = ball ? ((ball.p[0] - st.i) * -Math.cos(st.h) + (ball.p[1] - st.j) * Math.sin(st.h) >= 0 ? "fore" : "back") : "fore"; e.playSwing("yu", kind);
-    const jx = S.jx || 0;
-    if(G.rv === "wall"){ const w = C.wall, ti = clampN(st.i + jx * 1.6 + (Math.random() - 0.5) * (0.8 + Math.min(2.4, G.rally * 0.09)), w.i0 + 0.3, w.i1 - 0.3);   // 오래 칠수록 공이 좌우로 더 튐
-      G.b = {p:p0, v:tnLaunch(p0, [ti, w.j - 1.6], power ? 0.62 : Math.max(0.62, 0.88 - G.rally * 0.012), true), by:"yu", nb:0, wall:true, pw:power}; G.phase = "rally"; }
-    else { const rv = st.actors?.[G.rv], ri = rv ? rv.i : C.ci, side = Math.abs(jx) > 0.3 ? Math.sign(jx) : (ri > C.ci ? -1 : 1) * (Math.random() < 0.8 ? 1 : -1);
-      let ti = C.ci + side * (power ? 0.72 + Math.random() * 0.22 : 0.25 + Math.random() * 0.45) * (C.sw - 0.35), tj = Math.max(C.bl0 + 0.55, C.cj - (power ? 5.4 + Math.random() * 3.0 : 3.4 + Math.random() * 4.4));
-      if(power && Math.random() < 0.07){ if(Math.random() < 0.5) ti = C.ci + side * (C.sw + 0.55); else tj = C.bl0 - 0.8; }   // 너무 세게 치면 가끔 아웃
-      const T = (power ? 0.8 : 1.15) * clampN(Math.hypot(ti - p0[0], tj - p0[1]) / 11.5, 0.85, 1.25);
-      G.b = {p:p0, v:tnLaunch(p0, [ti, tj], T), by:"yu", nb:0, pw:power}; G.phase = "rally"; }
-    G.rally++; G.press = 0; sfx(power ? "boost" : "pick");
-    if(power){ e.playEmote?.("yu", "💥", 700); if(Math.random() < 0.5) yuSay(pick(["받아라~!! 💥", "강스매시! 🔥", "얍!!"]), 900); }
-    else if(G.rally > 0 && G.rally % 5 === 0) yuSay(G.rv === "wall" ? `${G.rally}번! 🔥` : pick([`랠리 ${G.rally}번! 🔥`, "안 놓친다~ 😤"]), 1000);
+  /* 유나가 침: 버튼으로 고른 샷(강타·로브·드롭) 또는 저절로 막기 */
+  const TN_SHOT = {drive:["🔥", ["받아라~!! 💥", "강스매시! 🔥", "얍!!"]], lob:["🌙", ["넘어가라~ 🌙", "높이 높이~!"]], drop:["🪶", ["톡! 🪶", "살짝~ 😏"]]};
+  function tnShot(p0, feed){ const e = E(), C = tnC(), st = S.st; if(!e || !st) return; const t = now(), R = Math.random;
+    const pressed = !feed && t - (G.press || 0) < 700, kind = pressed ? (G.pk || "drive") : feed ? "feed" : "block", pf = pressed && (G.pf || t - G.press < 220);
+    const aim = pressed && G.paim ? G.paim : Math.abs(S.jx || 0) > 0.3 ? Math.sign(S.jx) : 0;
+    const ball = G.b, sk = ball ? ((ball.p[0] - st.i) * -Math.cos(st.h) + (ball.p[1] - st.j) * Math.sin(st.h) >= 0 ? "fore" : "back") : "fore"; e.playSwing("yu", sk);
+    if(G.rv === "wall"){ const w = C.wall, power = kind === "drive", ti = clampN(st.i + aim * 1.6 + (R() - 0.5) * (0.8 + Math.min(2.4, G.rally * 0.09)), w.i0 + 0.3, w.i1 - 0.3);   // 오래 칠수록 공이 좌우로 더 튐
+      G.b = {p:p0, v:tnLaunch(p0, [ti, w.j - 1.6], power ? 0.62 : kind === "lob" ? 1.1 : Math.max(0.62, 0.88 - G.rally * 0.012), true), by:"yu", nb:0, wall:true, pw:power}; G.phase = "rally"; }
+    else { const rv = st.actors?.[G.rv], ri = rv ? rv.i : C.ci, side = aim || (ri > C.ci ? -1 : 1) * (R() < 0.8 ? 1 : -1), W = C.sw - 0.35;
+      let ti, tj, T, err = 0;
+      if(kind === "drive"){ ti = C.ci + side * (pf ? 0.72 + R() * 0.2 : 0.55 + R() * 0.35) * W; tj = Math.max(C.bl0 + 0.5, C.cj - (5.4 + R() * 2.8)); T = pf ? 0.72 : 0.8; err = pf ? 0.02 : 0.09; }
+      else if(kind === "lob"){ ti = C.ci + side * (0.3 + R() * 0.45) * W; tj = Math.max(C.bl0 + 0.45, C.cj - (7.0 + R() * 1.6)); T = 1.95; err = pf ? 0.02 : 0.07; }
+      else if(kind === "drop"){ ti = C.ci + side * (0.2 + R() * 0.55) * W; tj = C.cj - (1.4 + R() * 1.1); T = 0.95; err = pf ? 0.05 : 0.15; }
+      else { ti = C.ci + side * R() * 0.3 * W; tj = C.cj - (3.2 + R() * 2.2); T = 1.3; }
+      if(kind === "drive" || kind === "block" || kind === "feed") T *= clampN(Math.hypot(ti - p0[0], tj - p0[1]) / 11.5, 0.85, 1.25);
+      const miss = R() < err; let v;
+      if(miss && kind === "drop"){ v = tnLaunch(p0, [ti, tj], T); v[2] *= 0.55; }   // 드롭 실수 = 네트
+      else { if(miss){ if(kind === "drive" && R() < 0.5) ti = C.ci + side * (C.sw + 0.55); else tj = C.bl0 - 0.8; } v = tnLaunch(p0, [ti, tj], T); }
+      G.b = {p:p0, v, by:"yu", nb:0, pw:kind === "drive", kind, pf}; G.phase = "rally";
+      if(pressed && !miss) e.playRing?.(ti, tj, false); }   // 보낸 자리 표시
+    G.rally++; G.press = 0; G.pk = null; G.paim = null; G.pf = false; sfx(kind === "drive" ? "boost" : "pick");
+    if(pf){ e.playEmote?.("yu", "✨", 700); if(R() < 0.6) toast("✨ 나이스 타이밍!", "", 700); }
+    else if(TN_SHOT[kind]){ e.playEmote?.("yu", TN_SHOT[kind][0], 700); if(R() < 0.4) yuSay(pick(TN_SHOT[kind][1]), 900); }
+    else if(kind === "block" && !G.blockTip && G.rv !== "wall"){ G.blockTip = 1; later(600, () => toast("🛡️ 저절로 막기만 했어요", "공 오기 직전에 🔥🌙🪶 버튼을 누르면 내가 고른 샷!", 2200)); }
+    if(G.rally > 0 && G.rally % 5 === 0) yuSay(G.rv === "wall" ? `${G.rally}번! 🔥` : pick([`랠리 ${G.rally}번! 🔥`, "안 놓친다~ 😤"]), 1000);
     if(G.rv !== "wall") tnRvPlan(); tnBoard(); }
   /* 상대가 공을 따라 뜀: 닿을 수 있으면 받아치고, 늦거나 실수면 놓침 */
   function tnRvPlan(){ const C = tnC(), b = G.b, L = TN_RIV[G.rv], a = S.st?.actors?.[G.rv]; if(!b || !L) return; const pr = tnPredict(b);
     G.plan = null; if(pr.net || !pr.land || !tnIn(C, pr.land[0], pr.land[1], -1) || !pr.hit){ G.plan = {let:true}; return; }   // 아웃·네트면 안 쫓아감
     const at = [pr.hit[0] + 0.3, Math.min(C.cj - 1.0, pr.hit[1] - 0.2)], d = a ? Math.hypot(at[0] - a.i, at[1] - a.j) : 0, late = d / L.spd > pr.th + 0.12;
-    const err = Math.random() < L.err + (b.pw ? 0.16 : 0) + Math.min(0.12, G.rally * 0.008);
-    G.plan = {late, err, at}; E()?.playActor(G.rv, {to:at, spd:late ? L.spd : Math.max(1.2, Math.min(L.spd, d / Math.max(0.3, pr.th - 0.1)))}); }
-  function tnRvHit(st){ const e = E(), C = tnC(), b = G.b, L = TN_RIV[G.rv], a = st.actors?.[G.rv]; if(!e || !a) return; const err = G.plan?.err;
-    e.playSwing(G.rv, b.p[0] - a.i < 0 ? "fore" : "back"); e.playActor(G.rv, {h:0}); sfx("blip");
-    const aim = Math.min(1, L.aim * (0.35 + G.rally * 0.14)), away = st.i > C.ci ? -1 : 1;
-    let ti = Math.random() < aim ? C.ci + away * (1.0 + Math.random() * (C.sw - 1.5)) : st.i + (Math.random() - 0.5) * 1.8, tj = C.cj + 3.3 + Math.random() * (C.hl - 4.3);
-    ti = clampN(ti, C.ci - C.sw + 0.35, C.ci + C.sw - 0.35);
-    const p0 = [b.p[0], b.p[1], Math.max(0.35, b.p[2])], T = Math.max(L.Tmin, L.T - G.rally * 0.02) * clampN(Math.hypot(ti - p0[0], tj - p0[1]) / 11.5, 0.85, 1.2);
+    const near = a && a.j > C.cj - 5.2, deep = a && a.j < C.cj - 6.2;   // 상대가 네트 가까이 · 뒤쪽
+    const ex = b.kind === "drive" ? (b.pf ? 0.2 : 0.12) : b.kind === "lob" ? (near ? 0.5 : 0.04) : b.kind === "drop" ? (deep ? 0.22 : 0.06) : 0;
+    const err = Math.random() < L.err + ex + Math.min(0.12, G.rally * 0.008);
+    G.plan = {late, err, at, smash:b.kind === "lob" && !near && Math.random() < L.aim * 0.45, weak:b.kind === "drop", attack:b.kind === "block"}; E()?.playActor(G.rv, {to:at, spd:late ? L.spd : Math.max(1.2, Math.min(L.spd, d / Math.max(0.3, pr.th - 0.1)))}); }
+  function tnRvHit(st){ const e = E(), C = tnC(), b = G.b, L = TN_RIV[G.rv], a = st.actors?.[G.rv]; if(!e || !a) return; const pl = G.plan || {}, err = pl.err;
+    e.playSwing(G.rv, pl.smash ? "serve" : b.p[0] - a.i < 0 ? "fore" : "back"); e.playActor(G.rv, {h:0}); sfx(pl.smash ? "boost" : "blip");
+    const aim = Math.min(1, L.aim * (0.35 + G.rally * 0.14) + (pl.attack ? 0.35 : 0) + (pl.smash ? 0.5 : 0)), away = st.i > C.ci ? -1 : 1;
+    let ti = Math.random() < aim ? C.ci + away * (1.0 + Math.random() * (C.sw - 1.5)) : st.i + (Math.random() - 0.5) * 1.8, tj = pl.weak ? C.cj + 2.0 + Math.random() * 2.0 : C.cj + 3.3 + Math.random() * (C.hl - 4.3);
+    ti = clampN(pl.weak ? C.ci + (Math.random() - 0.5) * 2.4 : ti, C.ci - C.sw + 0.35, C.ci + C.sw - 0.35);
+    const p0 = [b.p[0], b.p[1], Math.max(0.35, b.p[2])], T = pl.weak ? 1.35 : Math.max(L.Tmin, L.T - G.rally * 0.02) * clampN(Math.hypot(ti - p0[0], tj - p0[1]) / 11.5, 0.85, 1.2) * (pl.smash ? 0.62 : pl.attack ? 0.88 : 1);
+    if(pl.smash){ e.playEmote?.("@" + G.rv, "💥", 700); if(Math.random() < 0.6) npcSay("@" + G.rv, pick(["스매시~! 💥", "높은 공은 내 거~ 😎"]), 1300); }
+    else if(pl.weak && Math.random() < 0.5) npcSay("@" + G.rv, pick(["헉헉 겨우 받았다 😵", "드롭이라니! 😮"]), 1300);
     let v;
     if(err && Math.random() < 0.45){ v = tnLaunch(p0, [ti, C.cj + 2.5], T * 0.8); v[2] *= 0.55; }   // 네트에 걸림
     else { if(err){ if(Math.random() < 0.5) ti = C.ci + (Math.random() < 0.5 ? -1 : 1) * (C.sw + 0.6); else tj = C.bl1 + 0.9; } v = tnLaunch(p0, [ti, tj], T); }
     G.b = {p:p0, v, by:"rv", nb:0}; G.plan = null; G.rally++; tnBoard();
     later(450, () => { if(G?.type === "tennis" && G.b?.by === "rv") E()?.playActor(G.rv, {to:[C.ci + (p0[0] - C.ci) * 0.35, C.bl0 - 0.4], spd:L.spd * 0.7}); }); }
-  function tnPress(){ const e = E(); if(G?.type !== "tennis" || !e) return;
-    if(G.phase === "yuserve"){ tnYuServe(); return; }
+  function tnPress(kind = "drive", aim = null){ const e = E(); if(G?.type !== "tennis" || !e) return;
+    if(G.phase === "yuserve"){ tnYuServe(kind, aim); return; }
     if(G.phase === "feed" || G.phase === "toss" || G.phase === "point" || G.phase === "end") return;
-    G.press = now(); const b = G.b, st = S.st;
-    if(b && st && b.by !== "yu" && tnReach(b, st, true)){ tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]); return; }
-    e.playSwing("yu", "fore"); }
+    G.press = now(); G.pk = kind; G.paim = aim; G.pf = false; const b = G.b, st = S.st;
+    if(b && st && b.by !== "yu" && tnReach(b, st, true)){ G.pf = true; tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]); return; }
+    if(b && b.by !== "yu" && !b.done) e.playEmote?.("yu", TN_SHOT[kind]?.[0] || "🎾", 450);   // 공 오는 중: 샷 준비 (0.7초 안에 닿으면 그 샷으로)
+    else e.playSwing("yu", "fore"); }
   function tnReach(b, st, btn){ const C = tnC(), d = Math.hypot(b.p[0] - st.i, b.p[1] - st.j);
     if(b.wall) return b.wallHit && b.nb <= 1 && b.p[2] < 1.5 && d < (btn ? 1.3 : 1.12);
     if(b.p[1] < C.cj + 0.25) return false;
@@ -1186,7 +1225,7 @@ export function start(api){
       npcSay("@" + rv, w === "yu" ? pick(["우리 유나 테니스 선수 해도 되겠다! 🏆", "졌다 졌어~ 진짜 잘한다 👏"]) : pick(["재밌었다~ 또 하자! 😆", "다음엔 유나가 이길걸? 😉"]), 2800);
       e?.playEmote?.("yu", w === "yu" ? "🏆" : "😤", 1600); firstUse("ct_tennis", "🎾 테니스 한 판"); renderCard(); }
     later0(1200, checkBadges); later(3000, () => endGame()); }
-  function tnClean(rv){ const e = E(); if(!e) return; e.playRacket(null); e.playTBall(null); e.playSet({camLock:null, camLead:null, cam:{el:0.62, d:5.2}, freeze:false});
+  function tnClean(rv){ const e = E(); if(!e) return; e.playRacket(null); e.playTBall(null); e.playSet({camLock:null, camLead:null, cam:{el:0.62, d:5.2}, freeze:false, face:null});
     if(rv === "coach"){ const fix = AREA_MOD.court?.npc?.coach; if(fix && S.floor === "court") e.playActor("coach", {at:fix, to:null}); }
     else if(rv && rv !== "wall" && !(rv === "fr" && Q?.id === "friend")) e.playActor(rv, null);
     AREA_MOD.court?.board?.(null); setup(); }
@@ -1199,7 +1238,7 @@ export function start(api){
       if(ev === "low"){ tnPoint("x", "앗 너무 낮다! 흰 줄 위로 😅"); return; }
       if(ev === "wall"){ b.wallHit = true; b.nb = 0; sfx("blip"); return; }
       if(ev === "bounce"){ if(!b.wallHit){ tnPoint("x", "벽까지 못 갔다 😅"); return; } b.nb++; if(b.nb >= 2){ tnPoint("x"); return; } }
-      if(b.wallHit && tnReach(b, st, false)) tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]);
+      if(b.wallHit && tnReach(b, st, now() - (G.press || 0) < 700)) tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]);
       if(b.wallHit && (b.p[1] > st.j + 2.5 || b.p[1] > 9.5)) tnPoint("x");
       return; }
     if(ev === "net"){ sfx("bump"); }
@@ -1209,10 +1248,10 @@ export function start(api){
         }
       else { tnPoint(b.by, b.by === "yu" ? pick(["✨ 유나 득점!", "🎯 못 받았다!"]) : ""); return; }
       b.nb++; }
-    if(b.by !== "yu" && tnReach(b, st, false)){ tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]); return; }
+    if(b.by !== "yu" && tnReach(b, st, now() - (G.press || 0) < 700)){ tnShot([b.p[0], b.p[1], Math.max(0.35, b.p[2])]); return; }
     if(b.by === "yu" && G.plan && !G.plan.let && !G.plan.late){ const a = st.actors?.[G.rv]; if(a && b.nb === 1 && b.p[2] < 1.4 && Math.hypot(b.p[0] - a.i, b.p[1] - a.j) < 1.0) tnRvHit(st); }
     if(b.by === "yu" && G.plan?.late && b.nb === 1 && Math.random() < 0.02) e.playEmote?.([...(G.plan.at), 1.2], "💦", 500); }
-  window.__ygTN = {start:rv => tnStart(rv), press:() => tnPress(), g:() => G};   // 시험용
+  window.__ygTN = {start:rv => tnStart(rv), press:(k, a) => tnPress(k, a), g:() => G};   // 시험용
   /* 물총 싸움 (2026-11-28, 옥상 수영장): 물속에서 7번 먼저 맞히면 승. 💦 버튼 = 쏘기(상대 쪽을 보고 있어야 맞음), 물은 6발 · 안 쏘면 다시 참
      상대가 💦 들면 곧 쏨 → 헤엄쳐서 피하기. 상대도 유나가 쏘면 가끔 옆으로 피함 */
   const SQ_RIV = {fr:{n:"지유", iv:3000, dodge:0.22, lead:0.15, hit:["으앗 차가워! 😆", "나도 간다~ 💦"], hurt:["으~ 맞았다 🥶", "치사해~ 😆"]},
@@ -2166,7 +2205,9 @@ export function start(api){
       const qn = n && sp && sp.f === st.floor && (sp.talk === n.id || Array.isArray(sp.talk) && sp.talk.includes(n.id));   // 할 일 상대가 엘베 앞에 있어도 말 걸기 먼저
       const land = S.boat && st.floor === "river" && now() - S.boat.t0 > 2500 && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) < 1.7;   // 오리배: 선착장 앞이면 내리기
       if(S.boat && Math.hypot(st.i - S.boat.bt[0], st.j - S.boat.bt[1]) > 2.5) S.boat.far = true;
-      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "tennis" ? (G.phase === "yuserve" ? "serve" : "swing") : G?.type === "squirt" ? "squirt" : G?.type === "race" ? "kick" : G?.type === "claw" ? "grab" : retry ? "retry" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
+      let mode = S.boat ? (land ? "land" : "") : G?.type === "grill" ? "flip" : G?.type === "arcade" ? "mash" : G?.type === "futsal" ? "shoot" : G?.type === "pong" ? "hit" : G?.type === "tennis" ? "" : G?.type === "squirt" ? "squirt" : G?.type === "race" ? "kick" : G?.type === "claw" ? "grab" : retry ? "retry" : hideAt ? "hide" : PR.chase ? "" : qn ? "talk" : nearElev ? "elev" : booth ? "dress" : myRoom && PR.place ? "place" : use ? "use:" + use.k : n ? "talk" : myRoom ? "room" : !G && !S.busy && PR.down >= 4 && !st.moving && PRANK[st.floor] ? "tidy" : "";
+      { const tp = G?.type === "tennis" && G.phase !== "end"; if(tnPad.hidden === tp){ tnPad.hidden = !tp; jumpB.style.visibility = tp ? "hidden" : ""; runB.querySelector("b").textContent = tp ? "대시" : "달리기"; }
+        const sv = tp && G.phase === "yuserve" ? "1" : ""; if(tp && tnPad.dataset.sv !== sv){ tnPad.dataset.sv = sv; tnPad.querySelector(".d b").textContent = sv ? "강서브" : "강타"; tnPad.querySelector(".l b").textContent = sv ? "서브" : "로브"; tnPad.querySelector(".p b").textContent = sv ? "서브" : "드롭"; } }
       if(mode !== act.dataset.m || (mode === "talk" && act.dataset.id !== n.id)){
         act.dataset.m = mode; act.dataset.id = n?.id || ""; act.hidden = !mode;
         if(mode === "elev"){ act.querySelector("span").textContent = "🛗"; act.querySelector("b").textContent = matchMedia("(hover:hover) and (pointer:fine)").matches ? "숫자 키로 층" : "엘리베이터"; }
@@ -2225,6 +2266,7 @@ export function start(api){
     auInit();
     if(e.key === "Shift"){ if(!e.repeat) doRun(); return; }
     if(KM[e.code]){ keys.add(KM[e.code]); push(); e.preventDefault(); e.stopPropagation(); return; }
+    if(G?.type === "tennis" && /^Key[JKL]$/.test(e.code)){ if(!e.repeat) tnPress(e.code === "KeyJ" ? "drive" : e.code === "KeyK" ? "lob" : "drop"); e.preventDefault(); return; }   // 테니스: J 강타 · K 로브 · L 드롭 (방향은 화살표)
     if(e.code === "Space"){ doJump(); e.preventDefault(); return; }
     if(e.code === "KeyF" && S.st?.swim){ nextStroke(); e.preventDefault(); return; }
     const dn = /^(?:Digit|Numpad)([1-9])$/.exec(e.code);   // 엘리베이터 앞이면 숫자 키로 층 고르기 (2026-11-23 감독님 "키보드로 엘베 층을 고를수없네")
@@ -2250,7 +2292,7 @@ export function start(api){
     if(G?.type === "arcade"){ mash(); return; }
     if(G?.type === "futsal"){ pass(); return; }
     if(G?.type === "pong"){ hit(); return; }
-    if(G?.type === "tennis"){ tnPress(); return; }
+    if(G?.type === "tennis"){ tnPress("drive"); return; }
     if(G?.type === "squirt"){ sqFire(); return; }
     if(G?.type === "race"){ rcTap(); return; }
     if(G?.type === "claw"){ grab(); return; }
@@ -2273,6 +2315,7 @@ export function start(api){
   function charge(st){
     const tn = now(), dt = Math.min(0.1, (tn - (S.lastT || tn)) / 1000); S.lastT = tn;
     if(!(st.boost > 0) && !st.swim){ const was = S.charge; S.charge = Math.min(1, S.charge + dt / (st.moving ? 9 : 22)); if(was < 1 && S.charge >= 1){ sfx("ready"); runB.classList.add("full"); } }
+    if(G?.type === "tennis"){ const q = 1 - Math.max(0, (S.dashCd || 0) - tn) / 1400; runB.style.setProperty("--p", q.toFixed(3)); runB.classList.toggle("full", q >= 1); runB.classList.toggle("go", st.boost > 0); return; }
     runB.style.setProperty("--p", Math.min(1, st.boost > 0 ? st.boost / 4500 : S.charge).toFixed(3)); runB.classList.toggle("go", st.boost > 0);
   }
   /* 달리다 엄마한테 걸리면 20초 달리기 금지 (2026-11-23 감독님 "달리다가 엄마한테 걸리면 못 뛰는것도 있으면 좋겟고") */
@@ -2291,7 +2334,9 @@ export function start(api){
     later0(20000, () => { runB.classList.remove("ban"); toast("🏃‍♀️ 다시 달릴 수 있어요", "엄마 앞에선 살살~", 1700); });
   }
   function doRun(){
-    const e = E(); if(!e || S.st?.boost > 0) return;
+    const e = E(); if(!e) return;
+    if(G?.type === "tennis"){ if(now() < (S.dashCd || 0) || G.phase === "end") return; S.dashCd = now() + 1400; e.playSet({boost:520}); sfx("boost"); e.playEmote?.("yu", "💨", 500); return; }   // 테니스 대시: 0.5초 확 (1.4초마다)
+    if(S.st?.boost > 0) return;
     if(S.runBan > now()){ yuSay(pick(["엄마가 뛰지 말랬어… 😢", "지금은 걸어야 해 🥲"]), 1400); toast("🚫 달리기 금지 중", `${Math.ceil((S.runBan - now()) / 1000)}초 남았어요`, 1300); return; }
     if(S.st?.swim){ yuSay("물속에선 못 달려~ 🏊‍♀️", 1300); return; }
     if(HOLD[carry]?.spill){ yuSay(pick([`뛰면 ${carry} 쏟아져요~ 천천히!`, "달리면 흘려요 😅 조심조심"]), 1600); return; }
