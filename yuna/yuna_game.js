@@ -475,15 +475,18 @@ const mtof = n => 440 * Math.pow(2, (n - 69) / 12);
 function auInit(){
   const C = window.AudioContext || window.webkitAudioContext; if(!C) return null;
   try { if(navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch(_){}   // 아이폰 무음 스위치여도 들리게
-  if(!AU.ctx){ const c = AU.ctx = new C(); AU.m = c.createGain(); AU.m.gain.value = AU.on ? 0.9 : 0; AU.m.connect(c.destination);
+  if(!AU.ctx){ const c = AU.ctx = new C(); AU.m = c.createGain(); AU.m.gain.value = AU.on && !AU.duck ? 0.9 : 0; AU.ct = -1; AU.ctAt = performance.now(); AU.tryAt = 0; AU.m.connect(c.destination);
     AU.sfx = c.createGain(); AU.sfx.gain.value = 0.55; AU.sfx.connect(AU.m); AU.bgm = c.createGain(); AU.bgm.gain.value = 0.28; AU.bgm.connect(AU.m);
     const len = c.sampleRate * 0.5 | 0, b = c.createBuffer(1, len, c.sampleRate), dd = b.getChannelData(0); for(let k = 0; k < len; k++) dd[k] = Math.random() * 2 - 1; AU.noise = b; }
-  if(AU.ctx.state !== "running" && AU.ctx.state !== "closed" && !document.hidden) AU.ctx.resume?.();
+  if(AU.ctx.state !== "running" && AU.ctx.state !== "closed" && !document.hidden) AU.ctx.resume?.()?.catch?.(() => {});
   if(!AU.iv){ AU.next = AU.ctx.currentTime + 0.15; AU.step = 0; AU.iv = setInterval(bgmPump, 90); }
   return AU.ctx;
 }
-function auStop(){ clearInterval(AU.iv); AU.iv = 0; try { AU.ctx?.close(); } catch(_){} AU.ctx = null; }
-function auSet(on){ AU.on = on; try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} if(AU.m) AU.m.gain.setTargetAtTime(on ? 0.9 : 0, AU.ctx.currentTime, 0.05); }
+function auStop(){ clearInterval(AU.iv); AU.iv = 0; try { AU.ctx?.close()?.catch?.(() => {}); } catch(_){} AU.ctx = null; }
+/* 소리가 한 번 끊기면 안 돌아오던 것 (2026-11-28 감독님 "한번씩 소리도 안나고"): 아이폰은 전화·시리·다른 앱 소리·잠금 뒤에 오디오가
+   "interrupted"로 멈추거나, "running"인데 시계가 멈춘 채 조용해짐 → 손가락을 댈 때 확인해서 살리고, 그래도 안 되면 소리 엔진을 새로 만듦 */
+function auRebuild(){ AU.rebuilt = (AU.rebuilt || 0) + 1; auStop(); AU.stuck = false; AU.woke = false; return auInit(); }
+function auSet(on){ AU.on = on; try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} if(AU.m) AU.m.gain.setTargetAtTime(on && !AU.duck ? 0.9 : 0, AU.ctx.currentTime, 0.05); }
 function tone(f, t0, dur, {type = "sine", vol = 0.2, slide = 0, out} = {}){
   const c = AU.ctx; if(!c) return; const o = c.createOscillator(), g = c.createGain();
   o.type = type; o.frequency.setValueAtTime(f, t0); if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t0 + dur);
@@ -803,7 +806,9 @@ function wayOut(f, to){
 }
 function bgmFloor(f){ const k = BGM[f] ? f : "main"; if(AU.trk !== k){ AU.trk = k; AU.step = 0; } }
 function bgmPump(){
-  const c = AU.ctx; if(!c) return; if(c.state !== "running"){ AU.next = c.currentTime + 0.1; return; }
+  const c = AU.ctx; if(!c) return; const pn = performance.now();
+  if(c.state === "running" && !document.hidden){ if(c.currentTime !== AU.ct){ AU.ct = c.currentTime; AU.ctAt = pn; } else if(pn - AU.ctAt > 1500) AU.stuck = true; } else AU.ctAt = pn;   // 켜져 있다는데 시계가 1.5초 넘게 멈춤 = 조용히 죽은 것
+  if(c.state !== "running"){ AU.next = c.currentTime + 0.1; return; }
   const T = BGM[AU.trk] || BGM.main, e8 = 60 / T.bpm / 2;
   while(AU.next < c.currentTime + 0.35){
     const t = AU.next, s = AU.step % 64, ch = T.ch[(s >> 3) % T.ch.length], b8 = s % 8;
@@ -1842,9 +1847,9 @@ export function start(api){
   /* 나이트 레이스 (2026-11-28 감독님 "이 안에서 레이싱게임도. 진짜 레이싱게임처럼. 니드포스피드처럼"): 오락실 RACER 기계나 할 일 목록에서 들어감. 화면은 race3d.js가 따로 띄우고, 그동안 타워는 쉼 */
   async function openRace(){
     if(S.race) return; const e = E(); S.race = true; keys.clear(); push(); panel.hidden = true; endGame(); e?.playSet({freeze:true});
-    const back = () => { S.race = false; const e2 = E(); e2?.pause?.(false); e2?.playSet({freeze:false}); if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(AU.on ? 0.9 : 0, AU.ctx.currentTime, 0.2); };
+    const back = () => { S.race = false; AU.duck = false; const e2 = E(); e2?.pause?.(false); e2?.playSet({freeze:false}); if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(AU.on ? 0.9 : 0, AU.ctx.currentTime, 0.2); };
     try { const m = await import("./race3d.js"); if(!m.webglOK()) throw new Error("webgl");
-      if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(0, AU.ctx.currentTime, 0.1); e?.pause?.(true);
+      AU.duck = true; if(AU.m && AU.ctx) AU.m.gain.setTargetAtTime(0, AU.ctx.currentTime, 0.1); e?.pause?.(true);
       m.open({sound:AU.on, best:rec.race,
         onSound(on){ AU.on = on; try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} sndB.textContent = on ? "🔊" : "🔇"; },
         onEnd(r){ const o = rec.race = rec.race || {}; o.runs = (o.runs || 0) + 1; if(!(o.time > 0) || r.time < o.time){ o.time = r.time; o.lap = r.bestLap; } if(!(o.rank > 0) || r.rank < o.rank) o.rank = r.rank; if(r.rank === 1) o.wins = (o.wins || 0) + 1; S.raceEnd = r; save(); },
@@ -2421,9 +2426,16 @@ export function start(api){
   }
   runB.addEventListener("pointerdown", ev => { ev.preventDefault(); ev.stopPropagation(); doRun(); });
   /* 아이폰은 손가락을 뗄 때(touchend·click)만 소리를 열어 줌 → 그때 무음 한 번 틀어 깨움 (2026-11-23 감독님 "음악이랑 효과음 안들리는데") */
-  const auKick = () => { const c = auInit(); if(c && !AU.woke){ try { const b = c.createBufferSource(); b.buffer = c.createBuffer(1, 1, 22050); b.connect(c.destination); b.start(0); AU.woke = c.state === "running"; } catch(_){} } },
-    auVis = () => { if(AU.ctx) document.hidden ? AU.ctx.suspend() : AU.ctx.resume(); }, AU_EV = ["pointerdown", "touchend", "click", "keydown"];
-  AU_EV.forEach(k => addEventListener(k, auKick, true)); document.addEventListener("visibilitychange", auVis); auInit();
+  const auKick = () => { const pn = performance.now(), o = AU.ctx;
+      if(o && (AU.stuck || (o.state !== "running" && AU.tryAt && pn - AU.tryAt > 700)) && !(pn - (AU.rbAt || -1e9) < 4000)){ AU.rbAt = pn; auRebuild(); }   // 지난번 깨우기가 0.7초 넘게 안 먹힘 → 새로
+      const c = auInit(); if(!c) return;
+      if(c.state !== "running"){ if(!AU.tryAt) AU.tryAt = pn; } else AU.tryAt = 0;
+      if(!AU.woke){ try { const b = c.createBufferSource(); b.buffer = c.createBuffer(1, 1, 22050); b.connect(c.destination); b.start(0); AU.woke = c.state === "running"; } catch(_){} } },
+    auVis = () => { if(!AU.ctx) return; if(document.hidden){ AU.ctx.suspend().catch(() => {}); return; }
+      AU.woke = false; AU.tryAt = 0; AU.ctAt = performance.now(); AU.ctx.resume().catch(() => {}); },   // 돌아오면 다음 터치 때 다시 깨움
+    auShow = ev => { if(ev.persisted) auVis(); }, AU_EV = ["pointerdown", "touchend", "click", "keydown"];
+  AU_EV.forEach(k => addEventListener(k, auKick, true)); document.addEventListener("visibilitychange", auVis); addEventListener("pageshow", auShow); auInit();
+  window.__ygAU = AU;   // 시험용
   /* 버튼 두 개를 같이 누르거나 두 번 톡 치면 화면이 확대되던 것: 게임 중엔 확대 막기 (2026-11-23 감독님 "갑자기 확대되서 방향키 숨음") */
   const noZoom = ev => ev.preventDefault(), oldTA = api.host.style.touchAction;
   api.host.style.touchAction = "none"; ["gesturestart", "gesturechange", "dblclick"].forEach(k => document.addEventListener(k, noZoom, {passive:false}));
@@ -2444,7 +2456,7 @@ export function start(api){
   function stop(){
     if(!live) return; live = false; clearTimeout(waitT); clearInterval(S.sitIv); if(S.film) window.yunaFilm?.(false); endGame(); save();
     removeEventListener("keydown", kd, true); removeEventListener("keyup", ku, true); removeEventListener("blur", blur);
-    AU_EV.forEach(k => removeEventListener(k, auKick, true)); document.removeEventListener("visibilitychange", auVis); auStop(); AU.woke = false;
+    AU_EV.forEach(k => removeEventListener(k, auKick, true)); document.removeEventListener("visibilitychange", auVis); removeEventListener("pageshow", auShow); auStop(); AU.woke = false; AU.duck = false;
     ["gesturestart", "gesturechange", "dblclick"].forEach(k => document.removeEventListener(k, noZoom)); api.host.style.touchAction = oldTA;
     try { E()?.playInput(0, 0); E()?.playStop(); } catch(e){ console.warn(e); }
     root.remove(); api.exit?.();
