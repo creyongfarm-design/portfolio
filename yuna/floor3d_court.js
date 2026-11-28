@@ -1,5 +1,5 @@
-/* 강변 테니스장 3D (2026-11-28 감독님 "수영장 테니스장 다 했어?" · "뭔 테니스도 치고 수영장도 만들고") — tower3d_floor.js 층 정의, 유나 모드로만 감
-   강변 공원 오른쪽 아래 "테니스장 →" 길로 나오면 여기 왼쪽 입구 (0.35, 13). 칸 i 0~31 · j 0~26, 1칸 ≈ 1.28 m (유나 키 1칸)
+/* 스포츠센터 실내 테니스장 3D (2026-11-28 감독님 "수영장 따로 만들라고 올림픽 규격으로. 체육관을 만들란 소리잖아") — tower3d_floor.js 층 정의, 유나 모드로만 감
+   크레용 스포츠센터(floor3d_gym.js) 50m 수영장 오른쪽 문으로 나오면 여기 왼쪽 문 (0.35, 13). 실내: 벽·천장 조명, 비 와도 침. 칸 i 0~31 · j 0~26, 1칸 ≈ 1.28 m (유나 키 1칸)
    코트는 실제 규격: 복식 23.77 × 10.97 m (18.57 × 8.57칸), 단식 폭 8.23 m, 서비스 라인은 네트에서 6.40 m, 네트 가운데 0.914 m · 기둥 1.07 m
    코트는 j 방향으로 길게: 유나 쪽은 +j (카메라 쪽), 상대는 −j. 철망은 먼 쪽·옆은 높게(3 m), 카메라 쪽은 낮게 (인형집처럼)
    - 왼쪽: 관리실 · 자판기 · 벽치기 연습 벽 · 음수대 · 등나무 쉼터 · 라켓 바구니
@@ -23,7 +23,7 @@ const CART = [12.55, 20.9];                                              // 공 
 const WALLP = {i0:5.4, i1:10.6, j:0.75, z:82};                           // 벽치기 연습 벽
 const KIOSK = {i0:0.5, i1:4.0, j0:0.5, j1:3.8};
 const BLEACH = {i0:27.35, j0:6.6, j1:20.2, d:0.86, n:3};
-const LAMPS = [[9.0, 11.4], [9.0, 21.0], [0.9, 15.2], [5.0, 8.6], [29.2, 4.4], [29.2, 22.4], [10.7, 25.9]];
+const CEIL = [5.0, 13.0, 19.0, 25.0].flatMap(i => [5.0, 13.4, 21.4].map(j => [i, j]));   // 천장 긴 등
 const RB = ["#F4A7B9", "#F9C99B", "#F6E39A", "#A8DCC8", "#A9CBEA", "#C8B4D0"];
 
 let K = null, W = null;
@@ -57,22 +57,18 @@ function paintKit(c, dark){
 }
 function paintCourt(c, dark){
   const p = paintKit(c, dark), v = p.v;
-  // 잔디
-  p.rect(EXT[0], EXT[1], EXT[2], EXT[3], v("#BFDDA2", "#2C4330"));
-  c.globalAlpha = dark ? 0.07 : 0.15; for(let k = 0; k < 4200; k++){ c.fillStyle = k % 3 ? "#FFFFFF" : "#4E7E46"; c.fillRect(EXT[0] + rnd(k) * 32.2, EXT[1] + rnd(k + 91) * 27.2, 0.05, 0.05); } c.globalAlpha = 1;
-  for(let k = 0; k < 160; k++){ const i = EXT[0] + rnd(k * 5 + 3) * 32.2, j = EXT[1] + rnd(k * 7 + 1) * 27.2; if(i > FN.i0 - 0.3 && i < FN.i1 + 0.3 && j > FN.j0 - 0.3 && j < FN.j1 + 0.3) continue;
-    c.fillStyle = v(["#FFFFFF", "#FFF2A8", "#F7D3E0"][k % 3], ["rgba(255,255,255,.25)", "rgba(255,240,160,.22)", "rgba(240,190,210,.2)"][k % 3]); c.beginPath(); c.arc(i, j, 0.045 + (k % 4) * 0.01, 0, 7); c.fill(); }
-  // 길: 입구 → 문 두 개 · 관리실 앞 · 관중석 뒤로 가는 길
-  const pc = v("#F0E6D5", "#3F3A34"), pl = v("rgba(120,100,70,.12)", "rgba(0,0,0,.25)");
-  p.rect(EXT[0], 12.35, 10.7, 13.65, pc); for(let i = EXT[0] + 0.4; i < 10.7; i += 0.5) p.line(i, 12.35, i, 13.65, pl, 0.012);
-  p.rect(9.6, 7.6, 11.45, 19.2, pc); for(let j = 7.9; j < 19.2; j += 0.5) p.line(9.6, j, 11.45, j, pl, 0.012);
-  p.rr(0.3, 3.6, 5.2, 5.6, 0.3, pc); p.rr(2.4, 5.2, 3.6, 12.6, 0.3, pc);
+  // 실내 바닥 (밝은 우레탄) · 문에서 들어오는 매트 길
+  p.rect(EXT[0], EXT[1], EXT[2], EXT[3], v("#E9E3D8", "#4A453F"));
+  const pl = v("rgba(120,100,70,.10)", "rgba(0,0,0,.25)");
+  for(let i = Math.ceil(EXT[0]); i < EXT[2]; i += 1) p.line(i, EXT[1], i, EXT[3], pl, 0.012);
+  const pc = v("#D8CDBB", "#5A5147");
+  p.rect(EXT[0], 12.35, 10.7, 13.65, pc); p.rect(9.6, 7.6, 11.45, 19.2, pc);
   p.rr(26.7, 4.6, 31.3, 6.4, 0.3, pc); p.rr(26.7, 20.4, 31.3, 22.2, 0.3, pc); p.rect(26.75, 6.4, 27.3, 20.4, pc);
   // 벽치기 연습장 (초록 바닥 + 네트 높이 흰 줄은 벽에)
   p.rect(5.2, WALLP.j + 0.15, 10.8, 7.0, v("#7CB8A0", "#2F4E44")); p.rect(5.2, 4.5, 10.8, 4.56, v("rgba(255,255,255,.9)", "rgba(230,230,230,.5)"));
   p.text("연습", 8.0, 5.6, 6.5, v("rgba(255,255,255,.55)", "rgba(230,230,230,.25)"));
-  // 등나무 쉼터 · 관리실 바닥
-  p.rr(0.8, 16.0, 5.4, 20.8, 0.2, v("#E7DCC8", "#433D36")); p.rect(KIOSK.i0, KIOSK.j0, KIOSK.i1, KIOSK.j1, v("#E9E1D2", "#47433D"));
+  // 쉼터 카펫 · 관리실 바닥
+  p.rr(0.8, 16.0, 5.4, 20.8, 0.3, v("#C9DCD4", "#36443F")); p.rect(KIOSK.i0, KIOSK.j0, KIOSK.i1, KIOSK.j1, v("#E9E1D2", "#47433D"));
   // 코트 바깥 (철망 안) · 코트 안 · 줄 (실제 규격)
   p.rect(FN.i0, FN.j0, FN.i1, FN.j1, v("#7CB8A0", "#2F4E44"));
   p.rect(CT.ci - CT.dw, BL0, CT.ci + CT.dw, BL1, v("#6E98CF", "#2C3E5E"));
@@ -85,11 +81,11 @@ function paintCourt(c, dark){
   ln(CT.ci, BL0, CT.ci, BL0 + 0.08, thin); ln(CT.ci, BL1 - 0.08, CT.ci, BL1, thin);   // 센터 마크
   p.rect(CT.ci - 0.03, CT.cj - 0.02, CT.ci + 0.03, CT.cj + 0.02, v("rgba(0,0,0,.08)", "rgba(0,0,0,.2)"));
   p.text("CREYONG TENNIS", CT.ci, BL1 + 1.45, 9, v("rgba(255,255,255,.5)", "rgba(230,230,230,.18)"));
-  p.text("크레용 강변 테니스장", CT.ci, BL0 - 1.4, 7.5, v("rgba(255,255,255,.45)", "rgba(230,230,230,.16)"));
+  p.text("크레용 스포츠센터 테니스장", CT.ci, BL0 - 1.4, 7.0, v("rgba(255,255,255,.45)", "rgba(230,230,230,.16)"));
   // 관중석 아래
   p.rect(BLEACH.i0 - 0.05, BLEACH.j0 - 0.05, BLEACH.i0 + BLEACH.d * BLEACH.n + 0.25, BLEACH.j1 + 0.05, v("#DCD2C4", "#46413C"));
-  p.text("← 강변 공원", 1.7, 14.15, 4.6, v("rgba(110,90,70,.45)", "rgba(220,210,190,.25)"));
-  if(dark){ LAMPS.forEach(([i, j]) => p.glow(i, j, 1.8, "rgba(255,206,150,.3)")); [[15.0, 7.0], [23.0, 7.0], [15.0, 19.8], [23.0, 19.8]].forEach(([i, j]) => p.glow(i, j, 4.2, "rgba(225,240,255,.16)")); }
+  p.text("← 50m 수영장", 1.9, 14.15, 4.6, v("rgba(110,90,70,.45)", "rgba(220,210,190,.25)"));
+  if(dark) CEIL.forEach(([i, j]) => p.glow(i, j, 3.2, "rgba(225,240,255,.14)"));
 }
 
 /* ---------- 나무 · 벤치 · 가로등 ---------- */
@@ -152,12 +148,6 @@ function buildFence(){
   fenceRun(FN.i1, FN.j0, FN.i1, FN.j1, FN.hi, "-j");
   // 카메라 쪽: 낮은 철망
   fenceRun(FN.i0, FN.j1, FN.i1, FN.j1, FN.lo, "i");
-  // 철망 위 조명탑 넷 (밤에 켜짐)
-  [[FN.i0, 6.0], [FN.i0, 21.0], [FN.i1, 6.0], [FN.i1, 21.0]].forEach(([i, j], k) => {
-    K.sm(K.cyl(0.045, 0.06, hz(150), 10), POST, X(i + (k < 2 ? -0.25 : 0.25)), hz(75), Z(j), null, "s");
-    const di = k < 2 ? 0.35 : -0.35; B(i + (k < 2 ? -0.25 : 0.25) - 0.32 + di * 0.3, j - 0.45, 0.64, 0.9, 14, POST, 148, {r:0.03, cls:"s"});
-    B(i + (k < 2 ? -0.25 : 0.25) - 0.28 + di * 0.3, j - 0.4, 0.56, 0.8, 2, D("#FFFBEA", "#FFF2C8"), 146.5, {r:0.02, cls:"glow"});
-    gl(i + di, j, 146, 60, "#E6F2FF", (tm, dk) => dk ? 0.85 : 0); });
 }
 /* ---------- 네트 · 심판 의자 · 벤치 · 공 바구니 ---------- */
 function buildNet(){
@@ -266,12 +256,8 @@ function buildWall(){
 function buildRest(){
   // 음수대
   { const i = 3.0, j = 9.6; K.sm(K.cyl(0.14, 0.18, hz(26), 14), STONE, X(i), hz(13), Z(j), null, "m"); disc(i, j, 0.24, 26, 2.5, D("#C9CDD2", "#5A5E62"), "s", 16); K.sm(K.cyl(0.015, 0.015, hz(4), 6), D("#C9CDD2", "#5A5E62"), X(i + 0.05), hz(30), Z(j), null, "s"); }
-  // 등나무 쉼터
-  const P = WOODD; [[1.0, 16.2], [5.2, 16.2], [1.0, 20.6], [5.2, 20.6]].forEach(([i, j]) => B(i - 0.08, j - 0.08, 0.16, 0.16, 74, P, 0, {r:0.03}));
-  [16.2, 20.6].forEach(j => B(0.8, j - 0.06, 4.6, 0.12, 4, P, 74, {r:0.02}));
-  for(let i = 0.9; i < 5.4; i += 0.38) B(i, 15.9, 0.07, 5.0, 3, WOOD, 78, {r:0.01});
-  for(let k = 0; k < 40; k++){ const i = 0.9 + rnd(k) * 4.4, j = 16.0 + rnd(k + 17) * 4.8; ball(i, j, 82 + rnd(k + 5) * 4, 0.2 + rnd(k + 3) * 0.12, [D("#8CC478", "#34502E"), D("#A9D48E", "#3E5A38")][k % 2], "m", 8).scale.y = 0.5; }
-  for(let k = 0; k < 16; k++){ const i = 1.0 + rnd(k + 70) * 4.2, j = 16.2 + rnd(k + 90) * 4.4; ball(i, j, 72 + rnd(k) * 3, 0.07, D("#C8A6E0", "#6A5680"), "m", 8).scale.y = 1.6; }   // 등꽃
+  // 쉼터 (카펫 · 벤치 · 수건함)
+  B(0.9, 20.9, 1.2, 0.45, 18, D("#FFFFFF", "#5A5752"), 0, {r:0.04}); for(let k = 0; k < 3; k++) B(0.98 + k * 0.36, 20.95, 0.3, 0.3, 4, D(RB[k + 2], K.sh(RB[k + 2], -0.4)[0] || RB[k + 2]), 18 + (k % 2) * 4, {r:0.06});
   bench(2.3, 17.35, "+i", 1.5); bench(2.3, 19.45, "+i", 1.5);
 }
 function buildBleachers(){
@@ -283,17 +269,28 @@ function buildBleachers(){
   B(i0 + n * d, j0, 0.14, j1 - j0, 50, D("#CFC6B6", "#4E4A44"), 0, {r:0.02});
   K.wtext("응원석", i0 + n * d + 0.0, (j0 + j1) / 2, 44, "-j", 3.6, D("#9A6A2E", "#FFD49A"), null, 800, K.FONT);
 }
-function buildGate(){
-  const pc = D("#4DAA97", "#2F7466");
-  [12.15, 13.85].forEach(j => { B(-0.12, j - 0.12, 0.24, 0.24, 64, pc, 0, {r:0.04}); ball(0, j, 68, 0.12, D("#DDF24E", "#8A9A30"), "s", 12); });
-  B(-0.06, 12.05, 0.12, 1.9, 14, WHITE, 50, {r:0.04});
-  K.wtext("강변 테니스장", 0.07, 13.0, 58.5, "j", 3.2, D("#2F7466", "#BFEDE0"), null, 800, K.FONT);
-  K.wtext("누구나 무료 · 공·라켓 빌려 줘요", 0.07, 13.0, 52.6, "j", 1.6, D("#8B5A3C", "#E9D2B0"), null, 700, K.FONT);
-  // 테두리 산울타리 (입구만 비움)
-  const hedge = (a, b, j) => { B(a, j - 0.23, b - a, 0.46, 15, D("#7FB86E", "#2E4A2E"), 0, {r:0.12, seg:2}); for(let i = a + 0.25; i < b; i += 0.5) ball(i, j, 15, 0.2, K.sh(D("#7FB86E", "#2E4A2E"), (rnd(i * 3) - 0.5) * 0.2), "m", 8).scale.y = 0.55; };
-  hedge(EXT[0] + 0.05, EXT[2] - 0.05, EXT[3] - 0.35); hedge(EXT[0] + 0.05, EXT[2] - 0.05, EXT[1] + 0.3);
-  const hedgeI = (i, a, b) => { B(i - 0.23, a, 0.46, b - a, 15, D("#7FB86E", "#2E4A2E"), 0, {r:0.12, seg:2}); for(let j = a + 0.25; j < b; j += 0.5) ball(i, j, 15, 0.2, K.sh(D("#7FB86E", "#2E4A2E"), (rnd(j * 3) - 0.5) * 0.2), "m", 8).scale.y = 0.55; };
-  hedgeI(EXT[0] + 0.3, EXT[1] + 0.55, 11.9); hedgeI(EXT[0] + 0.3, 14.1, EXT[3] - 0.6); hedgeI(EXT[2] - 0.3, EXT[1] + 0.55, EXT[3] - 0.6);
+const WALL = D("#EEF2F3", "#3A3F42"), WALL2 = D("#DCE4E7", "#30363A");
+const block = (i0, j0, i1, j1, zt) => W.extraBoxes.push([X(i0), Z(j0), X(i1), Z(j1), 0, hz(zt)]);
+function buildGate(){   // 실내 벽 · 수영장 쪽 문 · 천장 조명
+  const DJ = [12.0, 14.0];
+  // 뒤 벽 (높게 · 창)
+  B(EXT[0], EXT[1], EXT[2] - EXT[0], 0.3, 200, WALL, 0, {r:0.02}); block(EXT[0], EXT[1], EXT[2], EXT[1] + 0.3, 200);
+  for(let i = 0.6; i < 30.5; i += 3.1){ if(i > 13.4 && i < 24.6) continue; B(i, EXT[1] + 0.29, 2.5, 0.03, 60, D("#BFE3F2", "#1E3448"), 124, {r:0, cls:"glass"}); }
+  B(EXT[0], EXT[1] + 0.3, EXT[2] - EXT[0], 0.04, 6, TEAL, 194, {r:0});
+  K.wtext("CREYONG SPORTS CENTER · TENNIS", 6.0, EXT[1] + 0.33, 176, "i", 4.6, D("#3A8A78", "#72C4AE"), null, 800, K.FONT);
+  // 왼쪽 벽 (문 = 50m 수영장)
+  [[EXT[1], 8.0, 140], [8.0, DJ[0], 60], [DJ[1], EXT[3], 60]].forEach(([a, b, h]) => { B(EXT[0], a, 0.3, b - a, h, WALL2, 0, {r:0.02}); block(EXT[0], a, EXT[0] + 0.3, b, h); });
+  B(EXT[0], DJ[0], 0.3, DJ[1] - DJ[0], 18, TEAL, 60, {r:0.02});
+  K.wtext("🏊 ← 50m 수영장", EXT[0] + 0.32, 13.0, 69, "j", 2.4, WHITE, null, 800, K.FONT);
+  K.wtext("실내 테니스장", EXT[0] + 0.32, 10.0, 44, "j", 2.6, D("#2F7466", "#BFEDE0"), null, 800, K.FONT);
+  K.wtext("비 와도 OK ☔ · 공·라켓 빌려 줘요", EXT[0] + 0.32, 10.0, 37, "j", 1.5, D("#8B5A3C", "#E9D2B0"), null, 700, K.FONT);
+  // 오른쪽 벽
+  [[EXT[1], 8.0, 140], [8.0, EXT[3], 60]].forEach(([a, b, h]) => { B(EXT[2] - 0.3, a, 0.3, b - a, h, WALL2, 0, {r:0.02}); block(EXT[2] - 0.3, a, EXT[2], b, h); });
+  // 앞: 낮은 유리 난간
+  B(EXT[0], EXT[3] - 0.12, EXT[2] - EXT[0], 0.12, 9, WALL2, 0, {r:0.02}); B(EXT[0], EXT[3] - 0.09, EXT[2] - EXT[0], 0.05, 26, D("#CFEAF5", "#2A4050"), 9, {r:0, cls:"glass"});
+  block(EXT[0], EXT[3] - 0.15, EXT[2], EXT[3], 35);
+  // 천장 긴 등 (밤에 켜짐)
+  CEIL.forEach(([i, j]) => { B(i - 1.1, j - 0.12, 2.2, 0.24, 2, D("#FFFFFF", "#FFF4D8"), 186, {r:0.04, cls:"glow"}); gl(i, j, 184, 64, "#E6F2FF", (tm, dk) => dk ? 0.5 : 0); });
 }
 
 /* ---------- 유나 모드 ---------- */
@@ -302,7 +299,7 @@ const SEATS = [
   {a:[12.2, 10.3], b:[12.2, 11.4], h:PI / 2, H:H(13.8), k:"bench"}, {a:[12.2, 15.5], b:[12.2, 16.6], h:PI / 2, H:H(13.8), k:"bench"},
   {a:[BLEACH.i0 + 0.42, BLEACH.j0 + 0.5], b:[BLEACH.i0 + 0.42, BLEACH.j1 - 0.5], h:-PI / 2, H:H(9), k:"stand"}];
 export const COURT = {
-  name:"강변 테니스장",
+  name:"스포츠센터 테니스장",
   gate:GATE, spawnGate:SPAWN,
   seats:SEATS,
   sitLines:{stand:["유나 화이팅~ 📣", "와 공 진짜 빠르다 🎾", "나도 저렇게 치고 싶다 😆", "아빠 잘한다~ 👏"]},
@@ -326,9 +323,9 @@ const def = {
   outline:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
   walk:[[EXT[0], EXT[1]], [EXT[2], EXT[1]], [EXT[2], EXT[3]], [EXT[0], EXT[3]]],
   ext:EXT,
-  top:3.8,
-  allPts:V => [V(EXT[0], 0, EXT[1]), V(EXT[2], 0, EXT[1]), V(EXT[2], 0, EXT[3]), V(EXT[0], 0, EXT[3]), V(EXT[0], 2.4, EXT[1]), V(EXT[2], 2.4, EXT[1]), V(CT.ci, 4.0, 0.4)],
-  lamps:[[CT.ci, 7.0, 4.6], [CT.ci, 19.8, 4.6], [5.0, 9.0, 1.9], [29.0, 13.4, 1.9]],
+  top:6.6,
+  allPts:V => [V(EXT[0], 0, EXT[1]), V(EXT[2], 0, EXT[1]), V(EXT[2], 0, EXT[3]), V(EXT[0], 0, EXT[3]), V(EXT[0], 4.2, EXT[1]), V(EXT[2], 4.2, EXT[1]), V(CT.ci, 4.0, 0.4)],
+  lamps:[[CT.ci, 7.0, 5.4], [CT.ci, 19.8, 5.4], [5.0, 9.0, 5.4], [29.0, 13.4, 3.0]],
   glow:{color:0xE6F2FF, at:[CT.ci, CT.cj, 3.0]},
   eggs:[],
   people:[],
@@ -342,14 +339,11 @@ const def = {
       egg("ct_chair", [12.7, CT.cj, 70], ["🧑‍⚖️", "📣"], ["심판 의자! 여기 앉으면 '아웃!' 외칠 수 있어 📣"]),
       egg("ct_wall", [8.0, WALLP.j, 60], ["🧱", "💪"], ["벽은 절대 안 놓친대. 최고의 연습 상대 😆", "흰 줄이 네트 높이야"]),
       egg("ct_vend", [1.6, 4.6, 40], ["🥤", "🪙"], ["이온음료 한 캔 쭉~ 🥤", "자판기 불빛이 반짝반짝 ✨"]),
-      egg("ct_flower", [3.0, 18.4, 76], ["🌸", "🍃"], ["등나무 꽃 향기 좋다 💜"]),
+      egg("ct_light", [CT.ci, 13.4, 186], ["💡", "☔"], ["실내라서 비 와도 칠 수 있어 ☔", "천장 등이 공 그림자를 안 만들게 길게 달렸대"]),
       egg("ct_ball", [25.3, CT.cj + 0.75, 4], ["🎾", "🐾"], ["누가 공을 두고 갔네 🎾", "테니스공은 원래 형광 노랑이래"])];
     paintKitDone();
     buildFence(); buildNet(); buildChair(); buildBenches(); buildCart(); buildBoard(); buildKiosk(); buildWall(); buildRest(); buildBleachers(); buildGate();
-    LAMPS.forEach(([i, j]) => lamp(i, j));
-    [[30.8, 2.2, 1.1], [30.9, 8.6, 1.0], [30.8, 15.6, 1.05], [30.9, 22.8, 1.0], [6.6, 23.2, 1.0], [9.8, 24.6, 0.85], [0.6, 23.0, 0.9], [6.0, 10.8, 0.8], [3.2, 6.2, 0.75], [14.0, 0.2, 0.7], [24.0, 0.2, 0.72]].forEach(([i, j, s]) => roundTree(i, j, s));
     [[5.6, 12.0, "#F4A7B9"], [5.6, 14.0, "#C8B4D0"], [8.6, 14.0, "#F6E39A"], [10.6, 22.6, "#A9CBEA"], [26.9, 3.6, "#F9C99B"], [26.9, 23.4, "#F4A7B9"]].forEach(([i, j, c]) => flowerPot(i, j, c));
-    [[4.0, 24.6], [2.0, 24.4], [8.2, 25.6], [12.0, 26.1], [16.0, 26.1], [22.0, 26.1], [26.0, 26.1]].forEach(([i, j]) => bush(i, j, 0.9));
   },
   init(KIT){ LG.forEach(g => g.dispose()); LG.length = 0; },
   tick(KIT, now, t, dt){

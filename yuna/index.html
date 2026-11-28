@@ -6876,7 +6876,7 @@ var F3 = {mod:null, on:false, want:true, busy:false, timer:0, dark:null, zone:nu
 var F3_FLOORS = {main:null, wf:"./floor3d_wf.js", lobby:"./floor3d_lobby.js", s4:"./floor3d_studio.js", roof:"./floor3d_roof.js",
   home1:"./floor3d_home.js", home2:"./floor3d_home.js?f=2", home3:"./floor3d_home.js?f=3", home4:"./floor3d_home.js?f=4",
   park:"./floor3d_park.js", town:"./floor3d_town.js", fun:"./floor3d_fun.js", school:"./floor3d_school.js",
-  market:"./floor3d_market.js", river:"./floor3d_river.js", court:"./floor3d_court.js"};   /* 2026-11-24 감독님 "큰 마을이면 좋겠네" */   /* 동네 공원 · 학교 앞 골목 (2026-11-24): 3D만, 유나 모드로 감 */   /* 옆 건물 유나네 집: 3D만 (2.5D 지도 없음), 유나 모드로만 감 */
+  market:"./floor3d_market.js", river:"./floor3d_river.js", court:"./floor3d_court.js", gym:"./floor3d_gym.js"};   /* 2026-11-24 감독님 "큰 마을이면 좋겠네" */   /* 동네 공원 · 학교 앞 골목 (2026-11-24): 3D만, 유나 모드로 감 */   /* 옆 건물 유나네 집: 3D만 (2.5D 지도 없음), 유나 모드로만 감 */
 try { F3.want = localStorage.getItem("crayon-floor-view") !== "2d"; } catch(_){}
 function f3Data(){ const status = {}, tasks = {};
   ROSTER.forEach(r => { status[r.id] = statusOf(r.id); tasks[r.id] = (state.pds[r.id]?.task || "").trim() || IDLE_LINES[r.id] || ""; });

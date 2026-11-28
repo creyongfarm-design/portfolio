@@ -1966,7 +1966,7 @@ function enterPlay(){
   if(!R || !R.pl) return;
   R.zone = "play"; R.anim = null; R.layer.classList.remove("far"); R.layer.classList.add("play"); touchMode(true); if(R.back) R.back.hidden = true;
   R.camera.fov = 52; R.camera.near = 0.12; R.camera.updateProjectionMatrix();
-  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.tb = null; PL.cloak = false;
+  PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.freeze = false; PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; fxClear(); propsClear(); PL.swam = false; PL.wet = 0; PL.idleK = null; PL.still = clock(); PL.sit = null; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.tb = null; PL.cloak = false; PL.auto = null;
   const s = PL.spawn || [13.9, 17.1, Math.PI / 2]; PL.spawn = null;
   playGrid(); [PL.i, PL.j] = spawnSpot(s[0], s[1]); PL.h = s[2] ?? 0; PL.yaw = PL.h + Math.PI; PL.gy = groundH(PL.i, PL.j);
   PL.tg = new THREE.Vector3(X(PL.i), PL.gy + 0.62, Z(PL.j)); PL.dd = PL.d; R.cur = {tg:PL.tg.clone(), d:PL.d}; R.az = PL.yaw; R.el = PL.el;
@@ -1974,6 +1974,7 @@ function enterPlay(){
 }
 function playTick(now, t, dt){
   const [ix, iy] = PL.in; let mag = PL.freeze ? 0 : Math.min(1, Math.hypot(ix, iy));
+  const AU = PL.auto; if(AU) mag = AU.v > 0.02 ? 1 : 0;   // 자동 헤엄 (50m 시합, 2026-11-28): 방향 AU.h · 속도 AU.v, 조이스틱 안 씀
   if(PL.sit){ if(mag > 0.35){ standUp(); PL.cb?.onStand?.(); } else mag = 0; }
   if(PL.act?.yawOff != null) PL.sitYaw = PL.h + PL.act.yawOff;   // 도는 놀이기구: 카메라가 기구 따라 돎 (2026-11-26)
   if((PL.sit || PL.act) && PL.sitYaw != null && !PL.dragAt && !PL.act?.path && !PL.act?.drive) PL.yaw += wrapA(PL.sitYaw - PL.yaw) * Math.min(1, dt * 2.6);
@@ -1995,10 +1996,10 @@ function playTick(now, t, dt){
     if(Math.abs(v) > 0.15 && now - PL.dragAt > 1400) PL.yaw += wrapA(PL.h + Math.PI - PL.yaw) * Math.min(1, dt * 0.9);
     mag = 0; }
   const hs = PL.hold && !PL.swim ? PL.hold.slow : 1;   // 손에 든 게 있으면 조심조심 (2026-11-23 감독님 "커피 심부름은 흐를까바 들고 약간 천천히")
-  const sp = (PL.swim ? 1.45 : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
+  const sp = AU ? AU.v * mag : (PL.swim ? 1.45 : 2.35 * (clock() < PL.boost && !PL.hold?.spill ? 1.6 : 1) * hs) * mag; let mi = 0, mj = 0;
   if(mag > 0.06){
     const fx = -Math.sin(PL.yaw), fz = -Math.cos(PL.yaw), rx = Math.cos(PL.yaw), rz = -Math.sin(PL.yaw);
-    mi = (fx * iy + rx * ix) / Math.hypot(ix, iy); mj = (fz * iy + rz * ix) / Math.hypot(ix, iy);
+    if(AU){ mi = Math.sin(AU.h); mj = Math.cos(AU.h); } else { mi = (fx * iy + rx * ix) / Math.hypot(ix, iy); mj = (fz * iy + rz * ix) / Math.hypot(ix, iy); }
     const st = sp * dt, ni = PL.i + mi * st, nj = PL.j + mj * st;
     const ob = playObs(), ok = (a, b) => freeAt(a, b) && pplOk(ob, a, b); PL.bump = null; let mv = true;   // 사람은 통과 못 함 (2026-11-23 감독님 "사람 통과하는거 고치면")
     if(ok(ni, nj)){ PL.i = ni; PL.j = nj; } else if(ok(ni, PL.j)) PL.i = ni; else if(ok(PL.i, nj)) PL.j = nj; else mv = false;
@@ -2471,7 +2472,7 @@ function playTap(mx, my){
 }
 export function playStart(cb, spawn){ PL.on = true; PL.cb = cb; PL.spawn = spawn || null; PL.in = [0, 0]; if(R && R.pl) enterPlay(); }
 export function playStop(){
-  PL.on = false; PL.cb = null; PL.in = [0, 0]; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.tb = null; PCUT_A.value.w = 0; propsClear(); PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
+  PL.on = false; PL.cb = null; PL.in = [0, 0]; PL.rk = null; PL.sw = {}; PL.camLock = null; PL.camLead = null; PL.auto = null; PL.tb = null; PCUT_A.value.w = 0; propsClear(); PL.mark = null; PL.act = null; PL.actors = {}; PL.ball = null; PL.water = []; PL.hide = new Set(); PL.items.forEach(dropItem); PL.items = []; PL.jy = PL.jv = 0; PL.boost = 0; fxClear(); PL.idleK = null; PL.sit = null; PL.cloak = false;
   if(!R) return; R.layer.classList.remove("play"); R.camera.fov = 22; R.camera.near = 1; R.camera.updateProjectionMatrix(); R.zone = null; setView(HOME(), true);
 }
 export function playInput(x, y){ PL.in[0] = x; PL.in[1] = y; }
@@ -2486,6 +2487,7 @@ export function playSet(o){
   if("spawn" in o) PL.spawn = o.spawn;
   if("camLock" in o) PL.camLock = o.camLock ?? null;
   if("camLead" in o) PL.camLead = o.camLead ?? null;
+  if("auto" in o) PL.auto = o.auto ? {h:o.auto.h ?? PL.h, v:o.auto.v ?? 0} : null;
   if("wave" in o) PL.wave = clock() + o.wave;
   if("boost" in o) PL.boost = o.boost ? clock() + o.boost : 0;
   if(o.cam){ const c = o.cam; if(c.yaw != null) PL.yaw = c.yaw; if(c.el != null) PL.el = c.el; if(c.d != null){ PL.d = c.d; PL.dd = c.d; } }   // 시험용 카메라 (2026-11-26)
