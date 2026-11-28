@@ -334,6 +334,11 @@ const CSS = `
 .yg-panel h3 em{margin-left:auto;font-style:normal;font-size:13px;color:#C2407A;background:#FFE7F1;border-radius:999px;padding:2px 10px}
 .yg-row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:10px 12px;margin-top:8px;min-height:52px}
 .yg-row .e{font-size:22px;width:28px;text-align:center}
+.yg-sec{margin:16px 4px 2px;font-size:13px;font-weight:800}.yg-sec small{font-weight:600;font-size:11.5px;color:var(--ink-3);margin-left:6px}
+.yg-plays{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.yg-plays button{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:10px 12px;min-height:56px}
+.yg-plays button span{grid-row:1/3;font-size:24px;line-height:1}.yg-plays button b{font-size:14px;font-weight:700;align-self:end}.yg-plays button small{font-size:11px;color:var(--ink-3);align-self:start;line-height:1.3}
+.yg-snd.off{opacity:.55}
 .yg-row b{font-size:14.5px;font-weight:700}
 .yg-row small{display:block;font-size:12px;color:var(--ink-3);margin-top:1px}
 .yg-row .ok{margin-left:auto;font-size:12px;font-weight:700;color:#3A8A78;background:color-mix(in srgb,#3A8A78 14%,transparent);border-radius:999px;padding:2px 8px;white-space:nowrap}
@@ -501,11 +506,24 @@ function auInit(){
   if(!AU.iv){ AU.next = AU.ctx.currentTime + 0.15; AU.step = 0; AU.iv = setInterval(bgmPump, 90); }
   return AU.ctx;
 }
-function auStop(){ clearInterval(AU.iv); AU.iv = 0; try { AU.ctx?.close()?.catch?.(() => {}); } catch(_){} AU.ctx = null; }
+/* 아이폰 무음 스위치 (2026-11-29 감독님 "소리 안나서 답답하네"): 웹오디오는 무음 모드에서 안 들림. audioSession 이 안 먹는 경우(옛 iOS · 페이지 속 페이지)에 대비해
+   소리 없는 <audio>를 계속 틀어 '재생' 모드로 바꿔 둠 (unmute 방식). 아이폰 · 아이패드에서만 */
+const AU_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform || ""));
+function auSilent(){
+  if(!AU_IOS) return null; if(AU.el) return AU.el;
+  try { const sr = 8000, n = sr >> 1, b = new Uint8Array(44 + n), dv = new DataView(b.buffer), W4 = (o, t) => [...t].forEach((c, k) => b[o + k] = c.charCodeAt(0));
+    W4(0, "RIFF"); dv.setUint32(4, 36 + n, true); W4(8, "WAVEfmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true); W4(36, "data"); dv.setUint32(40, n, true); b.fill(128, 44);
+    const a = new Audio(); a.loop = true; a.preload = "auto"; a.setAttribute("playsinline", ""); a.setAttribute("x-webkit-airplay", "deny"); a.disableRemotePlayback = true;
+    let s64 = ""; b.forEach(c => s64 += String.fromCharCode(c)); const data = "data:audio/wav;base64," + btoa(s64);
+    try { a.src = URL.createObjectURL(new Blob([b], {type:"audio/wav"})); a.addEventListener("error", () => { if(!a.dataset.fb){ a.dataset.fb = "1"; a.src = data; a.play().catch(() => {}); } }); } catch(_){ a.src = data; }
+    AU.el = a; } catch(_){ AU.el = null; }
+  return AU.el; }
+function auSilentPlay(){ const a = AU.on ? auSilent() : null; if(a && a.paused) a.play().catch(() => {}); }
+function auStop(){ try { AU.el?.pause(); } catch(_){} clearInterval(AU.iv); AU.iv = 0; try { AU.ctx?.close()?.catch?.(() => {}); } catch(_){} AU.ctx = null; }
 /* 소리가 한 번 끊기면 안 돌아오던 것 (2026-11-28 감독님 "한번씩 소리도 안나고"): 아이폰은 전화·시리·다른 앱 소리·잠금 뒤에 오디오가
    "interrupted"로 멈추거나, "running"인데 시계가 멈춘 채 조용해짐 → 손가락을 댈 때 확인해서 살리고, 그래도 안 되면 소리 엔진을 새로 만듦 */
 function auRebuild(){ AU.rebuilt = (AU.rebuilt || 0) + 1; auStop(); AU.stuck = false; AU.woke = false; return auInit(); }
-function auSet(on){ AU.on = on; try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} if(AU.m) AU.m.gain.setTargetAtTime(on && !AU.duck ? 0.9 : 0, AU.ctx.currentTime, 0.05); }
+function auSet(on){ AU.on = on; if(on) auSilentPlay(); else { try { AU.el?.pause(); } catch(_){} } try { localStorage.setItem("crayon-yuna-sound", on ? "1" : "0"); } catch(_){} if(AU.m) AU.m.gain.setTargetAtTime(on && !AU.duck ? 0.9 : 0, AU.ctx.currentTime, 0.05); }
 function tone(f, t0, dur, {type = "sine", vol = 0.2, slide = 0, out} = {}){
   const c = AU.ctx; if(!c) return; const o = c.createOscillator(), g = c.createGain();
   o.type = type; o.frequency.setValueAtTime(f, t0); if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f * slide), t0 + dur);
@@ -604,6 +622,8 @@ Promise.all([import("./floor3d_market.js").then(m => AREA_MOD.market = m.MARKET)
     } catch(e){ console.warn("동네 연결", f, e); } });
 });
 /* 동네 놀이 (ACTS 형식. give = 끝나면 손에 듦, anim = 도는 동안 소품 움직임) */
+const PLAYS = [["fun", "fn_bumper", "🚗", "범퍼카 대결", "놀이공원 범퍼카장"], ["school", "sc_dodge", "🤾", "피구", "학교 운동장 노란 코트"], ["town", "tw_shop", "🍢", "분식집 알바", "학교 앞 골목 분식집"], ["court", "ct_tennis", "🎾", "테니스", "스포츠센터 테니스장"], ["gym", "gy_race", "🏊", "수영 시합", "스포츠센터 수영장"], ["river", "rv_boat", "🦢", "오리배", "강변 선착장"]];   // 할 일 판 "놀이 하러 가기": 동네 · 놀이 자리 · 이름 · 어디
+const PLAY_SIGN = {school:[["sc_dodge", "🤾"]], town:[["tw_shop", "🍢"]]};   // 표시가 없는 놀이 자리 위에 떠 있는 그림
 const AREA_SPECIAL = new Set(["gy_race", "ct_tennis", "ct_wall", "pk_slide", "pk_merry", "tw_gacha", "tw_bell", "tw_bus", "rv_boat", "fn_carousel", "fn_wheel", "fn_coaster", "fn_bumper", "fn_viking", "tw_shop", "sc_dodge"]);
 const AREA_PLAY = ["pk_slide", "pk_merry", "pk_seesaw", "pk_sand", "pk_fountain", "pk_duck", "pk_icecream", "tw_gacha", "tw_slime", "tw_tteok", "tw_fishcake", "tw_bungeo", "tw_store", "tw_bell"];
 const GACHA = [["🦖", "공룡 피규어"], ["🦄", "유니콘 키링"], ["🐰", "토끼 지우개"], ["💍", "반짝 반지"], ["🚀", "로켓 팽이"], ["🧸", "곰돌이 자석"], ["🌈", "무지개 스티커"], ["👑", "황금 왕관 캡슐", 1]];
@@ -882,7 +902,9 @@ export function start(api){
   /* 타이밍 판정 글씨 (2026-11-28 감독님 "타이밍도 섬세하게 해야 재밌지"): PERFECT · GOOD · 빨라요 · 늦어요 */
   const tmEl = $(".yg-tm");
   function tmShow(g, txt, sub){ tmEl.dataset.g = g; tmEl.textContent = txt; if(sub){ const s = document.createElement("small"); s.textContent = sub; tmEl.append(s); } tmEl.classList.remove("go"); void tmEl.offsetWidth; tmEl.classList.add("go"); }
-  sndB.onclick = ev => { ev.stopPropagation(); auSet(!AU.on); auInit(); sndB.textContent = AU.on ? "🔊" : "🔇"; };
+  sndB.onclick = ev => { ev.stopPropagation(); auSet(!AU.on); auInit(); sndB.textContent = AU.on ? "🔊" : "🔇"; sndB.classList.toggle("off", !AU.on);
+    if(AU.on){ sfx("star"); toast("🔊 소리 켰어요", "딩동 소리가 안 들리면 폰 옆 볼륨 버튼을 올려 봐요", 2400, true); } else toast("🔇 소리 껐어요", "스피커를 다시 누르면 켜져요", 1600, true); };
+  sndB.classList.toggle("off", !AU.on);
   /* 마을 지도 (2026-11-24 감독님 "큰 마을이면 좋겠네"): 어디 있는지 보이고, 누르면 그쪽으로 걸어감 */
   const mapEl = $(".yg-map"), mapB = $(".yg-mapb");
   const TOWER_F = ["lobby", "main", "wf", "s4", "roof"];
@@ -963,6 +985,7 @@ export function start(api){
     if(stepsEl.dataset.k !== sk){ stepsEl.dataset.k = sk; stepsEl.innerHTML = ""; stepsEl.hidden = !Q || Q.steps.length < 2;
       if(Q) Q.steps.forEach((x, k) => { if(k){ const u = document.createElement("u"); u.textContent = "›"; stepsEl.append(u); }
         const i = document.createElement("i"); i.className = k < step ? "ok" : k === step ? "now" : ""; i.textContent = (k < step ? "✓ " : "") + (x.lb || x.hint || ""); stepsEl.append(i); }); }
+    if(!Q && S.goto){ b.textContent = `${S.goto.em} ${S.goto.nm} 하러 가는 중`; const h = `${S.goto.where} · 반짝이는 표시를 따라가요`; if(s.textContent !== h) s.textContent = h; return; }
     if(!Q){ b.textContent = "할 일 고르기"; const h = S.floor ? `${flS(S.floor)} 보물 ${floorFound(S.floor)}/6 · 눌러서 할 일·놀이` : "눌러서 할 일·놀이 고르기"; if(s.textContent !== h) s.textContent = h; return; }
     b.textContent = `${Q.e} ${Q.t}`;
     const fNeed = needFloor(st);
@@ -996,6 +1019,10 @@ export function start(api){
       r.innerHTML = `<span class="e">🏎️</span><span><b>나이트 레이스</b><small></small></span>${o?.wins ? `<span class="ok">🏆 ${o.wins}번</span>` : ""}`;
       r.querySelector("small").textContent = o?.time > 0 ? `밤 도시 3바퀴 · 내 기록 ${Math.floor(o.time / 60)}:${(o.time % 60).toFixed(2).padStart(5, "0")}` : "밤 도시 3바퀴 · 드리프트와 니트로로 1등 하기";
       r.onclick = () => { panel.hidden = true; openRace(); }; panel.append(r); }
+    { const h = document.createElement("p"); h.className = "yg-sec"; h.innerHTML = "🎮 놀이 하러 가기 <small>누르면 그 자리까지 데려다줘요</small>"; panel.append(h);   // 2026-11-29 감독님 "피구는 어디서해??"
+      const g = document.createElement("div"); g.className = "yg-plays";
+      PLAYS.forEach(pl => { if(!AREA_MOD[pl[0]]) return; const b = document.createElement("button"); b.type = "button"; b.innerHTML = "<span></span><b></b><small></small>"; b.querySelector("span").textContent = pl[2]; b.querySelector("b").textContent = pl[3]; b.querySelector("small").textContent = pl[4]; b.onclick = () => goPlay(pl); g.append(b); });
+      panel.append(g); const h2 = document.createElement("p"); h2.className = "yg-sec"; h2.textContent = "📋 할 일"; panel.append(h2); }
     QUESTS.forEach(q => { const r = document.createElement("button"); r.type = "button"; r.className = "yg-row" + (Q === q ? " cur" : "");
       r.innerHTML = `<span class="e"></span><span><b></b><small></small></span>${rec.done[q.id] ? `<span class="ok">⭐ ${rec.done[q.id]}번</span>` : ""}`;
       r.querySelector(".e").textContent = q.e; r.querySelector("b").textContent = q.t; r.querySelector("small").textContent = q.id === "party" && rec.partyCh ? `이어 하기 · ${q.steps[rec.partyCh]?.ch?.join(" ") || ""}` : q.steps.map(s => s.f ? FL[s.f].name.split(" ")[0] : "❓").filter(x => x).filter((x, k, a) => a.indexOf(x) === k).join(" → ");
@@ -1004,8 +1031,11 @@ export function start(api){
   }
   card.onclick = () => panel.hidden ? openList() : (panel.hidden = true);
 
+  function goPlay(pl){ const [f, k, em, nm, where] = pl; panel.hidden = true; if(S.busy && !S.boat){ toast("지금 하는 놀이가 끝나면 갈 수 있어요", "", 1400); return; } if(S.boat) landBoat();
+    endGame(); if(Q){ E()?.playActor("fr", null); Q = null; setCarry(""); } S.goto = {f, k, em, nm, where}; renderCard();
+    if(S.floor === f) setup(); else { sfx("blip"); walkTo({f:S.floor, to:f, spawn:AREA[f].spawn}); } }
   function begin(q){
-    endGame(); Q = q; step = 0; setCarry(""); REQ = null; E()?.playActor("fr", null); S.frF = null; S.trail = [];
+    S.goto = null; endGame(); Q = q; step = 0; setCarry(""); REQ = null; E()?.playActor("fr", null); S.frF = null; S.trail = [];
     if(q.id === "party"){ step = rec.partyCh || 0; S.secret = rec.partySecret ?? 3; q.steps.forEach(x => { if(x.goAuto) x.go = null; }); }
     if(q.id === "cat"){ q.catF = pick(CAT_FLOORS); q.known = false; q.catAt = null; q.catAtF = null; q.cat = "lost"; S.catPos = null; }
     setup(); renderCard(); const st = curStep();
@@ -1045,6 +1075,7 @@ export function start(api){
       else if(st.use){ const u = (USE[f] || []).find(x => x.k === st.use); mark = u ? {at:u.at} : null; }
       else if(st.talk && st.talk[0] === "@") mark = {actor:st.talk.slice(1)};
       else if(Array.isArray(st.talk)){ const id = st.talk.find(x => e.playWhere(x)); mark = id ? {id} : null; } }
+    if(!mark && !G && S.goto && S.goto.f === f){ const u = (USE[f] || []).find(x => x.k === S.goto.k); if(u){ mark = {at:u.at}; if(!S.goto.told){ S.goto.told = 1; toast(`${S.goto.em} ${S.goto.nm}`, `${S.goto.where} · 반짝이는 표시를 따라가요`, 3000); } } }   // 놀이 하러 가기
     if(G?.type === "swim") mark = {at:[28.35, 18.45]};
     e.playSet({water:f === "roof" ? [POOL] : f === "gym" && AREA_MOD.gym?.pool ? [AREA_MOD.gym.pool] : [], hide, mark});
     if(Q?.id === "cat" && curStep()?.find && f === Q.catF && Q.catAtF !== f){ Q.catAt = e.playHideSpot(4) || e.playFree(EXIT[0] + 3, EXIT[1], 0.2); Q.catAtF = f; }
@@ -1063,6 +1094,7 @@ export function start(api){
     if(G?.type === "pong" && G.b) L.push({id:"pball", e:"⚪", i:G.b.f[0], j:G.b.f[1], y:0.95, s:0.24, pick:false, glow:false, bob:false});
     if(PR.cat && PR.f === f) L.push({id:"hcat", e:"🐈", model:"cat", i:PR.cat.at[0], j:PR.cat.at[1], y:0.27, s:0.62, pick:false, glow:false, bob:false});
     if(G?.type === "catmeat" && G.cat) L.push({id:"pcat", e:"🐈", model:"cat", meat:true, i:G.cat[0], j:G.cat[1], y:0.27, s:0.62, pick:false, glow:false, bob:false});
+    if(!G) (PLAY_SIGN[f] || []).forEach(([k, em]) => { const u = (USE[f] || []).find(x => x.k === k); if(u) L.push({id:"sg_" + k, e:em, i:u.at[0], j:u.at[1], y:1.55, s:0.5, pick:false, glow:true, bob:true}); });
     if(REQ && REQ.floor === f) L.push({id:"req", e:"💬", on:REQ.id, pick:false, glow:false, s:0.4});
     e.playItems(L);
   }
@@ -2170,7 +2202,7 @@ export function start(api){
     const d = r.deco.splice(k, 1)[0], nm = HOME.room.deco.find(x => x[0] === d.k); roomPush(); save(); sfx("blip"); toast(`${nm ? nm[1] + " " + nm[2] : "장식"} 치웠어요`, `남은 장식 ${r.deco.length}개`, 1400);
   }
   function useIt(u){
-    const e = E(); if(!e || S.busy) return;
+    const e = E(); if(!e || S.busy) return; if(S.goto?.k === u.k){ S.goto = null; e.playSet({mark:null}); }
     if(u.k === "ct_tennis"){ const T = rec.tennis || {}, opts = [["👧", "지유랑", "fr"], ["👩", "엄마랑", "mom"], ["👨", "아빠랑", "dad"], ["🧑‍🏫", "체육 선생님이랑", "coach"]].map(o => [o[0], o[1] + ((T.beat || {})[o[2]] ? " 🏆" : ""), o[2]]);
       opts.push(["🏆", "동네 대회 (토너먼트)" + (rec.cup?.tennis ? ` 🏆${rec.cup.tennis}` : ""), "cup"], ["↩️", "다음에 할래", ""]);
       npcSay("@coach", "라켓 여기 있다~ 누구랑 칠래? 🎾", 2000); choose("🎾 스포츠센터 테니스장", "누구랑 칠까?", opts).then(o => { if(G || S.floor !== "court" || !o[2]) return; if(o[2] === "cup") cupOpen("tennis"); else tnStart(o[2]); }); return; }
@@ -2530,7 +2562,7 @@ export function start(api){
       } else arrow.hidden = true;
       S.n = (S.n || 0) + 1; if(S.n % 6 === 0) renderCard(m?.d);
       gameTick(st);
-      { const idle = !G && !S.busy && !S.boat; if(idle && S.wasBusy && Q && !pendingFloor) setup(); S.wasBusy = !idle; }   // 놀이·놀이기구가 끝나면 할 일 표시 다시
+      { const idle = !G && !S.busy && !S.boat; if(idle && S.wasBusy && !pendingFloor){ if(Q || S.goto) setup(); else refreshItems(); } S.wasBusy = !idle; }   // 놀이·놀이기구가 끝나면 할 일 표시 다시
       if(st.swim && st.moving){ rec.strokes = rec.strokes || {}; if(!rec.strokes[S.stroke]){ rec.strokes[S.stroke] = 1; save(); later0(1500, checkBadges); } }
       { const jm = G?.type === "futsal" ? "pass" : st.swim ? "stroke:" + S.stroke : st.sit ? "stand" : !G && nearSeat(st) ? "sit" : "jump", sk = STROKES[(STROKES.findIndex(x => x[0] === S.stroke) + 1) % STROKES.length];   // 버튼엔 바꿀 영법 (2026-11-28 감독님 "바꾸고 싶은게 나와야지")
         if(jm !== jumpB.dataset.m){ jumpB.dataset.m = jm; jumpB.querySelector("span").innerHTML = jm === "pass" ? "🤝" : jm === "jump" ? JUMP_SVG : jm === "sit" ? "🪑" : st.swim ? sk[1] : "🧍‍♀️";
@@ -2641,10 +2673,10 @@ export function start(api){
   /* 아이폰은 손가락을 뗄 때(touchend·click)만 소리를 열어 줌 → 그때 무음 한 번 틀어 깨움 (2026-11-23 감독님 "음악이랑 효과음 안들리는데") */
   const auKick = () => { const pn = performance.now(), o = AU.ctx;
       if(o && (AU.stuck || (o.state !== "running" && AU.tryAt && pn - AU.tryAt > 700)) && !(pn - (AU.rbAt || -1e9) < 4000)){ AU.rbAt = pn; auRebuild(); }   // 지난번 깨우기가 0.7초 넘게 안 먹힘 → 새로
-      const c = auInit(); if(!c) return;
+      const c = auInit(); if(!c) return; auSilentPlay();
       if(c.state !== "running"){ if(!AU.tryAt) AU.tryAt = pn; } else AU.tryAt = 0;
       if(!AU.woke){ try { const b = c.createBufferSource(); b.buffer = c.createBuffer(1, 1, 22050); b.connect(c.destination); b.start(0); AU.woke = c.state === "running"; } catch(_){} } },
-    auVis = () => { if(!AU.ctx) return; if(document.hidden){ AU.ctx.suspend().catch(() => {}); return; }
+    auVis = () => { if(!AU.ctx) return; if(document.hidden){ try { AU.el?.pause(); } catch(_){} AU.ctx.suspend().catch(() => {}); return; }
       AU.woke = false; AU.tryAt = 0; AU.ctAt = performance.now(); AU.ctx.resume().catch(() => {}); },   // 돌아오면 다음 터치 때 다시 깨움
     auShow = ev => { if(ev.persisted) auVis(); }, AU_EV = ["pointerdown", "touchend", "click", "keydown"];
   AU_EV.forEach(k => addEventListener(k, auKick, true)); document.addEventListener("visibilitychange", auVis); addEventListener("pageshow", auShow); auInit();
@@ -2664,6 +2696,7 @@ export function start(api){
     e.playStart(cb, spawn); e.playOutfit?.(rec.fit || "base"); if(rec.hair) e.playHair?.(rec.hair[0], rec.hair[1]); e.playSet({stroke:S.stroke});
     setTimeout(() => { if(live && !Q && panel.hidden && !rec.stars) openList("q"); }, 700);
     setTimeout(() => { if(live) checkBadges(); }, 2500);
+    setTimeout(() => { if(live && !AU.on) toast("🔇 소리가 꺼져 있어요", "오른쪽 위 스피커를 누르면 켜져요", 3200); }, 4200);
   }
   boot();
   function stop(){
